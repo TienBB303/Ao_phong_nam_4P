@@ -1,6 +1,6 @@
-package com.example.datn.Repository;
+package com.example.datn.repositories;
 
-import com.example.datn.Entity.Coupon;
+import com.example.datn.entities.Coupon;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CouponRepo extends JpaRepository<Coupon,Integer> {
