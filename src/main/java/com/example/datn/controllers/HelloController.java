@@ -1,4 +1,4 @@
-package com.example.datn.repositories;
+package com.example.datn.controllers;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

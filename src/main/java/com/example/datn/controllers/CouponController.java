@@ -1,7 +1,7 @@
-package com.example.datn.Controller;
+package com.example.datn.controllers;
 
-import com.example.datn.Entity.Coupon;
-import com.example.datn.Repository.CouponRepo;
+import com.example.datn.entities.Coupon;
+import com.example.datn.repositories.CouponRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,25 +14,33 @@ import java.util.List;
 public class CouponController {
     @Autowired
     CouponRepo counponRepo;
+
     @GetMapping("/discount/view")
-    public List<Coupon> View(){return counponRepo.findAll();}
+    public List<Coupon> View() {
+        return counponRepo.findAll();
+    }
+
     @GetMapping("/discount/PhanTrang")
-    public List<Coupon> phanTrang(@RequestParam(defaultValue = "0")int p){
-        Pageable pageable = PageRequest.of(p,5);
+    public List<Coupon> phanTrang(@RequestParam(defaultValue = "0") int p) {
+        Pageable pageable = PageRequest.of(p, 1);
         Page<Coupon> page = counponRepo.findAll(pageable);
         return page.getContent();
     }
+
     @PutMapping("/discount/update/{id}")
-    public Coupon Update(@PathVariable int id, @RequestBody Coupon discountEntity){
+    public Coupon Update(@PathVariable int id, @RequestBody Coupon discountEntity) {
         discountEntity.setId(id);
         counponRepo.save(discountEntity);
         return discountEntity;
     }
+
     @GetMapping("/discount/Detail/{id}")
-    public Coupon Detail(@PathVariable int id){return counponRepo.findById(id).orElse(null);}
+    public Coupon Detail(@PathVariable int id) {
+        return counponRepo.findById(id).orElse(null);
+    }
 
     @PostMapping("/discount/create")
-    public Coupon add(@RequestBody Coupon discountEntity){
+    public Coupon add(@RequestBody Coupon discountEntity) {
         counponRepo.save(discountEntity);
         return discountEntity;
     }
