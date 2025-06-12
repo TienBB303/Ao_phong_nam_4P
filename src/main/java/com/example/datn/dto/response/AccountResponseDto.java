@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Setter
 @Getter
 @AllArgsConstructor
@@ -25,4 +27,8 @@ public class AccountResponseDto {
     private String gender;
 
     private String roleName;
+
+    private LocalDateTime created_at;
+
+    private LocalDateTime updated_at;
 }
