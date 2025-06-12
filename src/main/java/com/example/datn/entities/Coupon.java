@@ -1,4 +1,4 @@
-package com.example.datn.Entity;
+package com.example.datn.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
