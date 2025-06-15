@@ -47,6 +47,7 @@ public class AccountService {
         account.setCreated_at(LocalDateTime.now());
         account.setBirthOfDate(accountRequestDto.getBirthOfDate());
         account.setGender(accountRequestDto.getGender());
+        account.setStatus(Boolean.TRUE);
 
         Role role = roleRepository.findByName("ROLE_CUSTOMER").orElseThrow(() -> new RuntimeException("Khong tim thay quyen hop le!"));
         account.setRole(role);
@@ -79,7 +80,7 @@ public class AccountService {
     public Account updateAccount(AccountRequestDto accountRequestDto) {
         Optional<Account> optionalAccount = accountRepository.findById(accountRequestDto.getId());
         if (optionalAccount.isEmpty()) {
-            throw new ResourceClosedException("Account not found with ID: " + accountRequestDto.getId());
+            throw new ResourceClosedException("Tài khoản không tồn tại với ID: " + accountRequestDto.getId());
         }
 
         Account account = optionalAccount.get();

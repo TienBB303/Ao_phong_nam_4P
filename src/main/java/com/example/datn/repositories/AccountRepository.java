@@ -15,14 +15,14 @@ import java.util.Optional;
 @Repository
 public interface AccountRepository extends JpaRepository<Account, Integer> {
 
-    @Query("SELECT new com.example.datn.dto.response.AccountResponseDto(a.id, a.code, a.fullName, a.email, a.birthOfDate, a.gender, a.role.name, a.created_at, a.updated_at) FROM Account a")
+    @Query("SELECT new com.example.datn.dto.response.AccountResponseDto(a.id, a.code, a.fullName, a.email, a.birthOfDate, a.gender, a.role.name, a.created_at, a.updated_at, a.status) FROM Account a")
     List<AccountResponseDto> listAccountRes();
 
 
-    @Query("SELECT new com.example.datn.dto.response.AccountResponseDto(a.id, a.code, a.fullName, a.email, a.birthOfDate, a.gender, a.role.name, a.created_at, a.updated_at) FROM Account a")
+    @Query("SELECT new com.example.datn.dto.response.AccountResponseDto(a.id, a.code, a.fullName, a.email, a.birthOfDate, a.gender, a.role.name, a.created_at, a.updated_at, a.status) FROM Account a")
     Page<AccountResponseDto> paginate(Pageable pageable);
 
-    @Query("SELECT new com.example.datn.dto.response.AccountResponseDto(a.id, a.code, a.fullName, a.email, a.birthOfDate, a.gender, a.role.name, a.created_at, a.updated_at) FROM Account a WHERE a.code =:code")
+    @Query("SELECT new com.example.datn.dto.response.AccountResponseDto(a.id, a.code, a.fullName, a.email, a.birthOfDate, a.gender, a.role.name, a.created_at, a.updated_at, a.status) FROM Account a WHERE a.code =:code")
     List<AccountResponseDto> detailByCode(String code);
 
     Optional<Account> findTopByOrderByCodeDesc();

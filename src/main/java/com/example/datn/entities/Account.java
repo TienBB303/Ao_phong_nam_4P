@@ -38,6 +38,8 @@ public class Account {
 
     private LocalDateTime updated_at;
 
+    private Boolean status;
+
     @OneToOne
     @JoinColumn(name = "role_id")
     private Role role;
