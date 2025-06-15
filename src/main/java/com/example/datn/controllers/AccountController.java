@@ -47,7 +47,6 @@ public class AccountController {
             });
             return ResponseEntity.badRequest().body(errors);
         }
-
         accountService.createNewAccount(accountRequestDto);
         return ResponseEntity.ok("Thêm mới thành công!");
     }
@@ -67,14 +66,8 @@ public class AccountController {
             });
             return ResponseEntity.badRequest().body(errors);
         }
-
-        try {
             accountService.updateAccount(accountRequestDto);
             return ResponseEntity.ok("Cập nhật thành công!");
-        } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi hệ thống!");
-        }
+
     }
-
-
 }

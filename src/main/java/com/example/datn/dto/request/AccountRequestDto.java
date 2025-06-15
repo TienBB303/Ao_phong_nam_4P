@@ -18,6 +18,7 @@ public class AccountRequestDto {
     private Integer id;
 
     private String code;
+
     @NotBlank(message = "Ho ten khong duoc bo trong!")
     private String fullName;
 
@@ -41,4 +42,6 @@ public class AccountRequestDto {
     private LocalDateTime created_at;
 
     private LocalDateTime updated_at;
+
+    private Boolean status;
 }
