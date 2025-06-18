@@ -10,6 +10,7 @@ public class Main {
         SpringApplication.run(Main.class, args);
         // First comment TienBB
         // Second comment TienBB
+        System.out.println("Build complete!");
     }
 
 }

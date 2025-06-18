@@ -6,11 +6,13 @@ import com.example.datn.entities.Account;
 import com.example.datn.entities.Role;
 import com.example.datn.repositories.AccountRepository;
 import com.example.datn.repositories.RoleRepository;
+import org.hibernate.ResourceClosedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,8 +44,10 @@ public class AccountService {
         account.setPassword(accountRequestDto.getPassword());
         account.setPhoneNumber(accountRequestDto.getPhoneNumber());
         account.setEmail(accountRequestDto.getEmail());
+        account.setCreated_at(LocalDateTime.now());
         account.setBirthOfDate(accountRequestDto.getBirthOfDate());
         account.setGender(accountRequestDto.getGender());
+        account.setStatus(Boolean.TRUE);
 
         Role role = roleRepository.findByName("ROLE_CUSTOMER").orElseThrow(() -> new RuntimeException("Khong tim thay quyen hop le!"));
         account.setRole(role);
@@ -69,4 +73,25 @@ public class AccountService {
         return "TK001";
     }
 
+    public List<AccountResponseDto> getDetail(String code) {
+        return accountRepository.detailByCode(code);
+    }
+
+    public Account updateAccount(AccountRequestDto accountRequestDto) {
+        Optional<Account> optionalAccount = accountRepository.findById(accountRequestDto.getId());
+        if (optionalAccount.isEmpty()) {
+            throw new ResourceClosedException("Tài khoản không tồn tại với ID: " + accountRequestDto.getId());
+        }
+
+        Account account = optionalAccount.get();
+        account.setFullName(accountRequestDto.getFullName());
+        account.setPassword(accountRequestDto.getPassword());
+        account.setPhoneNumber(accountRequestDto.getPhoneNumber());
+        account.setEmail(accountRequestDto.getEmail());
+        account.setUpdated_at(LocalDateTime.now());
+        account.setBirthOfDate(accountRequestDto.getBirthOfDate());
+        account.setGender(accountRequestDto.getGender());
+
+        return accountRepository.save(account);
+    }
 }

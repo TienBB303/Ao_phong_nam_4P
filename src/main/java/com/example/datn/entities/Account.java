@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Setter
 @Getter
 @AllArgsConstructor
@@ -31,6 +33,12 @@ public class Account {
     private LocalDate birthOfDate;
 
     private String gender;
+
+    private LocalDateTime created_at;
+
+    private LocalDateTime updated_at;
+
+    private Boolean status;
 
     @OneToOne
     @JoinColumn(name = "role_id")
