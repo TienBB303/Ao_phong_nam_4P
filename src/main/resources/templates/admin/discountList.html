@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Danh sách mã giảm giá</title>
+    <meta charset="UTF-8">
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 6px 10px;
+        }
+        .pagination {
+            margin-top: 10px;
+        }
+        .pagination a {
+            margin: 0 3px;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<h2>Danh sách mã giảm giá</h2>
+
+
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Mã</th>
+        <th>Tên mã</th>
+        <th>Loại</th>
+        <th>Giá trị</th>
+        <th>Ngày bắt đầu</th>
+        <th>Ngày kết thúc</th>
+        <th>Đơn tối thiểu</th>
+        <th>Giảm tối đa</th>
+        <th>Số lượng</th>
+        <th>Mô tả</th>
+        <th>Trạng thái</th>
+        <th>Hành động</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="d : ${list}">
+        <td th:text="${d.id}"></td>
+        <td th:text="${d.code}"></td>
+        <td th:text="${d.codeName}"></td>
+        <td th:text="${d.discountType}"></td>
+        <td th:text="${d.discountType == 'percent'} ? ${d.discountValue.intValue() + '%'} : ${#numbers.formatDecimal(d.discountValue, 0, 'POINT', 0, 'COMMA') + '₫'}"></td>
+        <td th:text="${#temporals.format(d.startDatetime, 'dd/MM/yyyy HH:mm')}"></td>
+        <td th:text="${#temporals.format(d.endDatetime, 'dd/MM/yyyy HH:mm')}"></td>
+        <td th:text="${d.minPurchase}"></td>
+        <td th:text="${d.maxDiscount}"></td>
+        <td th:text="${d.usageLimit}"></td>
+        <td th:text="${d.description}"></td>
+        <td>
+            <span th:text="${d.status ? 'Đang hoạt động' : 'Ngừng'}"></span>
+            <form th:action="@{'/admin/discount/toggle-status/' + ${d.id}}" method="post" style="display:inline;">
+                <button type="submit" th:text="${d.status ? 'Tắt' : 'Bật'}"></button>
+            </form>
+        </td>
+
+        <td>
+            <a th:href="@{'/admin/discount/detail/' + ${d.id}}">
+                <button>🔍 Chi tiết</button>
+            </a>
+            <a th:href="@{'/admin/discount/edit/' + ${d.id} }">
+                <button>✏️Sửa </button>
+            </a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<a th:href="@{/admin/discount/create}">
+    <button>➕ Thêm mới</button>
+</a>
+<div class="pagination">
+    <span th:if="${currentPage > 0}">
+        <a th:href="@{|/admin/discount/view?page=${currentPage - 1}&size=5|}">&laquo; Trang trước</a>
+    </span>
+
+    <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+        <a th:href="@{|/admin/discount/view?page=${i}&size=5|}"
+           th:text="${i + 1}"
+           th:classappend="${i == currentPage} ? 'active' : ''">
+        </a>
+    </span>
+
+    <span th:if="${currentPage < totalPages - 1}">
+        <a th:href="@{|/admin/discount/view?page=${currentPage + 1}&size=5|}">Trang sau &raquo;</a>
+    </span>
+</div>
+
+</body>
+</html>
