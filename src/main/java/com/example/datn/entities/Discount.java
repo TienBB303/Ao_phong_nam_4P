@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Data
 @Entity
 @Table(name = "discount")
-public class Coupon {
+public class Discount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -48,4 +48,8 @@ public class Coupon {
     @Column(name = "status")
     private Boolean status;
 
+    public boolean isStatus() {
+        return Boolean.TRUE.equals(status);
+
+    }
 }
