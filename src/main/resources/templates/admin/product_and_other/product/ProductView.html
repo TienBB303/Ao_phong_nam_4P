@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>4P Store</title>
+    <link rel="icon" type="image/png" href="https://png.pngtree.com/png-vector/20221011/ourmid/pngtree-letter-v-logo-icon-vector-png-image_6295820.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- Main-->
+<div id="main" class="container mt-4">
+    <h3>Sản phẩm áo</h3>
+    <div class="card-header d-flex justify-content-between">
+        <a class="btn btn-outline-primary" href="/admin" style="width: 70px">
+            <i class="bi bi-arrow-return-left"></i>
+        </a>
+        <a class="btn btn-outline-success" href="/admin/product/view-add" style="width: 70px">
+            <i class="bi bi-plus"></i>
+        </a>
+    </div>
+
+    <table class="table table-striped table-bordered dataTable-table" id="table1">
+        <thead>
+        <tr>
+            <th style="text-align: center">STT</th>
+            <th style="text-align: center">Mã sản phẩm</th>
+            <th style="text-align: center">Tên sản phẩm</th>
+            <th style="text-align: center">Loại sản phẩm</th>
+            <th style="text-align: center">Hãng</th>
+            <th style="text-align: center">Trạng thái</th>
+            <th style="text-align: center">Hành động</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="sp, iter : ${listProduct.content}" th:data-id="${sp.id}">
+            <td th:text="${listProduct.number * listProduct.size + iter.index + 1}"></td>
+            <td th:text="${sp.code}"></td>
+            <td th:text="${sp.name}"></td>
+            <td th:text="${sp.category.name}"></td>
+            <td th:text="${sp.brand.name}"></td>
+            <td style="text-align: center">
+                <span th:if="${sp.status}" class="badge bg-success">Hoạt động</span>
+                <span th:unless="${sp.status}" class="badge bg-danger">Không hoạt động</span>
+            </td>
+            <td style="text-align: center">
+                <a class="btn btn-outline-warning" style="width: 70px" title="Sửa">
+                    <i class="bi bi-pencil-square"></i>
+                </a>
+                <a class="btn btn-outline-info" style="width: 70px" title="Xem">
+                    <i class="bi bi-eye"></i>
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <nav>
+        <ul class="pagination">
+            <li class="page-item" th:classappend="${listProduct.first} ? 'disabled'">
+                <a class="page-link" th:href="@{/admin/product/hien-thi(page=${listProduct.number - 1}, size=${size})}">Previous</a>
+            </li>
+
+            <li class="page-item"
+                th:each="i : ${#numbers.sequence(0, listProduct.totalPages - 1)}"
+                th:classappend="${i == listProduct.number} ? 'active'">
+                <a class="page-link" th:href="@{/admin/product/hien-thi(page=${i}, size=${size})}" th:text="${i + 1}">1</a>
+            </li>
+
+            <li class="page-item" th:classappend="${listProduct.last} ? 'disabled'">
+                <a class="page-link" th:href="@{/admin/product/hien-thi(page=${listProduct.number + 1}, size=${size})}">Next</a>
+            </li>
+        </ul>
+    </nav>
+
+</div>
+
+<!-- Script -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
