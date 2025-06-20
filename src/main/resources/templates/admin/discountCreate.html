@@ -1,135 +1,144 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
+    <title>Thông tin mã giảm giá</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <title>Thêm mã giảm giá</title>
-    <meta charset="UTF-8">
     <style>
-        label {
-            display: block;
-            margin-top: 10px;
+        body {
+            background-color: #f5f6fa;
         }
-        input, textarea, select {
-            width: 300px;
-            padding: 5px;
+
+        .discount-form-container {
+            background-color: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            max-width: 900px;
+            margin: 40px auto;
         }
-        button {
-            margin-top: 15px;
-            padding: 8px 16px;
+
+        .form-title {
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
         }
-        .unit-label {
-            margin-left: 10px;
+
+        .form-label {
+            font-weight: 500;
+        }
+
+        .form-buttons {
+            text-align: right;
+            margin-top: 30px;
+        }
+
+        .btn-cancel {
+            border: 1px solid #dc3545;
+            color: #dc3545;
+            background: none;
+        }
+
+        .btn-cancel:hover {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
-<div class="container mt-5">
-    <h2 class="mb-4">Thêm mã giảm giá</h2>
+<div class="container discount-form-container">
+    <h2 class="form-title">Thông tin mã giảm giá</h2>
 
     <form th:action="@{/admin/discount/create}" th:object="${discount}" method="post">
-        <div class="mb-3">
-            <label class="form-label">Mã</label>
-            <input type="text" class="form-control" th:field="*{code}" required>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Tên mã</label>
-            <input type="text" class="form-control" th:field="*{codeName}" required>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label d-block">Loại giảm giá</label>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" th:field="*{discountType}" value="percent"
-                       onclick="handleDiscountTypeChange()">
-                <label class="form-check-label">Phần trăm</label>
+        <div class="row">
+            <div class="col-md-6 form-group">
+                <label class="form-label">Mã giảm giá *</label>
+                <input type="text" class="form-control" th:field="*{code}" required>
             </div>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" th:field="*{discountType}" value="amount"
-                       onclick="handleDiscountTypeChange()">
-                <label class="form-check-label">Số tiền</label>
+            <div class="col-md-6 form-group">
+                <label class="form-label">Tên giảm giá *</label>
+                <input type="text" class="form-control" th:field="*{codeName}" required>
             </div>
-        </div>
+
+            <div class="col-md-6 form-group">
+                <label class="form-label">Ngày áp dụng *</label>
+                <input type="datetime-local" class="form-control"
+                       th:field="*{startDatetime}" required>
+            </div>
+
+            <div class="col-md-6 form-group">
+                <label class="form-label">Ngày kết thúc *</label>
+                <input type="datetime-local" class="form-control"
+                       th:field="*{endDatetime}" required>
+            </div>
 
 
-        <div class="mb-3">
-            <label class="form-label">Giá trị giảm</label>
-            <div class="input-group">
+            <div class="col-md-6 form-group">
+                <label class="form-label d-block">Phương thức giảm *</label>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" th:field="*{discountType}" value="percent"
+                           onclick="handleDiscountTypeChange()">
+                    <label class="form-check-label">Giảm theo phần trăm</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" th:field="*{discountType}" value="amount"
+                           onclick="handleDiscountTypeChange()">
+                    <label class="form-check-label">Giảm theo tiền</label>
+                </div>
+            </div>
+
+            <div class="col-md-6 form-group">
+                <label class="form-label">Giá trị giảm *</label>
                 <input type="number" class="form-control" id="discountValue" th:field="*{discountValue}" required>
-                <span class="input-group-text" id="discountUnit">%</span>
+            </div>
+
+            <div class="col-md-6 form-group">
+                <label class="form-label">Số tiền giảm tối đa (đ) *</label>
+                <input type="number" class="form-control" th:field="*{maxDiscount}" id="maxDiscountInput">
+            </div>
+
+            <div class="col-md-6 form-group">
+                <label class="form-label">Số tiền áp dụng cho đơn tối thiểu từ (đ) *</label>
+                <input type="number" class="form-control" th:field="*{minPurchase}" required>
+            </div>
+
+            <div class="col-md-6 form-group">
+                <label class="form-label">Số lượng tối đa *</label>
+                <input type="number" class="form-control" th:field="*{usageLimit}" required>
             </div>
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">Ngày bắt đầu</label>
-            <input type="datetime-local" class="form-control" th:field="*{startDatetime}" required>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Ngày kết thúc</label>
-            <input type="datetime-local" class="form-control" th:field="*{endDatetime}" required>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Đơn hàng tối thiểu</label>
-            <input type="number" class="form-control" th:field="*{minPurchase}" step="0.01">
-        </div>
-
-        <div class="mb-3" id="maxDiscountGroup">
-            <label class="form-label">Giảm tối đa</label>
-            <input type="number" class="form-control" th:field="*{maxDiscount}" step="0.01">
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Giới hạn sử dụng</label>
-            <input type="number" class="form-control" th:field="*{usageLimit}">
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Mô tả</label>
-            <textarea class="form-control" rows="3" th:field="*{description}"></textarea>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Trạng thái</label>
-            <select class="form-select" th:field="*{status}">
-                <option th:value="true">Đang hoạt động</option>
-                <option th:value="false">Không hoạt động</option>
-            </select>
-        </div>
-
-        <div class="mt-4">
-            <button type="submit" class="btn btn-primary me-2">Lưu</button>
-            <a th:href="@{/admin/discount/view}" class="btn btn-secondary">Quay lại</a>
+        <div class="form-buttons">
+            <a th:href="@{/admin/discount/view}" class="btn btn-cancel me-2">Hủy</a>
+            <button type="submit" class="btn btn-primary">Lưu</button>
         </div>
     </form>
 </div>
+
 <script>
     function handleDiscountTypeChange() {
         const percentRadio = document.querySelector('input[name="discountType"][value="percent"]');
-        const amountRadio = document.querySelector('input[name="discountType"][value="amount"]');
         const discountInput = document.getElementById('discountValue');
-        const unitLabel = document.getElementById('discountUnit');
-        const maxDiscountGroup = document.getElementById('maxDiscountGroup');
-        const maxDiscountInput = maxDiscountGroup.querySelector('input');
+        const maxDiscountInput = document.getElementById('maxDiscountInput');
 
         if (percentRadio.checked) {
             discountInput.max = 100;
             discountInput.min = 0;
-            unitLabel.textContent = '%';
-            maxDiscountGroup.style.display = 'block';
             maxDiscountInput.disabled = false;
-        } else if (amountRadio.checked) {
+        } else {
             discountInput.removeAttribute('max');
             discountInput.removeAttribute('min');
-            unitLabel.textContent = '₫';
-            maxDiscountGroup.style.display = 'none';
             maxDiscountInput.disabled = true;
         }
     }
+
     window.onload = handleDiscountTypeChange;
 </script>
-
 </body>
 </html>
