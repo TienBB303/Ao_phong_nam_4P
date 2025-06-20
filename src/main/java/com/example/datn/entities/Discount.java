@@ -2,6 +2,7 @@ package com.example.datn.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -27,10 +28,10 @@ public class Discount {
     @Column(name = "discount_value")
     private BigDecimal discountValue;
 
-    @Column(name = "start_datetime")
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime startDatetime;
 
-    @Column(name = "end_datetime")
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime endDatetime;
 
     @Column(name = "min_purchase")
@@ -46,10 +47,23 @@ public class Discount {
     private String description;
 
     @Column(name = "status")
-    private Boolean status;
+    private Integer status;
 
-    public boolean isStatus() {
-        return Boolean.TRUE.equals(status);
 
+
+    @Transient
+    public String getDisplayStatus() {
+        switch (this.status) {
+            case 1:
+                return "Đang diễn ra";
+            case 2:
+                return "Sắp diễn ra";
+            case 3:
+                return "Đã kết thúc";
+            case 4:
+                return "Đã đóng";
+            default:
+                return "Không xác định";
+        }
     }
 }
