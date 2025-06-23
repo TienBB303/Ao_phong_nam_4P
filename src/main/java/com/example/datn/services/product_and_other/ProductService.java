@@ -1,10 +1,8 @@
 package com.example.datn.services.product_and_other;
 
 import com.example.datn.entities.product_and_other.Product;
-import com.example.datn.repositories.product_and_other.BrandRepository;
-import com.example.datn.repositories.product_and_other.CategoryRepository;
-import com.example.datn.repositories.product_and_other.MaterialCategory;
-import com.example.datn.repositories.product_and_other.ProductRepository;
+import com.example.datn.entities.product_and_other.ProductDetail;
+import com.example.datn.repositories.product_and_other.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,13 +16,16 @@ public class ProductService {
     ProductRepository productRepository;
 
     @Autowired
+    ProductDetailRepository productDetailRepository;
+
+    @Autowired
     BrandRepository brandRepository;
 
     @Autowired
     CategoryRepository categoryRepository;
 
     @Autowired
-    MaterialCategory materialCategory;
+    MaterialRepository materialCategory;
 
     public List<Product> getAll(){
         return productRepository.getAll();
@@ -40,10 +41,11 @@ public class ProductService {
     }
 
     public Product addProduct(Product product){
-        product.setCategory(categoryRepository.findById(product.getCategory().getId()).orElse(null));
-        product.setBrand(brandRepository.findById(product.getBrand().getId()).orElse(null));
-        product.setMaterial(materialCategory.findById(product.getMaterial().getId()).orElse(null));
         return productRepository.save(product);
+    }
+
+    public ProductDetail addProductDetail(ProductDetail productDetail){
+        return productDetailRepository.save(productDetail);
     }
 
     public Product update(Integer id, Product updateProduct){
@@ -60,7 +62,26 @@ public class ProductService {
         product.setBrand(updateProduct.getBrand());
         product.setMaterial(updateProduct.getMaterial());
 
-        System.out.println("Product save done!");
+        System.out.println("ProductForm save done!");
         return productRepository.save(product);
+    }
+
+    public String findLastCodeProduct(){
+        return productRepository.findMaxCodeProduct();
+    }
+
+    public String taoMaTuDongSanPham(){
+        String lastCode = findLastCodeProduct();
+        int nextCode = 1;
+
+        if(lastCode != null && !lastCode.trim().isEmpty()){
+            try{
+                String numberPart = lastCode.substring(2); // lay so phia sau SP
+                nextCode = Integer.parseInt(numberPart) + 1; // cong them 1
+            }catch (NumberFormatException e){
+//                hihi
+            }
+        }
+        return String.format("SP%03d",nextCode);
     }
 }

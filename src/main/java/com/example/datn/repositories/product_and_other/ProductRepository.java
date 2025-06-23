@@ -13,9 +13,12 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     @Query("SELECT p FROM Product p")
     List<Product> getAll();
 
-    @Query("SELECT p FROM Product p")
+    @Query("SELECT p FROM Product p ORDER BY p.id DESC")
     Page<Product> getAll(Pageable pageable);
 
     @Query("SELECT p FROM Product p WHERE p.id = :id")
     Product findByIdProduct(Integer id);
+
+    @Query("SELECT MAX(p.code) FROM Product p WHERE p.code LIKE 'SP%' ")
+    String findMaxCodeProduct();
 }

@@ -1,7 +1,9 @@
 package com.example.datn.controllers.product_and_other;
 
-import com.example.datn.entities.product_and_other.Product;
-import com.example.datn.services.product_and_other.ProductService;
+import com.example.datn.dto.product.ProductDetailForm;
+import com.example.datn.dto.product.ProductForm;
+import com.example.datn.entities.product_and_other.*;
+import com.example.datn.services.product_and_other.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +20,45 @@ import java.util.Map;
 public class ProductController {
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    CategoryService categoryService;
+
+    @Autowired
+    BrandService brandService;
+
+    @Autowired
+    MaterialService materialService;
+
+    @Autowired
+    ColorService colorService;
+
+    @Autowired
+    SizeService sizeService;
+
+    @ModelAttribute("listCategory")
+    public List<Category> listCategory() {
+        return categoryService.getAll();
+    }
+
+    @ModelAttribute("listBrand")
+    public List<Brand> listBrand() {
+        return brandService.getAll();
+    }
+
+    @ModelAttribute("listMaterial")
+    public List<Material> listMaterial() {
+        return materialService.getAll();
+    }
+
+    @ModelAttribute("listColor")
+    public List<Color> listColor() {
+        return colorService.getAll();
+    }
+    @ModelAttribute("listSize")
+    public List<Size> listSize() {
+        return sizeService.getAll();
+    }
 
     @GetMapping("/hien-thi")
     public String sanPham(
@@ -40,9 +81,51 @@ public class ProductController {
     public String viewAdd(){
         return "admin/product_and_other/product/ProductViewAdd";
     }
+
+    @GetMapping("/view-atribute")
+    public String viewAtribute(){
+        return "admin/product_and_other/product/AtributeView";
+    }
+
     @PostMapping("/add")
-    public Product AddNewProduct(@RequestBody Product product){
-        return productService.addProduct(product);
+    public String AddNewProduct(
+            @ModelAttribute ProductForm productForm// khi binding thuôc tính thì name ngoài view phải trừng trong enity ProductForm
+            ){
+        Product product = new Product();
+        String code = (productForm.getCode() == null || productForm.getCode().trim().isEmpty()) ? productService.taoMaTuDongSanPham() : productForm.getCode().trim();
+        product.setCode(code);
+        product.setName(productForm.getName());
+        product.setStatus(true);
+        product.setDescription(productForm.getDescription());
+
+        Category category = categoryService.findById(productForm.getCategoryId());
+        Brand brand = brandService.findById(productForm.getBrandId());
+        Material material = materialService.findById(productForm.getMaterialId());
+
+        product.setCategory(category);
+        System.out.println(category.getId());
+        product.setBrand(brand);
+        product.setMaterial(material);
+
+        productService.addProduct(product);
+
+        for (ProductDetailForm pdf : productForm.getVariants()){
+            ProductDetail productDetail = new ProductDetail();
+            productDetail.setProduct(product);
+            productDetail.setColor(colorService.findById(pdf.getColorId()));
+            productDetail.setSize(sizeService.findById(pdf.getSizeId()));
+            productDetail.setPrice(pdf.getPrice());
+            productDetail.setQuantity(pdf.getQuantity());
+
+//            String path = "src/main/resources/static/barcode/" + code + ".png";
+//            Ulities.generateBarcodeImage(code, path);
+            String barcode = product.getCode() + "-C" + pdf.getColorId() + "-S" + pdf.getSizeId();
+            productDetail.setBarcode(barcode);
+
+            productService.addProductDetail(productDetail);
+        }
+
+        return "redirect:/admin/product/hien-thi";
     }
 
     @PostMapping("/update/{id}")
@@ -51,16 +134,6 @@ public class ProductController {
     }
 
 
-//    demo Body -> Raw (JSON)
-//    {
-//        "code": "SP002",
-//        "name": "Áo nike",
-//        "status": true,
-//        "description": "Cập nhật mô tả",
-//        "category": { "id": 1 },
-//        "brand": { "id": 2 },
-//        "material": { "id": 1 }
-//    }
 
 }
 
