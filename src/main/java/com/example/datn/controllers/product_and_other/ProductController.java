@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.HashMap;
 import java.util.List;
@@ -66,7 +67,13 @@ public class ProductController {
                         @RequestParam(defaultValue = "5") int size,
                           Model model) {
         Page<Product> listProduct = productService.getAll(PageRequest.of(page, size));
+        Map<Integer, Integer> totalQuantity = new HashMap<>();
 
+        for(Product p : listProduct){
+            int total = productService.tongSoLuongSPCT(p.getId());
+            totalQuantity.put(p.getId(),total);
+        }
+        model.addAttribute("totalQuantity", totalQuantity);
         model.addAttribute("listProduct", listProduct);
         model.addAttribute("currentPage", page);
         return "admin/product_and_other/product/ProductView";
@@ -78,7 +85,12 @@ public class ProductController {
     }
 
     @GetMapping("/view-add")
-    public String viewAdd(){
+    public String viewAdd(Model model){
+        if (!model.containsAttribute("productForm")) {
+            ProductForm form = new ProductForm();
+            form.setVariants(List.of(new ProductDetailForm())); // tạo trước 1 dòng
+            model.addAttribute("productForm", form);
+        }
         return "admin/product_and_other/product/ProductViewAdd";
     }
 
@@ -87,29 +99,64 @@ public class ProductController {
         return "admin/product_and_other/product/AtributeView";
     }
 
+
     @PostMapping("/add")
     public String AddNewProduct(
-            @ModelAttribute ProductForm productForm// khi binding thuôc tính thì name ngoài view phải trừng trong enity ProductForm
-            ){
+            @ModelAttribute("productForm") ProductForm productForm,
+            Model model) {
+
+        // Gán lại dữ liệu để hiển thị lại khi có lỗi
+        model.addAttribute("productForm", productForm);
+
+        if (productForm.getName() == null || productForm.getName().trim().isEmpty()) {
+            model.addAttribute("alert", "Tên sản phẩm không được để trống");
+            model.addAttribute("type", "error");
+            return "admin/product_and_other/product/ProductViewAdd";
+        }
+
+        if (productService.checkNameTrung(productForm.getName())) {
+            model.addAttribute("alert", "Tên sản phẩm trùng sản phẩm đã có");
+            model.addAttribute("type", "error");
+            return "admin/product_and_other/product/ProductViewAdd";
+        }
+
+        List<ProductDetailForm> variants = productForm.getVariants();
+        if (variants == null || variants.isEmpty()) {
+            model.addAttribute("alert", "Cần ít nhất một biến thể");
+            model.addAttribute("type", "error");
+            return "admin/product_and_other/product/ProductViewAdd";
+        }
+
+        for (ProductDetailForm pdf : variants) {
+            if (pdf.getQuantity() == null || pdf.getQuantity() < 0) {
+                model.addAttribute("alert", "Số lượng không hợp lệ");
+                model.addAttribute("type", "error");
+                return "admin/product_and_other/product/ProductViewAdd";
+            }
+
+            if (pdf.getPrice() == null || pdf.getPrice().intValue() < 0) {
+                model.addAttribute("alert", "Giá không hợp lệ");
+                model.addAttribute("type", "error");
+                return "admin/product_and_other/product/ProductViewAdd";
+            }
+        }
+
         Product product = new Product();
-        String code = (productForm.getCode() == null || productForm.getCode().trim().isEmpty()) ? productService.taoMaTuDongSanPham() : productForm.getCode().trim();
+        String code = (productForm.getCode() == null || productForm.getCode().trim().isEmpty())
+                ? productService.taoMaTuDongSanPham()
+                : productForm.getCode().trim();
         product.setCode(code);
         product.setName(productForm.getName());
-        product.setStatus(true);
         product.setDescription(productForm.getDescription());
+        product.setStatus(true);
 
-        Category category = categoryService.findById(productForm.getCategoryId());
-        Brand brand = brandService.findById(productForm.getBrandId());
-        Material material = materialService.findById(productForm.getMaterialId());
-
-        product.setCategory(category);
-        System.out.println(category.getId());
-        product.setBrand(brand);
-        product.setMaterial(material);
+        product.setCategory(categoryService.findById(productForm.getCategoryId()));
+        product.setBrand(brandService.findById(productForm.getBrandId()));
+        product.setMaterial(materialService.findById(productForm.getMaterialId()));
 
         productService.addProduct(product);
 
-        for (ProductDetailForm pdf : productForm.getVariants()){
+        for (ProductDetailForm pdf : variants) {
             ProductDetail productDetail = new ProductDetail();
             productDetail.setProduct(product);
             productDetail.setColor(colorService.findById(pdf.getColorId()));
@@ -117,8 +164,6 @@ public class ProductController {
             productDetail.setPrice(pdf.getPrice());
             productDetail.setQuantity(pdf.getQuantity());
 
-//            String path = "src/main/resources/static/barcode/" + code + ".png";
-//            Ulities.generateBarcodeImage(code, path);
             String barcode = product.getCode() + "-C" + pdf.getColorId() + "-S" + pdf.getSizeId();
             productDetail.setBarcode(barcode);
 
