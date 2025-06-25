@@ -21,4 +21,10 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 
     @Query("SELECT MAX(p.code) FROM Product p WHERE p.code LIKE 'SP%' ")
     String findMaxCodeProduct();
+
+    @Query("SELECT p FROM Product p WHERE LOWER(p.name) = LOWER(:name) ")
+    Product findNameAlreadyHave(String name);
+
+    @Query("SELECT SUM(p.quantity) FROM ProductDetail p WHERE p.product.id = :productId")
+    Integer tongSoLuongTheoSanPham(Integer productId);
 }

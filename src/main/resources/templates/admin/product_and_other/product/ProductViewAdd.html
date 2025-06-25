@@ -33,7 +33,7 @@
                         <div class="mb-3">
                             <label for="product_code" class="form-label">
                                 Mã sản phẩm <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="product_code" name="code" placeholder="Mã tạo tự động/ nhập thủ công">
+                            <input type="text" class="form-control" id="product_code" name="code" th:value="${productForm.code}" placeholder="Mã tạo tự động/ nhập thủ công">
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -41,7 +41,7 @@
                         <div class="mb-3">
                             <label for="product_name" class="form-label">
                                 Tên sản phẩm <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="product_name" name="name" placeholder="Nhập tên sản phẩm">
+                            <input type="text" class="form-control" id="product_name" name="name" th:value="${productForm.name}" placeholder="Nhập tên sản phẩm">
                         </div>
                     </div>
                 </div>
@@ -54,7 +54,8 @@
                                     <option th:each="cate : ${listCategory}"
                                             th:value="${cate.id}"
                                             th:text="${cate.name}"
-                                            th:if="${cate.status}">
+                                            th:if="${cate.status}"
+                                            th:selected="${cate.id == productForm.categoryId}">
                                     </option>
                                 </select>
                                 <span id="add_category" class="btn btn-outline-secondary">
@@ -69,10 +70,11 @@
                             <label for="product_brand" class="form-label">Hãng</label>
                             <div class="d-flex align-items-center">
                                 <select class="form-select me-2" id="product_brand" name="brandId">
-                                    <option th:each="cate : ${listBrand}"
-                                            th:value="${cate.id}"
-                                            th:text="${cate.name}"
-                                            th:if="${cate.status}">
+                                    <option th:each="brand : ${listBrand}"
+                                            th:value="${brand.id}"
+                                            th:text="${brand.name}"
+                                            th:if="${brand.status}"
+                                            th:selected="${brand.id == productForm.brandId}">
                                     </option>
                                 </select>
                                 <span id="add_brand" class="btn btn-outline-secondary">
@@ -91,7 +93,8 @@
                                     <option th:each="mate : ${listMaterial}"
                                             th:value="${mate.id}"
                                             th:text="${mate.name}"
-                                            th:if="${mate.status}">
+                                            th:if="${mate.status}"
+                                            th:selected="${mate.id == productForm.materialId}">
                                     </option>
                                 </select>
                                 <span id="add_material" class="btn btn-outline-secondary">
@@ -110,36 +113,56 @@
                 </div>
                 <hr>
                 <div id="variant-list">
-                    <div class="variant-item row mb-3">
+                    <div th:each="variant, stat : ${productForm.variants}" class="variant-item row mb-3">
+                        <!-- Màu sắc -->
                         <div class="col-md-2">
                             <label>Màu sắc</label>
-                            <select class="form-select" name="variants[0].colorId">
+                            <select class="form-select" th:name="'variants[' + ${stat.index} + '].colorId'">
                                 <option th:each="color : ${listColor}"
                                         th:value="${color.id}"
-                                        th:text="${color.name}"></option>
+                                        th:text="${color.name}"
+                                        th:selected="${color.id == variant.colorId}">
+                                </option>
                             </select>
                         </div>
+
+                        <!-- Kích cỡ -->
                         <div class="col-md-2">
                             <label>Kích cỡ</label>
-                            <select class="form-select" name="variants[0].sizeId">
+                            <select class="form-select" th:name="'variants[' + ${stat.index} + '].sizeId'">
                                 <option th:each="size : ${listSize}"
                                         th:value="${size.id}"
-                                        th:text="${size.name}"></option>
+                                        th:text="${size.name}"
+                                        th:selected="${size.id == variant.sizeId}">
+                                </option>
                             </select>
                         </div>
+
+                        <!-- Số lượng -->
                         <div class="col-md-2">
                             <label>Số lượng</label>
-                            <input type="number" name="variants[0].quantity" class="form-control" min="0">
+                            <input type="number"
+                                   class="form-control"
+                                   th:name="'variants[' + ${stat.index} + '].quantity'"
+                                   th:value="${variant.quantity}" min="0">
                         </div>
+
+                        <!-- Giá tiền -->
                         <div class="col-md-2">
                             <label>Giá tiền</label>
-                            <input type="number" name="variants[0].price" class="form-control" min="0">
+                            <input type="number"
+                                   class="form-control"
+                                   th:name="'variants[' + ${stat.index} + '].price'"
+                                   th:value="${variant.price}" min="0">
                         </div>
+
+                        <!-- Nút Xóa -->
                         <div class="col-md-2 d-flex align-items-end">
                             <button type="button" class="btn btn-danger remove-variant">Xóa</button>
                         </div>
                     </div>
                 </div>
+
                 <div class="mb-3">
                     <button type="button" class="btn btn-success" id="add-variant-btn">Thêm biến thể</button>
                 </div>
@@ -150,26 +173,50 @@
         </div>
     </div>
 </div>
+
+<script th:if="${alert != null}" th:inline="javascript">
+    Swal.fire({
+        toast: true,
+        icon: [[${type}]],
+        title: '[[${alert}]]', // Thông báo từ controller
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true
+    });
+</script>
 <script>
-        let index = 1;
-
-        $('#add-variant-btn').on('click', function () {
-            const newItem = $('.variant-item:first').clone();
-            newItem.find('select, input').each(function () {
+    function updateVariantIndexes() {
+        $('#variant-list .variant-item').each(function (i) {
+            $(this).find('select, input').each(function () {
                 const name = $(this).attr('name');
-                const newName = name.replace(/\[\d+\]/, `[${index}]`);
-                $(this).attr('name', newName).val('');
+                const newName = name.replace(/\[\d+\]/, `[${i}]`);
+                $(this).attr('name', newName);
             });
-            $('#variant-list').append(newItem);
-            index++;
         });
+        index = $('#variant-list .variant-item').length; // cập nhật lại index
+    }
 
-        // Xóa dòng
-        $(document).on('click', '.remove-variant', function () {
-            if ($('.variant-item').length > 1) {
-                $(this).closest('.variant-item').remove();
-            }
+    $('#add-variant-btn').on('click', function () {
+        const newItem = $('.variant-item:first').clone();
+        // newItem.find('select, input').each(function () {
+        //     $(this).val(''); // Xóa dữ liệu của các ô input, select
+        // });
+        newItem.find('input').val(''); // Xóa dữ liệu của các ô input
+        newItem.find('select').each(function () {
+            $(this).prop('selectedIndex', 0); // chọn option đầu tiên
         });
+        $('#variant-list').append(newItem);
+        updateVariantIndexes();
+    });
+
+    $(document).on('click', '.remove-variant', function () {
+        if ($('.variant-item').length > 1) {
+            $(this).closest('.variant-item').remove();
+            updateVariantIndexes();
+        }
+    });
+
 </script>
 
 <!-- Script -->

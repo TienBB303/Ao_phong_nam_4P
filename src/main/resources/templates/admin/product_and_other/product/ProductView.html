@@ -49,7 +49,7 @@
             <td th:text="${sp.name}"></td>
             <td th:text="${sp.category.name}"></td>
             <td th:text="${sp.brand.name}"></td>
-            <td>#SL</td>
+            <td th:text="${totalQuantity[sp.id]}">0</td>
             <td style="text-align: center">
                 <span th:if="${sp.status}" class="badge bg-success">Hoạt động</span>
                 <span th:unless="${sp.status}" class="badge bg-danger">Không hoạt động</span>
