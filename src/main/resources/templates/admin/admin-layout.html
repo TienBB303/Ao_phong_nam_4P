@@ -2,7 +2,6 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Quản lý sản phẩm</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -25,7 +24,26 @@
         .sidebar .nav-link:hover {
             background-color: #5a6268;
         }
+        .sidebar .nav-link {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .sidebar .nav-link {
+            color: white; /* màu mặc định */
+            transition: background-color 0.3s, color 0.3s;
+        }
 
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link:focus {
+            background-color: #495057; /* màu nền hover */
+            color: #FFD700; /* đổi sang vàng cho dễ nhìn (tuỳ chọn) */
+        }
+
+        .sidebar .nav-link.active {
+            background-color: #343a40; /* màu nền cho mục đang active */
+            color: #FFD700; /* màu chữ khi đang active */
+        }
         .main-content {
             background-color: #e9ecef;
             padding: 30px;
@@ -71,23 +89,35 @@
     </style>
 </head>
 <body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
 <!-- Wrapper chứa cả sidebar và content -->
 <div class="d-flex">
     <!-- Sidebar -->
     <div class="sidebar d-flex flex-column p-3">
         <div class="logo-box">
-            <img th:src="@{/admin/images/logo.png}" alt="Logo" class="logo-img">
+            <img th:src="@{/images/logo.png}" alt="Logo">
+
             <p class="logo-text">4P Store</p>
         </div>
         <hr>
         <ul class="nav nav-pills flex-column">
-            <li class="nav-item"><a href="#" data-url="/admin/home" class="nav-link menu-link">Trang chủ</a></li>
+            <li class="nav-item"><a href="#" data-url="/admin/home" class="nav-link menu-link">Dashboard</a></li>
             <li class="nav-item"><a href="#" data-url="" class="nav-link menu-link">Bán hàng tại quầy</a></li>
             <li class="nav-item"><a href="#" data-url="/admin/product/hien-thi" class="nav-link menu-link fw-bold">Quản lý sản phẩm</a></li>
             <li class="nav-item"><a href="#" data-url="" class="nav-link menu-link">Quản lý hóa đơn</a></li>
             <li class="nav-item"><a href="#" data-url="/admin/discount/view" class="nav-link menu-link" >Công cụ khuyến mãi</a></li>
-            <li class="nav-item"><a href="#" data-url="" class="nav-link menu-link">Thống kê</a></li>
-            <li class="nav-item"><a href="#" data-url="" class="nav-link menu-link">Quản lý tài khoản</a></li>
+            <li class="nav-item">
+                <a href="#" class="nav-link menu-link" data-bs-toggle="collapse" data-bs-target="#submenu-account" aria-expanded="false">
+                    Quản lý tài khoản
+                </a>
+                <ul class="collapse list-unstyled ps-3" id="submenu-account">
+                    <li><a href="#" data-url="/admin/customer/view" class="nav-link menu-link">Quản lý khách hàng </a></li>
+<!--                    <li><a href="#" data-url="/admin/account/create" class="nav-link menu-link">Quản lý nhân viên</a></li>-->
+                </ul>
+            </li>
+
+            <li class="nav-item"><a href="#" data-url="" class="nav-link menu-link">Thống kê </a></li>
         </ul>
     </div>
 

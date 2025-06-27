@@ -27,6 +27,7 @@ public class Account {
     private String email;
 
     private String password;
+    private String address;
 
     private String phoneNumber;
 
@@ -43,4 +44,7 @@ public class Account {
     @OneToOne
     @JoinColumn(name = "role_id")
     private Role role;
+    @OneToOne
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
 }
