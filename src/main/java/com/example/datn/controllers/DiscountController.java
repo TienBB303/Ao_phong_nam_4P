@@ -53,6 +53,24 @@ public class DiscountController {
                 status,
                 pageable
         );
+        for (Discount d : pageDiscounts.getContent()) {
+            LocalDateTime now = LocalDateTime.now();
+            int newStatus;
+
+            if (d.getEndDatetime().isBefore(now)) {
+                newStatus = 3; // Đã kết thúc
+            } else if (d.getStartDatetime().isAfter(now)) {
+                newStatus = 2; // Sắp diễn ra
+            } else {
+                newStatus = (d.getStatus() != 4) ? 1 : 4; // Đang diễn ra hoặc vẫn giữ là Đã đóng
+            }
+
+            if (d.getStatus() == null || d.getStatus() != newStatus) {
+                d.setStatus(newStatus);
+                discountRepo.save(d); // Cập nhật khi cần
+            }
+        }
+
 
         // 4. Đẩy dữ liệu ra view
         model.addAttribute("list", pageDiscounts.getContent());

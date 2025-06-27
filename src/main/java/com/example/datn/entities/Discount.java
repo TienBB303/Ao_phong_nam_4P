@@ -53,17 +53,16 @@ public class Discount {
 
     @Transient
     public String getDisplayStatus() {
-        switch (this.status) {
-            case 1:
-                return "Đang diễn ra";
-            case 2:
-                return "Sắp diễn ra";
-            case 3:
-                return "Đã kết thúc";
-            case 4:
-                return "Đã đóng";
-            default:
-                return "Không xác định";
+        LocalDateTime now = LocalDateTime.now();
+        if (status != null && status == 4) {
+            return "Đã đóng";
+        }
+        if (endDatetime != null && endDatetime.isBefore(now)) {
+            return "Đã kết thúc";
+        } else if (startDatetime != null && startDatetime.isAfter(now)) {
+            return "Sắp diễn ra";
+        } else {
+            return "Đang diễn ra";
         }
     }
 }
