@@ -53,21 +53,20 @@ public class DiscountController {
                 status,
                 pageable
         );
+        LocalDateTime now = LocalDateTime.now();
         for (Discount d : pageDiscounts.getContent()) {
-            LocalDateTime now = LocalDateTime.now();
             int newStatus;
-
             if (d.getEndDatetime().isBefore(now)) {
-                newStatus = 3; // Đã kết thúc
+                newStatus = 3;
             } else if (d.getStartDatetime().isAfter(now)) {
-                newStatus = 2; // Sắp diễn ra
+                newStatus = 2;
             } else {
-                newStatus = (d.getStatus() != 4) ? 1 : 4; // Đang diễn ra hoặc vẫn giữ là Đã đóng
+                newStatus = (d.getStatus() != null && d.getStatus() == 4) ? 4 : 1;
             }
 
             if (d.getStatus() == null || d.getStatus() != newStatus) {
                 d.setStatus(newStatus);
-                discountRepo.save(d); // Cập nhật khi cần
+                discountRepo.save(d);
             }
         }
 
@@ -152,9 +151,13 @@ public class DiscountController {
         if (discount != null) {
             LocalDateTime now = LocalDateTime.now();
 
-            // Nếu đã kết thúc thì không cho thay đổi trạng thái
+
             if (discount.getEndDatetime() != null && discount.getEndDatetime().isBefore(now)) {
                 redirectAttributes.addFlashAttribute("error", "Mã giảm giá đã kết thúc, không thể thay đổi trạng thái.");
+                return "redirect:/admin/discount/view";
+            }
+            if (discount.getStatus() != null && discount.getStatus() == 2) {
+                redirectAttributes.addFlashAttribute("error", "Mã giảm giá sắp diễn ra, không thể thay đổi trạng thái.");
                 return "redirect:/admin/discount/view";
             }
 

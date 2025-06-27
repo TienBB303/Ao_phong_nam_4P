@@ -49,7 +49,7 @@ public class Discount {
     @Column(name = "status")
     private Integer status;
 
-
+//
 
     @Transient
     public String getDisplayStatus() {
