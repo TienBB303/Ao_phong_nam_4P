@@ -58,7 +58,7 @@ public class ColorService {
 
     public Color changeStatus(Integer id){
         if (id == null){
-            System.out.println("Do not have color with id = " + id);
+            System.out.println("khong co color id = " + id);
             return null;
         }
         Color color = colorRepository.findByIdColor(id);
@@ -66,14 +66,31 @@ public class ColorService {
         return colorRepository.save(color);
     }
 
-    public Color update(Integer id, String colorCode,String colorName){
+    public Color update(Integer id,String colorName){
         if (id == null){
-            System.out.println("Do not have color with id = " + id);
+            System.out.println("khong co color id = " + id);
             return null;
         }
         Color color = colorRepository.findByIdColor(id);
-        color.setCode(colorCode);
         color.setName(colorName);
         return colorRepository.save(color);
+    }
+
+    public String findLastCodeColor(){
+        return colorRepository.findMaxCodeColor();
+    }
+    public String taoMaTuDongColor(){
+        String lastCode = findLastCodeColor();
+        int nextCode = 1;
+
+        if(lastCode != null && !lastCode.trim().isEmpty()){
+            try{
+                String numberPart = lastCode.substring(2); // lay so phia sau CL
+                nextCode = Integer.parseInt(numberPart) + 1; // cong them 1
+            }catch (NumberFormatException e){
+//                hihi
+            }
+        }
+        return String.format("CL%03d",nextCode);
     }
 }

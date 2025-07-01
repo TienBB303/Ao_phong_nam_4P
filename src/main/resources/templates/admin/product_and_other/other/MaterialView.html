@@ -130,10 +130,10 @@
             </div>
             <div class="modal-body">
                 <form id="addSize" method="post" action="/admin/material/add">
-                    <div class="mb-3">
-                        <label for="material_code" class="form-label">Mã</label><span class="text-danger">*</span>
-                        <input type="text" class="form-control" id="material_code" name="materialCode" placeholder="Nhập mã">
-                    </div>
+<!--                    <div class="mb-3">-->
+<!--                        <label for="material_code" class="form-label">Mã</label><span class="text-danger">*</span>-->
+<!--                        <input type="text" class="form-control" id="material_code" name="materialCode" placeholder="Nhập mã">-->
+<!--                    </div>-->
                     <div class="mb-3">
                         <label for="material_name" class="form-label">Tên</label><span class="text-danger">*</span>
                         <input type="text" class="form-control" id="material_name" name="materialName" placeholder="Nhập tên chất liệu">
@@ -162,12 +162,12 @@
             <div class="modal-body">
                 <form id="updateSize" method="post" action="/admin/material/update">
                     <input type="hidden" id="material_id" name="materialId">
+<!--                    <div class="mb-3">-->
+<!--                        <label for="material_code_update" class="form-label">Mã</label><span class="text-danger">*</span>-->
+<!--                        <input type="text" class="form-control" id="material_code_update" name="materialCodeUpdate" placeholder="Nhập mã chất liệu">-->
+<!--                    </div>-->
                     <div class="mb-3">
-                        <label for="material_code_update" class="form-label">Mã</label><span class="text-danger">*</span>
-                        <input type="text" class="form-control" id="material_code_update" name="materialCodeUpdate" placeholder="Nhập mã chất liệu">
-                    </div>
-                    <div class="mb-3">
-                        <label for="material_name_update" class="form-label">Tên</label>
+                        <label for="material_name_update" class="form-label">Tên</label><span class="text-danger">*</span>
                         <input type="text" class="form-control" id="material_name_update" name="materialNameUpdate" placeholder="Nhập tên chất liệu">
                     </div>
                     <div class="modal-footer">

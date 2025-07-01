@@ -19,10 +19,10 @@ public interface MaterialRepository extends JpaRepository<Material, Integer> {
     @Query("SELECT m FROM Material m WHERE m.id = :id")
     Material findByIdMaterial(Integer id);
 
-    @Query("SELECT m FROM Material m WHERE m.name = :name")
+    @Query("SELECT m FROM Material m WHERE LOWER(m.name) = LOWER(:name)")
     Material findByName(String name);
 
-    @Query("SELECT m FROM Material m WHERE m.code = :code")
+    @Query("SELECT m FROM Material m WHERE LOWER(m.code) = LOWER(:code)")
     Material findByCode(String code);
 
     @Query("SELECT m FROM Material m " +
@@ -31,4 +31,7 @@ public interface MaterialRepository extends JpaRepository<Material, Integer> {
             "AND (:status IS NULL OR m.status = :status)) " +
             "ORDER BY m.id DESC")
     Page<Material> search(String query, Boolean status, Pageable pageable);
+
+    @Query("SELECT MAX(m.code) FROM Material m WHERE m.code LIKE 'MA%'")
+    String findMaxCodeMaterial();
 }

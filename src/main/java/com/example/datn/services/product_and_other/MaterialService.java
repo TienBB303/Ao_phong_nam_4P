@@ -64,14 +64,34 @@ public class MaterialService {
         return materialRepository.save(material);
     }
 
-    public Material update(Integer id, String materialCode,String materialName){
+    public Material update(Integer id,String materialName){
         if (id == null){
             System.out.println("Do not have material with id = " + id);
             return null;
         }
         Material material = materialRepository.findByIdMaterial(id);
-        material.setCode(materialCode);
+//        material.setCode(materialCode);
         material.setName(materialName);
         return materialRepository.save(material);
+    }
+
+    public String findMaxCodeMaterial(){
+        System.out.println("Max code mate : " + materialRepository.findMaxCodeMaterial());
+        return materialRepository.findMaxCodeMaterial();
+    }
+
+    public String taoMaTuDongMaterial(){
+        String lastCode = findMaxCodeMaterial();
+        int nextCode = 1;
+
+        if(lastCode != null && !lastCode.trim().isEmpty()){
+            try {
+                String numberPart = lastCode.substring(2);
+                nextCode = Integer.parseInt(numberPart) + 1;
+            } catch (NumberFormatException e) {
+//            kkk
+            }
+        }
+        return String.format("MA%03d",nextCode);
     }
 }

@@ -65,14 +65,32 @@ public class BrandService {
         return brandRepository.save(brand);
     }
 
-    public Brand update(Integer id, String brandCode,String brandName){
+    public Brand update(Integer id,String brandName){
         if (id == null){
             System.out.println("Do not have brand with id = " + id);
             return null;
         }
         Brand brand = brandRepository.findByIdBrand(id);
-        brand.setCode(brandCode);
         brand.setName(brandName);
         return brandRepository.save(brand);
+    }
+
+    public String findLastCodeBrand(){
+        return brandRepository.findMaxCodeBrand();
+    }
+
+    public String taoMaTuDongBrand(){
+        String lastCode = findLastCodeBrand();
+        int nextCode = 1;
+
+        if(lastCode != null && !lastCode.trim().isEmpty()){
+            try{
+                String numberPart = lastCode.substring(2); // lay so phia sau BR
+                nextCode = Integer.parseInt(numberPart) + 1; // cong them 1
+            }catch (NumberFormatException e){
+//                hihi
+            }
+        }
+        return String.format("BR%03d",nextCode);
     }
 }

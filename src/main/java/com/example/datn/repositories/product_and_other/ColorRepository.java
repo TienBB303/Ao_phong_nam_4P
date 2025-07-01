@@ -19,10 +19,10 @@ public interface ColorRepository extends JpaRepository<Color, Integer> {
     @Query("SELECT c FROM Color c WHERE c.id = :id")
     Color findByIdColor(Integer id);
 
-    @Query("SELECT c FROM Color c WHERE c.name = :name")
+    @Query("SELECT c FROM Color c WHERE LOWER(c.name) = LOWER(:name)")
     Color findByName(String name);
 
-    @Query("SELECT c FROM Color c WHERE c.code = :code")
+    @Query("SELECT c FROM Color c WHERE LOWER(c.code) = LOWER(:code)")
     Color findByCode(String code);
 
     @Query("SELECT c FROM Color c " +
@@ -31,4 +31,7 @@ public interface ColorRepository extends JpaRepository<Color, Integer> {
             "AND (:status IS NULL OR c.status = :status)) " +
             "ORDER BY c.id DESC")
     Page<Color> search(String query, Boolean status, Pageable pageable);
+
+    @Query("SELECT MAX(c.code) FROM Color c WHERE c.code LIKE 'CL%'")
+    String findMaxCodeColor();
 }
