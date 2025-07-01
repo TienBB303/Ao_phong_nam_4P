@@ -59,25 +59,23 @@
         <div class="row">
             <div class="col-md-6 form-group">
                 <label class="form-label">Mã giảm giá *</label>
-                <input type="text" class="form-control" th:field="*{code}" id="code"  placeholder="Để trống sẽ tự sinh mã giảm giá" >
+                <input type="text" class="form-control" th:field="*{code}" placeholder="Để trống sẽ tự sinh mã giảm giá">
             </div>
             <div class="col-md-6 form-group">
                 <label class="form-label">Tên giảm giá *</label>
-                <input type="text" class="form-control" th:field="*{codeName}" id="codeName" >
+                <input type="text" class="form-control" th:field="*{codeName}">
                 <div class="text-danger" th:if="${#fields.hasErrors('codeName')}" th:errors="*{codeName}"></div>
             </div>
 
             <div class="col-md-6 form-group">
                 <label class="form-label">Ngày áp dụng *</label>
-                <input type="datetime-local" class="form-control"
-                       th:field="*{startDatetime}" id="startDatetime" >
+                <input type="datetime-local" class="form-control" th:field="*{startDatetime}">
                 <div class="text-danger" th:if="${#fields.hasErrors('startDatetime')}" th:errors="*{startDatetime}"></div>
             </div>
 
             <div class="col-md-6 form-group">
                 <label class="form-label">Ngày kết thúc *</label>
-                <input type="datetime-local" class="form-control"
-                       th:field="*{endDatetime}" id="endDatetime" >
+                <input type="datetime-local" class="form-control" th:field="*{endDatetime}">
                 <div class="text-danger" th:if="${#fields.hasErrors('endDatetime')}" th:errors="*{endDatetime}"></div>
             </div>
 
@@ -85,47 +83,44 @@
             <div class="col-md-6 form-group">
                 <label class="form-label d-block">Phương thức giảm *</label>
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" th:field="*{discountType}" value="percent"
-                           onclick="handleDiscountTypeChange()">
+                    <input class="form-check-input" type="radio" th:field="*{discountType}" value="percent" onclick="handleDiscountTypeChange()">
                     <label class="form-check-label">Giảm theo phần trăm</label>
                 </div>
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" th:field="*{discountType}" value="amount"
-                           onclick="handleDiscountTypeChange()">
+                    <input class="form-check-input" type="radio" th:field="*{discountType}" value="amount" onclick="handleDiscountTypeChange()">
                     <label class="form-check-label">Giảm theo tiền</label>
                 </div>
                 <div class="text-danger" th:if="${#fields.hasErrors('discountType')}" th:errors="*{discountType}"></div>
             </div>
-
             <div class="col-md-6 form-group">
                 <label class="form-label">Giá trị giảm *</label>
-                <input type="number" class="form-control" id="discountValue" th:field="*{discountValue}" th:id="discountValue" >
+                <input type="number" class="form-control" th:field="*{discountValue}">
                 <div class="text-danger" th:if="${#fields.hasErrors('discountValue')}" th:errors="*{discountValue}"></div>
             </div>
-
             <div class="col-md-6 form-group">
                 <label class="form-label">Số tiền giảm tối đa (đ) *</label>
-                <input type="number" class="form-control" th:field="*{maxDiscount}" id="maxDiscount">
+                <input type="number" class="form-control" th:field="*{maxDiscount}">
                 <div class="text-danger" th:if="${#fields.hasErrors('maxDiscount')}" th:errors="*{maxDiscount}"></div>
             </div>
-
             <div class="col-md-6 form-group">
                 <label class="form-label">Số tiền áp dụng cho đơn tối thiểu từ (đ) *</label>
-                <input type="number" class="form-control" th:field="*{minPurchase}" id="minPurchase" >
+                <input type="number" class="form-control" th:field="*{minPurchase}">
                 <div class="text-danger" th:if="${#fields.hasErrors('minPurchase')}" th:errors="*{minPurchase}"></div>
             </div>
 
             <div class="col-md-6 form-group">
                 <label class="form-label">Số lượng tối đa *</label>
-                <input type="number" class="form-control" th:field="*{usageLimit}" th:id="usageLimit" >
+                <input type="number" class="form-control" th:field="*{usageLimit}">
                 <div class="text-danger" th:if="${#fields.hasErrors('usageLimit')}" th:errors="*{usageLimit}"></div>
             </div>
+
             <div class="col-md-6 form-group">
                 <label class="form-label">Mô tả</label>
-                <input type="text" class="form-control" th:field="*{description}" th:id="description" >
+                <input type="text" class="form-control" th:field="*{description}">
                 <div class="text-danger" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
             </div>
         </div>
+
         <div class="form-buttons">
             <a th:href="@{/admin/discount/view}" class="btn btn-cancel me-2">Hủy</a>
             <button type="submit" class="btn btn-primary">Lưu</button>
