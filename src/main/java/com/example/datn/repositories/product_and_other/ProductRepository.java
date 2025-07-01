@@ -1,6 +1,7 @@
 package com.example.datn.repositories.product_and_other;
 
 import com.example.datn.entities.product_and_other.Product;
+import com.example.datn.entities.product_and_other.ProductDetail;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,4 +28,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 
     @Query("SELECT SUM(p.quantity) FROM ProductDetail p WHERE p.product.id = :productId")
     Integer tongSoLuongTheoSanPham(Integer productId);
+
+    @Query("SELECT pd FROM ProductDetail pd WHERE pd.product.id = :id")
+    List<ProductDetail> findAllProductDetail(Integer id);
 }

@@ -19,7 +19,7 @@ public interface BrandRepository extends JpaRepository<Brand, Integer> {
     @Query("SELECT abc FROM Brand abc WHERE abc.id = :id")
     Brand findByIdBrand(Integer id);
 
-    @Query("SELECT abc FROM Brand abc WHERE abc.name = :name")
+    @Query("SELECT abc FROM Brand abc WHERE LOWER(abc.name) = LOWER(:name)")
     Brand findByName(String name);
 
     @Query("SELECT abc FROM Brand abc WHERE abc.code = :code")
@@ -32,5 +32,6 @@ public interface BrandRepository extends JpaRepository<Brand, Integer> {
             "ORDER BY abc.id DESC")
     Page<Brand> search(String query, Boolean status, Pageable pageable);
 
-
+    @Query("SELECT MAX(b.code) FROM Brand b WHERE b.code LIKE 'BR%'")
+    String findMaxCodeBrand();
 }

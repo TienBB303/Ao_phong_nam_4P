@@ -19,10 +19,10 @@
             </a>
         </div>
         <div>
-            <a class="btn btn-outline-success" href="/admin/product/view-add" style="width: 70px">
+            <a class="btn btn-outline-success" href="/admin/product/view-add" style="width: 70px" title="Thêm sản phẩm mới">
                 <i class="bi bi-plus"></i>
             </a>
-            <a class="btn btn-outline-success" href="/admin/product/view-atribute" style="width: 70px">
+            <a class="btn btn-outline-success" href="/admin/product/view-atribute" style="width: 70px" title="Thuộc tính">
                 <i class="bi bi-play-fill"></i>
             </a>
         </div>
@@ -58,7 +58,7 @@
                 <a class="btn btn-outline-warning" style="width: 70px" title="Sửa">
                     <i class="bi bi-pencil-square"></i>
                 </a>
-                <a class="btn btn-outline-info" style="width: 70px" title="Xem">
+                <a class="btn btn-outline-info" th:href="@{'/admin/product/view-detail/' + ${sp.id}}" style="width: 70px" title="Xem">
                     <i class="bi bi-eye"></i>
                 </a>
             </td>

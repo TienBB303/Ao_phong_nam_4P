@@ -1,19 +1,14 @@
 package com.example.datn.controllers.product_and_other;
 
 import com.example.datn.entities.product_and_other.Category;
-import com.example.datn.entities.product_and_other.Product;
 import com.example.datn.services.product_and_other.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import java.util.List;
-import java.util.Optional;
 
 @Controller
 @RequestMapping("/admin/category")
@@ -31,8 +26,8 @@ public class CategoryController {
         if (page < 0) {
             page = 0;
         }
-        Page<Category> listCategory = categoryService.searchPage(name, status, PageRequest.of(page, size));
-        model.addAttribute("categoryNameSearch", name);
+        Page<Category> listCategory = categoryService.searchPage(name.trim(), status, PageRequest.of(page, size));
+        model.addAttribute("categoryNameSearch", name.trim());
         model.addAttribute("categoryStatusSearch", status != null ? status : "");
         model.addAttribute("listCategory", listCategory);
         model.addAttribute("currentPage", page);
@@ -49,13 +44,13 @@ public class CategoryController {
             redirectAttributes.addFlashAttribute("type", "error");
             return "redirect:/admin/category/hien-thi";
         }
-        Category checkTonTai = categoryService.findByName(categoryName);
+        Category checkTonTai = categoryService.findByName(categoryName.trim());
         if(checkTonTai != null){
             redirectAttributes.addFlashAttribute("alert", "Đã tồn tại kiểu loại");
             redirectAttributes.addFlashAttribute("type", "error");
             return "redirect:/admin/category/hien-thi";
         } else {
-            categoryService.addCategory(categoryName, categoryDescription);
+            categoryService.addCategory(categoryName.trim(), categoryDescription);
             redirectAttributes.addFlashAttribute("alert", "Thêm kiểu loại thành công!");
             redirectAttributes.addFlashAttribute("type", "success");
             return "redirect:/admin/category/hien-thi";
@@ -79,13 +74,13 @@ public class CategoryController {
             redirectAttributes.addFlashAttribute("type","error");
             return "redirect:/admin/category/hien-thi";
         }
-        Category checkTonTai = categoryService.findByName(name);
+        Category checkTonTai = categoryService.findByName(name.trim());
         if(checkTonTai != null && !checkTonTai.getId().equals(id)){
             redirectAttributes.addFlashAttribute("alert", "Đã tồn tại kiểu loại");
             redirectAttributes.addFlashAttribute("type", "error");
             return "redirect:/admin/category/hien-thi";
         } else {
-            categoryService.update(id,name, description);
+            categoryService.update(id,name.trim(), description);
             redirectAttributes.addFlashAttribute("alert", "Cập nhật kiểu loại thành công!");
             redirectAttributes.addFlashAttribute("type", "success");
             return "redirect:/admin/category/hien-thi";

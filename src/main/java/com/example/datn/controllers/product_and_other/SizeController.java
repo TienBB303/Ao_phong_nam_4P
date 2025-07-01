@@ -26,8 +26,8 @@ public class SizeController {
         if (page < 0) {
             page = 0;
         }
-        Page<Size> listSize = sizeService.searchPage(name, status, PageRequest.of(page, size));
-        model.addAttribute("sizeNameSearch", name);
+        Page<Size> listSize = sizeService.searchPage(name.trim(), status, PageRequest.of(page, size));
+        model.addAttribute("sizeNameSearch", name.trim());
         model.addAttribute("sizeStatusSearch", status != null ? status : "");
         model.addAttribute("listSize", listSize);
         model.addAttribute("currentPage", page);
@@ -44,13 +44,13 @@ public class SizeController {
             redirectAttributes.addFlashAttribute("type", "error");
             return "redirect:/admin/size/hien-thi";
         }
-        Size checkTonTai = sizeService.findByCode(sizeCode);
+        Size checkTonTai = sizeService.findByCode(sizeCode.trim());
         if(checkTonTai != null){
-            redirectAttributes.addFlashAttribute("alert", "Đã tồn tại mã kích thước");
+            redirectAttributes.addFlashAttribute("alert", "Đã tồn tại kích thước");
             redirectAttributes.addFlashAttribute("type", "error");
             return "redirect:/admin/size/hien-thi";
         } else {
-            sizeService.addSize(sizeCode, sizeName);
+            sizeService.addSize(sizeCode.trim(), sizeName.trim());
             redirectAttributes.addFlashAttribute("alert", "Thêm kích thước thành công!");
             redirectAttributes.addFlashAttribute("type", "success");
             return "redirect:/admin/size/hien-thi";
@@ -74,13 +74,13 @@ public class SizeController {
             redirectAttributes.addFlashAttribute("type","error");
             return "redirect:/admin/size/hien-thi";
         }
-        Size checkTonTai = sizeService.findByCode(code);
+        Size checkTonTai = sizeService.findByCode(code.trim());
         if(checkTonTai != null && !checkTonTai.getId().equals(id)){
             redirectAttributes.addFlashAttribute("alert", "Đã tồn tại kích thước");
             redirectAttributes.addFlashAttribute("type", "error");
             return "redirect:/admin/size/hien-thi";
         } else {
-            sizeService.update(id,code, name);
+            sizeService.update(id,code.trim(), name.trim());
             redirectAttributes.addFlashAttribute("alert", "Cập nhật kích thước thành công!");
             redirectAttributes.addFlashAttribute("type", "success");
             return "redirect:/admin/size/hien-thi";

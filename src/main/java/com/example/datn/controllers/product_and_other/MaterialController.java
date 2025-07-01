@@ -28,8 +28,8 @@ public class MaterialController {
         if (page < 0) {
             page = 0;
         }
-        Page<Material> listMaterial = materialService.searchPage(name, status, PageRequest.of(page, material));
-        model.addAttribute("materialNameSearch", name);
+        Page<Material> listMaterial = materialService.searchPage(name.trim(), status, PageRequest.of(page, material));
+        model.addAttribute("materialNameSearch", name.trim());
         model.addAttribute("materialStatusSearch", status != null ? status : "");
         model.addAttribute("listMaterial", listMaterial);
         model.addAttribute("currentPage", page);
@@ -38,21 +38,23 @@ public class MaterialController {
     }
 
     @PostMapping("/add")
-    public String add(@RequestParam("materialCode") String materialCode,
+    public String add(
+//            @RequestParam("materialCode") String materialCode,
                       @RequestParam("materialName") String materialName,
                       RedirectAttributes redirectAttributes){
-        if (materialCode == null || materialCode.trim().isEmpty()){
-            redirectAttributes.addFlashAttribute("alert", "Mã không được để trống");
+        if (materialName == null || materialName.trim().isEmpty()){
+            redirectAttributes.addFlashAttribute("alert", "Tên chất liệu không được để trống");
             redirectAttributes.addFlashAttribute("type", "error");
             return "redirect:/admin/material/hien-thi";
         }
-        Material checkTonTai = materialService.findByCode(materialCode);
+        Material checkTonTai = materialService.findByName(materialName.trim());
         if(checkTonTai != null){
-            redirectAttributes.addFlashAttribute("alert", "Đã tồn tại mã chất liệu");
+            redirectAttributes.addFlashAttribute("alert", "Đã tồn tại chất liệu");
             redirectAttributes.addFlashAttribute("type", "error");
             return "redirect:/admin/material/hien-thi";
         } else {
-            materialService.addMaterial(materialCode, materialName);
+            String materialCode = materialService.taoMaTuDongMaterial();
+            materialService.addMaterial(materialCode.trim(), materialName.trim());
             redirectAttributes.addFlashAttribute("alert", "Thêm chất liệu thành công!");
             redirectAttributes.addFlashAttribute("type", "success");
             return "redirect:/admin/material/hien-thi";
@@ -68,21 +70,21 @@ public class MaterialController {
     @PostMapping("/update")
     public String updateMaterial(
             @RequestParam("materialId") Integer id,
-            @RequestParam("materialCodeUpdate") String code,
+//            @RequestParam("materialCodeUpdate") String code,
             @RequestParam("materialNameUpdate") String name,
             RedirectAttributes redirectAttributes){
-        if(code == null || code.trim().isEmpty()){
-            redirectAttributes.addFlashAttribute("alert", "Mã không được để trống");
+        if(name == null || name.trim().isEmpty()){
+            redirectAttributes.addFlashAttribute("alert", "Tên không được để trống");
             redirectAttributes.addFlashAttribute("type","error");
             return "redirect:/admin/material/hien-thi";
         }
-        Material checkTonTai = materialService.findByCode(code);
+        Material checkTonTai = materialService.findByCode(name.trim());
         if(checkTonTai != null && !checkTonTai.getId().equals(id)){
             redirectAttributes.addFlashAttribute("alert", "Đã tồn tại chất liệu");
             redirectAttributes.addFlashAttribute("type", "error");
             return "redirect:/admin/material/hien-thi";
         } else {
-            materialService.update(id,code, name);
+            materialService.update(id, name.trim());
             redirectAttributes.addFlashAttribute("alert", "Cập nhật chất liệu thành công!");
             redirectAttributes.addFlashAttribute("type", "success");
             return "redirect:/admin/material/hien-thi";

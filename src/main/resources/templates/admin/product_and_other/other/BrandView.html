@@ -130,10 +130,10 @@
             </div>
             <div class="modal-body">
                 <form id="addSize" method="post" action="/admin/brand/add">
-                    <div class="mb-3">
-                        <label for="brand_code" class="form-label">Mã</label><span class="text-danger">*</span>
-                        <input type="text" class="form-control" id="brand_code" name="brandCode" placeholder="Nhập mã">
-                    </div>
+<!--                    <div class="mb-3">-->
+<!--                        <label for="brand_code" class="form-label">Mã</label><span class="text-danger">*</span>-->
+<!--                        <input type="text" class="form-control" id="brand_code" name="brandCode" placeholder="Nhập mã">-->
+<!--                    </div>-->
                     <div class="mb-3">
                         <label for="brand_name" class="form-label">Tên</label><span class="text-danger">*</span>
                         <input type="text" class="form-control" id="brand_name" name="brandName" placeholder="Nhập tên hãng">
@@ -162,12 +162,12 @@
             <div class="modal-body">
                 <form id="updateSize" method="post" action="/admin/brand/update">
                     <input type="hidden" id="brand_id" name="brandId">
+<!--                    <div class="mb-3">-->
+<!--                        <label for="brand_code_update" class="form-label">Mã</label><span class="text-danger">*</span>-->
+<!--                        <input type="text" class="form-control" id="brand_code_update" name="brandCodeUpdate" placeholder="Nhập mã hãng">-->
+<!--                    </div>-->
                     <div class="mb-3">
-                        <label for="brand_code_update" class="form-label">Mã</label><span class="text-danger">*</span>
-                        <input type="text" class="form-control" id="brand_code_update" name="brandCodeUpdate" placeholder="Nhập mã hãng">
-                    </div>
-                    <div class="mb-3">
-                        <label for="brand_name_update" class="form-label">Tên</label>
+                        <label for="brand_name_update" class="form-label">Tên</label><span class="text-danger">*</span>
                         <input type="text" class="form-control" id="brand_name_update" name="brandNameUpdate" placeholder="Nhập tên hãng">
                     </div>
                     <div class="modal-footer">

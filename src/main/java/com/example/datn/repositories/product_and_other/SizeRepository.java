@@ -16,13 +16,13 @@ public interface SizeRepository extends JpaRepository<Size, Integer> {
     @Query("SELECT s FROM Size s ORDER BY s.id DESC")
     Page<Size> getAll(Pageable pageable);
 
-    @Query("SELECT s FROM Size s WHERE s.id = :id")
+    @Query("SELECT s FROM Size s WHERE s.id  = :id")
     Size findByIdSize(Integer id);
 
-    @Query("SELECT s FROM Size s WHERE s.name = :name")
+    @Query("SELECT s FROM Size s WHERE LOWER(s.name) = LOWER(:name)")
     Size findByName(String name);
 
-    @Query("SELECT s FROM Size s WHERE s.code = :code")
+    @Query("SELECT s FROM Size s WHERE LOWER(s.code) = LOWER(:code)")
     Size findByCode(String code);
 
     @Query("SELECT s FROM Size s " +

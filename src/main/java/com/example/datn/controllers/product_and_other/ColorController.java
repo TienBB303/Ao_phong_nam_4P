@@ -26,8 +26,8 @@ public class ColorController {
         if (page < 0) {
             page = 0;
         }
-        Page<Color> listColor = colorService.searchPage(name, status, PageRequest.of(page, color));
-        model.addAttribute("colorNameSearch", name);
+        Page<Color> listColor = colorService.searchPage(name.trim(), status, PageRequest.of(page, color));
+        model.addAttribute("colorNameSearch", name.trim());
         model.addAttribute("colorStatusSearch", status != null ? status : "");
         model.addAttribute("listColor", listColor);
         model.addAttribute("currentPage", page);
@@ -36,21 +36,23 @@ public class ColorController {
     }
 
     @PostMapping("/add")
-    public String add(@RequestParam("colorCode") String colorCode,
+    public String add(
+//                      @RequestParam("colorCode") String colorCode,
                       @RequestParam("colorName") String colorName,
                       RedirectAttributes redirectAttributes){
-        if (colorCode == null || colorCode.trim().isEmpty()){
-            redirectAttributes.addFlashAttribute("alert", "Mã không được để trống");
+        if (colorName == null || colorName.trim().isEmpty()){
+            redirectAttributes.addFlashAttribute("alert", "Tên không được để trống");
             redirectAttributes.addFlashAttribute("type", "error");
             return "redirect:/admin/color/hien-thi";
         }
-        Color checkTonTai = colorService.findByCode(colorCode);
+        Color checkTonTai = colorService.findByName(colorName.trim());
         if(checkTonTai != null){
-            redirectAttributes.addFlashAttribute("alert", "Đã tồn tại mã màu sắc");
+            redirectAttributes.addFlashAttribute("alert", "Đã tồn tại màu sắc");
             redirectAttributes.addFlashAttribute("type", "error");
             return "redirect:/admin/color/hien-thi";
         } else {
-            colorService.addColor(colorCode, colorName);
+            String colorCode = colorService.taoMaTuDongColor();
+            colorService.addColor(colorCode.trim(), colorName.trim());
             redirectAttributes.addFlashAttribute("alert", "Thêm màu sắc thành công!");
             redirectAttributes.addFlashAttribute("type", "success");
             return "redirect:/admin/color/hien-thi";
@@ -66,21 +68,21 @@ public class ColorController {
     @PostMapping("/update")
     public String updateColor(
             @RequestParam("colorId") Integer id,
-            @RequestParam("colorCodeUpdate") String code,
+//            @RequestParam("colorCodeUpdate") String code,
             @RequestParam("colorNameUpdate") String name,
             RedirectAttributes redirectAttributes){
-        if(code == null || code.trim().isEmpty()){
-            redirectAttributes.addFlashAttribute("alert", "Mã không được để trống");
-            redirectAttributes.addFlashAttribute("type","error");
+        if (name == null || name.trim().isEmpty()){
+            redirectAttributes.addFlashAttribute("alert", "Tên không được để trống");
+            redirectAttributes.addFlashAttribute("type", "error");
             return "redirect:/admin/color/hien-thi";
         }
-        Color checkTonTai = colorService.findByCode(code);
+        Color checkTonTai = colorService.findByName(name.trim());
         if(checkTonTai != null && !checkTonTai.getId().equals(id)){
             redirectAttributes.addFlashAttribute("alert", "Đã tồn tại màu sắc");
             redirectAttributes.addFlashAttribute("type", "error");
             return "redirect:/admin/color/hien-thi";
         } else {
-            colorService.update(id,code, name);
+            colorService.update(id, name.trim());
             redirectAttributes.addFlashAttribute("alert", "Cập nhật màu sắc thành công!");
             redirectAttributes.addFlashAttribute("type", "success");
             return "redirect:/admin/color/hien-thi";
