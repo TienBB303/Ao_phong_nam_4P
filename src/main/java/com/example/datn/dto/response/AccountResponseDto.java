@@ -24,6 +24,10 @@ public class AccountResponseDto {
 
     private LocalDate birthOfDate;
 
+    private String addressDetail;
+
+    private String phoneNumber;
+
     private String gender;
 
     private String roleName;

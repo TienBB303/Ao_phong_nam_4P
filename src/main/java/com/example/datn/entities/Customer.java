@@ -25,7 +25,7 @@ public class Customer {
     private Boolean isActive = true;
 
 
-    @OneToOne(mappedBy = "customer")
-    private Account account;
+//    @OneToOne(mappedBy = "customer")
+//    private Account account;
 
 }
