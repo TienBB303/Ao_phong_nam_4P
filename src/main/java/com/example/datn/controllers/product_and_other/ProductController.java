@@ -139,6 +139,7 @@ public class ProductController {
                 model.addAttribute("type", "error");
                 return "admin/product_and_other/product/ProductViewAdd";
             }
+
         }
 
         Product product = new Product();
@@ -171,6 +172,25 @@ public class ProductController {
         }
 
         return "redirect:/admin/product/hien-thi";
+    }
+
+    @GetMapping("/view-detail/{id}")
+    public String viewDetailProduct(@PathVariable("id") Integer id, Model model){
+        Product product = productService.findByIdProduct(id);
+        List<ProductDetail> listDetail = productService.findAllProductDetailByIdProduct(id);
+
+        ProductForm form = new ProductForm();
+        form.setCode(product.getCode());
+        form.setName(product.getName());
+        form.setCategoryId(product.getCategory().getId());
+        form.setBrandId(product.getBrand().getId());
+        form.setMaterialId(product.getMaterial().getId());
+        form.setDescription(product.getDescription());
+
+        model.addAttribute("productForm", form);
+        model.addAttribute("listProductDetail", listDetail);
+
+        return "admin/product_and_other/product/ProductDetailView";
     }
 
     @PostMapping("/update/{id}")

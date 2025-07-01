@@ -1,0 +1,79 @@
+<nav class="pc-sidebar" th:fragment="sidebar">
+  <div class="navbar-wrapper">
+    <div class="m-header">
+      <a th:href="@{/admin}" class="b-brand text-primary">
+        <img th:src="@{/assets/images/logo-dark.svg}" alt="logo">
+      </a>
+    </div>
+    <div class="navbar-content">
+      <ul class="pc-navbar">
+        <li class="pc-item">
+          <a th:href="@{/admin}" class="pc-link">
+            <span class="pc-micon"><i class="ti ti-dashboard"></i></span>
+            <span class="pc-mtext">Dashboard</span>
+          </a>
+        </li>
+        <li class="pc-item">
+          <a href="#" class="pc-link">
+            <span class="pc-micon"><i class="ti ti-shopping-cart"></i></span>
+            <span class="pc-mtext">Bán hàng tại quầy</span>
+          </a>
+        </li>
+        <li class="pc-item">
+          <a href="#" class="pc-link">
+            <span class="pc-micon"><i class="ti ti-vocabulary"></i></span>
+            <span class="pc-mtext">Quản lý hóa đơn</span>
+          </a>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon"><i class="ti ti-shirt"></i></span>
+            <span class="pc-mtext">Quản lý sản phẩm</span>
+            <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+          </a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="#!">Sản phẩm</a></li>
+            <li class="pc-item pc-hasmenu">
+              <a href="#!" class="pc-link">Thuộc tính<span class="pc-arrow"><i data-feather="chevron-right"></i></span></a>
+              <ul class="pc-submenu">
+                <li class="pc-item"><a class="pc-link" href="#!">Màu sắc</a></li>
+                <li class="pc-item"><a class="pc-link" href="#!">Danh mục</a></li>
+                <li class="pc-item"><a class="pc-link" href="#!">Hãng</a></li>
+                <li class="pc-item"><a class="pc-link" href="#!">Chất liệu</a></li>
+                <li class="pc-item"><a class="pc-link" href="#!">Kích thước</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li class="pc-item">
+          <a th:href="@{/admin/discount/view}" class="pc-link">
+            <span class="pc-micon"><i class="ti ti-discount-2"></i></span>
+            <span class="pc-mtext">Quản lý khuyến mại</span>
+          </a>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon"><i class="ti ti-users"></i></span>
+            <span class="pc-mtext">Quản lý tài khoản</span>
+            <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+          </a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="#!">Nhân viên</a></li>
+            <li class="pc-item"><a class="pc-link" href="#!">Khách hàng</a></li>
+          </ul>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon"><i class="ti ti-antenna-bars-5"></i></span>
+            <span class="pc-mtext">Thống kê</span>
+            <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+          </a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="#!">Doanh thu</a></li>
+            <li class="pc-item"><a class="pc-link" href="#!">Sản phẩm</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>

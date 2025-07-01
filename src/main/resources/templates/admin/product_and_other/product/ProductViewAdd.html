@@ -10,7 +10,13 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <style>
+        #variant-list {
+            display: none;
+        }
+    </style>
 </head>
 <body>
 
@@ -112,12 +118,66 @@
                     </div>
                 </div>
                 <hr>
+                <!-- Chọn nhiều màu và kích cỡ -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="multi_color" class="form-label">Chọn nhiều màu sắc</label>
+                        <select id="multi_color" class="form-select" multiple>
+                            <option th:each="color : ${listColor}" th:value="${color.id}" th:text="${color.name}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="multi_size" class="form-label">Chọn nhiều kích cỡ</label>
+                        <select id="multi_size" class="form-select" multiple>
+                            <option th:each="size : ${listSize}" th:value="${size.id}" th:text="${size.name}"></option>
+                        </select>
+                    </div>
+                </div>
+
+                <hr>
+                <!-- Template mẫu, không dùng Thymeleaf ở đây -->
+                <div class="variant-item row mb-3 d-none" id="variant-template">
+                    <!-- Màu sắc -->
+                    <div class="col-md-2">
+                        <label>Màu sắc</label>
+                        <select class="form-control" name="variants[0].colorId" disabled>
+                            <option th:each="color : ${listColor}" th:value="${color.id}" th:text="${color.name}"></option>
+                        </select>
+                    </div>
+
+                    <!-- Kích cỡ -->
+                    <div class="col-md-2">
+                        <label>Kích cỡ</label>
+                        <select class="form-control" name="variants[0].sizeId" disabled>
+                            <option th:each="size : ${listSize}" th:value="${size.id}" th:text="${size.name}"></option>
+                        </select>
+                    </div>
+
+                    <!-- Số lượng -->
+                    <div class="col-md-2">
+                        <label>Số lượng</label>
+                        <input type="number" class="form-control" name="variants[0].quantity" value="" min="0">
+                    </div>
+
+                    <!-- Giá tiền -->
+                    <div class="col-md-2">
+                        <label>Giá tiền</label>
+                        <input type="number" class="form-control" name="variants[0].price" value="" min="0">
+                    </div>
+
+                    <!-- Nút Xóa -->
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="button" class="btn btn-danger remove-variant">Xóa</button>
+                    </div>
+                </div>
+
                 <div id="variant-list">
                     <div th:each="variant, stat : ${productForm.variants}" class="variant-item row mb-3">
+
                         <!-- Màu sắc -->
                         <div class="col-md-2">
                             <label>Màu sắc</label>
-                            <select class="form-select" th:name="'variants[' + ${stat.index} + '].colorId'">
+                            <select class="form-control" th:name="'variants[' + ${stat.index} + '].colorId'" disabled>
                                 <option th:each="color : ${listColor}"
                                         th:value="${color.id}"
                                         th:text="${color.name}"
@@ -129,7 +189,7 @@
                         <!-- Kích cỡ -->
                         <div class="col-md-2">
                             <label>Kích cỡ</label>
-                            <select class="form-select" th:name="'variants[' + ${stat.index} + '].sizeId'">
+                            <select class="form-control" th:name="'variants[' + ${stat.index} + '].sizeId'" disabled>
                                 <option th:each="size : ${listSize}"
                                         th:value="${size.id}"
                                         th:text="${size.name}"
@@ -186,6 +246,13 @@
     });
 </script>
 <script>
+    // Khởi tạo select2
+    $(document).ready(function () {
+        $('#multi_color').select2({ placeholder: 'Chọn màu sắc' });
+        $('#multi_size').select2({ placeholder: 'Chọn kích cỡ' });
+    });
+
+    // Cập nhật lại index biến thể
     function updateVariantIndexes() {
         $('#variant-list .variant-item').each(function (i) {
             $(this).find('select, input').each(function () {
@@ -194,32 +261,86 @@
                 $(this).attr('name', newName);
             });
         });
-        index = $('#variant-list .variant-item').length; // cập nhật lại index
+        index = $('#variant-list .variant-item').length;
     }
+    let firstClick = true;
 
     $('#add-variant-btn').on('click', function () {
-        const newItem = $('.variant-item:first').clone();
-        // newItem.find('select, input').each(function () {
-        //     $(this).val(''); // Xóa dữ liệu của các ô input, select
-        // });
-        newItem.find('input').val(''); // Xóa dữ liệu của các ô input
-        newItem.find('select').each(function () {
-            $(this).prop('selectedIndex', 0); // chọn option đầu tiên
+        $('#variant-list').show();
+        const selectedColors = $('#multi_color').val();
+        const selectedSizes = $('#multi_size').val();
+
+        if (!selectedColors || !selectedSizes) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Vui lòng chọn ít nhất 1 màu và 1 kích cỡ!',
+                toast: true,
+                position: 'top-end',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            return;
+        }
+
+        // Xoá biến thể đang render từ Thymeleaf nếu là lần đầu
+        if (firstClick) {
+            $('#variant-list').empty();
+            firstClick = false;
+        }
+
+        let countAdded = 0;
+
+        selectedColors.forEach(function (colorId) {
+            selectedSizes.forEach(function (sizeId) {
+                let isDuplicate = false;
+
+                $('#variant-list .variant-item').each(function () {
+                    const currentColor = $(this).find('select[name$=".colorId"]').val();
+                    const currentSize = $(this).find('select[name$=".sizeId"]').val();
+                    if (currentColor === colorId && currentSize === sizeId) {
+                        isDuplicate = true;
+                        return false;
+                    }
+                });
+
+                if (!isDuplicate) {
+                    const newItem = $('#variant-template').clone().removeAttr('id').removeClass('d-none');
+
+                    newItem.find('select[name$=".colorId"]').val(colorId);
+                    newItem.find('select[name$=".sizeId"]').val(sizeId);
+
+                    newItem.find('input[type=number]').val('');
+
+                    $('#variant-list').append(newItem);
+                    countAdded++;
+                }
+            });
         });
-        $('#variant-list').append(newItem);
+
         updateVariantIndexes();
+
+        if (countAdded === 0) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Tất cả biến thể bạn chọn đã tồn tại!',
+                toast: true,
+                position: 'top-end',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
     });
 
+
+
+    // Nút Xóa biến thể
     $(document).on('click', '.remove-variant', function () {
         if ($('.variant-item').length > 1) {
             $(this).closest('.variant-item').remove();
             updateVariantIndexes();
         }
     });
-
 </script>
 
-<!-- Script -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

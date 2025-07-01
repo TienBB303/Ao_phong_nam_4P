@@ -35,6 +35,13 @@ public class ProductService {
         return productRepository.getAll(pageable);
     }
 
+    public Product findByIdProduct(Integer id){
+        return productRepository.findByIdProduct(id);
+    }
+
+    public List<ProductDetail> findAllProductDetailByIdProduct(Integer id){
+        return productRepository.findAllProductDetail(id);
+    }
     public Product detail(Integer id){
         Product product = productRepository.findByIdProduct(id);
         return product;

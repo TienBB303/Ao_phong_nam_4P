@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html>
 <head>
     <meta charset="UTF-8">
 
@@ -137,7 +137,7 @@
         <div class="navbar-content">
             <ul class="pc-navbar">
                 <li class="pc-item">
-                    <a href="/admin" class="pc-link">
+                    <a href="/admin/dashboard" class="pc-link">
                         <span class="pc-micon"><i class="ti ti-dashboard"></i></span>
                         <span class="pc-mtext">Dashboard</span>
                     </a>
@@ -225,7 +225,7 @@
                                 <h5 class="m-b-10">Quản lý khuyến mại</h5>
                             </div>
                             <ul class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+                                <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
                                 <li class="breadcrumb-item" aria-current="page">Quản lý khuyến mại</li>
                             </ul>
                         </div>
@@ -245,27 +245,27 @@
                     <div class="row gy-3">
                         <div class="col-md-3">
                             <label for="code" class="form-label">Mã giảm giá</label>
-                            <input type="text" name="code" id="code" class="form-control" placeholder="Nhập mã..." th:value="${code}">
+                            <input type="text" name="code" id="code" class="form-control" placeholder="Nhập mã..." value="">
                         </div>
 
                         <div class="col-md-3">
                             <label for="start" class="form-label">Ngày áp dụng</label>
-                            <input type="date" name="start" id="start" class="form-control"  th:value="${start != null} ? ${#temporals.format(start, 'yyyy-MM-dd')} : ''">
+                            <input type="date" name="start" id="start" class="form-control" value="">
                         </div>
 
                         <div class="col-md-3">
                             <label for="end" class="form-label">Ngày kết thúc</label>
-                            <input type="date" name="end" id="end" class="form-control" th:value="${end != null} ? ${#temporals.format(end, 'yyyy-MM-dd')} : ''">
+                            <input type="date" name="end" id="end" class="form-control" value="">
                         </div>
 
                         <div class="col-md-3">
                             <label for="status" class="form-label">Trạng thái</label>
                             <select name="status" id="status" class="form-select">
                                 <option value="">-- Tất cả --</option>
-                                <option value="1" th:selected="${status == 1}">Đang diễn ra</option>
-                                <option value="2" th:selected="${status == 2}">Sắp diễn ra</option>
-                                <option value="3" th:selected="${status == 3}">Đã kết thúc</option>
-                                <option value="4" th:selected="${status == 4}">Đã đóng</option>
+                                <option value="1">Đang diễn ra</option>
+                                <option value="2">Sắp diễn ra</option>
+                                <option value="3">Đã kết thúc</option>
+                                <option value="4">Đã đóng</option>
                             </select>
                         </div>
 
@@ -273,32 +273,20 @@
                             <label for="type" class="form-label">Loại giảm giá</label>
                             <select name="type" id="type" class="form-select">
                                 <option value="">-- Tất cả --</option>
-                                <option value="percent" th:selected="${type == 'percent'}">Phần trăm</option>
-                                <option value="amount" th:selected="${type == 'amount'}">Số tiền</option>
+                                <option value="percent">Phần trăm</option>
+                                <option value="amount">Số tiền</option>
                             </select>
                         </div>
 
                         <div class="col-md-3 d-flex align-items-end gap-2">
                             <button type="button" id="search-btn" class="btn btn-primary w-100">🔍 Tìm kiếm</button>
-                            <a th:href="@{/admin/discount/view}" class="btn btn-outline-secondary w-100">🧹 Hủy</a>
+                            <a href="/admin/discount/view" class="btn btn-outline-secondary w-100">🧹 Hủy</a>
                         </div>
                     </div>
                 </form>
 
 
-                <a th:href="@{/admin/discount/create}" class="btn btn-primary">➕ Thêm</a>
-                <!-- Hiển thị thông báo thành công -->
-                <div th:if="${success}" class="alert alert-dismissible fade show" role="alert"
-                     style="background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc;">
-                    <span th:text="${success}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-
-                <!-- Hiển thị thông báo lỗi -->
-                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <span th:text="${error}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
+                <a href="/admin/discount/create" class="btn btn-primary">➕ Thêm</a>
                 <table class="table table-hover table-bordered align-middle text-center">
                     <thead>
                     <tr>
@@ -315,36 +303,95 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="d, iterStat : ${list}">
-                        <td th:text="${iterStat.index + 1}"></td>
-                        <td th:text="${d.code}"></td>
-                        <td th:text="${d.codeName}"></td>
-                        <td th:text="${#temporals.format(d.startDatetime, 'dd/MM/yyyy HH:mm')}"></td>
-                        <td th:text="${#temporals.format(d.endDatetime, 'dd/MM/yyyy HH:mm')}"></td>
-                        <td th:text="${d.discountType == 'percent' ? 'Phần trăm' : 'Số tiền'}"></td>
+                    <tr>
+                        <td>1</td>
+                        <td>HELLOWORD123</td>
+                        <td>Chào mừng Thế giới</td>
+                        <td>20/06/2025 10:18</td>
+                        <td>30/06/2025 10:18</td>
+                        <td>Phần trăm</td>
                         <td>
-                            <span th:text="${d.discountType == 'percent'} ? ${d.discountValue.intValue() + '%'} : ${#numbers.formatDecimal(d.discountValue, 0, 'POINT', 0, 'COMMA')} + '₫'"></span>
+                            <span>250000%</span>
                         </td>
-                        <td th:text="${d.usageLimit}"></td>
+                        <td>30</td>
                         <td>
-    <span th:switch="${d.displayStatus}">
-        <span th:case="'Đã kết thúc'" class="badge badge-expired">Đã kết thúc</span>
-        <span th:case="'Sắp diễn ra'" class="badge badge-upcoming">Sắp diễn ra</span>
-        <span th:case="'Đã đóng'" class="badge bg-secondary">Đã đóng</span>
-        <span th:case="'Đang diễn ra'" class="badge badge-active">Đang diễn ra</span>
-    </span>            </td>
+                            <span>
+                                <span class="badge badge-expired">Đã kết thúc</span>
 
+
+
+                            </span>
+                        </td>
                         <td>
 
-                            <a th:href="@{'/admin/discount/toggle-status/' + ${d.id}}"
+                            <a href="/admin/discount/toggle-status/3"
                                onclick="return confirm('Bạn có chắc chắn muốn đổi trạng thái?')">
                                 <button type="button" class="btn-icon text-danger">🔄</button>
                             </a>
-                            <a th:href="@{'/admin/discount/detail/' + ${d.id}}">
-                                <button class="btn-icon text-primary">👁️</button>
+
+                            <a href="/admin/discount/edit/3">
+                                <button class="btn-icon text-dark">✏️</button>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>TET30</td>
+                        <td>Giảm Tết 30k</td>
+                        <td>22/06/2025 00:00</td>
+                        <td>31/12/2023 00:00</td>
+                        <td>Số tiền</td>
+                        <td>
+                            <span>30.000₫</span>
+                        </td>
+                        <td>30</td>
+                        <td>
+                            <span>
+                                <span class="badge badge-expired">Đã kết thúc</span>
+
+
+
+                            </span>
+                        </td>
+                        <td>
+
+                            <a href="/admin/discount/toggle-status/2"
+                               onclick="return confirm('Bạn có chắc chắn muốn đổi trạng thái?')">
+                                <button type="button" class="btn-icon text-danger">🔄</button>
                             </a>
 
-                            <a th:href="@{'/admin/discount/edit/' + ${d.id}}">
+                            <a href="/admin/discount/edit/2">
+                                <button class="btn-icon text-dark">✏️</button>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>SALE10</td>
+                        <td>Giảm 10%</td>
+                        <td>01/11/2023 00:00</td>
+                        <td>31/12/2023 00:00</td>
+                        <td>Số tiền</td>
+                        <td>
+                            <span>10₫</span>
+                        </td>
+                        <td>100</td>
+                        <td>
+                            <span>
+                                <span class="badge badge-expired">Đã kết thúc</span>
+
+
+
+                            </span>
+                        </td>
+                        <td>
+
+                            <a href="/admin/discount/toggle-status/1"
+                               onclick="return confirm('Bạn có chắc chắn muốn đổi trạng thái?')">
+                                <button type="button" class="btn-icon text-danger">🔄</button>
+                            </a>
+
+                            <a href="/admin/discount/edit/1">
                                 <button class="btn-icon text-dark">✏️</button>
                             </a>
                         </td>
@@ -355,27 +402,21 @@
                     <nav>
                         <ul class="pagination">
                             <!-- Nút Previous -->
-                            <li class="page-item" th:if="${currentPage > 0}">
-                                <a class="page-link" href="javascript:void(0)" th:onclick="'changePage(' + (${currentPage - 1}) + ')'">«</a>
-                            </li>
+
 
                             <!-- Các nút số trang -->
-                            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                                th:classappend="${i == currentPage} ? 'active'">
-                                <a class="page-link" href="javascript:void(0)" th:text="${i + 1}" th:onclick="'changePage(' + ${i} + ')'"></a>
+                            <li class="page-item active">
+                                <a class="page-link" href="javascript:void(0)" onclick="changePage(0)">1</a>
                             </li>
 
                             <!-- Nút Next -->
-                            <li class="page-item" th:if="${currentPage < totalPages - 1}">
-                                <a class="page-link" href="javascript:void(0)" th:onclick="'changePage(' + (${currentPage + 1}) + ')'">»</a>
-                            </li>
+
                         </ul>
                     </nav>
                 </div>
-            </div>
                 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
             </div>
-    </div>
+
             <script>
                 function changePage(page) {
                     const params = new URLSearchParams(window.location.search);
@@ -394,8 +435,7 @@
                             params.set("code", document.querySelector("input[name='code']").value);
                             params.set("start", document.querySelector("input[name='start']").value);
                             params.set("end", document.querySelector("input[name='end']").value);
-                            const statusValue = document.querySelector("select[name='status']").value;
-                            params.set("status", statusValue === "" ? "" : parseInt(statusValue));
+                            params.set("status", document.querySelector("select[name='status']").value);
                             params.set("type", document.querySelector("select[name='type']").value);
 
                             window.location.search = params.toString();

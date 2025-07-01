@@ -19,7 +19,7 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
     @Query("SELECT c FROM Category c WHERE c.id = :id")
     Category findByIdCategory(Integer id);
 
-    @Query("SELECT c FROM Category c WHERE c.name = :name")
+    @Query("SELECT c FROM Category c WHERE LOWER(c.name) = LOWER(:name)")
     Category findByName(String name);
 
     @Query("SELECT c FROM Category c " +
@@ -27,4 +27,5 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
             "AND (:status IS NULL OR c.status = :status)) " +
             "ORDER BY c.id DESC")
     Page<Category> search(String name, Boolean status, Pageable pageable);
+
 }
