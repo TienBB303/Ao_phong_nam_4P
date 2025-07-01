@@ -53,6 +53,23 @@ public class DiscountController {
                 status,
                 pageable
         );
+        LocalDateTime now = LocalDateTime.now();
+        for (Discount d : pageDiscounts.getContent()) {
+            int newStatus;
+            if (d.getEndDatetime().isBefore(now)) {
+                newStatus = 3;
+            } else if (d.getStartDatetime().isAfter(now)) {
+                newStatus = 2;
+            } else {
+                newStatus = (d.getStatus() != null && d.getStatus() == 4) ? 4 : 1;
+            }
+
+            if (d.getStatus() == null || d.getStatus() != newStatus) {
+                d.setStatus(newStatus);
+                discountRepo.save(d);
+            }
+        }
+
 
         // 4. Đẩy dữ liệu ra view
         model.addAttribute("list", pageDiscounts.getContent());
@@ -134,9 +151,13 @@ public class DiscountController {
         if (discount != null) {
             LocalDateTime now = LocalDateTime.now();
 
-            // Nếu đã kết thúc thì không cho thay đổi trạng thái
+
             if (discount.getEndDatetime() != null && discount.getEndDatetime().isBefore(now)) {
                 redirectAttributes.addFlashAttribute("error", "Mã giảm giá đã kết thúc, không thể thay đổi trạng thái.");
+                return "redirect:/admin/discount/view";
+            }
+            if (discount.getStatus() != null && discount.getStatus() == 2) {
+                redirectAttributes.addFlashAttribute("error", "Mã giảm giá sắp diễn ra, không thể thay đổi trạng thái.");
                 return "redirect:/admin/discount/view";
             }
 
