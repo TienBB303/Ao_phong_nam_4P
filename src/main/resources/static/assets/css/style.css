@@ -4856,6 +4856,25 @@ textarea.form-control-lg {
   position: relative;
   top: -1px;
 }
+.badge-expired {
+    background-color: #dc3545; /* đỏ */
+    color: #fff;
+}
+
+.badge-upcoming {
+    background-color: #0d6efd; /* xanh dương */
+    color: #fff;
+}
+
+.badge-active {
+    background-color: #198754; /* xanh lá */
+    color: #fff;
+}
+
+.badge-closed {
+    background-color: #6c757d; /* xám */
+    color: #fff;
+}
 
 .alert {
   --bs-alert-bg: transparent;

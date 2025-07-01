@@ -1,21 +1,18 @@
 package com.example.datn.controllers;
 
 import com.example.datn.entities.Discount;
-import com.example.datn.repositories.DiscountRepository;
+import com.example.datn.services.DiscountService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+
 
 
 
@@ -23,60 +20,24 @@ import java.util.List;
 @RequestMapping("/admin/discount")
 public class DiscountController {
     @Autowired
-    DiscountRepository discountRepo;
-
+    private DiscountService discountService;
 
     @GetMapping("/view")
     public String viewDiscounts(
             @RequestParam(defaultValue = "") String code,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end,
+            @RequestParam(required = false) LocalDate start,
+            @RequestParam(required = false) LocalDate end,
             @RequestParam(defaultValue = "") String type,
             @RequestParam(required = false) Integer status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
             Model model
     ) {
-        // 1. Chuyển đổi ngày
-        LocalDateTime startDateTime = (start != null) ? start.atStartOfDay() : null;
-        LocalDateTime endDateTime = (end != null) ? end.atTime(23, 59, 59) : null;
+        Page<Discount> pageDiscounts = discountService.getFilteredDiscounts(code, start, end, type, status, page, size);
 
-        // 2. Phân trang
-        Pageable pageable = PageRequest.of(page, size);
-
-        // 3. Lọc dữ liệu từ DB (không filter thủ công nữa)
-        Page<Discount> pageDiscounts = discountRepo.filterDiscounts(
-                code.isEmpty() ? null : code,
-                startDateTime,
-                endDateTime,
-                type.isEmpty() ? null : type,
-                status,
-                pageable
-        );
-        LocalDateTime now = LocalDateTime.now();
-        for (Discount d : pageDiscounts.getContent()) {
-            int newStatus;
-            if (d.getEndDatetime().isBefore(now)) {
-                newStatus = 3;
-            } else if (d.getStartDatetime().isAfter(now)) {
-                newStatus = 2;
-            } else {
-                newStatus = (d.getStatus() != null && d.getStatus() == 4) ? 4 : 1;
-            }
-
-            if (d.getStatus() == null || d.getStatus() != newStatus) {
-                d.setStatus(newStatus);
-                discountRepo.save(d);
-            }
-        }
-
-
-        // 4. Đẩy dữ liệu ra view
         model.addAttribute("list", pageDiscounts.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", pageDiscounts.getTotalPages());
-
-        // 5. Truyền lại dữ liệu lọc để giữ lại input
         model.addAttribute("code", code);
         model.addAttribute("start", start);
         model.addAttribute("end", end);
@@ -86,89 +47,70 @@ public class DiscountController {
         return "admin/discountList";
     }
 
-
     @GetMapping("/create")
     public String createForm(Model model) {
-        model.addAttribute("discount", new Discount());
+        if (!model.containsAttribute("discount")) {
+            model.addAttribute("discount", new Discount());
+        }
         return "admin/discountCreate";
     }
-
-
     @PostMapping("/create")
-    public String create(@ModelAttribute("discount") Discount discount, RedirectAttributes redirectAttributes) {
-        LocalDateTime now = LocalDateTime.now();
-
-        // Set status dựa trên ngày bắt đầu/kết thúc
-        if (discount.getEndDatetime().isBefore(now)) {
-            discount.setStatus(3); // Đã kết thúc
-        } else if (discount.getStartDatetime().isAfter(now)) {
-            discount.setStatus(2); // Sắp diễn ra
-        } else {
-            discount.setStatus(1); // Đang diễn ra
+    public String create(@ModelAttribute("discount") @Valid Discount discount,
+                         BindingResult result, Model model,
+                         RedirectAttributes redirectAttributes) {
+        if (result.hasErrors()) {
+            return "admin/discountCreate";
         }
-        redirectAttributes.addFlashAttribute("success", "Thêm mã giảm giá thành công!");
-        discountRepo.save(discount);
-        return "redirect:/admin/discount/view";
+        try {
+            discountService.saveDiscount(discount);
+            redirectAttributes.addFlashAttribute("success", "Thêm mã giảm giá thành công!");
+            return "redirect:/admin/discount/view";
+        } catch (RuntimeException e) {
+            model.addAttribute("discount", discount);
+            model.addAttribute("error", e.getMessage());
+            return "admin/discountCreate";
+        }
     }
-
-
     @GetMapping("/edit/{id}")
     public String editForm(@PathVariable int id, Model model) {
-        Discount discount = discountRepo.findById(id).orElse(null);
-        model.addAttribute("discount", discount);
+        discountService.getDiscountById(id).ifPresent(d -> model.addAttribute("discount", d));
         return "admin/discountEdit";
     }
 
-
     @PostMapping("/update/{id}")
-    public String update(@PathVariable int id, @ModelAttribute("discount") Discount discount,RedirectAttributes redirectAttributes) {
-        discount.setId(id);
-
-        LocalDateTime now = LocalDateTime.now();
-        if (discount.getEndDatetime().isBefore(now)) {
-            discount.setStatus(3);
-        } else if (discount.getStartDatetime().isAfter(now)) {
-            discount.setStatus(2);
-        } else {
-            discount.setStatus(1);
+    public String update(@PathVariable int id,
+                         @Valid @ModelAttribute("discount") Discount discount,
+                         BindingResult result,
+                         Model model,
+                         RedirectAttributes redirectAttributes) {
+        if (result.hasErrors()) {
+            return "admin/discountEdit";
         }
-        redirectAttributes.addFlashAttribute("success", "Cập nhật mã giảm giá thành công!");
-        discountRepo.save(discount);
-        return "redirect:/admin/discount/view";
+
+        discount.setId(id);
+        try {
+            discountService.saveDiscount(discount);
+            redirectAttributes.addFlashAttribute("success", "Cập nhật mã giảm giá thành công!");
+            return "redirect:/admin/discount/view";
+        } catch (RuntimeException e) {
+            model.addAttribute("discount", discount);
+            model.addAttribute("error", e.getMessage());
+            return "admin/discountEdit";
+        }
     }
-
-
 
     @GetMapping("/detail/{id}")
     public String detail(@PathVariable int id, Model model) {
-        Discount discount = discountRepo.findById(id).orElse(null);
-        model.addAttribute("discount", discount);
+        discountService.getDiscountById(id).ifPresent(d -> model.addAttribute("discount", d));
         return "admin/discountDetail";
     }
+
     @GetMapping("/toggle-status/{id}")
     public String toggleStatus(@PathVariable int id, RedirectAttributes redirectAttributes) {
-        Discount discount = discountRepo.findById(id).orElse(null);
-        if (discount != null) {
-            LocalDateTime now = LocalDateTime.now();
-
-
-            if (discount.getEndDatetime() != null && discount.getEndDatetime().isBefore(now)) {
-                redirectAttributes.addFlashAttribute("error", "Mã giảm giá đã kết thúc, không thể thay đổi trạng thái.");
-                return "redirect:/admin/discount/view";
-            }
-            if (discount.getStatus() != null && discount.getStatus() == 2) {
-                redirectAttributes.addFlashAttribute("error", "Mã giảm giá sắp diễn ra, không thể thay đổi trạng thái.");
-                return "redirect:/admin/discount/view";
-            }
-
-            if (discount.getStatus() != null && discount.getStatus() == 4) {
-                discount.setStatus(1); // Mở lại
-            } else {
-                discount.setStatus(4); // Đóng
-            }
-            discountRepo.save(discount);
+        String errorMsg = discountService.toggleStatus(id);
+        if (errorMsg != null) {
+            redirectAttributes.addFlashAttribute("error", errorMsg);
         }
         return "redirect:/admin/discount/view";
     }
-
 }
