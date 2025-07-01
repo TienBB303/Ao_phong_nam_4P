@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/admin-layout}">
 <head>
     <meta charset="UTF-8">
     <title>Thông tin mã giảm giá</title>
@@ -16,7 +18,7 @@
             padding: 40px;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
             max-width: 900px;
-            margin: 40px auto;
+            margin: 100px auto 40px auto;
         }
 
         .form-title {
@@ -49,33 +51,45 @@
         .form-group {
             margin-bottom: 20px;
         }
+        .content-wrapper {
+            padding-top: 80px;
+        }
     </style>
 </head>
 <body>
+<section layout:fragment="content" class="content-wrapper">
 <div class="container discount-form-container">
-    <h2 class="form-title">Thông tin mã giảm giá</h2>
+    <h2 class="form-title">Thêm mã giảm giá</h2>
+    <!-- Hiển thị thông báo lỗi -->
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 
-    <form th:action="@{/admin/discount/create}" th:object="${discount}" method="post">
+    <form th:action="@{/admin/discount/create}" th:object="${discount}" method="post" >
         <div class="row">
             <div class="col-md-6 form-group">
                 <label class="form-label">Mã giảm giá *</label>
-                <input type="text" class="form-control" th:field="*{code}" required>
+                <input type="text" class="form-control" th:field="*{code}" id="code"  placeholder="Để trống sẽ tự sinh mã giảm giá" >
             </div>
             <div class="col-md-6 form-group">
                 <label class="form-label">Tên giảm giá *</label>
-                <input type="text" class="form-control" th:field="*{codeName}" required>
+                <input type="text" class="form-control" th:field="*{codeName}" id="codeName" >
+                <div class="text-danger" th:if="${#fields.hasErrors('codeName')}" th:errors="*{codeName}"></div>
             </div>
 
             <div class="col-md-6 form-group">
                 <label class="form-label">Ngày áp dụng *</label>
                 <input type="datetime-local" class="form-control"
-                       th:field="*{startDatetime}" required>
+                       th:field="*{startDatetime}" id="startDatetime" >
+                <div class="text-danger" th:if="${#fields.hasErrors('startDatetime')}" th:errors="*{startDatetime}"></div>
             </div>
 
             <div class="col-md-6 form-group">
                 <label class="form-label">Ngày kết thúc *</label>
                 <input type="datetime-local" class="form-control"
-                       th:field="*{endDatetime}" required>
+                       th:field="*{endDatetime}" id="endDatetime" >
+                <div class="text-danger" th:if="${#fields.hasErrors('endDatetime')}" th:errors="*{endDatetime}"></div>
             </div>
 
 
@@ -91,26 +105,36 @@
                            onclick="handleDiscountTypeChange()">
                     <label class="form-check-label">Giảm theo tiền</label>
                 </div>
+                <div class="text-danger" th:if="${#fields.hasErrors('discountType')}" th:errors="*{discountType}"></div>
             </div>
 
             <div class="col-md-6 form-group">
                 <label class="form-label">Giá trị giảm *</label>
-                <input type="number" class="form-control" id="discountValue" th:field="*{discountValue}" required>
+                <input type="number" class="form-control" id="discountValue" th:field="*{discountValue}" th:id="discountValue" >
+                <div class="text-danger" th:if="${#fields.hasErrors('discountValue')}" th:errors="*{discountValue}"></div>
             </div>
 
             <div class="col-md-6 form-group">
                 <label class="form-label">Số tiền giảm tối đa (đ) *</label>
-                <input type="number" class="form-control" th:field="*{maxDiscount}" id="maxDiscountInput">
+                <input type="number" class="form-control" th:field="*{maxDiscount}" id="maxDiscount">
+                <div class="text-danger" th:if="${#fields.hasErrors('maxDiscount')}" th:errors="*{maxDiscount}"></div>
             </div>
 
             <div class="col-md-6 form-group">
                 <label class="form-label">Số tiền áp dụng cho đơn tối thiểu từ (đ) *</label>
-                <input type="number" class="form-control" th:field="*{minPurchase}" required>
+                <input type="number" class="form-control" th:field="*{minPurchase}" id="minPurchase" >
+                <div class="text-danger" th:if="${#fields.hasErrors('minPurchase')}" th:errors="*{minPurchase}"></div>
             </div>
 
             <div class="col-md-6 form-group">
                 <label class="form-label">Số lượng tối đa *</label>
-                <input type="number" class="form-control" th:field="*{usageLimit}" required>
+                <input type="number" class="form-control" th:field="*{usageLimit}" th:id="usageLimit" >
+                <div class="text-danger" th:if="${#fields.hasErrors('usageLimit')}" th:errors="*{usageLimit}"></div>
+            </div>
+            <div class="col-md-6 form-group">
+                <label class="form-label">Mô tả</label>
+                <input type="text" class="form-control" th:field="*{description}" th:id="description" >
+                <div class="text-danger" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
             </div>
         </div>
 
@@ -120,25 +144,71 @@
         </div>
     </form>
 </div>
-
+</section>
 <script>
-    function handleDiscountTypeChange() {
-        const percentRadio = document.querySelector('input[name="discountType"][value="percent"]');
-        const discountInput = document.getElementById('discountValue');
-        const maxDiscountInput = document.getElementById('maxDiscountInput');
-
-        if (percentRadio.checked) {
-            discountInput.max = 100;
-            discountInput.min = 0;
-            maxDiscountInput.disabled = false;
-        } else {
-            discountInput.removeAttribute('max');
-            discountInput.removeAttribute('min');
-            maxDiscountInput.disabled = true;
-        }
+    function showError(input, message) {
+        clearError(input);
+        const error = document.createElement('div');
+        error.className = 'text-danger mt-1 js-error';
+        error.innerText = message;
+        input.parentNode.appendChild(error);
     }
 
-    window.onload = handleDiscountTypeChange;
+    function clearError(input) {
+        const oldError = input.parentNode.querySelector('.js-error');
+        if (oldError) oldError.remove();
+    }
+
+    function validateDates() {
+        const startInput = document.getElementById("startDatetime");
+        const endInput = document.getElementById("endDatetime");
+
+        const startVal = startInput.value;
+        const endVal = endInput.value;
+
+        clearError(startInput);
+        clearError(endInput);
+
+        if (!startVal || !endVal) return true; // không lỗi nếu chưa nhập đủ
+
+        const startDate = new Date(startVal);
+        const endDate = new Date(endVal);
+        const now = new Date();
+
+        let hasError = false;
+
+        if (startDate >= endDate) {
+            showError(startInput, "Ngày bắt đầu phải nhỏ hơn ngày kết thúc");
+            hasError = true;
+        }
+
+        if (endDate <= now) {
+            showError(endInput, "Ngày kết thúc phải sau thời điểm hiện tại");
+            hasError = true;
+        }
+
+        return !hasError;
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const startInput = document.getElementById('startDatetime');
+        const endInput = document.getElementById('endDatetime');
+
+        if (startInput && endInput) {
+            startInput.addEventListener('change', validateDates);
+            endInput.addEventListener('change', validateDates);
+        }
+
+        const form = document.querySelector("form");
+        form.addEventListener("submit", function (e) {
+            if (!validateDates()) {
+                e.preventDefault(); //
+            }
+        });
+    });
+
 </script>
+
+
 </body>
 </html>
