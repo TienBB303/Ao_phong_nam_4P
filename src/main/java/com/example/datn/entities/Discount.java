@@ -1,6 +1,7 @@
 package com.example.datn.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -19,27 +20,37 @@ public class Discount {
     @Column(name = "code")
     private String code;
 
+    @NotBlank(message = "Tên mã giảm giá không được để trống")
     @Column(name = "code_name")
     private String codeName;
 
+    @NotBlank(message = "Phương thức giảm không được để trống")
     @Column(name = "discount_type")
     private String discountType;
 
+    @NotNull(message = "Giá trị giảm không được để trống")
+    @DecimalMin(value = "0.0", inclusive = false, message = "Giá trị giảm phải lớn hơn 0")
     @Column(name = "discount_value")
     private BigDecimal discountValue;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+    @NotNull(message = "Ngày bắt đầu không được để trống")
     private LocalDateTime startDatetime;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+    @NotNull(message = "Ngày kết thúc không được để trống")
     private LocalDateTime endDatetime;
 
+    @NotNull(message = "Giá trị đơn hàng tối thiểu không được để trống")
+    @DecimalMin(value = "0.0", inclusive = true, message = "Không được âm")
     @Column(name = "min_purchase")
     private BigDecimal minPurchase;
 
     @Column(name = "max_discount")
     private BigDecimal maxDiscount;
 
+    @NotNull(message = "Số lượng sử dụng tối đa không được để trống")
+    @Min(value = 0, message = "Không được âm")
     @Column(name = "usage_limit")
     private Integer usageLimit;
 
@@ -66,4 +77,22 @@ public class Discount {
                 return "Không xác định";
         }
     }
+    @AssertTrue(message = "Ngày bắt đầu phải nhỏ hơn ngày kết thúc")
+    @Transient
+    public boolean isStartBeforeEnd() {
+        if (startDatetime == null || endDatetime == null) {
+            return true;
+        }
+        return startDatetime.isBefore(endDatetime);
+    }
+
+    @AssertTrue(message = "Ngày kết thúc phải sau thời điểm hiện tại")
+    @Transient
+    public boolean isEndAfterNow() {
+        if (endDatetime == null) {
+            return true;
+        }
+        return endDatetime.isAfter(LocalDateTime.now());
+    }
+
 }

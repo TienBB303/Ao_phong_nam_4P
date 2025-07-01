@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Optional;
 
 public interface DiscountRepository extends JpaRepository<Discount,Integer> {
 
@@ -30,4 +30,13 @@ public interface DiscountRepository extends JpaRepository<Discount,Integer> {
             @Param("status") Integer status,
             Pageable pageable
     );
+    boolean existsByCodeName(String codeName);
+    @Query("SELECT COUNT(d) > 0 FROM Discount d WHERE d.codeName = :name AND d.id <> :id")
+    boolean existsByCodeNameAndNotId(@Param("name") String name, @Param("id") int id);
+
+    boolean existsByCode(String code);
+    @Query("SELECT MAX(CAST(SUBSTRING(d.code, 3) AS int)) FROM Discount d WHERE d.code LIKE 'DC%'")
+    Integer findMaxCodeNumber();
+    Optional<Discount> findByCode(String code);
+
 }
