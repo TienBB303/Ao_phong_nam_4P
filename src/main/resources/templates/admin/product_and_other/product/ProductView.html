@@ -6,7 +6,9 @@
 <!--    <link rel="icon" type="image/png" href="https://png.pngtree.com/png-vector/20221011/ourmid/pngtree-letter-v-logo-icon-vector-png-image_6295820.png">-->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 <header th:replace="~{admin/fragments/header :: header}"></header>
@@ -49,6 +51,7 @@
                     <th style="text-align: center">Tên sản phẩm</th>
                     <th style="text-align: center">Loại sản phẩm</th>
                     <th style="text-align: center">Hãng</th>
+                    <th style="text-align: center">Chất liệu</th>
                     <th style="text-align: center">Số lượng</th>
                     <th style="text-align: center">Trạng thái</th>
                     <th style="text-align: center">Hành động</th>
@@ -61,13 +64,14 @@
                     <td th:text="${sp.name}"></td>
                     <td th:text="${sp.category.name}"></td>
                     <td th:text="${sp.brand.name}"></td>
+                    <td th:text="${sp.material.name}"></td>
                     <td th:text="${totalQuantity[sp.id]}">0</td>
                     <td style="text-align: center">
                         <span th:if="${sp.status}" class="badge bg-success">Hoạt động</span>
                         <span th:unless="${sp.status}" class="badge bg-danger">Không hoạt động</span>
                     </td>
                     <td style="text-align: center">
-                        <a class="btn btn-outline-warning" style="width: 70px" title="Sửa">
+                        <a class="btn btn-outline-warning hienThiThongTinModal" th:attr="data-id=${sp.id}" style="width: 70px" title="Sửa" data-bs-toggle="modal" data-bs-target="#modalChinhSua">
                             <i class="bi bi-pencil-square"></i>
                         </a>
                         <a class="btn btn-outline-info" th:href="@{'/admin/product/view-detail/' + ${sp.id}}" style="width: 70px" title="Xem">
@@ -97,9 +101,116 @@
 
         </div>
     </section>>
+<!--Modal sửa-->
+    <div class="modal fade" id="modalChinhSua" tabindex="-1" aria-labelledby="modalChinhSuaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalChinhSuaLabel">Chỉnh sửa thông tin sản phẩm</h5>
+                </div>
+                <div class="modal-body">
+                    <form id="updateProduct" method="post" th:action="@{/admin/product/update}">
+                        <input type="hidden" id="product_id" name="productId">
+                        <div class="mb-3">
+                            <label for="product_name_update" class="form-label">Tên sản phẩm</label><span class="text-danger">*</span>
+                            <input type="text" class="form-control" id="product_name_update" name="productName" placeholder="Nhập tên sản phẩm">
+                        </div>
+                        <div class="mb-3">
+                            <label for="product_category_update" class="form-label">Loại sản phẩm</label><span class="text-danger">*</span>
+                            <select class="form-select me-2" id="product_category_update" name="categoryId">
+                                <option th:each="cate : ${listCategory}"
+                                        th:value="${cate.id}"
+                                        th:text="${cate.name}"
+                                        th:if="${cate.status}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="product_brand_update" class="form-label">Hãng</label><span class="text-danger">*</span>
+                            <select class="form-select me-2" id="product_brand_update" name="brandId">
+                                <option th:each="brand : ${listBrand}"
+                                        th:value="${brand.id}"
+                                        th:text="${brand.name}"
+                                        th:if="${brand.status}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="product_material_update" class="form-label">Chất liệu</label><span class="text-danger">*</span>
+                            <select class="form-select me-2" id="product_material_update" name="materialId">
+                                <option th:each="mate : ${listMaterial}"
+                                        th:value="${mate.id}"
+                                        th:text="${mate.name}"
+                                        th:if="${mate.status}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-outline-success">
+                                <i class="bi bi-check-lg"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-warning" data-bs-dismiss="modal">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                    </form>
 
+                </div>
+            </div>
+        </div>
+    </div>
     <footer th:replace="admin/fragments/footer :: footer"></footer>
     <!-- Script -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+
+<!--    <script th:if="${alert != null}" th:inline="javascript">-->
+<!--        Swal.fire({-->
+<!--            toast: true,-->
+<!--            icon: [[${type}]],-->
+<!--            title: '[[${alert}]]', // Thông báo từ controller-->
+<!--            position: 'top-end',-->
+<!--            showConfirmButton: false,-->
+<!--            timer: 2000,-->
+<!--            timerProgressBar: true-->
+<!--        });-->
+<!--    </script>-->
+    <script th:if="${alert != null}" th:inline="javascript">
+        Swal.fire({
+            toast: true,
+            icon: [[${type}]], // Đảm bảo `type` là kiểu string (success, error,...)
+            title: [[${alert}]],
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+        });
+    </script>
+
+    <script>
+        $(document).on('click', '.hienThiThongTinModal', function () {
+            const id = $(this).data('id');
+            console.log("ID sản phẩm:", id);
+            console.log("DATA:", $(this).data()); // debug
+            console.log("ID sản phẩm:", id);      // kiểm tra có ra khôn
+            $('#product_id').val(id);
+
+            $.ajax({
+                url: `/admin/product/get-detail/${id}`,
+                type: 'GET',
+                success: function (response) {
+                    console.log("Dữ liệu sản phẩm:", response);
+                    $('#product_id').val(response.id);
+                    $('#product_name_update').val(response.name);
+                    $('#product_category_update').val(response.category.id);
+                    $('#product_brand_update').val(response.brand.id);
+                    $('#product_material_update').val(response.material.id);
+                },
+                error: function (xhr) {
+                    console.error("Lỗi khi lấy dữ liệu sản phẩm:", xhr);
+                }
+            });
+        });
+    </script>
+
+
 </body>
 </html>

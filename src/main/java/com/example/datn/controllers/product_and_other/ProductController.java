@@ -198,9 +198,42 @@ public class ProductController {
         return "admin/product_and_other/product/ProductDetailView";
     }
 
-    @PostMapping("/update/{id}")
-    public Product updateProduct(@PathVariable("id") Integer id, @RequestBody Product product){
-        return productService.update(id, product);
+    @GetMapping("/get-detail/{id}")
+    @ResponseBody
+    public Product getDetail(@PathVariable("id") Integer id){
+        return productService.detail(id);
+    }
+
+    @PostMapping("/update")
+    public String updateProduct(
+            @RequestParam("productId") Integer productId,
+            @RequestParam("productName") String productName,
+            @RequestParam("categoryId") Integer categoryId,
+            @RequestParam("brandId") Integer brandId,
+            @RequestParam("materialId") Integer materialId,
+            RedirectAttributes redirectAttributes) {
+
+        Product product = productService.findByIdProduct(productId);
+        if (product == null) {
+            redirectAttributes.addFlashAttribute("alert", "Không tìm thấy sản phẩm");
+            redirectAttributes.addFlashAttribute("type", "error");
+            return "redirect:/admin/product/hien-thi";
+        }
+        if (!productName.trim().equalsIgnoreCase(product.getName()) && productService.checkNameTrung(productName.trim())) {
+            redirectAttributes.addFlashAttribute("alert", "Tên sản phẩm trùng sản phẩm đã có");
+            redirectAttributes.addFlashAttribute("type", "error");
+            return "redirect:/admin/product/hien-thi";
+        }
+        product.setName(productName.trim());
+        product.setCategory(categoryService.findById(categoryId));
+        product.setBrand(brandService.findById(brandId));
+        product.setMaterial(materialService.findById(materialId));
+        productService.update(product);
+
+        redirectAttributes.addFlashAttribute("alert", "Cập nhật thành công");
+        redirectAttributes.addFlashAttribute("type", "success");
+
+        return "redirect:/admin/product/hien-thi";
     }
 
 //    @GetMapping("/giu-thong-tin")
