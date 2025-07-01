@@ -57,6 +57,7 @@ public class CategoryController {
         }
     }
 
+
     @GetMapping("/detail/{id}")
     @ResponseBody
     public Category detailCategory(@PathVariable("id") Integer id){
