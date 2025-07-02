@@ -27,11 +27,12 @@ public class Account {
     private String email;
 
     private String password;
-    private String address;
 
     private String phoneNumber;
 
     private LocalDate birthOfDate;
+
+    private String addressDetail;
 
     private String gender;
 
@@ -44,7 +45,7 @@ public class Account {
     @OneToOne
     @JoinColumn(name = "role_id")
     private Role role;
-    @OneToOne
-    @JoinColumn(name = "customer_id")
-    private Customer customer;
+//    @OneToOne
+//    @JoinColumn(name = "customer_id")
+//    private Customer customer;
 }

@@ -7,67 +7,66 @@ import com.example.datn.services.AccountService;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@RestController
-@RequestMapping("/api/account/employee")
+@Controller
+@RequestMapping("/admin/employee")
 public class AccountController {
 
     @Autowired
     private AccountService accountService;
 
     @GetMapping
-    public List<AccountResponseDto> getAll() {
-        return accountService.getAll();
+    public String index(Model model,
+                        @RequestParam(defaultValue = "0") int page,
+                        @RequestParam(defaultValue = "5") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Account> pagedList = accountService.getAll(pageable);
+
+        model.addAttribute("listEmployee", pagedList.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", pagedList.getTotalPages());
+
+        return "admin/employee/index";
     }
 
-    @GetMapping("/page")
-    public List<AccountResponseDto> pagination(@RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
-                                               @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize) {
-        Pageable pageable = PageRequest.of(pageNo, pageSize);
-        return accountService.getPaginate(pageable).getContent();
+    @GetMapping("/add")
+    public String addShow() {
+
+        return "admin/employee/add";
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> createAccount(@Valid @RequestBody AccountRequestDto accountRequestDto,
-                                           BindingResult result) {
-        if (result.hasErrors()) {
-            Map<String, String> errors = new HashMap<>();
-            result.getFieldErrors().forEach(error -> {
-                errors.put(error.getField(), error.getDefaultMessage());
-            });
-            return ResponseEntity.badRequest().body(errors);
-        }
+   public String add(@ModelAttribute AccountRequestDto accountRequestDto) {
         accountService.createNewAccount(accountRequestDto);
-        return ResponseEntity.ok("Thêm mới thành công!");
+
+        return "redirect:/admin/employee";
     }
 
     @GetMapping("/detail")
-    public List<AccountResponseDto> detail(@RequestParam String code) {
-        return accountService.getDetail(code);
+    public String detail(@RequestParam Integer id, Model m) {
+        m.addAttribute("detail", accountService.getDetail(id));
+
+        return "admin/employee/detail";
     }
 
-    @PutMapping("/update")
-    public ResponseEntity<?> updateAccount(@Valid @RequestBody AccountRequestDto accountRequestDto,
-                                           BindingResult result) {
-        if (result.hasErrors()) {
-            Map<String, String> errors = new HashMap<>();
-            result.getFieldErrors().forEach(error -> {
-                errors.put(error.getField(), error.getDefaultMessage());
-            });
-            return ResponseEntity.badRequest().body(errors);
-        }
-            accountService.updateAccount(accountRequestDto);
-            return ResponseEntity.ok("Cập nhật thành công!");
+    @PostMapping("/update")
+    public String update(@ModelAttribute Account a) {
+        accountService.update(a);
 
+        return "redirect:/admin/employee";
     }
 }

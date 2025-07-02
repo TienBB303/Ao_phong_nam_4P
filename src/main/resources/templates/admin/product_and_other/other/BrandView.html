@@ -1,255 +1,243 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments/head :: head}">
-    <title>Quan ly khuyen mai | 4PStore</title>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>4P Store</title>
+    <link rel="icon" type="image/png" href="https://png.pngtree.com/png-vector/20221011/ourmid/pngtree-letter-v-logo-icon-vector-png-image_6295820.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-<header th:replace="~{admin/fragments/header :: header}"></header>
-<div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
-<section>
-    <div class="pc-container">
-        <div class="pc-content">
-            <div class="page-header">
-                <div class="page-block">
-                    <div class="row align-items-center">
-                        <div class="col-md-12">
-                            <div class="page-header-title">
-                                <h5 class="m-b-10">Quản lý sản phẩm</h5>
-                            </div>
-                            <ul class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
-                                <li class="breadcrumb-item" aria-current="page">Quản lý thương hiệu</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+<!-- Main-->
+<div id="main">
+    <div class="page-heading">
+        <div class="page-title">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3>Hãng</h3>
+                <a class="btn btn-outline-primary" href="/admin/product/view-atribute" style="width: 70px">
+                    <i class="bi bi-arrow-return-left"></i>
+                </a>
             </div>
-            <div class="container mt-5">
-    <!-- Main-->
-    <div id="main">
-        <div class="page-heading">
-            <div class="page-title">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h3>Hãng</h3>
-                    <a class="btn btn-outline-primary" href="/admin/product/view-atribute" style="width: 70px">
-                        <i class="bi bi-arrow-return-left"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <div class="page-content">
-            <!--        dữ liệu thực hiện trong selection-->
-            <section class="row">
-                <div class="card">
-                    <div class="card-header">
-                        <form method="get" action="/admin/brand/hien-thi" th:object="${listBrand}" style="padding-bottom: 20px">
-                            <div class="row">
-                                <div class="col-5">
-                                    <input type="text" id="searchInput" class="form-control" name="brandNameSearch"
-                                           placeholder="Nhập hãng..." th:value="${param.brandNameSearch}">
-                                </div>
-                                <div class="col-5">
-                                    <select id="status" name="brandStatusSearch" class="form-select">
-                                        <option value="" th:selected="${brandStatusSearch == null}">Tất cả trạng thái</option>
-                                        <option value="true" th:selected="${brandStatusSearch == true}">Hoạt động</option>
-                                        <option value="false" th:selected="${brandStatusSearch == false}">Không hoạt động</option>
-                                    </select>
-                                </div>
-                                <div class="col-2">
-                                    <button class="btn btn-primary" type="submit" id="sbmt">
-                                        <i class="bi bi-search"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalThemMoi">
-                                        <i class="bi bi-plus"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                    <div th:if="${#lists.isEmpty(listBrand.content)}" class="d-flex flex-column justify-content-center align-items-center" style="height: 400px;">
-                        <img src="https://shop.nebulacare.in/Content/Images/nodata.jpg" style="max-height: 400px;">
-                    </div>
-                    <div th:if="${!#lists.isEmpty(listBrand.content)}" class="card-body">
-                        <table class="table table-striped table-bordered dataTable-table" id="table1">
-                            <thead>
-                            <tr>
-                                <th style="text-align: center">STT</th>
-                                <th style="text-align: center">Mã</th>
-                                <th style="text-align: center">Tên hãng</th>
-                                <th style="text-align: center">Trạng thái</th>
-                                <th style="text-align: center">Hành động</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:each="brand, iter : ${listBrand.content}" th:data-id="${brand.id}">
-                                <td th:text="${listBrand.number * listBrand.size + iter.index + 1}"></td>
-                                <td th:text="${brand.code}"></td>
-                                <td th:text="${brand.name}"></td>
-                                <td style="text-align: center">
-                                    <span th:if="${brand.status}" class="badge bg-success">Hoạt động</span>
-                                    <span th:unless="${brand.status}" class="badge bg-danger">Không hoạt động</span>
-                                </td>
-                                <td style="text-align: center">
-                                    <a class="btn btn-outline-warning hienThiThongTinModal" style="width: 70px" title="Sửa" th:attr="data-id=${brand.id}" data-bs-toggle="modal" data-bs-target="#modalChinhSua">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </a>
-                                    <a class="btn btn-outline-info thayDoiTrangThai" style="width: 70px" title="Xem" th:attr="data-id=${brand.id}">
-                                        <i class="bi bi-arrow-left-right"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="dataTable-bottom">
-                        <nav th:if="${listBrand.totalPages > 0}">
-                            <ul class="pagination">
-                                <li class="page-item" th:classappend="${listBrand.first} ? 'disabled'">
-                                    <a class="page-link"
-                                       th:href="@{/admin/brand/hien-thi(page=${listBrand.number > 0 ? listBrand.number - 1 : 0},  size=${listBrand.size},brandNameSearch=${brandNameSearch},brandStatusSearch=${brandStatusSearch})}">
-                                        Trước
-                                    </a>
-                                </li>
-
-                                <li class="page-item"
-                                    th:each="i : ${#numbers.sequence(0, listBrand.totalPages - 1)}"
-                                    th:classappend="${i == listBrand.number} ? 'active'">
-                                    <a class="page-link"
-                                       th:href="@{/admin/brand/hien-thi(page=${i},   size=${listBrand.size}, brandNameSearch=${brandNameSearch}, brandStatusSearch=${brandStatusSearch})}"
-                                       th:text="${i + 1}">1</a>
-                                </li>
-
-                                <li class="page-item" th:classappend="${listBrand.last} ? 'disabled'">
-                                    <a class="page-link"
-                                       th:href="@{/admin/brand/hien-thi(page=${listBrand.number + 1},  size=${listBrand.size}, brandNameSearch=${brandNameSearch},    brandStatusSearch=${brandStatusSearch})}">
-                                        Sau
-                                    </a>
-                                </li>
-                            </ul>
-                        </nav>
-
-                    </div>
-                </div>
-            </section>
         </div>
     </div>
-    <!--    modal thêm-->
-    <div class="modal fade" id="modalThemMoi" tabindex="-1" aria-labelledby="modalThemMoiLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalThemMoiLabel">Thêm mới hãng</h5>
-                </div>
-                <div class="modal-body">
-                    <form id="addSize" method="post" action="/admin/brand/add">
-                        <!--                    <div class="mb-3">-->
-                        <!--                        <label for="brand_code" class="form-label">Mã</label><span class="text-danger">*</span>-->
-                        <!--                        <input type="text" class="form-control" id="brand_code" name="brandCode" placeholder="Nhập mã">-->
-                        <!--                    </div>-->
-                        <div class="mb-3">
-                            <label for="brand_name" class="form-label">Tên</label><span class="text-danger">*</span>
-                            <input type="text" class="form-control" id="brand_name" name="brandName" placeholder="Nhập tên hãng">
-                        </div>
 
-                        <div class="modal-footer">
-                            <button type="submit" class="btn btn-outline-success">
-                                <i class="bi bi-check-lg"></i>
-                            </button>
-                            <button type="button" class="btn btn-outline-warning" data-bs-dismiss="modal">
-                                <i class="bi bi-x"></i>
-                            </button>
+    <div class="page-content">
+        <!--        dữ liệu thực hiện trong selection-->
+        <section class="row">
+            <div class="card">
+                <div class="card-header">
+                    <form method="get" action="/admin/brand/hien-thi" th:object="${listBrand}" style="padding-bottom: 20px">
+                        <div class="row">
+                            <div class="col-5">
+                                <input type="text" id="searchInput" class="form-control" name="brandNameSearch"
+                                       placeholder="Nhập hãng..." th:value="${param.brandNameSearch}">
+                            </div>
+                            <div class="col-5">
+                                <select id="status" name="brandStatusSearch" class="form-select">
+                                    <option value="" th:selected="${brandStatusSearch == null}">Tất cả trạng thái</option>
+                                    <option value="true" th:selected="${brandStatusSearch == true}">Hoạt động</option>
+                                    <option value="false" th:selected="${brandStatusSearch == false}">Không hoạt động</option>
+                                </select>
+                            </div>
+                            <div class="col-2">
+                                <button class="btn btn-primary" type="submit" id="sbmt">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalThemMoi">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>
+                <div th:if="${#lists.isEmpty(listBrand.content)}" class="d-flex flex-column justify-content-center align-items-center" style="height: 400px;">
+                    <img src="https://shop.nebulacare.in/Content/Images/nodata.jpg" style="max-height: 400px;">
+                </div>
+                <div th:if="${!#lists.isEmpty(listBrand.content)}" class="card-body">
+                    <table class="table table-striped table-bordered dataTable-table" id="table1">
+                        <thead>
+                        <tr>
+                            <th style="text-align: center">STT</th>
+                            <th style="text-align: center">Mã</th>
+                            <th style="text-align: center">Tên hãng</th>
+                            <th style="text-align: center">Trạng thái</th>
+                            <th style="text-align: center">Hành động</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="brand, iter : ${listBrand.content}" th:data-id="${brand.id}">
+                            <td th:text="${listBrand.number * listBrand.size + iter.index + 1}"></td>
+                            <td th:text="${brand.code}"></td>
+                            <td th:text="${brand.name}"></td>
+                            <td style="text-align: center">
+                                <span th:if="${brand.status}" class="badge bg-success">Hoạt động</span>
+                                <span th:unless="${brand.status}" class="badge bg-danger">Không hoạt động</span>
+                            </td>
+                            <td style="text-align: center">
+                                <a class="btn btn-outline-warning hienThiThongTinModal" style="width: 70px" title="Sửa" th:attr="data-id=${brand.id}" data-bs-toggle="modal" data-bs-target="#modalChinhSua">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <a class="btn btn-outline-info thayDoiTrangThai" style="width: 70px" title="Xem" th:attr="data-id=${brand.id}">
+                                    <i class="bi bi-arrow-left-right"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="dataTable-bottom">
+                    <nav th:if="${listBrand.totalPages > 0}">
+                        <ul class="pagination">
+                            <li class="page-item" th:classappend="${listBrand.first} ? 'disabled'">
+                                <a class="page-link"
+                                   th:href="@{/admin/brand/hien-thi(page=${listBrand.number > 0 ? listBrand.number - 1 : 0},  size=${listBrand.size},brandNameSearch=${brandNameSearch},brandStatusSearch=${brandStatusSearch})}">
+                                    Trước
+                                </a>
+                            </li>
+
+                            <li class="page-item"
+                                th:each="i : ${#numbers.sequence(0, listBrand.totalPages - 1)}"
+                                th:classappend="${i == listBrand.number} ? 'active'">
+                                <a class="page-link"
+                                   th:href="@{/admin/brand/hien-thi(page=${i},   size=${listBrand.size}, brandNameSearch=${brandNameSearch}, brandStatusSearch=${brandStatusSearch})}"
+                                   th:text="${i + 1}">1</a>
+                            </li>
+
+                            <li class="page-item" th:classappend="${listBrand.last} ? 'disabled'">
+                                <a class="page-link"
+                                   th:href="@{/admin/brand/hien-thi(page=${listBrand.number + 1},  size=${listBrand.size}, brandNameSearch=${brandNameSearch},    brandStatusSearch=${brandStatusSearch})}">
+                                    Sau
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+<!--    modal thêm-->
+<div class="modal fade" id="modalThemMoi" tabindex="-1" aria-labelledby="modalThemMoiLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalThemMoiLabel">Thêm mới hãng</h5>
+            </div>
+            <div class="modal-body">
+                <form id="addSize" method="post" action="/admin/brand/add">
+<!--                    <div class="mb-3">-->
+<!--                        <label for="brand_code" class="form-label">Mã</label><span class="text-danger">*</span>-->
+<!--                        <input type="text" class="form-control" id="brand_code" name="brandCode" placeholder="Nhập mã">-->
+<!--                    </div>-->
+                    <div class="mb-3">
+                        <label for="brand_name" class="form-label">Tên</label><span class="text-danger">*</span>
+                        <input type="text" class="form-control" id="brand_name" name="brandName" placeholder="Nhập tên hãng">
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-outline-success">
+                            <i class="bi bi-check-lg"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-warning" data-bs-dismiss="modal">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-    <!--    Modal chỉnh sửa-->
-    <div class="modal fade" id="modalChinhSua" tabindex="-1" aria-labelledby="modalChinhSuaLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalChinhSuaLabel">Chỉnh sửa hãng</h5>
-                </div>
-                <div class="modal-body">
-                    <form id="updateSize" method="post" action="/admin/brand/update">
-                        <input type="hidden" id="brand_id" name="brandId">
-                        <!--                    <div class="mb-3">-->
-                        <!--                        <label for="brand_code_update" class="form-label">Mã</label><span class="text-danger">*</span>-->
-                        <!--                        <input type="text" class="form-control" id="brand_code_update" name="brandCodeUpdate" placeholder="Nhập mã hãng">-->
-                        <!--                    </div>-->
-                        <div class="mb-3">
-                            <label for="brand_name_update" class="form-label">Tên</label><span class="text-danger">*</span>
-                            <input type="text" class="form-control" id="brand_name_update" name="brandNameUpdate" placeholder="Nhập tên hãng">
-                        </div>
-                        <div class="modal-footer">
-                            <button type="submit" class="btn btn-outline-success">
-                                <i class="bi bi-check-lg"></i>
-                            </button>
-                            <button type="button" class="btn btn-outline-warning" data-bs-dismiss="modal">
-                                <i class="bi bi-x"></i>
-                            </button>
-                        </div>
-                    </form>
+</div>
+<!--    Modal chỉnh sửa-->
+<div class="modal fade" id="modalChinhSua" tabindex="-1" aria-labelledby="modalChinhSuaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalChinhSuaLabel">Chỉnh sửa hãng</h5>
+            </div>
+            <div class="modal-body">
+                <form id="updateSize" method="post" action="/admin/brand/update">
+                    <input type="hidden" id="brand_id" name="brandId">
+<!--                    <div class="mb-3">-->
+<!--                        <label for="brand_code_update" class="form-label">Mã</label><span class="text-danger">*</span>-->
+<!--                        <input type="text" class="form-control" id="brand_code_update" name="brandCodeUpdate" placeholder="Nhập mã hãng">-->
+<!--                    </div>-->
+                    <div class="mb-3">
+                        <label for="brand_name_update" class="form-label">Tên</label><span class="text-danger">*</span>
+                        <input type="text" class="form-control" id="brand_name_update" name="brandNameUpdate" placeholder="Nhập tên hãng">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-outline-success">
+                            <i class="bi bi-check-lg"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-warning" data-bs-dismiss="modal">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                </form>
 
-                </div>
             </div>
         </div>
     </div>
-    <!--    Script-->
+</div>
+<!--    Script-->
 
 
-    <script th:if="${alert != null}" th:inline="javascript">
+<script th:if="${alert != null}" th:inline="javascript">
+    Swal.fire({
+        toast: true,
+        icon: [[${type}]],
+        title: '[[${alert}]]', // Thông báo từ controller
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true
+    });
+</script>
+<!--    Detail-->
+<script>
+    $(document).on('click', '.hienThiThongTinModal', function () {
+        const id = $(this).data('id');
+        console.log("ID lấy được:", id);
+        $('#brand_id').val(id); // Gắn ID vào input ẩn trong form
+
+        $.ajax({
+            url: `/admin/brand/detail/${id}`,
+            type: 'GET',
+            success: function (response) {
+                console.log("Response:", response);
+                $('#brand_id').val(response.id);
+                $('#brand_name_update').val(response.name);
+                $('#brand_code_update').val(response.code);
+            },
+            error: function (xhr) {
+            }
+        });
+    });
+</script>
+<script>
+    $(document).on('click', '.thayDoiTrangThai', function () {
+        const id = $(this).data('id');
         Swal.fire({
-            toast: true,
-            icon: [[${type}]],
-            title: '[[${alert}]]', // Thông báo từ controller
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 2000,
-            timerProgressBar: true
+            title: 'Bạn có chắc muốn đổi trạng thái?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Có',
+            cancelButtonText: 'Không'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `/admin/brand/change-status/${id}`;
+            }
         });
-    </script>
-    <!--    Detail-->
-    <script>
-        $(document).on('click', '.hienThiThongTinModal', function () {
-            const id = $(this).data('id');
-            console.log("ID lấy được:", id);
-            $('#brand_id').val(id); // Gắn ID vào input ẩn trong form
+    });
 
-            $.ajax({
-                url: `/admin/brand/detail/${id}`,
-                type: 'GET',
-                success: function (response) {
-                    console.log("Response:", response);
-                    $('#brand_id').val(response.id);
-                    $('#brand_name_update').val(response.name);
-                    $('#brand_code_update').val(response.code);
-                },
-                error: function (xhr) {
-                }
-            });
-        });
-    </script>
-    <script>
-        $(document).on('click', '.thayDoiTrangThai', function () {
-            const id = $(this).data('id');
-            Swal.fire({
-                title: 'Bạn có chắc muốn đổi trạng thái?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Có',
-                cancelButtonText: 'Không'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = `/admin/brand/change-status/${id}`;
-                }
-            });
-        });
+</script>
 
-    </script>
-</section>
-<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
+
 </body>
+
 </html>

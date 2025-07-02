@@ -28,13 +28,10 @@ public class AccountService {
 //    @Autowired
 //    private PasswordEncoder passwordEncoder;
 
-    public List<AccountResponseDto> getAll() {
-        return accountRepository.listAccountRes();
+    public Page<Account> getAll(Pageable pageable) {
+        return accountRepository.findAll(pageable);
     }
 
-    public Page<AccountResponseDto> getPaginate(Pageable pageable) {
-        return accountRepository.paginate(pageable);
-    }
 
     public Account createNewAccount(AccountRequestDto accountRequestDto) {
         Account account = new Account();
@@ -44,6 +41,7 @@ public class AccountService {
         account.setPassword(accountRequestDto.getPassword());
         account.setPhoneNumber(accountRequestDto.getPhoneNumber());
         account.setEmail(accountRequestDto.getEmail());
+        account.setAddressDetail(accountRequestDto.getAddressDetail());
         account.setCreated_at(LocalDateTime.now());
         account.setBirthOfDate(accountRequestDto.getBirthOfDate());
         account.setGender(accountRequestDto.getGender());
@@ -73,25 +71,13 @@ public class AccountService {
         return "TK001";
     }
 
-    public List<AccountResponseDto> getDetail(String code) {
-        return accountRepository.detailByCode(code);
+    public Account getDetail(Integer id) {
+        return accountRepository.findById(id).orElse(null);
     }
 
-    public Account updateAccount(AccountRequestDto accountRequestDto) {
-        Optional<Account> optionalAccount = accountRepository.findById(accountRequestDto.getId());
-        if (optionalAccount.isEmpty()) {
-            throw new ResourceClosedException("Tài khoản không tồn tại với ID: " + accountRequestDto.getId());
-        }
 
-        Account account = optionalAccount.get();
-        account.setFullName(accountRequestDto.getFullName());
-        account.setPassword(accountRequestDto.getPassword());
-        account.setPhoneNumber(accountRequestDto.getPhoneNumber());
-        account.setEmail(accountRequestDto.getEmail());
-        account.setUpdated_at(LocalDateTime.now());
-        account.setBirthOfDate(accountRequestDto.getBirthOfDate());
-        account.setGender(accountRequestDto.getGender());
-
-        return accountRepository.save(account);
+    public Account update(Account a) {
+        a.setUpdated_at(LocalDateTime.now());
+        return accountRepository.save(a);
     }
 }

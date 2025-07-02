@@ -1,254 +1,243 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments/head :: head}">
-    <title>Quan ly khuyen mai | 4PStore</title>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>4P Store</title>
+    <link rel="icon" type="image/png" href="https://png.pngtree.com/png-vector/20221011/ourmid/pngtree-letter-v-logo-icon-vector-png-image_6295820.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-<header th:replace="~{admin/fragments/header :: header}"></header>
-<div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
-<section>
-    <div class="pc-container">
-        <div class="pc-content">
-            <div class="page-header">
-                <div class="page-block">
-                    <div class="row align-items-center">
-                        <div class="col-md-12">
-                            <div class="page-header-title">
-                                <h5 class="m-b-10">Quản lý sản phẩm</h5>
-                            </div>
-                            <ul class="breadcrumb">
-                                <li class="breadcrumb-item" aria-current="page">Quản lý màu</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+<!-- Main-->
+<div id="main">
+    <div class="page-heading">
+        <div class="page-title">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3>Màu sắc</h3>
+                <a class="btn btn-outline-primary" href="/admin/product/view-atribute" style="width: 70px">
+                    <i class="bi bi-arrow-return-left"></i>
+                </a>
             </div>
-            <div class="container mt-5">
-    <!-- Main-->
-    <div id="main">
-        <div class="page-heading">
-            <div class="page-title">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h3>Màu sắc</h3>
-                    <a class="btn btn-outline-primary" href="/admin/product/view-atribute" style="width: 70px">
-                        <i class="bi bi-arrow-return-left"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <div class="page-content">
-            <!--        dữ liệu thực hiện trong selection-->
-            <section class="row">
-                <div class="card">
-                    <div class="card-header">
-                        <form method="get" action="/admin/color/hien-thi" th:object="${listColor}" style="padding-bottom: 20px">
-                            <div class="row">
-                                <div class="col-5">
-                                    <input type="text" id="searchInput" class="form-control" name="colorNameSearch"
-                                           placeholder="Nhập màu sắc..." th:value="${param.colorNameSearch}">
-                                </div>
-                                <div class="col-5">
-                                    <select id="status" name="colorStatusSearch" class="form-select">
-                                        <option value="" th:selected="${colorStatusSearch == null}">Tất cả trạng thái</option>
-                                        <option value="true" th:selected="${colorStatusSearch == true}">Hoạt động</option>
-                                        <option value="false" th:selected="${colorStatusSearch == false}">Không hoạt động</option>
-                                    </select>
-                                </div>
-                                <div class="col-2">
-                                    <button class="btn btn-primary" type="submit" id="sbmt">
-                                        <i class="bi bi-search"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalThemMoi">
-                                        <i class="bi bi-plus"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                    <div th:if="${#lists.isEmpty(listColor.content)}" class="d-flex flex-column justify-content-center align-items-center" style="height: 400px;">
-                        <img src="https://shop.nebulacare.in/Content/Images/nodata.jpg" style="max-height: 400px;">
-                    </div>
-                    <div th:if="${!#lists.isEmpty(listColor.content)}" class="card-body">
-                        <table class="table table-striped table-bordered dataTable-table" id="table1">
-                            <thead>
-                            <tr>
-                                <th style="text-align: center">STT</th>
-                                <th style="text-align: center">Mã</th>
-                                <th style="text-align: center">Tên màu sắc</th>
-                                <th style="text-align: center">Trạng thái</th>
-                                <th style="text-align: center">Hành động</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:each="color, iter : ${listColor.content}" th:data-id="${color.id}">
-                                <td th:text="${listColor.number * listColor.size + iter.index + 1}"></td>
-                                <td th:text="${color.code}"></td>
-                                <td th:text="${color.name}"></td>
-                                <td style="text-align: center">
-                                    <span th:if="${color.status}" class="badge bg-success">Hoạt động</span>
-                                    <span th:unless="${color.status}" class="badge bg-danger">Không hoạt động</span>
-                                </td>
-                                <td style="text-align: center">
-                                    <a class="btn btn-outline-warning hienThiThongTinModal" style="width: 70px" title="Sửa" th:attr="data-id=${color.id}" data-bs-toggle="modal" data-bs-target="#modalChinhSua">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </a>
-                                    <a class="btn btn-outline-info thayDoiTrangThai" style="width: 70px" title="Xem" th:attr="data-id=${color.id}">
-                                        <i class="bi bi-arrow-left-right"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="dataTable-bottom">
-                        <nav th:if="${listColor.totalPages > 0}">
-                            <ul class="pagination">
-                                <li class="page-item" th:classappend="${listColor.first} ? 'disabled'">
-                                    <a class="page-link"
-                                       th:href="@{/admin/color/hien-thi(page=${listColor.number > 0 ? listColor.number - 1 : 0},  size=${listColor.size},colorNameSearch=${colorNameSearch},colorStatusSearch=${colorStatusSearch})}">
-                                        Trước
-                                    </a>
-                                </li>
-
-                                <li class="page-item"
-                                    th:each="i : ${#numbers.sequence(0, listColor.totalPages - 1)}"
-                                    th:classappend="${i == listColor.number} ? 'active'">
-                                    <a class="page-link"
-                                       th:href="@{/admin/color/hien-thi(page=${i},   size=${listColor.size}, colorNameSearch=${colorNameSearch}, colorStatusSearch=${colorStatusSearch})}"
-                                       th:text="${i + 1}">1</a>
-                                </li>
-
-                                <li class="page-item" th:classappend="${listColor.last} ? 'disabled'">
-                                    <a class="page-link"
-                                       th:href="@{/admin/color/hien-thi(page=${listColor.number + 1},  size=${listColor.size}, colorNameSearch=${colorNameSearch},    colorStatusSearch=${colorStatusSearch})}">
-                                        Sau
-                                    </a>
-                                </li>
-                            </ul>
-                        </nav>
-
-                    </div>
-                </div>
-            </section>
         </div>
     </div>
-    <!--    modal thêm-->
-    <div class="modal fade" id="modalThemMoi" tabindex="-1" aria-labelledby="modalThemMoiLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalThemMoiLabel">Thêm mới màu sắc</h5>
-                </div>
-                <div class="modal-body">
-                    <form id="addSize" method="post" action="/admin/color/add">
-                        <!--                    <div class="mb-3">-->
-                        <!--                        <label for="color_code" class="form-label">Mã</label><span class="text-danger">*</span>-->
-                        <!--                        <input type="text" class="form-control" id="color_code" name="colorCode" placeholder="Nhập mã">-->
-                        <!--                    </div>-->
-                        <div class="mb-3">
-                            <label for="color_name" class="form-label">Tên</label><span class="text-danger">*</span>
-                            <input type="text" class="form-control" id="color_name" name="colorName" placeholder="Nhập tên màu sắc">
-                        </div>
 
-                        <div class="modal-footer">
-                            <button type="submit" class="btn btn-outline-success">
-                                <i class="bi bi-check-lg"></i>
-                            </button>
-                            <button type="button" class="btn btn-outline-warning" data-bs-dismiss="modal">
-                                <i class="bi bi-x"></i>
-                            </button>
+    <div class="page-content">
+        <!--        dữ liệu thực hiện trong selection-->
+        <section class="row">
+            <div class="card">
+                <div class="card-header">
+                    <form method="get" action="/admin/color/hien-thi" th:object="${listColor}" style="padding-bottom: 20px">
+                        <div class="row">
+                            <div class="col-5">
+                                <input type="text" id="searchInput" class="form-control" name="colorNameSearch"
+                                       placeholder="Nhập màu sắc..." th:value="${param.colorNameSearch}">
+                            </div>
+                            <div class="col-5">
+                                <select id="status" name="colorStatusSearch" class="form-select">
+                                    <option value="" th:selected="${colorStatusSearch == null}">Tất cả trạng thái</option>
+                                    <option value="true" th:selected="${colorStatusSearch == true}">Hoạt động</option>
+                                    <option value="false" th:selected="${colorStatusSearch == false}">Không hoạt động</option>
+                                </select>
+                            </div>
+                            <div class="col-2">
+                                <button class="btn btn-primary" type="submit" id="sbmt">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalThemMoi">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>
+                <div th:if="${#lists.isEmpty(listColor.content)}" class="d-flex flex-column justify-content-center align-items-center" style="height: 400px;">
+                    <img src="https://shop.nebulacare.in/Content/Images/nodata.jpg" style="max-height: 400px;">
+                </div>
+                <div th:if="${!#lists.isEmpty(listColor.content)}" class="card-body">
+                    <table class="table table-striped table-bordered dataTable-table" id="table1">
+                        <thead>
+                        <tr>
+                            <th style="text-align: center">STT</th>
+                            <th style="text-align: center">Mã</th>
+                            <th style="text-align: center">Tên màu sắc</th>
+                            <th style="text-align: center">Trạng thái</th>
+                            <th style="text-align: center">Hành động</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="color, iter : ${listColor.content}" th:data-id="${color.id}">
+                            <td th:text="${listColor.number * listColor.size + iter.index + 1}"></td>
+                            <td th:text="${color.code}"></td>
+                            <td th:text="${color.name}"></td>
+                            <td style="text-align: center">
+                                <span th:if="${color.status}" class="badge bg-success">Hoạt động</span>
+                                <span th:unless="${color.status}" class="badge bg-danger">Không hoạt động</span>
+                            </td>
+                            <td style="text-align: center">
+                                <a class="btn btn-outline-warning hienThiThongTinModal" style="width: 70px" title="Sửa" th:attr="data-id=${color.id}" data-bs-toggle="modal" data-bs-target="#modalChinhSua">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <a class="btn btn-outline-info thayDoiTrangThai" style="width: 70px" title="Xem" th:attr="data-id=${color.id}">
+                                    <i class="bi bi-arrow-left-right"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="dataTable-bottom">
+                    <nav th:if="${listColor.totalPages > 0}">
+                        <ul class="pagination">
+                            <li class="page-item" th:classappend="${listColor.first} ? 'disabled'">
+                                <a class="page-link"
+                                   th:href="@{/admin/color/hien-thi(page=${listColor.number > 0 ? listColor.number - 1 : 0},  size=${listColor.size},colorNameSearch=${colorNameSearch},colorStatusSearch=${colorStatusSearch})}">
+                                    Trước
+                                </a>
+                            </li>
+
+                            <li class="page-item"
+                                th:each="i : ${#numbers.sequence(0, listColor.totalPages - 1)}"
+                                th:classappend="${i == listColor.number} ? 'active'">
+                                <a class="page-link"
+                                   th:href="@{/admin/color/hien-thi(page=${i},   size=${listColor.size}, colorNameSearch=${colorNameSearch}, colorStatusSearch=${colorStatusSearch})}"
+                                   th:text="${i + 1}">1</a>
+                            </li>
+
+                            <li class="page-item" th:classappend="${listColor.last} ? 'disabled'">
+                                <a class="page-link"
+                                   th:href="@{/admin/color/hien-thi(page=${listColor.number + 1},  size=${listColor.size}, colorNameSearch=${colorNameSearch},    colorStatusSearch=${colorStatusSearch})}">
+                                    Sau
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+<!--    modal thêm-->
+<div class="modal fade" id="modalThemMoi" tabindex="-1" aria-labelledby="modalThemMoiLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalThemMoiLabel">Thêm mới màu sắc</h5>
+            </div>
+            <div class="modal-body">
+                <form id="addSize" method="post" action="/admin/color/add">
+<!--                    <div class="mb-3">-->
+<!--                        <label for="color_code" class="form-label">Mã</label><span class="text-danger">*</span>-->
+<!--                        <input type="text" class="form-control" id="color_code" name="colorCode" placeholder="Nhập mã">-->
+<!--                    </div>-->
+                    <div class="mb-3">
+                        <label for="color_name" class="form-label">Tên</label><span class="text-danger">*</span>
+                        <input type="text" class="form-control" id="color_name" name="colorName" placeholder="Nhập tên màu sắc">
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-outline-success">
+                            <i class="bi bi-check-lg"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-warning" data-bs-dismiss="modal">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-    <!--    Modal chỉnh sửa-->
-    <div class="modal fade" id="modalChinhSua" tabindex="-1" aria-labelledby="modalChinhSuaLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalChinhSuaLabel">Chỉnh sửa màu sắc</h5>
-                </div>
-                <div class="modal-body">
-                    <form id="updateSize" method="post" action="/admin/color/update">
-                        <input type="hidden" id="color_id" name="colorId">
-                        <!--                    <div class="mb-3">-->
-                        <!--                        <label for="color_code_update" class="form-label">Mã</label><span class="text-danger">*</span>-->
-                        <!--                        <input type="text" class="form-control" id="color_code_update" name="colorCodeUpdate" placeholder="Nhập mã màu sắc">-->
-                        <!--                    </div>-->
-                        <div class="mb-3">
-                            <label for="color_name_update" class="form-label">Tên</label><span class="text-danger">*</span>
-                            <input type="text" class="form-control" id="color_name_update" name="colorNameUpdate" placeholder="Nhập tên màu sắc">
-                        </div>
-                        <div class="modal-footer">
-                            <button type="submit" class="btn btn-outline-success">
-                                <i class="bi bi-check-lg"></i>
-                            </button>
-                            <button type="button" class="btn btn-outline-warning" data-bs-dismiss="modal">
-                                <i class="bi bi-x"></i>
-                            </button>
-                        </div>
-                    </form>
+</div>
+<!--    Modal chỉnh sửa-->
+<div class="modal fade" id="modalChinhSua" tabindex="-1" aria-labelledby="modalChinhSuaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalChinhSuaLabel">Chỉnh sửa màu sắc</h5>
+            </div>
+            <div class="modal-body">
+                <form id="updateSize" method="post" action="/admin/color/update">
+                    <input type="hidden" id="color_id" name="colorId">
+<!--                    <div class="mb-3">-->
+<!--                        <label for="color_code_update" class="form-label">Mã</label><span class="text-danger">*</span>-->
+<!--                        <input type="text" class="form-control" id="color_code_update" name="colorCodeUpdate" placeholder="Nhập mã màu sắc">-->
+<!--                    </div>-->
+                    <div class="mb-3">
+                        <label for="color_name_update" class="form-label">Tên</label><span class="text-danger">*</span>
+                        <input type="text" class="form-control" id="color_name_update" name="colorNameUpdate" placeholder="Nhập tên màu sắc">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-outline-success">
+                            <i class="bi bi-check-lg"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-warning" data-bs-dismiss="modal">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                </form>
 
-                </div>
             </div>
         </div>
     </div>
-    <!--    Script-->
+</div>
+<!--    Script-->
 
 
-    <script th:if="${alert != null}" th:inline="javascript">
+<script th:if="${alert != null}" th:inline="javascript">
+    Swal.fire({
+        toast: true,
+        icon: [[${type}]],
+        title: '[[${alert}]]', // Thông báo từ controller
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true
+    });
+</script>
+<!--    Detail-->
+<script>
+    $(document).on('click', '.hienThiThongTinModal', function () {
+        const id = $(this).data('id');
+        console.log("ID lấy được:", id);
+        $('#color_id').val(id); // Gắn ID vào input ẩn trong form
+
+        $.ajax({
+            url: `/admin/color/detail/${id}`,
+            type: 'GET',
+            success: function (response) {
+                console.log("Response:", response);
+                $('#color_id').val(response.id);
+                $('#color_name_update').val(response.name);
+                $('#color_code_update').val(response.code);
+            },
+            error: function (xhr) {
+            }
+        });
+    });
+</script>
+<script>
+    $(document).on('click', '.thayDoiTrangThai', function () {
+        const id = $(this).data('id');
         Swal.fire({
-            toast: true,
-            icon: [[${type}]],
-            title: '[[${alert}]]', // Thông báo từ controller
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 2000,
-            timerProgressBar: true
+            title: 'Bạn có chắc muốn đổi trạng thái?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Có',
+            cancelButtonText: 'Không'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `/admin/color/change-status/${id}`;
+            }
         });
-    </script>
-    <!--    Detail-->
-    <script>
-        $(document).on('click', '.hienThiThongTinModal', function () {
-            const id = $(this).data('id');
-            console.log("ID lấy được:", id);
-            $('#color_id').val(id); // Gắn ID vào input ẩn trong form
+    });
 
-            $.ajax({
-                url: `/admin/color/detail/${id}`,
-                type: 'GET',
-                success: function (response) {
-                    console.log("Response:", response);
-                    $('#color_id').val(response.id);
-                    $('#color_name_update').val(response.name);
-                    $('#color_code_update').val(response.code);
-                },
-                error: function (xhr) {
-                }
-            });
-        });
-    </script>
-    <script>
-        $(document).on('click', '.thayDoiTrangThai', function () {
-            const id = $(this).data('id');
-            Swal.fire({
-                title: 'Bạn có chắc muốn đổi trạng thái?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Có',
-                cancelButtonText: 'Không'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = `/admin/color/change-status/${id}`;
-                }
-            });
-        });
+</script>
 
-    </script>
-</section>
-<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
+
 </body>
+
 </html>

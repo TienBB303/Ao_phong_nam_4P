@@ -55,21 +55,21 @@ public class ProductService {
         return productDetailRepository.save(productDetail);
     }
 
-    public Product update(Integer id, Product updateProduct){
-        if (id == null){
-            System.out.println("Do not have product with id = " + id);
-            return null;
-        }
-        Product product = productRepository.findByIdProduct(id);
-        product.setCode(updateProduct.getCode());
-        product.setName(updateProduct.getName());
-        product.setStatus(updateProduct.getStatus());
-        product.setDescription(updateProduct.getDescription());
-        product.setCategory(updateProduct.getCategory());
-        product.setBrand(updateProduct.getBrand());
-        product.setMaterial(updateProduct.getMaterial());
-
-        System.out.println("ProductForm save done!");
+    public Product update(Product product){
+//        if (id == null){
+//            System.out.println("Do not have product with id = " + id);
+//            return null;
+//        }
+//        Product product = productRepository.findByIdProduct(id);
+//        product.setCode(updateProduct.getCode());
+//        product.setName(updateProduct.getName());
+//        product.setStatus(updateProduct.getStatus());
+//        product.setDescription(updateProduct.getDescription());
+//        product.setCategory(updateProduct.getCategory());
+//        product.setBrand(updateProduct.getBrand());
+//        product.setMaterial(updateProduct.getMaterial());
+//
+//        System.out.println("ProductForm save done!");
         return productRepository.save(product);
     }
 

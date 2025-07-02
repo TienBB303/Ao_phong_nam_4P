@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.HashMap;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
+//@SessionAttributes("productForm")
 @RequestMapping("/admin/product")
 public class ProductController {
     @Autowired
@@ -61,6 +63,11 @@ public class ProductController {
         return sizeService.getAll();
     }
 
+    @ModelAttribute("productForm")
+    public ProductForm initProductForm() {
+        return new ProductForm();
+    }
+
     @GetMapping("/hien-thi")
     public String sanPham(
                         @RequestParam(defaultValue = "0") int page,
@@ -88,7 +95,7 @@ public class ProductController {
     public String viewAdd(Model model){
         if (!model.containsAttribute("productForm")) {
             ProductForm form = new ProductForm();
-            form.setVariants(List.of(new ProductDetailForm())); // tạo trước 1 dòng
+//            form.setVariants(List.of(new ProductDetailForm())); // tạo trước 1 dòng
             model.addAttribute("productForm", form);
         }
         return "admin/product_and_other/product/ProductViewAdd";
@@ -98,7 +105,6 @@ public class ProductController {
     public String viewAtribute(){
         return "admin/product_and_other/product/AtributeView";
     }
-
 
     @PostMapping("/add")
     public String AddNewProduct(
@@ -170,7 +176,6 @@ public class ProductController {
 
             productService.addProductDetail(productDetail);
         }
-
         return "redirect:/admin/product/hien-thi";
     }
 
@@ -193,11 +198,84 @@ public class ProductController {
         return "admin/product_and_other/product/ProductDetailView";
     }
 
-    @PostMapping("/update/{id}")
-    public Product updateProduct(@PathVariable("id") Integer id, @RequestBody Product product){
-        return productService.update(id, product);
+    @GetMapping("/get-detail/{id}")
+    @ResponseBody
+    public Product getDetail(@PathVariable("id") Integer id){
+        return productService.detail(id);
     }
 
+    @PostMapping("/update")
+    public String updateProduct(
+            @RequestParam("productId") Integer productId,
+            @RequestParam("productName") String productName,
+            @RequestParam("categoryId") Integer categoryId,
+            @RequestParam("brandId") Integer brandId,
+            @RequestParam("materialId") Integer materialId,
+            RedirectAttributes redirectAttributes) {
+
+        Product product = productService.findByIdProduct(productId);
+        if (product == null) {
+            redirectAttributes.addFlashAttribute("alert", "Không tìm thấy sản phẩm");
+            redirectAttributes.addFlashAttribute("type", "error");
+            return "redirect:/admin/product/hien-thi";
+        }
+        if (!productName.trim().equalsIgnoreCase(product.getName()) && productService.checkNameTrung(productName.trim())) {
+            redirectAttributes.addFlashAttribute("alert", "Tên sản phẩm trùng sản phẩm đã có");
+            redirectAttributes.addFlashAttribute("type", "error");
+            return "redirect:/admin/product/hien-thi";
+        }
+        product.setName(productName.trim());
+        product.setCategory(categoryService.findById(categoryId));
+        product.setBrand(brandService.findById(brandId));
+        product.setMaterial(materialService.findById(materialId));
+        productService.update(product);
+
+        redirectAttributes.addFlashAttribute("alert", "Cập nhật thành công");
+        redirectAttributes.addFlashAttribute("type", "success");
+
+        return "redirect:/admin/product/hien-thi";
+    }
+
+//    @GetMapping("/giu-thong-tin")
+//    public String showAddForm(
+//            @ModelAttribute("productForm") ProductForm productForm,
+//            Model model) {
+////        if (!model.containsAttribute("productForm")) {
+////            model.addAttribute("productForm", new ProductForm());
+////        }
+//        model.addAttribute("productForm", productForm);
+//
+//        model.addAttribute("listCategory", categoryService.getAll());
+//        model.addAttribute("listBrand", brandService.getAll());
+//        model.addAttribute("listMaterial", materialService.getAll());
+//        model.addAttribute("listColor", colorService.getAll());
+//        model.addAttribute("listSize", sizeService.getAll());
+//        return "admin/product_and_other/product/ProductViewAdd";
+//    }
+//    @PostMapping("/add-nhanh/category")
+//    public String addNhanh(@RequestParam("categoryName") String categoryName,
+//                           @RequestParam("categoryDescription") String categoryDescription,
+//                           RedirectAttributes redirectAttributes) {
+//
+//        if (categoryName == null || categoryName.trim().isEmpty()) {
+//            redirectAttributes.addFlashAttribute("alert", "Tên không được để trống");
+//            redirectAttributes.addFlashAttribute("type", "error");
+//            return "redirect:/admin/product/giu-thong-tin";
+//        }
+//
+//        Category checkTonTai = categoryService.findByName(categoryName.trim());
+//        if (checkTonTai != null) {
+//            redirectAttributes.addFlashAttribute("alert", "Đã tồn tại kiểu loại");
+//            redirectAttributes.addFlashAttribute("type", "error");
+//            return "redirect:/admin/product/giu-thong-tin";
+//        }
+//
+//        categoryService.addCategory(categoryName.trim(), categoryDescription);
+//        redirectAttributes.addFlashAttribute("alert", "Thêm kiểu loại thành công!");
+//        redirectAttributes.addFlashAttribute("type", "success");
+//
+//        return "redirect:/admin/product/giu-thong-tin";
+//    }
 
 
 }
