@@ -91,7 +91,7 @@
                 </div>
                 <div class="dataTable-bottom">
                     <nav th:if="${listColor.totalPages > 0}">
-                        <ul class="pagination">
+                        <ul class="pagination d-flex justify-content-end">
                             <li class="page-item" th:classappend="${listColor.first} ? 'disabled'">
                                 <a class="page-link"
                                    th:href="@{/admin/color/hien-thi(page=${listColor.number > 0 ? listColor.number - 1 : 0},  size=${listColor.size},colorNameSearch=${colorNameSearch},colorStatusSearch=${colorStatusSearch})}">
