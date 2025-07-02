@@ -1,29 +1,42 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
-<head>
-    <th:block th:insert="~{admin/fragments/head :: head}"></th:block>
-<!--    <title>4P Store</title>-->
-<!--    <link rel="icon" type="image/png" href="https://png.pngtree.com/png-vector/20221011/ourmid/pngtree-letter-v-logo-icon-vector-png-image_6295820.png">-->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/head :: head}">
+    <title>Quan ly khuyen mai | 4PStore</title>
 </head>
 <body>
 <header th:replace="~{admin/fragments/header :: header}"></header>
 <div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
-<div id="main" class="container mt-4">
-    <h3>Kiểu loại</h3>
-    <div class="card-header">
-        <a class="btn btn-outline-primary" href="/admin/product/view-atribute" style="width: 70px">
-            <i class="bi bi-arrow-return-left"></i>
-        </a>
-    </div>
-    <section>
-        <div class="container mt-5">
-            <div class="page-content">
+<section>
+    <div class="pc-container">
+        <div class="pc-content">
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="row align-items-center">
+                        <div class="col-md-12">
+                            <div class="page-header-title">
+                                <h5 class="m-b-10">Quản lý sản phẩm</h5>
+                            </div>
+                            <ul class="breadcrumb">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container discount-form-container">
+    <!-- Main-->
+    <div id="main">
+        <div class="page-heading">
+            <div class="page-title">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3>Kiểu loại</h3>
+                    <a class="btn btn-outline-primary" href="/admin/product/view-atribute" style="width: 70px">
+                        <i class="bi bi-arrow-return-left"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-content">
             <!--        dữ liệu thực hiện trong selection-->
             <section class="row">
                 <div class="card">
@@ -118,8 +131,6 @@
                 </div>
             </section>
         </div>
-        </div>
-    </section>
     </div>
     <!--    modal thêm-->
     <div class="modal fade" id="modalThemMoi" tabindex="-1" aria-labelledby="modalThemMoiLabel" aria-hidden="true">
@@ -151,7 +162,7 @@
             </div>
         </div>
     </div>
-<!--    Modal chỉnh sửa-->
+    <!--    Modal chỉnh sửa-->
     <div class="modal fade" id="modalChinhSua" tabindex="-1" aria-labelledby="modalChinhSuaLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -183,7 +194,7 @@
             </div>
         </div>
     </div>
-<!--    Script-->
+    <!--    Script-->
 
 
     <script th:if="${alert != null}" th:inline="javascript">
@@ -197,7 +208,7 @@
             timerProgressBar: true
         });
     </script>
-<!--    Detail-->
+    <!--    Detail-->
     <script>
         $(document).on('click', '.hienThiThongTinModal', function () {
             const id = $(this).data('id');
@@ -236,7 +247,7 @@
 
     </script>
 
-<footer th:replace="admin/fragments/footer :: footer"></footer>
+</section>
+<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
 </body>
-
 </html>

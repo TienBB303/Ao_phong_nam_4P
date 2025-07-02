@@ -27,7 +27,7 @@ public class Image {
 
     private String path_file;
 
-    @ManyToOne
-    @JoinColumn(name = "product_id")
-    private Product product;
+//    @ManyToOne
+//    @JoinColumn(name = "product_id")
+//    private Product product;
 }

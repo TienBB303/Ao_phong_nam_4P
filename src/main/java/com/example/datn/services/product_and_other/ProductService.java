@@ -103,6 +103,7 @@ public class ProductService {
     }
 
     public Integer tongSoLuongSPCT(Integer id){
-        return productRepository.tongSoLuongTheoSanPham(id);
+        Integer result = productRepository.tongSoLuongTheoSanPham(id);
+        return result != null ? result : 0;
     }
 }
