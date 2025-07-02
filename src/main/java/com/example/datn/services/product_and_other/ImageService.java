@@ -39,7 +39,7 @@ public class ImageService {
         Image image = imageRepository.findByIdImage(id);
         image.setPath_file(updateImage.getPath_file());
         image.setName(updateImage.getName());
-        image.setProduct(updateImage.getProduct());
+//        image.setProduct(updateImage.getProduct());
 
         System.out.println("Image save done!");
         return imageRepository.save(image);

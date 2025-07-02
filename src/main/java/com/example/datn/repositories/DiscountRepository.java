@@ -17,6 +17,7 @@ public interface DiscountRepository extends JpaRepository<Discount,Integer> {
 
     @Query("SELECT d FROM Discount d " +
             "WHERE (:code IS NULL OR d.code LIKE CONCAT('%', :code, '%')) " +
+            "AND (:codeName IS NULL OR d.codeName LIKE CONCAT('%', :codeName, '%')) " +
             "AND (:start IS NULL OR d.startDatetime >= :start) " +
             "AND (:end IS NULL OR d.endDatetime <= :end) " +
             "AND (:type IS NULL OR d.discountType = :type) " +
@@ -24,6 +25,7 @@ public interface DiscountRepository extends JpaRepository<Discount,Integer> {
             "ORDER BY d.id DESC")
     Page<Discount> filterDiscounts(
             @Param("code") String code,
+            @Param("codeName") String codeName,
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end,
             @Param("type") String type,

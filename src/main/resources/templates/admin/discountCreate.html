@@ -7,7 +7,23 @@
 <header th:replace="~{admin/fragments/header :: header}"></header>
 <div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
 <section>
-    <div class="container discount-form-container">
+    <div class="pc-container">
+        <div class="pc-content">
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="row align-items-center">
+                        <div class="col-md-12">
+                            <div class="page-header-title">
+                                <h5 class="m-b-10">Quản lý khuyến mại</h5>
+                            </div>
+                            <ul class="breadcrumb">
+                                <li class="breadcrumb-item" aria-current="page">Thêm khuyến mại</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container discount-form-container">
         <h2 class="form-title">Thông tin mã giảm giá</h2>
 
         <form th:action="@{/admin/discount/create}" th:object="${discount}" method="post" novalidate>
@@ -81,6 +97,8 @@
                 <button type="submit" class="btn btn-primary">Lưu</button>
             </div>
         </form>
+    </div>
+        </div>
     </div>
 </section>
 <script>
@@ -270,6 +288,6 @@
         });
     };
 </script>
-<header th:replace="~{admin/fragments/footer :: footer}"></header>
+<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
 </body>
 </html>

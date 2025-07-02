@@ -77,22 +77,22 @@ public class Discount {
                 return "Không xác định";
         }
     }
-    @AssertTrue(message = "Ngày bắt đầu phải nhỏ hơn ngày kết thúc")
-    @Transient
-    public boolean isStartBeforeEnd() {
-        if (startDatetime == null || endDatetime == null) {
-            return true;
-        }
-        return startDatetime.isBefore(endDatetime);
-    }
-
-    @AssertTrue(message = "Ngày kết thúc phải sau thời điểm hiện tại")
-    @Transient
-    public boolean isEndAfterNow() {
-        if (endDatetime == null) {
-            return true;
-        }
-        return endDatetime.isAfter(LocalDateTime.now());
-    }
+//    @AssertTrue(message = "Ngày bắt đầu phải nhỏ hơn ngày kết thúc")
+//    @Transient
+//    public boolean isStartBeforeEnd() {
+//        if (startDatetime == null || endDatetime == null) {
+//            return true;
+//        }
+//        return startDatetime.isBefore(endDatetime);
+//    }
+//
+//    @AssertTrue(message = "Ngày kết thúc phải sau thời điểm hiện tại")
+//    @Transient
+//    public boolean isEndAfterNow() {
+//        if (endDatetime == null) {
+//            return true;
+//        }
+//        return endDatetime.isAfter(LocalDateTime.now());
+//    }
 
 }
