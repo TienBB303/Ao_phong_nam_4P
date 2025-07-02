@@ -90,7 +90,7 @@
                 </div>
                 <div class="dataTable-bottom">
                     <nav th:if="${listBrand.totalPages > 0}">
-                        <ul class="pagination">
+                        <ul class="pagination d-flex justify-content-end">
                             <li class="page-item" th:classappend="${listBrand.first} ? 'disabled'">
                                 <a class="page-link"
                                    th:href="@{/admin/brand/hien-thi(page=${listBrand.number > 0 ? listBrand.number - 1 : 0},  size=${listBrand.size},brandNameSearch=${brandNameSearch},brandStatusSearch=${brandStatusSearch})}">

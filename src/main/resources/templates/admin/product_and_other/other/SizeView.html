@@ -91,7 +91,7 @@
                 </div>
                 <div class="dataTable-bottom">
                     <nav th:if="${listSize.totalPages > 0}">
-                        <ul class="pagination">
+                        <ul class="pagination d-flex justify-content-end">
                             <li class="page-item" th:classappend="${listSize.first} ? 'disabled'">
                                 <a class="page-link"
                                    th:href="@{/admin/size/hien-thi(page=${listSize.number > 0 ? listSize.number - 1 : 0}, size=${listSize.size},sizeNameSearch=${sizeNameSearch},sizeStatusSearch=${sizeStatusSearch})}">
