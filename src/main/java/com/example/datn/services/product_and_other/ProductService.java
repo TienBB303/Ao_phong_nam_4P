@@ -1,5 +1,6 @@
 package com.example.datn.services.product_and_other;
 
+import com.example.datn.entities.product_and_other.Category;
 import com.example.datn.entities.product_and_other.Product;
 import com.example.datn.entities.product_and_other.ProductDetail;
 import com.example.datn.repositories.product_and_other.*;
@@ -33,6 +34,10 @@ public class ProductService {
 
     public Page<Product> getAll(Pageable pageable){
         return productRepository.getAll(pageable);
+    }
+
+    public Page<Product> searchPage(String name, Boolean status, Pageable pageable){
+        return productRepository.search(name,status, pageable);
     }
 
     public Product findByIdProduct(Integer id){

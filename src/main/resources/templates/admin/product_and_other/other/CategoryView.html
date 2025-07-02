@@ -102,7 +102,7 @@
                     </div>
                     <div class="dataTable-bottom">
                         <nav th:if="${listCategory.totalPages > 0}">
-                            <ul class="pagination">
+                            <ul class="pagination d-flex justify-content-end">
                                 <li class="page-item" th:classappend="${listCategory.first} ? 'disabled'">
                                     <a class="page-link"
                                        th:href="@{/admin/category/hien-thi(page=${listCategory.number > 0 ? listCategory.number - 1 : 0}, size=${listCategory.size},categoryNameSearch=${categoryNameSearch},categoryStatusSearch=${categoryStatusSearch})}">
