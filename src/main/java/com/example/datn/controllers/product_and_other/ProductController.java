@@ -260,18 +260,18 @@ public class ProductController {
 
             productService.addProductDetail(productDetail);
         }
-        for (Integer colorId : selectedColorIds) {
-            MultipartFile[] files = colorImages.get("colorImages[" + colorId + "]");
-            if (files != null && files.length > 0) {
-                for (MultipartFile file : files) {
-                    if (!file.isEmpty()) {
-//                        String imagePath = imageService.saveFile(file); // lưu ảnh
-//                        imageService.savaImage(product, colorId, imagePath);
-                        imageService.savaImage(product, colorId, file);
-                    }
-                }
-            }
-        }
+//        for (Integer colorId : selectedColorIds) {
+//            MultipartFile[] files = colorImages.get("colorImages[" + colorId + "]");
+//            if (files != null && files.length > 0) {
+//                for (MultipartFile file : files) {
+//                    if (!file.isEmpty()) {
+////                        String imagePath = imageService.saveFile(file); // lưu ảnh
+////                        imageService.savaImage(product, colorId, imagePath);
+//                        imageService.savaImage(product, colorId, file);
+//                    }
+//                }
+//            }
+//        }
         session.removeAttribute(SESSION_PRODUCT_FORM_KEY);
         model.addAttribute("alert", "Thêm sản phẩm thành công");
         model.addAttribute("type", "success");
