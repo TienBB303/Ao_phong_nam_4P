@@ -88,6 +88,7 @@
             <table class="table table-bordered table-striped align-middle text-center">
                 <thead class="table-primary">
                 <tr>
+                    <th scope="col">Tên</th>
                     <th scope="col">Màu</th>
                     <th scope="col">Kích cỡ</th>
                     <th scope="col">Giá</th>
@@ -96,6 +97,7 @@
                 </thead>
                 <tbody>
                 <tr th:each="detail : ${listProductDetail}">
+                    <td th:text="${detail.product.name + '(' + detail.color.name + ' - ' + detail.size.code + ' )'}">Tên</td>
                     <td th:text="${detail.color.name}">Màu</td>
                     <td th:text="${detail.size.name}">Size</td>
                     <td th:text="${detail.price}">Giá</td>

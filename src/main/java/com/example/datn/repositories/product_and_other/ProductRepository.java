@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -36,6 +37,14 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     @Query("SELECT p FROM Product p " +
             "WHERE (LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')) " +
             "AND (:status IS NULL OR p.status = :status)) " +
+            "AND (:categoryId IS NULL OR p.category.id = :categoryId) " +
+            "AND (:brandId IS NULL OR p.brand.id = :brandId) " +
+            "AND (:materialId IS NULL OR p.material.id = :materialId) " +
             "ORDER BY p.id DESC")
-    Page<Product> search(String name, Boolean status, Pageable pageable);
+    Page<Product> search(String name,
+                         Boolean status,
+                         @Param("categoryId") Integer categoryId,
+                         @Param("brandId") Integer brandId,
+                         @Param("materialId") Integer materialId,
+                         Pageable pageable);
 }

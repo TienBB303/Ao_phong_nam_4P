@@ -21,12 +21,41 @@
                     <!-- Ô tìm kiếm và trạng thái -->
                     <label for="searchInput" class="form-label">Tìm kiếm sản phẩm</label>
                     <div class="row">
-                        <select id="category_search" name="productCategorySearch" class="form-select">
+                        <div class="col-4">
+                            <select id="category_search" name="productCategorySearch" class="form-select">
+                                <option value="" th:selected="${productCategorySearch == null}">Tất cả loại</option>
+                                <option th:each="cate : ${listCategory}"
+                                        th:value="${cate.id}"
+                                        th:text="${cate.name}"
+                                        th:if="${cate.status}"
+                                        th:selected="${cate.id == productCategorySearch}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-4">
+                            <select id="brand_search" name="productBrandSearch" class="form-select">
+                                <option value="" th:selected="${productBrandSearch == null}">Tất cả hãng</option>
+                                <option th:each="brand : ${listBrand}"
+                                        th:value="${brand.id}"
+                                        th:text="${brand.name}"
+                                        th:if="${brand.status}"
+                                        th:selected="${brand.id == productBrandSearch}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-4">
+                            <select id="material_search" name="productMaterialSearch" class="form-select">
+                                <option value="" th:selected="${productMaterialSearch == null}">Tất cả chất liệu</option>
+                                <option th:each="mate : ${listMaterial}"
+                                        th:value="${mate.id}"
+                                        th:text="${mate.name}"
+                                        th:if="${mate.status}"
+                                        th:selected="${mate.id == productMaterialSearch}">
+                                </option>
+                            </select>
+                        </div>
 
-                        </select>
-                        <select id="brand_search" name="productBrandSearch" class="form-select">
 
-                        </select>
                     </div>
                     <div class="row">
                         <div class="col-md-8">
@@ -113,7 +142,13 @@
                     <ul class="pagination d-flex justify-content-end">
                         <li class="page-item" th:classappend="${listProduct.first} ? 'disabled'">
                             <a class="page-link"
-                               th:href="@{/admin/product/hien-thi(page=${listProduct.number > 0 ? listProduct.number - 1 : 0}, size=${listProduct.size},productNameSearch=${productNameSearch},productStatusSearch=${productStatusSearch})}">
+                               th:href="@{/admin/product/hien-thi(page=${listProduct.number > 0 ? listProduct.number - 1 : 0},
+                                size=${listProduct.size},
+                                productNameSearch=${productNameSearch},
+                                productStatusSearch=${productStatusSearch},
+                                roductCategorySearch=${productCategorySearch},
+                                productBrandSearch=${productBrandSearch},
+                                productMaterialSearch=${productMaterialSearch})}">
                                 Trước
                             </a>
                         </li>
@@ -122,13 +157,27 @@
                             th:each="i : ${#numbers.sequence(0, listProduct.totalPages - 1)}"
                             th:classappend="${i == listProduct.number} ? 'active'">
                             <a class="page-link"
-                               th:href="@{/admin/product/hien-thi(   page=${i},  size=${listProduct.size}, productNameSearch=${productNameSearch}, productStatusSearch=${productStatusSearch})}"
+                                th:href="@{/admin/product/hien-thi(   page=${i},
+                                size=${listProduct.size},
+                                productNameSearch=${productNameSearch},
+                                productStatusSearch=${productStatusSearch},
+                                roductCategorySearch=${productCategorySearch},
+                                productBrandSearch=${productBrandSearch},
+                                productMaterialSearch=${productMaterialSearch}
+                               )}"
                                th:text="${i + 1}">1</a>
                         </li>
 
                         <li class="page-item" th:classappend="${listProduct.last} ? 'disabled'">
                             <a class="page-link"
-                               th:href="@{/admin/product/hien-thi(   page=${listProduct.number + 1}, size=${listProduct.size}, productNameSearch=${productNameSearch},    productStatusSearch=${productStatusSearch})}">
+                               th:href="@{/admin/product/hien-thi(   page=${listProduct.number + 1},
+                               size=${listProduct.size},
+                               productNameSearch=${productNameSearch},
+                               productStatusSearch=${productStatusSearch},
+                               roductCategorySearch=${productCategorySearch},
+                               productBrandSearch=${productBrandSearch},
+                               productMaterialSearch=${productMaterialSearch}
+                               )}">
                                 Sau
                             </a>
                         </li>

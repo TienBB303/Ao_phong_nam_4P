@@ -36,8 +36,8 @@ public class ProductService {
         return productRepository.getAll(pageable);
     }
 
-    public Page<Product> searchPage(String name, Boolean status, Pageable pageable){
-        return productRepository.search(name,status, pageable);
+    public Page<Product> searchPage(String name, Boolean status,Integer categoryId, Integer brandId, Integer materialId, Pageable pageable){
+        return productRepository.search(name,status, categoryId, brandId, materialId, pageable);
     }
 
     public Product findByIdProduct(Integer id){

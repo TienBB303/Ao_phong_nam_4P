@@ -4,6 +4,8 @@ import com.example.datn.dto.product.ProductDetailForm;
 import com.example.datn.dto.product.ProductForm;
 import com.example.datn.entities.product_and_other.*;
 import com.example.datn.services.product_and_other.*;
+import com.google.zxing.qrcode.decoder.Mode;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -11,16 +13,18 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.support.SessionStatus;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.util.*;
 
 @Controller
-//@SessionAttributes("productForm")
 @RequestMapping("/admin/product")
 public class ProductController {
+
+    private static final String SESSION_PRODUCT_FORM_KEY = "productFormSession";
+
     @Autowired
     private ProductService productService;
 
@@ -38,6 +42,9 @@ public class ProductController {
 
     @Autowired
     SizeService sizeService;
+
+    @Autowired
+    ImageService imageService;
 
     @ModelAttribute("listCategory")
     public List<Category> listCategory() {
@@ -63,19 +70,17 @@ public class ProductController {
         return sizeService.getAll();
     }
 
-    @ModelAttribute("productForm")
-    public ProductForm initProductForm() {
-        return new ProductForm();
-    }
-
     @GetMapping("/hien-thi")
     public String sanPham(
                         @RequestParam(value = "productNameSearch", defaultValue = "") String name,
                         @RequestParam(value = "productStatusSearch", defaultValue = "") Boolean status,
+                        @RequestParam(value = "productCategorySearch", defaultValue = "") Integer categoryId,
+                        @RequestParam(value = "productBrandSearch", defaultValue = "") Integer brandId,
+                        @RequestParam(value = "productMaterialSearch", defaultValue = "") Integer materialId,
                         @RequestParam(defaultValue = "0") int page,
                         @RequestParam(defaultValue = "5") int size,
                           Model model) {
-        Page<Product> listProduct = productService.searchPage(name.trim(), status, PageRequest.of(page, size));
+        Page<Product> listProduct = productService.searchPage(name.trim(), status, categoryId, brandId, materialId,PageRequest.of(page, size));
         Map<Integer, Integer> totalQuantity = new HashMap<>();
 
         for(Product p : listProduct){
@@ -84,6 +89,9 @@ public class ProductController {
         }
         model.addAttribute("categoryNameSearch", name.trim());
         model.addAttribute("categoryStatusSearch", status != null ? status : "");
+        model.addAttribute("productCategorySearch", categoryId);
+        model.addAttribute("productBrandSearch", brandId);
+        model.addAttribute("productMaterialSearch", materialId);
         model.addAttribute("size", size);
         model.addAttribute("totalQuantity", totalQuantity);
         model.addAttribute("listProduct", listProduct);
@@ -95,14 +103,15 @@ public class ProductController {
     public Product detailProduct(@PathVariable("id") Integer id){
         return productService.detail(id);
     }
-
+//VIEW
     @GetMapping("/view-add")
-    public String viewAdd(Model model){
-        if (!model.containsAttribute("productForm")) {
-            ProductForm form = new ProductForm();
-//            form.setVariants(List.of(new ProductDetailForm())); // tạo trước 1 dòng
-            model.addAttribute("productForm", form);
+    public String viewAdd(HttpSession session, Model model){
+        ProductForm form = (ProductForm) session.getAttribute(SESSION_PRODUCT_FORM_KEY);
+        if (form == null) {
+            form = new ProductForm();
+            session.setAttribute(SESSION_PRODUCT_FORM_KEY, form);
         }
+        model.addAttribute("productForm", form);
         return "admin/product_and_other/product/ProductViewAdd";
     }
 
@@ -111,78 +120,163 @@ public class ProductController {
         return "admin/product_and_other/product/AtributeView";
     }
 
+    @PostMapping("/add-variant")
+    @ResponseBody
+    public String addVariant(@RequestParam Integer colorId,
+                             @RequestParam Integer sizeId,
+//                             @RequestParam Integer quantity,
+//                             @RequestParam BigDecimal price,
+                             HttpSession session) {
+        ProductForm productForm = (ProductForm) session.getAttribute(SESSION_PRODUCT_FORM_KEY);
+        if (productForm == null) {
+            productForm = new ProductForm();
+        }
+
+        if (productForm.getVariants() == null) {
+            productForm.setVariants(new ArrayList<>());
+        }
+
+        boolean isDuplicate = productForm.getVariants().stream()
+                .anyMatch(p -> Objects.equals(p.getColorId(), colorId) && Objects.equals(p.getSizeId(), sizeId));
+
+        if (isDuplicate) {
+            return "duplicate";
+        }
+
+        ProductDetailForm variant = new ProductDetailForm();
+        variant.setColorId(colorId);
+        variant.setSizeId(sizeId);
+//        variant.setQuantity(quantity);
+//        variant.setPrice(price);
+        productForm.getVariants().add(variant);
+
+        session.setAttribute(SESSION_PRODUCT_FORM_KEY, productForm);
+        return "success";
+    }
+
     @PostMapping("/add")
-    public String AddNewProduct(
-            @ModelAttribute("productForm") ProductForm productForm,
-            Model model) {
+    public String AddNewProduct(HttpSession session,
+                                @RequestParam Map<String, String> params,
+                                @RequestParam Map<String, MultipartFile[]> colorImages,
+                                @ModelAttribute("productForm") ProductForm productForm,
+                                Model model) {
 
-        // Gán lại dữ liệu để hiển thị lại khi có lỗi
-        model.addAttribute("productForm", productForm);
+        // Lấy từ session, giữ lại giá tri của ô select multi
+        List<Integer> selectedColorIds = new ArrayList<>();
+        List<Integer> selectedSizeIds = new ArrayList<>();
 
-        if (productForm.getName() == null || productForm.getName().trim().isEmpty()) {
+        if (productForm.getVariants() != null) {
+            selectedColorIds = productForm.getVariants().stream()
+                    .map(ProductDetailForm::getColorId)
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .toList();
+
+            selectedSizeIds = productForm.getVariants().stream()
+                    .map(ProductDetailForm::getSizeId)
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .toList();
+        }
+
+        model.addAttribute("selectedColorIds", selectedColorIds);
+        model.addAttribute("selectedSizeIds", selectedSizeIds);
+        ProductForm sessionForm = (ProductForm) session.getAttribute(SESSION_PRODUCT_FORM_KEY);
+        if (sessionForm == null) {
+            sessionForm = new ProductForm();
+        }
+
+        sessionForm.setName(productForm.getName());
+        sessionForm.setCode(productForm.getCode());
+        sessionForm.setCategoryId(productForm.getCategoryId());
+        sessionForm.setBrandId(productForm.getBrandId());
+        sessionForm.setMaterialId(productForm.getMaterialId());
+        sessionForm.setDescription(productForm.getDescription());
+
+        sessionForm.setVariants(productForm.getVariants());
+        // Cập nhật các giá trị từ variants đang submit (quantity, price)
+        List<ProductDetailForm> currentVariants = sessionForm.getVariants();
+
+        // Validate
+        if (sessionForm.getName() == null || sessionForm.getName().trim().isEmpty()) {
             model.addAttribute("alert", "Tên sản phẩm không được để trống");
             model.addAttribute("type", "error");
+            model.addAttribute("productForm", sessionForm);
             return "admin/product_and_other/product/ProductViewAdd";
         }
 
-        if (productService.checkNameTrung(productForm.getName())) {
+        if (productService.checkNameTrung(sessionForm.getName())) {
             model.addAttribute("alert", "Tên sản phẩm trùng sản phẩm đã có");
             model.addAttribute("type", "error");
+            model.addAttribute("productForm", sessionForm);
             return "admin/product_and_other/product/ProductViewAdd";
         }
 
-        List<ProductDetailForm> variants = productForm.getVariants();
-        if (variants == null || variants.isEmpty()) {
+        if (currentVariants == null || currentVariants.isEmpty()) {
             model.addAttribute("alert", "Cần ít nhất một biến thể");
             model.addAttribute("type", "error");
+            model.addAttribute("productForm", sessionForm);
             return "admin/product_and_other/product/ProductViewAdd";
         }
 
-        for (ProductDetailForm pdf : variants) {
+        for (ProductDetailForm pdf : currentVariants) {
             if (pdf.getQuantity() == null || pdf.getQuantity() < 0) {
                 model.addAttribute("alert", "Số lượng không hợp lệ");
                 model.addAttribute("type", "error");
+                model.addAttribute("productForm", sessionForm);
                 return "admin/product_and_other/product/ProductViewAdd";
             }
-
-            if (pdf.getPrice() == null || pdf.getPrice().intValue() < 0) {
+            if (pdf.getPrice() == null || pdf.getPrice().compareTo(BigDecimal.ZERO) < 0) {
                 model.addAttribute("alert", "Giá không hợp lệ");
                 model.addAttribute("type", "error");
+                model.addAttribute("productForm", sessionForm);
                 return "admin/product_and_other/product/ProductViewAdd";
             }
-
         }
 
         Product product = new Product();
-        String code = (productForm.getCode() == null || productForm.getCode().trim().isEmpty())
+        String code = (sessionForm.getCode() == null || sessionForm.getCode().trim().isEmpty())
                 ? productService.taoMaTuDongSanPham()
-                : productForm.getCode().trim();
-        product.setCode(code);
-        product.setName(productForm.getName());
-        product.setDescription(productForm.getDescription());
+                : sessionForm.getCode().trim();
+        product.setCode(code.trim());
+        product.setName(sessionForm.getName().trim());
+        product.setDescription(sessionForm.getDescription().trim());
         product.setStatus(true);
-
-        product.setCategory(categoryService.findById(productForm.getCategoryId()));
-        product.setBrand(brandService.findById(productForm.getBrandId()));
-        product.setMaterial(materialService.findById(productForm.getMaterialId()));
+        product.setCategory(categoryService.findById(sessionForm.getCategoryId()));
+        product.setBrand(brandService.findById(sessionForm.getBrandId()));
+        product.setMaterial(materialService.findById(sessionForm.getMaterialId()));
 
         productService.addProduct(product);
 
-        for (ProductDetailForm pdf : variants) {
+        for (ProductDetailForm pdf : currentVariants) {
             ProductDetail productDetail = new ProductDetail();
             productDetail.setProduct(product);
             productDetail.setColor(colorService.findById(pdf.getColorId()));
             productDetail.setSize(sizeService.findById(pdf.getSizeId()));
             productDetail.setPrice(pdf.getPrice());
             productDetail.setQuantity(pdf.getQuantity());
-
-            String barcode = product.getCode() + "-C" + pdf.getColorId() + "-S" + pdf.getSizeId();
-            productDetail.setBarcode(barcode);
+            productDetail.setBarcode(product.getCode() + "-C" + pdf.getColorId() + "-S" + pdf.getSizeId());
 
             productService.addProductDetail(productDetail);
         }
+        for (Integer colorId : selectedColorIds) {
+            MultipartFile[] files = colorImages.get("colorImages[" + colorId + "]");
+            if (files != null && files.length > 0) {
+                for (MultipartFile file : files) {
+                    if (!file.isEmpty()) {
+//                        String imagePath = imageService.saveFile(file); // lưu ảnh
+//                        imageService.savaImage(product, colorId, imagePath);
+                        imageService.savaImage(product, colorId, file);
+                    }
+                }
+            }
+        }
+        session.removeAttribute(SESSION_PRODUCT_FORM_KEY);
+        model.addAttribute("alert", "Thêm sản phẩm thành công");
+        model.addAttribute("type", "success");
         return "redirect:/admin/product/hien-thi";
     }
+
 
     @GetMapping("/view-detail/{id}")
     public String viewDetailProduct(@PathVariable("id") Integer id, Model model){
@@ -208,7 +302,7 @@ public class ProductController {
     public Product getDetail(@PathVariable("id") Integer id){
         return productService.detail(id);
     }
-
+//update chung
     @PostMapping("/update")
     public String updateProduct(
             @RequestParam("productId") Integer productId,
@@ -241,46 +335,36 @@ public class ProductController {
         return "redirect:/admin/product/hien-thi";
     }
 
-    @GetMapping("/giu-thong-tin")
-    public String showAddForm(
-            @ModelAttribute("productForm") ProductForm productForm,
-            Model model) {
-//        if (!model.containsAttribute("productForm")) {
-//            model.addAttribute("productForm", new ProductForm());
-//        }
-        model.addAttribute("productForm", productForm);
-
-        model.addAttribute("listCategory", categoryService.getAll());
-        model.addAttribute("listBrand", brandService.getAll());
-        model.addAttribute("listMaterial", materialService.getAll());
-        model.addAttribute("listColor", colorService.getAll());
-        model.addAttribute("listSize", sizeService.getAll());
-        return "admin/product_and_other/product/ProductViewAdd";
-    }
     @PostMapping("/add-nhanh/category")
     public String addNhanh(@RequestParam("categoryName") String categoryName,
                            @RequestParam("categoryDescription") String categoryDescription,
-                           RedirectAttributes redirectAttributes) {
-
+                           HttpSession session,
+                           Model model) {
+        ProductForm productForm = (ProductForm) session.getAttribute(SESSION_PRODUCT_FORM_KEY);
+        model.addAttribute("productForm", productForm);
+        model.addAttribute("listCategory", categoryService.getAll());
+        model.addAttribute("listBrand", brandService.getAll());
+        model.addAttribute("listMaterial", materialService.getAll());
         if (categoryName == null || categoryName.trim().isEmpty()) {
-            redirectAttributes.addFlashAttribute("alert", "Tên không được để trống");
-            redirectAttributes.addFlashAttribute("type", "error");
-            return "redirect:/admin/product/giu-thong-tin";
+            model.addAttribute("alert", "Tên sản phẩm không được để trống");
+            model.addAttribute("type", "error");
+            return "admin/product_and_other/product/ProductViewAdd";
         }
 
         Category checkTonTai = categoryService.findByName(categoryName.trim());
         if (checkTonTai != null) {
-            redirectAttributes.addFlashAttribute("alert", "Đã tồn tại kiểu loại");
-            redirectAttributes.addFlashAttribute("type", "error");
-            return "redirect:/admin/product/giu-thong-tin";
+            model.addAttribute("alert", "Đã tồn tại kiểu loại");
+            model.addAttribute("type", "error");
+            return "admin/product_and_other/product/ProductViewAdd";
         }
 
         categoryService.addCategory(categoryName.trim(), categoryDescription);
-        redirectAttributes.addFlashAttribute("alert", "Thêm kiểu loại thành công!");
-        redirectAttributes.addFlashAttribute("type", "success");
 
-        return "redirect:/admin/product/giu-thong-tin";
+        model.addAttribute("alert", "Thêm kiểu loại thành công!");
+        model.addAttribute("type", "success");
+        return "admin/product_and_other/product/ProductViewAdd";
     }
+
 
 
 }
