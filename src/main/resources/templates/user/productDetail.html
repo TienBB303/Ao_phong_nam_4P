@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" layout:decorate="~{user/layout-user.html}">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Chi tiết sản phẩm</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.css" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <main class="mt-5 pt-4">
+        <div class="container mt-5">
+            <div class="row g-4">
+                <!-- Ảnh sản phẩm -->
+                <div class="col-md-6">
+                    <div class="bg-light rounded shadow-sm p-3">
+                        <img th:src="@{/images/default-product.jpg}" class="img-fluid rounded" alt="Hình ảnh sản phẩm">
+                    </div>
+                </div>
+
+                <!-- Thông tin sản phẩm -->
+                <div class="col-md-6">
+                    <div class="p-3">
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="badge bg-dark me-2" th:text="${product.brand.name}"></span>
+                            <span class="badge bg-danger" th:text="${product.material.name}"></span>
+                        </div>
+
+                        <h2 class="fw-bold mb-3" th:text="${product.name}">Tên sản phẩm</h2>
+                          <div class="mb-3">
+                                <label for="colorSelect" class="form-label">Chọn màu:</label>
+                                <select id="colorSelect" name="colorId" class="form-select form-select-sm w-50">
+                                <option disabled selected>-- Chọn màu --</option>
+                                    <option th:each="color : ${colors}" th:value="${color.id}" th:text="${color.name}"></option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="sizeSelect" class="form-label">Chọn size:</label>
+                                <select id="sizeSelect" name="sizeId" class="form-select form-select-sm w-50">
+                                <option disabled selected>-- Chọn size --</option>
+                                    <option th:each="size : ${sizes}" th:value="${size.id}" th:text="${size.name}"></option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="quantity" class="form-label">Số lượng:</label>
+                                <input type="number" id="quantity" name="quantity" value="1" min="1" class="form-control w-25">
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">
+                                Thêm vào giỏ
+                            </button>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Divider -->
+            <hr class="my-5"/>
+
+            <!-- Sản phẩm liên quan -->
+            <h4 class="mb-4 text-center">Sản phẩm liên quan</h4>
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <img src="" class="img-fluid rounded shadow-sm" alt="">
+                    <h5 class="card-title" th:text="${product.name}">Tên sản phẩm</h5>
+                    <a th:href="@{'/product-detail/' + ${product.code}}" class="btn btn-outline-primary btn-sm">Chi tiết</a>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.js"></script>
+</body>
+</html>

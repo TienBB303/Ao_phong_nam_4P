@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{user/layout-user.html}">
+
+<head>
+    <meta charset="UTF-8">
+    <title layout:title-pattern="$CONTENT_TITLE - Trang người dùng">Danh sách sản phẩm</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.3.0/mdb.min.css" rel="stylesheet"/>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="container my-5">
+        <h3 class="mb-4 text-center">Danh sách sản phẩm</h3>
+        <div class="row">
+            <div class="col-md-3 mb-4" th:each="product : ${listProduct}">
+                <div class="card h-100 shadow-sm">
+                    <div class="bg-image hover-overlay ripple" data-mdb-ripple-color="light">
+                        <img src=""
+                             class="img-fluid"
+                             style="width: 100%; height: 250px; object-fit: cover; object-position: center;"
+                             alt="Ảnh sản phẩm" />
+                        <a th:href="@{'/product-detail/' + ${product.code}}">
+                            <div class="mask" style="background-color: rgba(0, 0, 0, 0.1);"></div>
+                        </a>
+                    </div>
+                    <div class="card-body text-center">
+                        <h5 class="card-title" th:text="${product.name}">Tên sản phẩm</h5>
+                        <p class="card-text text-muted">
+                            Số lượng: <span th:text="${totalQuantity[product.id]}"></span>
+                        </p>
+                        <a th:href="@{'/product-detail/' + ${product.code}}" class="btn btn-outline-primary btn-sm">Chi tiết</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PHÂN TRANG -->
+        <nav th:if="${listProduct.totalPages > 1}">
+            <ul class="pagination justify-content-center mt-4">
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link" th:href="@{/product(page=${currentPage - 1})}">«</a>
+                </li>
+                <li class="page-item"
+                    th:each="page : ${#numbers.sequence(0, listProduct.totalPages - 1)}"
+                    th:classappend="${page == currentPage} ? 'active'">
+                    <a class="page-link" th:href="@{/product(page=${page})}" th:text="${page + 1}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${currentPage + 1 == listProduct.totalPages} ? 'disabled'">
+                    <a class="page-link" th:href="@{/product(page=${currentPage + 1})}">»</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.3.0/mdb.min.js"></script>
+</body>
+</html>
