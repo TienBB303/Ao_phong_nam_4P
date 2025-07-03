@@ -71,17 +71,19 @@ public class ProductController {
     @GetMapping("/hien-thi")
     public String sanPham(
                         @RequestParam(defaultValue = "0") int page,
-                        @RequestParam(defaultValue = "10") int size,
+                        @RequestParam(defaultValue = "5") int size,
                           Model model) {
         Page<Product> listProduct = productService.getAll(PageRequest.of(page, size));
         Map<Integer, Integer> totalQuantity = new HashMap<>();
-        for (Product p : listProduct) {
-            totalQuantity.put(p.getId(), productService.tongSoLuongSPCT(p.getId()));
-        }
 
-        model.addAttribute("listProduct", listProduct);
+        for(Product p : listProduct){
+            int total = productService.tongSoLuongSPCT(p.getId());
+            totalQuantity.put(p.getId(),total);
+        }
         model.addAttribute("totalQuantity", totalQuantity);
-        return "user/shopProduct";
+        model.addAttribute("listProduct", listProduct);
+        model.addAttribute("currentPage", page);
+        return "admin/product_and_other/product/ProductView";
     }
 
     @GetMapping("/detail/{id}")
