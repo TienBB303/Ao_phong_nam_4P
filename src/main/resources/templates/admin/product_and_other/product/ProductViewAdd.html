@@ -14,7 +14,6 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
 </head>
 <body>
 <header th:replace="~{admin/fragments/header :: header}"></header>
@@ -147,12 +146,12 @@
 
                 <hr>
                 <div id="variant-list">
-                    <!--                    <div th:each="variant, stat : ${productForm.variants}" class="variant-item row mb-3">-->
+                    <div th:each="variant, stat : ${productForm.variants}" class="variant-item row mb-3">
 
-                    <div th:each="colorId : ${selectedColorIds}" class="mb-4 border p-3 rounded">
-                        <h5 th:text="'Màu: ' + ${#lists.select(listColor, c -> c.id == colorId)[0].name}"></h5>
-                        <div th:each="variant, stat : ${productForm.variants}"
-                             th:if="${variant.colorId == colorId}" class="variant-item row mb-2">
+<!--                    <div th:each="colorId : ${selectedColorIds}" class="mb-4 border p-3 rounded">-->
+<!--                        <h5 th:text="'Màu: ' + ${#lists.select(listColor, c -> c.id == colorId)[0].name}"></h5>-->
+<!--                        <div th:each="variant, stat : ${productForm.variants}"-->
+<!--                             th:if="${variant.colorId == colorId}" class="variant-item row mb-2">-->
                             <!-- Màu sắc -->
                             <div class="col-md-2">
                                 <label>Màu sắc</label>
@@ -193,23 +192,22 @@
                                        th:value="${variant.price}" min="0">
                             </div>
 
-
                             <!-- Nút Xóa -->
                             <div class="col-md-2 d-flex align-items-end">
                                 <button type="button" class="btn btn-danger remove-variant">Xóa</button>
                             </div>
                         </div>
                         <!-- Upload ảnh cho màu -->
-                        <div class="mt-3">
-                            <label th:text="'Ảnh cho màu: ' + ${#lists.find(listColor, c : c.id == colorId)?.name}"></label>
-                            <input type="file"
-                                   th:name="'colorImages[' + ${colorId} + ']'"
-                                   multiple
-                                   class="form-control"
-                                   accept="image/*">
-                        </div>
+<!--                        <div class="mt-3">-->
+<!--                            <label th:text="'Ảnh cho màu: ' + ${#lists.find(listColor, c : c.id == colorId)?.name}"></label>-->
+<!--                            <input type="file"-->
+<!--                                   th:name="'colorImages[' + ${colorId} + ']'"-->
+<!--                                   multiple-->
+<!--                                   class="form-control"-->
+<!--                                   accept="image/*">-->
+<!--                        </div>-->
                     </div>
-                </div>
+<!--                </div>-->
                 <div class="mb-3">
                     <button type="button" class="btn btn-success" id="add-variant-btn">Thêm biến thể</button>
                 </div>
@@ -251,36 +249,6 @@
                     </div>
                 </form>
             </div>
-        </section>
-    </div>
-    <!--Modal add thuộc tính nhanh-->
-    <div class="modal fade" id="modalThemMoi" tabindex="-1" aria-labelledby="modalThemMoiLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalThemMoiLabel">Thêm mới kiểu loại</h5>
-                </div>
-                <div class="modal-body">
-                    <form id="addCategory" method="post" action="/admin/product/add-nhanh/category">
-                        <div class="mb-3">
-                            <label for="category_name" class="form-label">Tên kiểu loại</label><span class="text-danger">*</span>
-                            <input type="text" class="form-control" id="category_name" name="categoryName" placeholder="Nhập tên kiểu loại">
-                        </div>
-                        <div class="mb-3">
-                            <label for="category_description" class="form-label">Mô tả</label>
-                            <input type="text" class="form-control" id="category_description" name="categoryDescription" placeholder="Nhập mô tả">
-                        </div>
-                        <div class="modal-footer">
-                            <button type="submit" class="btn btn-outline-success">
-                                <i class="bi bi-check-lg"></i>
-                            </button>
-                            <button type="button" class="btn btn-outline-warning" data-bs-dismiss="modal">
-                                <i class="bi bi-x"></i>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
         </div>
     </div>
 </div>
@@ -304,9 +272,8 @@
 <script>
     let variantIndex = 0;
 
-
-        function createVariantItem(colorId, colorName, sizeId, sizeName) {
-            return `
+    function createVariantItem(colorId, colorName, sizeId, sizeName) {
+        return `
         <div class="variant-item row mb-3">
             <div class="col-md-2">
                 <label>Màu sắc</label>
@@ -331,29 +298,28 @@
             </div>
         </div>
         `;
-        }
+    }
 
-        function updateVariantIndexes() {
-            $('#variant-list .variant-item').each(function (i) {
-                $(this).find('input, select').each(function () {
-                    const nameAttr = $(this).attr('name');
-                    if (nameAttr) {
-                        const newName = nameAttr.replace(/\[\d+\]/, `[${i}]`);
-                        $(this).attr('name', newName);
-                    }
-                });
+    function updateVariantIndexes() {
+        $('#variant-list .variant-item').each(function (i) {
+            $(this).find('input, select').each(function () {
+                const nameAttr = $(this).attr('name');
+                if (nameAttr) {
+                    const newName = nameAttr.replace(/\[\d+\]/, `[${i}]`);
+                    $(this).attr('name', newName);
+                }
             });
-            variantIndex = $('#variant-list .variant-item').length;
-        }
+        });
+        variantIndex = $('#variant-list .variant-item').length;
+    }
 
     $(document).ready(function () {
         $('#multi_color').select2({placeholder: 'Chọn màu sắc'});
         $('#multi_size').select2({placeholder: 'Chọn kích cỡ'});
 
-
-            $('#add-variant-btn').on('click', function () {
-                const selectedColors = $('#multi_color').val();
-                const selectedSizes = $('#multi_size').val();
+        $('#add-variant-btn').on('click', function () {
+            const selectedColors = $('#multi_color').val();
+            const selectedSizes = $('#multi_size').val();
 
             let countAdded = 0;
 
