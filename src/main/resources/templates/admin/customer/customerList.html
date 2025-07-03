@@ -1,207 +1,145 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Danh sách khách hàng</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://unpkg.com/@tabler/icons-webfont@2.30.0/tabler-icons.min.css" rel="stylesheet">
-
-    <style>
-        body {
-            background-color: white; /* Nền trắng */
-            color: black;            /* Chữ đen */
-        }
-
-        /* Giao diện input/select */
-        .filter-section input,
-        .filter-section select {
-            border-radius: 6px;
-            color: black;
-        }
-
-        .table thead {
-            background-color: #f1f1f1;
-        }
-
-        /* Trạng thái hoạt động */
-        .badge-status {
-            font-size: 0.9rem;
-            padding: 4px 8px;
-            border-radius: 8px;
-        }
-
-        .badge-active {
-            color: #198754;
-            background-color: #d1e7dd;
-        }
-
-        .badge-inactive {
-            color: #dc3545;
-            background-color: #f8d7da;
-        }
-
-        /* Nút icon */
-        .btn-icon {
-            border: none;
-            background: none;
-            font-size: 1.2rem;
-            cursor: pointer;
-            color: black;
-            transition: color 0.2s ease;
-        }
-
-        .btn-icon:hover {
-            color: #0d6efd; /* Màu xanh khi hover */
-        }
-
-        /* Link (th:href) và button */
-        a, button {
-            color: black;
-            transition: color 0.2s ease;
-        }
-
-        a:hover,
-        button:hover {
-            color: #0d6efd !important; /* Hover màu xanh */
-        }
-
-        /* Chỉ sửa màu nút phân trang (button) */
-        .pagination .page-link {
-            background-color: white !important;
-            color: #0d6efd !important;
-            border: 1px solid #0d6efd !important;
-        }
-
-        .pagination .page-link:hover {
-            background-color: #e9f1ff !important;
-            color: #0a58ca !important;
-            border-color: #0a58ca !important;
-        }
-
-        .pagination .page-item.active .page-link {
-            background-color: #0d6efd !important;
-            color: white !important;
-            border-color: #0d6efd !important;
-        }
-
-    </style>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/head :: head}">
+    <title>Quan ly khach hang| 4PStore</title>
 </head>
 <body>
-<div class="container mt-5">
-    <div th:if="${error}" class="alert alert-warning alert-dismissible fade show" role="alert">
-        <span th:text="${error}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
-        <span th:text="${message}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-
-    <h4 class="mb-4 fw-semibold">Danh sách khách hàng</h4>
-
-    <form class="p-4 rounded shadow-sm mb-4" method="get">
-        <div class="row gy-3 align-items-end">
-            <div class="col-md-3">
-                <label for="keyword" class="form-label">Tìm kiếm theo tên hoặc mã KH</label>
-                <input type="text" name="keyword" id="keyword" class="form-control"
-                       placeholder="Nhập tên hoặc mã..." th:value="${keyword}">
+<header th:replace="~{admin/fragments/header :: header}"></header>
+<div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
+<section>
+    <div class="pc-container">
+        <div class="pc-content">
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="row align-items-center">
+                        <div class="col-md-12">
+                            <div class="page-header-title">
+                                <h5 class="m-b-10">Quản lý khách hàng</h5>
+                            </div>
+                            <ul class="breadcrumb">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
+            <div class="container mt-5">
+                <div th:if="${error}" class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <span th:text="${message}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
 
-            <div class="col-md-2">
-                <button type="button" class="btn btn-primary w-100" id="search-btn">
-                    <i class="ti ti-search me-1"></i> Tìm kiếm
-                </button>
+                <h4 class="mb-4 fw-semibold">Danh sách khách hàng</h4>
 
+                <form class="p-4 rounded shadow-sm mb-4" method="get">
+                    <div class="row gy-3 align-items-end">
+                        <div class="col-md-3">
+                            <label for="keyword" class="form-label">Tìm kiếm theo tên hoặc mã KH</label>
+                            <input type="text" name="keyword" id="keyword" class="form-control"
+                                   placeholder="Nhập tên hoặc mã..." th:value="${keyword}">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-primary w-100" id="search-btn">
+                                <i class="ti ti-search me-1"></i> Tìm kiếm
+                            </button>
+
+                        </div>
+                        <div class="col-md-2">
+                            <a th:href="@{/admin/customer/view}" class="btn btn-outline-secondary w-100">
+                                Hủy
+                            </a>
+                        </div>
+                    </div>
+                </form>
+                <a th:href="@{/admin/customer/create}" class="btn btn-primary mb-3">➕ Thêm mới khách hàng</a>
+                <table class="table table-hover table-bordered align-middle text-center">
+                    <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Mã KH</th>
+                        <th>Họ tên</th>
+                        <th>Email</th>
+                        <th>Phone number</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="c, iterStat : ${customerPage.content}" th:if="${c != null}">
+                        <td th:text="${iterStat.index + 1}"></td>
+                        <td th:text="${c.code != null ? c.code : ''}"></td>
+                        <td th:text="${c.name != null ? c.name : ''}"></td>
+                        <td th:text="${c.email != null ? c.email : ''}"></td>
+                        <td th:text="${c.phoneNumber != null ? c.phoneNumber : ''}"></td>
+                        <td>
+                            <span th:if="${c.isActive != null and c.isActive}"
+                                  class="badge badge-active">Hoạt động</span>
+                            <span th:if="${c.isActive != null and !c.isActive}" class="badge badge-inactive">Không hoạt động</span>
+                            <span th:if="${c.isActive == null}" class="badge badge-inactive">Không xác định</span>
+                        </td>
+                        <td>
+                            <a th:href="${c.id != null ? '/admin/customer/edit/' + c.id : '#'}">
+                                <button class="btn-icon text-dark">✏️</button>
+                            </a>
+                            <a th:href="${c.id != null ? '/admin/customer/delete/' + c.id : '#'}">
+                                <button class="btn-icon text-danger" onclick="return confirm('Bạn có chắc muốn xóa?')">
+                                    🗑️
+                                </button>
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <div class="mt-3">
+                    <nav>
+                        <ul class="pagination">
+                            <li class="page-item" th:if="${currentPage > 0}">
+                                <a class="page-link" href="javascript:void(0)"
+                                   onclick="changePage([[${currentPage - 1}]])">«</a>
+                            </li>
+                            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                th:classappend="${i == currentPage} ? 'active'">
+                                <a class="page-link" href="javascript:void(0)" th:text="${i + 1}"
+                                   th:onclick="'changePage(' + ${i} + ')'"></a>
+                            </li>
+                            <li class="page-item" th:if="${currentPage < totalPages - 1}">
+                                <a class="page-link" href="javascript:void(0)"
+                                   onclick="changePage([[${currentPage + 1}]])">»</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
             </div>
+            <script>
+                // Hàm thay đổi trang khi click vào nút phân trang
+                function changePage(page) {
+                    const params = new URLSearchParams(window.location.search); // Lấy các tham số hiện tại trên URL
+                    params.set("page", page); // Thiết lập tham số 'page' mới
+                    window.location.search = params.toString(); // Tải lại trang với URL mới
+                }
 
-            <div class="col-md-2">
-                <a th:href="@{/admin/customer/view}" class="btn btn-outline-secondary w-100">
-                    Hủy
-                </a>
-            </div>
+                // Khi DOM đã được tải hoàn toàn
+                document.addEventListener("DOMContentLoaded", function () {
+                    const searchBtn = document.getElementById("search-btn"); // Lấy nút tìm kiếm
+                    if (searchBtn) {
+                        searchBtn.addEventListener("click", function (e) {
+                            e.preventDefault(); // Ngăn chặn hành vi submit mặc định của form
+                            const params = new URLSearchParams();
+                            params.set("page", 0); // Đặt lại về trang đầu tiên khi tìm kiếm
+                            params.set("keyword", document.querySelector("input[name='keyword']").value); // Lấy giá trị từ input keyword
+                            window.location.search = params.toString(); // Tải lại trang với tham số tìm kiếm
+                        });
+                    }
+                });
+            </script>
         </div>
-    </form>
-
-    <a th:href="@{/admin/customer/create}" class="btn btn-primary mb-3">➕ Thêm mới khách hàng</a>
-    <table class="table table-hover table-bordered align-middle text-center">
-        <thead>
-        <tr>
-            <th>STT</th>
-            <th>Mã KH</th>
-            <th>Họ tên</th>
-            <th>Email</th>
-            <th>Phone number</th>
-            <th>Trạng thái</th>
-            <th>Thao tác</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="c, iterStat : ${customerPage.content}" th:if="${c != null}">
-            <td th:text="${iterStat.index + 1}"></td>
-            <td th:text="${c.code != null ? c.code : ''}"></td>
-            <td th:text="${c.name != null ? c.name : ''}"></td>
-            <td th:text="${c.email != null ? c.email : ''}"></td>
-            <td th:text="${c.phoneNumber != null ? c.phoneNumber : ''}"></td>
-            <td>
-                <span th:if="${c.isActive != null and c.isActive}" class="badge badge-active">Hoạt động</span>
-                <span th:if="${c.isActive != null and !c.isActive}" class="badge badge-inactive">Không hoạt động</span>
-                <span th:if="${c.isActive == null}" class="badge badge-inactive">Không xác định</span>
-            </td>
-            <td>
-                <a th:href="${c.id != null ? '/admin/customer/edit/' + c.id : '#'}">
-                    <button class="btn-icon text-dark">✏️</button>
-                </a>
-                <a th:href="${c.id != null ? '/admin/customer/delete/' + c.id : '#'}">
-                    <button class="btn-icon text-danger" onclick="return confirm('Bạn có chắc muốn xóa?')">🗑️</button>
-                </a>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-
-    <div class="mt-3">
-        <nav>
-            <ul class="pagination">
-                <li class="page-item" th:if="${currentPage > 0}">
-                    <a class="page-link" href="javascript:void(0)" onclick="changePage([[${currentPage - 1}]])">«</a>
-                </li>
-                <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                    th:classappend="${i == currentPage} ? 'active'">
-                    <a class="page-link" href="javascript:void(0)" th:text="${i + 1}"
-                       th:onclick="'changePage(' + ${i} + ')'"></a>
-                </li>
-                <li class="page-item" th:if="${currentPage < totalPages - 1}">
-                    <a class="page-link" href="javascript:void(0)" onclick="changePage([[${currentPage + 1}]])">»</a>
-                </li>
-            </ul>
-        </nav>
     </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-<script>
-    // Hàm thay đổi trang khi click vào nút phân trang
-    function changePage(page) {
-        const params = new URLSearchParams(window.location.search); // Lấy các tham số hiện tại trên URL
-        params.set("page", page); // Thiết lập tham số 'page' mới
-        window.location.search = params.toString(); // Tải lại trang với URL mới
-    }
-
-    // Khi DOM đã được tải hoàn toàn
-    document.addEventListener("DOMContentLoaded", function () {
-        const searchBtn = document.getElementById("search-btn"); // Lấy nút tìm kiếm
-        if (searchBtn) {
-            searchBtn.addEventListener("click", function (e) {
-                e.preventDefault(); // Ngăn chặn hành vi submit mặc định của form
-                const params = new URLSearchParams();
-                params.set("page", 0); // Đặt lại về trang đầu tiên khi tìm kiếm
-                params.set("keyword", document.querySelector("input[name='keyword']").value); // Lấy giá trị từ input keyword
-                window.location.search = params.toString(); // Tải lại trang với tham số tìm kiếm
-            });
-        }
-    });
-</script>
-
+</section>
+<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
 </body>
 </html>

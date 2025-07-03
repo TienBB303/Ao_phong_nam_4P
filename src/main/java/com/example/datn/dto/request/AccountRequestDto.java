@@ -36,6 +36,9 @@ public class AccountRequestDto {
     @Past(message = "Ngay sinh phai o qua khu!")
     private LocalDate birthOfDate;
 
+
+    private String addressDetail;
+
     @Pattern(regexp = "^(Nam|Nữ)$", message = "Gioi tinh phai la Nam hoac Nu!")
     private String gender;
 

@@ -1,8 +1,9 @@
 package com.example.datn.repositories.product_and_other;
 
-import com.example.datn.entities.product_and_other.Category;
+import com.example.datn.entities.product_and_other.Color;
 import com.example.datn.entities.product_and_other.Product;
 import com.example.datn.entities.product_and_other.ProductDetail;
+import com.example.datn.entities.product_and_other.Size;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -33,6 +34,12 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 
     @Query("SELECT pd FROM ProductDetail pd WHERE pd.product.id = :id")
     List<ProductDetail> findAllProductDetail(Integer id);
+    @Query("SELECT DISTINCT pd.color FROM ProductDetail pd WHERE pd.product.id = :productId")
+    List<Color> findColorsByProductId(@Param("productId") Integer productId);
+
+    @Query("SELECT DISTINCT pd.size FROM ProductDetail pd WHERE pd.product.id = :productId")
+    List<Size> findSizesByProductId(@Param("productId") Integer productId);
+    Product findByCode(String code);
 
     @Query("SELECT p FROM Product p " +
             "WHERE (LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')) " +

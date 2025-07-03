@@ -76,6 +76,7 @@ public class ImageService {
             pd.setImage(image);
             productDetailRepository.save(pd); // lưu cập nhật
         }
+
     }
 //
 //    public Image detail(Integer id){

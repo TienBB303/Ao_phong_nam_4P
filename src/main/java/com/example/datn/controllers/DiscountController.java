@@ -25,6 +25,7 @@ public class DiscountController {
     @GetMapping("/view")
     public String viewDiscounts(
             @RequestParam(defaultValue = "") String code,
+            @RequestParam(defaultValue = "") String codeName,
             @RequestParam(required = false) LocalDate start,
             @RequestParam(required = false) LocalDate end,
             @RequestParam(defaultValue = "") String type,
@@ -33,12 +34,13 @@ public class DiscountController {
             @RequestParam(defaultValue = "5") int size,
             Model model
     ) {
-        Page<Discount> pageDiscounts = discountService.getFilteredDiscounts(code, start, end, type, status, page, size);
+        Page<Discount> pageDiscounts = discountService.getFilteredDiscounts(code,codeName, start, end, type, status, page, size);
 
         model.addAttribute("list", pageDiscounts.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", pageDiscounts.getTotalPages());
         model.addAttribute("code", code);
+        model.addAttribute("codeName", codeName);
         model.addAttribute("start", start);
         model.addAttribute("end", end);
         model.addAttribute("type", type);

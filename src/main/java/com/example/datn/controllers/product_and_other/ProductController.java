@@ -81,6 +81,7 @@ public class ProductController {
                         @RequestParam(defaultValue = "5") int size,
                           Model model) {
         Page<Product> listProduct = productService.searchPage(name.trim(), status, categoryId, brandId, materialId,PageRequest.of(page, size));
+
         Map<Integer, Integer> totalQuantity = new HashMap<>();
 
         for(Product p : listProduct){

@@ -18,7 +18,4 @@ public class Role {
     private Integer id;
 
     private String name;
-
-    @OneToOne(mappedBy = "role")
-    private Account account;
 }

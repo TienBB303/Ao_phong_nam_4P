@@ -17,18 +17,20 @@ public class DiscountService {
     @Autowired
     private DiscountRepository discountRepository;
 
-    public Page<Discount> getFilteredDiscounts(String code, LocalDate start, LocalDate end, String type, Integer status, int page, int size) {
+    public Page<Discount> getFilteredDiscounts(String code,String codeName, LocalDate start, LocalDate end, String type, Integer status, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         LocalDateTime startDateTime = (start != null) ? start.atStartOfDay() : null;
         LocalDateTime endDateTime = (end != null) ? end.atTime(23, 59, 59) : null;
 
         Page<Discount> pageDiscounts = discountRepository.filterDiscounts(
                 code.isEmpty() ? null : code,
+                codeName.isEmpty() ? null : codeName,
                 startDateTime,
                 endDateTime,
                 type.isEmpty() ? null : type,
                 status,
                 pageable
+
         );
 
         LocalDateTime now = LocalDateTime.now();
