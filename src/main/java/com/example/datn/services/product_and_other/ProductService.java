@@ -1,8 +1,9 @@
 package com.example.datn.services.product_and_other;
 
-import com.example.datn.entities.product_and_other.Category;
+import com.example.datn.entities.product_and_other.Color;
 import com.example.datn.entities.product_and_other.Product;
 import com.example.datn.entities.product_and_other.ProductDetail;
+import com.example.datn.entities.product_and_other.Size;
 import com.example.datn.repositories.product_and_other.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -34,10 +35,6 @@ public class ProductService {
 
     public Page<Product> getAll(Pageable pageable){
         return productRepository.getAll(pageable);
-    }
-
-    public Page<Product> searchPage(String name, Boolean status, Pageable pageable){
-        return productRepository.search(name,status, pageable);
     }
 
     public Product findByIdProduct(Integer id){
@@ -105,5 +102,15 @@ public class ProductService {
     public Integer tongSoLuongSPCT(Integer id){
         Integer result = productRepository.tongSoLuongTheoSanPham(id);
         return result != null ? result : 0;
+    }
+    public List<Color> findColorsByProductId(Integer productId) {
+        return productRepository.findColorsByProductId(productId);
+    }
+
+    public List<Size> findSizesByProductId(Integer productId) {
+        return productRepository.findSizesByProductId(productId);
+    }
+    public Product findByCode(String code) {
+        return productRepository.findByCode(code);
     }
 }

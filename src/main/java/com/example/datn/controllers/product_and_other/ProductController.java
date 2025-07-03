@@ -70,21 +70,16 @@ public class ProductController {
 
     @GetMapping("/hien-thi")
     public String sanPham(
-                        @RequestParam(value = "productNameSearch", defaultValue = "") String name,
-                        @RequestParam(value = "productStatusSearch", defaultValue = "") Boolean status,
                         @RequestParam(defaultValue = "0") int page,
                         @RequestParam(defaultValue = "5") int size,
                           Model model) {
-        Page<Product> listProduct = productService.searchPage(name.trim(), status, PageRequest.of(page, size));
+        Page<Product> listProduct = productService.getAll(PageRequest.of(page, size));
         Map<Integer, Integer> totalQuantity = new HashMap<>();
 
         for(Product p : listProduct){
             int total = productService.tongSoLuongSPCT(p.getId());
             totalQuantity.put(p.getId(),total);
         }
-        model.addAttribute("categoryNameSearch", name.trim());
-        model.addAttribute("categoryStatusSearch", status != null ? status : "");
-        model.addAttribute("size", size);
         model.addAttribute("totalQuantity", totalQuantity);
         model.addAttribute("listProduct", listProduct);
         model.addAttribute("currentPage", page);
@@ -241,46 +236,46 @@ public class ProductController {
         return "redirect:/admin/product/hien-thi";
     }
 
-    @GetMapping("/giu-thong-tin")
-    public String showAddForm(
-            @ModelAttribute("productForm") ProductForm productForm,
-            Model model) {
-//        if (!model.containsAttribute("productForm")) {
-//            model.addAttribute("productForm", new ProductForm());
+//    @GetMapping("/giu-thong-tin")
+//    public String showAddForm(
+//            @ModelAttribute("productForm") ProductForm productForm,
+//            Model model) {
+////        if (!model.containsAttribute("productForm")) {
+////            model.addAttribute("productForm", new ProductForm());
+////        }
+//        model.addAttribute("productForm", productForm);
+//
+//        model.addAttribute("listCategory", categoryService.getAll());
+//        model.addAttribute("listBrand", brandService.getAll());
+//        model.addAttribute("listMaterial", materialService.getAll());
+//        model.addAttribute("listColor", colorService.getAll());
+//        model.addAttribute("listSize", sizeService.getAll());
+//        return "admin/product_and_other/product/ProductViewAdd";
+//    }
+//    @PostMapping("/add-nhanh/category")
+//    public String addNhanh(@RequestParam("categoryName") String categoryName,
+//                           @RequestParam("categoryDescription") String categoryDescription,
+//                           RedirectAttributes redirectAttributes) {
+//
+//        if (categoryName == null || categoryName.trim().isEmpty()) {
+//            redirectAttributes.addFlashAttribute("alert", "Tên không được để trống");
+//            redirectAttributes.addFlashAttribute("type", "error");
+//            return "redirect:/admin/product/giu-thong-tin";
 //        }
-        model.addAttribute("productForm", productForm);
-
-        model.addAttribute("listCategory", categoryService.getAll());
-        model.addAttribute("listBrand", brandService.getAll());
-        model.addAttribute("listMaterial", materialService.getAll());
-        model.addAttribute("listColor", colorService.getAll());
-        model.addAttribute("listSize", sizeService.getAll());
-        return "admin/product_and_other/product/ProductViewAdd";
-    }
-    @PostMapping("/add-nhanh/category")
-    public String addNhanh(@RequestParam("categoryName") String categoryName,
-                           @RequestParam("categoryDescription") String categoryDescription,
-                           RedirectAttributes redirectAttributes) {
-
-        if (categoryName == null || categoryName.trim().isEmpty()) {
-            redirectAttributes.addFlashAttribute("alert", "Tên không được để trống");
-            redirectAttributes.addFlashAttribute("type", "error");
-            return "redirect:/admin/product/giu-thong-tin";
-        }
-
-        Category checkTonTai = categoryService.findByName(categoryName.trim());
-        if (checkTonTai != null) {
-            redirectAttributes.addFlashAttribute("alert", "Đã tồn tại kiểu loại");
-            redirectAttributes.addFlashAttribute("type", "error");
-            return "redirect:/admin/product/giu-thong-tin";
-        }
-
-        categoryService.addCategory(categoryName.trim(), categoryDescription);
-        redirectAttributes.addFlashAttribute("alert", "Thêm kiểu loại thành công!");
-        redirectAttributes.addFlashAttribute("type", "success");
-
-        return "redirect:/admin/product/giu-thong-tin";
-    }
+//
+//        Category checkTonTai = categoryService.findByName(categoryName.trim());
+//        if (checkTonTai != null) {
+//            redirectAttributes.addFlashAttribute("alert", "Đã tồn tại kiểu loại");
+//            redirectAttributes.addFlashAttribute("type", "error");
+//            return "redirect:/admin/product/giu-thong-tin";
+//        }
+//
+//        categoryService.addCategory(categoryName.trim(), categoryDescription);
+//        redirectAttributes.addFlashAttribute("alert", "Thêm kiểu loại thành công!");
+//        redirectAttributes.addFlashAttribute("type", "success");
+//
+//        return "redirect:/admin/product/giu-thong-tin";
+//    }
 
 
 }
