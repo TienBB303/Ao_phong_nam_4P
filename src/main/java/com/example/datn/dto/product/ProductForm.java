@@ -20,4 +20,7 @@ public class ProductForm {
     private String description;
 
     private List<ProductDetailForm> variants;
+
+    private List<Integer> selectedColorIds;
+    private List<Integer> selectedSizeIds;
 }

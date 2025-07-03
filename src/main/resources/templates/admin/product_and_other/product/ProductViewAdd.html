@@ -1,161 +1,167 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments/head :: head}">
-    <title>Quan ly khuyen mai | 4PStore</title>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
+<head>
+    <th:block th:insert="~{admin/fragments/head :: head}"></th:block>
+    <meta charset="UTF-8">
+    <title>4P Store</title>
+    <link rel="icon" type="image/png"
+          href="https://png.pngtree.com/png-vector/20221011/ourmid/pngtree-letter-v-logo-icon-vector-png-image_6295820.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 </head>
 <body>
 <header th:replace="~{admin/fragments/header :: header}"></header>
 <div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
-<section>
-    <div class="pc-container">
-        <div class="pc-content">
-            <div class="page-header">
-                <div class="page-block">
-                    <div class="row align-items-center">
-                        <div class="col-md-12">
-                            <div class="page-header-title">
-                                <h5 class="m-b-10">Quản lý sản phẩm</h5>
-                            </div>
-                            <ul class="breadcrumb">
-                            </ul>
+<!-- Main-->
+<div id="main" class="container mt-4">
+    <h3>Thêm sản phẩm</h3>
+    <div class="card-header">
+        <a class="btn btn-outline-primary" href="/admin/product/hien-thi" style="width: 70px">
+            <i class="bi bi-arrow-return-left"></i>
+        </a>
+    </div>
+    <section>
+        <div class="container mt-5">
+            <form id="TaoBienThe" th:action="@{/admin/product/add}" method="post" enctype="multipart/form-data">
+                <!-- Thông tin sản phẩm -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <!-- Phần tên sản phẩm -->
+                        <div class="mb-3">
+                            <label for="product_code" class="form-label">
+                                Mã sản phẩm <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="product_code" name="code"
+                                   th:value="${productForm.code}" placeholder="Mã tạo tự động/ nhập thủ công">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <!-- Kiểu quạt-->
+                        <div class="mb-3">
+                            <label for="product_name" class="form-label">
+                                Tên sản phẩm <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="product_name" name="name"
+                                   th:value="${productForm.name}" placeholder="Nhập tên sản phẩm">
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="container discount-form-container">
-    <!-- Main-->
-    <div id="main" class="container mt-4">
-        <h3>Thêm sản phẩm</h3>
-        <div class="card-header">
-            <a class="btn btn-outline-primary" href="/admin/product/hien-thi" style="width: 70px">
-                <i class="bi bi-arrow-return-left"></i>
-            </a>
-        </div>
-        <section>
-            <div class="container mt-5">
-                <!--            <h3>Thêm sản phẩm áo</h3>-->
-                <!--            <form class="p-4 rounded shadow-sm mb-4" method="get">-->
-                <!--                <div class="row gy-3">-->
-                <!--                    <div class="col-md-3 d-flex align-items-end gap-2">-->
-                <!--                        <button type="button" id="search-btn" href="/admin/product/hien-thi" class="btn btn-primary w-100">Back</button>-->
-                <!--                    </div>-->
-                <!--                </div>-->
-                <!--            </form>-->
-                <form id="TaoBienThe" th:action="@{/admin/product/add}" method="post" enctype="multipart/form-data">
-                    <!-- Thông tin sản phẩm -->
-                    <div class="row">
-                        <div class="col-md-6">
-                            <!-- Phần tên sản phẩm -->
-                            <div class="mb-3">
-                                <label for="product_code" class="form-label">
-                                    Mã sản phẩm <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="product_code" name="code" th:value="${productForm.code}" placeholder="Mã tạo tự động/ nhập thủ công">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <!-- Kiểu quạt-->
-                            <div class="mb-3">
-                                <label for="product_name" class="form-label">
-                                    Tên sản phẩm <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="product_name" name="name" th:value="${productForm.name}" placeholder="Nhập tên sản phẩm">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="product_category" class="form-label">Loại sản phẩm</label>
-                                <div class="d-flex align-items-center">
-                                    <select class="form-select me-2" id="product_category" name="categoryId">
-                                        <option th:each="cate : ${listCategory}"
-                                                th:value="${cate.id}"
-                                                th:text="${cate.name}"
-                                                th:if="${cate.status}"
-                                                th:selected="${cate.id == productForm.categoryId}">
-                                        </option>
-                                    </select>
-                                    <span id="add_category" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalThemMoi">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="product_category" class="form-label">Loại sản phẩm</label>
+                            <div class="d-flex align-items-center">
+                                <select class="form-select me-2" id="product_category" name="categoryId">
+                                    <option th:each="cate : ${listCategory}"
+                                            th:value="${cate.id}"
+                                            th:text="${cate.name}"
+                                            th:if="${cate.status}"
+                                            th:selected="${cate.id == productForm.categoryId}">
+                                    </option>
+                                </select>
+                                <span id="add_category" class="btn btn-outline-secondary" data-bs-toggle="modal"
+                                      data-bs-target="#modalAddCategory">
                                 <i class="fas fa-plus"></i>
-                                        </button>
+                                    </button>
                             </span>
-                                </div>
-
                             </div>
+
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="product_brand" class="form-label">Hãng</label>
-                                <div class="d-flex align-items-center">
-                                    <select class="form-select me-2" id="product_brand" name="brandId">
-                                        <option th:each="brand : ${listBrand}"
-                                                th:value="${brand.id}"
-                                                th:text="${brand.name}"
-                                                th:if="${brand.status}"
-                                                th:selected="${brand.id == productForm.brandId}">
-                                        </option>
-                                    </select>
-                                    <span id="add_brand" class="btn btn-outline-secondary">
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="product_brand" class="form-label">Hãng</label>
+                            <div class="d-flex align-items-center">
+                                <select class="form-select me-2" id="product_brand" name="brandId">
+                                    <option th:each="brand : ${listBrand}"
+                                            th:value="${brand.id}"
+                                            th:text="${brand.name}"
+                                            th:if="${brand.status}"
+                                            th:selected="${brand.id == productForm.brandId}">
+                                    </option>
+                                </select>
+                                <span id="add_brand" class="btn btn-outline-secondary">
                             <i class="fas fa-plus"></i>
                         </span>
-                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="product_category" class="form-label">Chất liệu</label>
-                                <div class="d-flex align-items-center">
-                                    <select class="form-select me-2" id="product_material" name="materialId">
-                                        <option th:each="mate : ${listMaterial}"
-                                                th:value="${mate.id}"
-                                                th:text="${mate.name}"
-                                                th:if="${mate.status}"
-                                                th:selected="${mate.id == productForm.materialId}">
-                                        </option>
-                                    </select>
-                                    <span id="add_material" class="btn btn-outline-secondary">
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="product_category" class="form-label">Chất liệu</label>
+                            <div class="d-flex align-items-center">
+                                <select class="form-select me-2" id="product_material" name="materialId">
+                                    <option th:each="mate : ${listMaterial}"
+                                            th:value="${mate.id}"
+                                            th:text="${mate.name}"
+                                            th:if="${mate.status}"
+                                            th:selected="${mate.id == productForm.materialId}">
+                                    </option>
+                                </select>
+                                <span id="add_material" class="btn btn-outline-secondary">
                             <i class="fas fa-plus"></i>
                         </span>
-                                </div>
+                            </div>
 
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="product_brand" class="form-label">Mô tả</label>
-                                <input type="text" class="form-control" id="product_description" name="description"  placeholder="Nhập mô tả">
-                            </div>
                         </div>
                     </div>
-                    <hr>
-                    <!-- Chọn nhiều màu và kích cỡ -->
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="multi_color" class="form-label">Chọn nhiều màu sắc</label>
-                            <select id="multi_color" class="form-select" multiple>
-                                <option th:each="color : ${listColor}" th:value="${color.id}" th:text="${color.name}"></option>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="multi_size" class="form-label">Chọn nhiều kích cỡ</label>
-                            <select id="multi_size" class="form-select" multiple>
-                                <option th:each="size : ${listSize}" th:value="${size.id}" th:text="${size.name}"></option>
-                            </select>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="product_brand" class="form-label">Mô tả</label>
+                            <input type="text" class="form-control" id="product_description" name="description"
+                                   placeholder="Nhập mô tả" th:value="${productForm.description}">
                         </div>
                     </div>
+                </div>
+                <hr>
+                <!-- Chọn nhiều màu và kích cỡ -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="multi_color" class="form-label">Chọn nhiều màu sắc</label>
+                        <select id="multi_color" class="form-select" multiple>
+                            <option th:each="color : ${listColor}"
+                                    th:value="${color.id}"
+                                    th:text="${color.name}"
+                                    th:selected="${selectedColorIds != null and selectedColorIds.contains(color.id)}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="multi_size" class="form-label">Chọn nhiều kích cỡ</label>
+                        <select id="multi_size" class="form-select" multiple>
+                            <option th:each="size : ${listSize}"
+                                    th:value="${size.id}"
+                                    th:text="${size.name}"
+                                    th:selected="${selectedSizeIds != null and selectedSizeIds.contains(size.id)}">
+                            </option>
+                        </select>
+                    </div>
+                </div>
 
-                    <hr>
-                    <div id="variant-list">
-                        <div th:each="variant, stat : ${productForm.variants}" class="variant-item row mb-3">
+                <hr>
+                <div id="variant-list">
+                    <!--                    <div th:each="variant, stat : ${productForm.variants}" class="variant-item row mb-3">-->
+
+                    <div th:each="colorId : ${selectedColorIds}" class="mb-4 border p-3 rounded">
+                        <h5 th:text="'Màu: ' + ${#lists.select(listColor, c -> c.id == colorId)[0].name}"></h5>
+                        <div th:each="variant, stat : ${productForm.variants}"
+                             th:if="${variant.colorId == colorId}" class="variant-item row mb-2">
                             <!-- Màu sắc -->
                             <div class="col-md-2">
                                 <label>Màu sắc</label>
                                 <input class="form-control"
                                        th:each="color : ${listColor}"
                                        th:if="${color.id == variant.colorId}"
-                                       th:value="${color.name}" disabled />
-                                <input type="hidden" th:name="'variants[' + ${stat.index} + '].colorId'" th:value="${variant.colorId}" />
+                                       th:value="${color.name}" disabled/>
+                                <input type="hidden" th:name="'variants[' + ${stat.index} + '].colorId'"
+                                       th:value="${variant.colorId}"/>
                             </div>
 
                             <!-- Kích cỡ -->
@@ -164,8 +170,9 @@
                                 <input class="form-control"
                                        th:each="size : ${listSize}"
                                        th:if="${size.id == variant.sizeId}"
-                                       th:value="${size.name}" disabled />
-                                <input type="hidden" th:name="'variants[' + ${stat.index} + '].sizeId'" th:value="${variant.sizeId}" />
+                                       th:value="${size.name}" disabled/>
+                                <input type="hidden" th:name="'variants[' + ${stat.index} + '].sizeId'"
+                                       th:value="${variant.sizeId}"/>
                             </div>
 
                             <!-- Số lượng -->
@@ -186,18 +193,61 @@
                                        th:value="${variant.price}" min="0">
                             </div>
 
+
                             <!-- Nút Xóa -->
                             <div class="col-md-2 d-flex align-items-end">
                                 <button type="button" class="btn btn-danger remove-variant">Xóa</button>
                             </div>
                         </div>
+                        <!-- Upload ảnh cho màu -->
+                        <div class="mt-3">
+                            <label th:text="'Ảnh cho màu: ' + ${#lists.find(listColor, c : c.id == colorId)?.name}"></label>
+                            <input type="file"
+                                   th:name="'colorImages[' + ${colorId} + ']'"
+                                   multiple
+                                   class="form-control"
+                                   accept="image/*">
+                        </div>
                     </div>
-
+                </div>
+                <div class="mb-3">
+                    <button type="button" class="btn btn-success" id="add-variant-btn">Thêm biến thể</button>
+                </div>
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-success" id="Confirm">Xác nhận</button>
+                </div>
+            </form>
+        </div>
+    </section>
+</div>
+<!--Modal add thuộc tính nhanh-->
+<div class="modal fade" id="modalAddCategory" tabindex="-1" aria-labelledby="modalAddCategoryLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAddCategoryLabel">Thêm mới kiểu loại</h5>
+            </div>
+            <div class="modal-body">
+                <form id="addCategory" method="post" action="/admin/product/add-nhanh/category"
+                      onsubmit="return submitAddNhanhCategory(event)">
                     <div class="mb-3">
-                        <button type="button" class="btn btn-success" id="add-variant-btn">Thêm biến thể</button>
+                        <label for="category_name" class="form-label">Tên kiểu loại</label><span
+                            class="text-danger">*</span>
+                        <input type="text" class="form-control" id="category_name" name="categoryName"
+                               placeholder="Nhập tên kiểu loại">
                     </div>
                     <div class="mb-3">
-                        <button type="submit" class="btn btn-success" id="Confirm">Xác nhận</button>
+                        <label for="category_description" class="form-label">Mô tả</label>
+                        <input type="text" class="form-control" id="category_description" name="categoryDescription"
+                               placeholder="Nhập mô tả">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-outline-success">
+                            <i class="bi bi-check-lg"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-warning" data-bs-dismiss="modal">
+                            <i class="bi bi-x"></i>
+                        </button>
                     </div>
                 </form>
             </div>
@@ -233,21 +283,27 @@
             </div>
         </div>
     </div>
-    <footer th:replace="admin/fragments/footer :: footer"></footer>
-    <script th:if="${alert != null}" th:inline="javascript">
-        Swal.fire({
-            toast: true,
-            icon: [[${type}]],
-            title: '[[${alert}]]', // Thông báo từ controller
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 2000,
-            timerProgressBar: true
-        });
-    </script>
+</div>
 
-    <script>
-        let variantIndex = 0;
+<footer th:replace="admin/fragments/footer :: footer"></footer>
+
+<!--báo lỗi-->
+<script th:if="${alert != null}" th:inline="javascript">
+    Swal.fire({
+        toast: true,
+        icon: [[${type}]],
+        title: '[[${alert}]]', // Thông báo từ controller
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true
+    });
+</script>
+
+<!--Thêm nhiều biến thể-->
+<script>
+    let variantIndex = 0;
+
 
         function createVariantItem(colorId, colorName, sizeId, sizeName) {
             return `
@@ -290,74 +346,64 @@
             variantIndex = $('#variant-list .variant-item').length;
         }
 
-        $(document).ready(function () {
-            $('#multi_color').select2({ placeholder: 'Chọn màu sắc' });
-            $('#multi_size').select2({ placeholder: 'Chọn kích cỡ' });
+    $(document).ready(function () {
+        $('#multi_color').select2({placeholder: 'Chọn màu sắc'});
+        $('#multi_size').select2({placeholder: 'Chọn kích cỡ'});
+
 
             $('#add-variant-btn').on('click', function () {
                 const selectedColors = $('#multi_color').val();
                 const selectedSizes = $('#multi_size').val();
 
-                if (!selectedColors || !selectedSizes) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Vui lòng chọn ít nhất 1 màu và 1 kích cỡ!',
-                        toast: true,
-                        position: 'top-end',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-                    return;
-                }
+            let countAdded = 0;
 
-                let countAdded = 0;
+            // Kiểm tra nếu chưa chọn gì
+            if (!selectedColors || !selectedSizes) {
+                return;
+            }
 
-                selectedColors.forEach(function (colorId) {
-                    const colorName = $('#multi_color option[value="' + colorId + '"]').text();
-                    selectedSizes.forEach(function (sizeId) {
-                        const sizeName = $('#multi_size option[value="' + sizeId + '"]').text();
+            selectedColors.forEach(function (colorId) {
+                const colorName = $('#multi_color option[value="' + colorId + '"]').text();
+                selectedSizes.forEach(function (sizeId) {
+                    const sizeName = $('#multi_size option[value="' + sizeId + '"]').text();
 
-                        let isDuplicate = false;
-                        $('#variant-list .variant-item').each(function () {
-                            const currentColor = $(this).find('input[name$=".colorId"]').val();
-                            const currentSize = $(this).find('input[name$=".sizeId"]').val();
-                            if (currentColor === colorId && currentSize === sizeId) {
-                                isDuplicate = true;
-                                return false;
+                    $.post('/admin/product/add-variant', {
+                        colorId: colorId,
+                        sizeId: sizeId
+                    }, function (response) {
+                        if (response === 'success') {
+                            const html = createVariantItem(colorId, colorName, sizeId, sizeName);
+                            $('#variant-list').append(html);
+                            updateVariantIndexes();
+                            countAdded++; //  tăng số biến thể
+                        }
+
+                        if (colorId === selectedColors[selectedColors.length - 1]
+                            && sizeId === selectedSizes[selectedSizes.length - 1]) {
+
+                            if (countAdded === 0 && $('#variant-list .variant-item').length > 0) {
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Tất cả biến thể bạn chọn đã tồn tại!',
+                                    toast: true,
+                                    position: 'top-end',
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                });
                             }
-                        });
-
-                        if (!isDuplicate) {
-                            const newVariantHtml = createVariantItem(colorId, colorName, sizeId, sizeName);
-                            $('#variant-list').append(newVariantHtml);
-                            countAdded++;
-                            variantIndex++;
                         }
                     });
                 });
-
-                updateVariantIndexes();
-
-                if (countAdded === 0) {
-                    Swal.fire({
-                        icon: 'info',
-                        title: 'Tất cả biến thể bạn chọn đã tồn tại!',
-                        toast: true,
-                        position: 'top-end',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-                }
-            });
-
-            // Nút Xóa
-            $(document).on('click', '.remove-variant', function () {
-                $(this).closest('.variant-item').remove();
-                updateVariantIndexes();
             });
         });
-    </script>
-</section>
-<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
+
+
+        // Nút Xóa
+        $(document).on('click', '.remove-variant', function () {
+            $(this).closest('.variant-item').remove();
+            updateVariantIndexes();
+        });
+    });
+</script>
 </body>
 </html>

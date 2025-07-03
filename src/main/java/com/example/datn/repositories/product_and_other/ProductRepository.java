@@ -41,4 +41,17 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     List<Size> findSizesByProductId(@Param("productId") Integer productId);
     Product findByCode(String code);
 
+    @Query("SELECT p FROM Product p " +
+            "WHERE (LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')) " +
+            "AND (:status IS NULL OR p.status = :status)) " +
+            "AND (:categoryId IS NULL OR p.category.id = :categoryId) " +
+            "AND (:brandId IS NULL OR p.brand.id = :brandId) " +
+            "AND (:materialId IS NULL OR p.material.id = :materialId) " +
+            "ORDER BY p.id DESC")
+    Page<Product> search(String name,
+                         Boolean status,
+                         @Param("categoryId") Integer categoryId,
+                         @Param("brandId") Integer brandId,
+                         @Param("materialId") Integer materialId,
+                         Pageable pageable);
 }
