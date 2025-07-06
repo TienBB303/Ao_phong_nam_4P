@@ -45,11 +45,11 @@ public class Discount {
     @DecimalMin(value = "0.0", inclusive = true, message = "Không được âm")
     @Column(name = "min_purchase")
     private BigDecimal minPurchase;
-
+    @NotNull(message = "Giá trị tối đa không được để trống")
     @Column(name = "max_discount")
     private BigDecimal maxDiscount;
 
-    @NotNull(message = "Số lượng sử dụng tối đa không được để trống")
+    @NotNull(message = "Số lượng  không được để trống")
     @Min(value = 0, message = "Không được âm")
     @Column(name = "usage_limit")
     private Integer usageLimit;
