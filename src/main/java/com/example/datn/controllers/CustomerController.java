@@ -1,27 +1,26 @@
 package com.example.datn.controllers;
-//import com.example.datn.dto.customer.CustomerDto;
+import com.example.datn.dto.customer.CustomerDto;
 import com.example.datn.entities.Customer;
-import com.example.datn.entities.Discount;
 import com.example.datn.repositories.CustomerRepository;
-import com.example.datn.repositories.DiscountRepository;
+import com.example.datn.services.CustomerService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;
 import java.util.Optional;
 
 @Controller
 @RequestMapping("/admin/customer")
 public class CustomerController {
     @Autowired
-    CustomerRepository customerRepo;
+    private CustomerService customerService;
     // Hiển thị danh sách khách hàng có tìm kiếm + phân trang
     @GetMapping("/view")
     public String viewCustomers(Model model,
@@ -32,9 +31,10 @@ public class CustomerController {
         Page<Customer> customerPage;
 
         if (keyword != null && !keyword.trim().isEmpty()) {
-            customerPage = customerRepo.searchCustomerKeyword(keyword, pageable);
+            customerPage = customerService.searchCustomerEntity(keyword, pageable);
         } else {
-            customerPage = customerRepo.findByIsActiveTrue(pageable);
+            customerPage =customerService.getAllCustomersEntity(pageable);
+            ;
         }
 
         model.addAttribute("customerPage", customerPage);
@@ -46,85 +46,106 @@ public class CustomerController {
     }
 
     // Hiển thị form tạo khách hàng mới
+    //Dùng DTO, có validate
     @GetMapping("/create")
     public String create(Model model) {
-        model.addAttribute("customer", new Customer());
-        return "admin/customer/customerCreate1.html";
+        model.addAttribute("customerDto", new CustomerDto());
+        return "admin/customer/customerCreate1";
     }
-
-
-    // Xử lý lưu khách hàng
+    // Xử lý lưu khách hàng,Dùng DTO, validate, update theo id
     @PostMapping("/save")
-    public String save(@ModelAttribute("customer") Customer customer, RedirectAttributes redirectAttributes) {
-        // Kiểm tra trùng mã khi tạo mới
-        if (customer.getId() == null && customerRepo.existsByCode(customer.getCode())) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Mã khách hàng đã tồn tại. Vui lòng chọn mã khác.");
-            return "redirect:/admin/customer/create";
+    public String save(@Valid @ModelAttribute("customerDto") CustomerDto dto,
+                       BindingResult result,
+                       RedirectAttributes redirectAttributes) {
+        System.out.println("DTO nhận được: " + dto);
+        if (result.hasErrors()) {
+            System.out.println("Lỗi validate: " + result.getAllErrors());
+            return "admin/customer/customerCreate1";
         }
 
-        customerRepo.save(customer);
+        // Kiểm tra email đã tồn tại
+        if (customerService.isEmailExists(dto.getEmail())) {
+            result.rejectValue("email", "error.customerDto", "Email đã tồn tại trong hệ thống.");
+            return "admin/customer/customerCreate1";
+        }
+
+        customerService.createCustomer(dto);
         redirectAttributes.addFlashAttribute("message", "Lưu khách hàng thành công!");
         return "redirect:/admin/customer/view";
     }
-
     // Hiển thị form chỉnh sửa khách hàng
     @GetMapping("/edit/{id}")
-    public String showEditForm(@PathVariable("id") int id, Model model, RedirectAttributes redirectAttributes) {
-        Optional<Customer> customerOptional = customerRepo.findById(id);
-        if (customerOptional.isPresent()) {
-            model.addAttribute("customer", customerOptional.get());
-            return "admin/customer/customerEdit";
-        } else {
-            redirectAttributes.addFlashAttribute("errorMessage", "Khách hàng không tồn tại!");
+    public String edit(@PathVariable int id, Model model, RedirectAttributes redirect) {
+        Customer customer = customerService.findById(id);
+        if (customer == null) {
+            redirect.addFlashAttribute("errorMessage", "Không tìm thấy khách hàng!");
             return "redirect:/admin/customer/view";
         }
+        CustomerDto dto = convertToDto(customer);
+        model.addAttribute("customerDto", dto);
+        return "admin/customer/customerEdit";
     }
+    //Dùng isActive
     @PostMapping("/update")
-    public String updateCustomer(@ModelAttribute("customer") Customer customer, RedirectAttributes redirectAttributes) {
-        if (!customerRepo.existsById(customer.getId())) {
-            redirectAttributes.addFlashAttribute("error", "Không tìm thấy khách hàng để cập nhật!");
-            return "redirect:/admin/customer/view";
+    public String updateCustomer(@Valid @ModelAttribute("customerDto") CustomerDto dto,
+                                 BindingResult result,
+                                 RedirectAttributes redirectAttributes) {
+        if (result.hasErrors()) {
+            return "admin/customer/customerEdit";
         }
-        customer.setIsActive(true);
-        customerRepo.save(customer); // lưu thay đổi
-        redirectAttributes.addFlashAttribute("message", "Cập nhật khách hàng thành công!");
+
+        Customer updated = customerService.updateCustomer(dto.getId(), convertToEntity(dto));
+        if (updated == null) {
+            redirectAttributes.addFlashAttribute("error", "Không tìm thấy khách hàng để cập nhật!");
+        } else {
+            redirectAttributes.addFlashAttribute("message", "Cập nhật khách hàng thành công!");
+        }
+
+        return "redirect:/admin/customer/view";
+    }
+    @GetMapping("/delete/{id}")
+    public String deleteCustomer(@PathVariable Integer id, RedirectAttributes redirect) {
+        try {
+            customerService.softDeleteCustomer(id);
+            redirect.addFlashAttribute("success", "Xóa khách hàng thành công (dạng ẩn)");
+        } catch (Exception e) {
+            redirect.addFlashAttribute("error", "Không tìm thấy khách hàng.");
+        }
         return "redirect:/admin/customer/view";
     }
 
-    @GetMapping("/delete/{id}")
-    public String deleteCustomer(@PathVariable Integer id, RedirectAttributes redirect) {
-        Optional<Customer> customerOpt = customerRepo.findById(id);
-        if (customerOpt.isPresent()) {
-            Customer customer = customerOpt.get();
-            customer.setIsActive(false); // cập nhật trạng thái xóa mềm
-            customerRepo.save(customer); // lưu lại vào DB
-            redirect.addFlashAttribute("success", "Xóa khách hàng thành công (dạng ẩn)");
-        } else {
-            redirect.addFlashAttribute("error", "Không tìm thấy khách hàng.");
-        }
-        return "redirect:/admin/customer/view"; // điều hướng lại danh sách
-    }
-
-//    @GetMapping("/search")
-//    public String searchCustomers(@RequestParam("keyword") String keyword,
-//                                  @RequestParam(defaultValue = "0") int page,
-//                                  Model model) {
-//        int pageSize = 5;
-//        Pageable pageable = PageRequest.of(page, pageSize);
-//
-//        Page<CustomerDto> searchResults = customerRepo.searchCustomerKeyword(keyword, pageable);
-//        model.addAttribute("customerPage", searchResults);
-//        // Sử dụng cùng tên attribute để tái sử dụng view
-//        model.addAttribute("currentPage", page);
-//        model.addAttribute("totalPages", searchResults.getTotalPages());
-//        model.addAttribute("keyword", keyword); // Giữ lại keyword để hiển thị trên form tìm kiếm
-//
-//        return "admin/customer/customerList"; // Hiển thị kết quả tìm kiếm trên cùng trang view
-//    }
+    // Chi tiết khách hàng,Gọi theo id
     @GetMapping("/detail/{id}")
-    public String detail(@PathVariable int id, Model model) {
-        Customer customer = customerRepo.findById(id).orElse(null);
+    public String detail(@PathVariable int id, Model model, RedirectAttributes redirect) {
+        Customer customer = customerService.findById(id);
+        if (customer == null) {
+            redirect.addFlashAttribute("errorMessage", "Không tìm thấy khách hàng!");
+            return "redirect:/admin/customer/view";
+        }
         model.addAttribute("customer", customer);
         return "admin/customer/customerDetail";
+    }
+    // Hàm hỗ trợ convert từ entity -> dto
+    private CustomerDto convertToDto(Customer customer) {
+        CustomerDto dto = new CustomerDto();
+        dto.setId(customer.getId());
+        dto.setCode(customer.getCode());
+        dto.setName(customer.getName());
+        dto.setEmail(customer.getEmail());
+        dto.setPhoneNumber(customer.getPhoneNumber());
+        dto.setAddress(customer.getAddress());
+        return dto;
+    }
+    // Hàm hỗ trợ convert từ dto -> entity
+    private Customer convertToEntity(CustomerDto dto) {
+        Customer customer = new Customer();
+        customer.setId(dto.getId());
+        customer.setCode(dto.getCode());
+        customer.setName(dto.getName());
+        customer.setEmail(dto.getEmail());
+        customer.setPhoneNumber(dto.getPhoneNumber());
+        customer.setAddress(dto.getAddress());
+        customer.setIsActive(true);
+        return customer;
     }
 }

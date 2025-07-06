@@ -12,10 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
-
-
-
-
 @Controller
 @RequestMapping("/admin/discount")
 public class DiscountController {
