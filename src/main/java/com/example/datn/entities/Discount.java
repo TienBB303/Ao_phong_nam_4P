@@ -24,33 +24,33 @@ public class Discount {
     @Column(name = "code_name")
     private String codeName;
 
-    @NotBlank(message = "Phương thức giảm không được để trống")
+//    @NotBlank(message = "Phương thức giảm không được để trống")
     @Column(name = "discount_type")
     private String discountType;
 
-    @NotNull(message = "Giá trị giảm không được để trống")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Giá trị giảm phải lớn hơn 0")
+//    @NotNull(message = "Giá trị giảm không được để trống")
+//    @DecimalMin(value = "0.0", inclusive = false, message = "Giá trị giảm phải lớn hơn 0")
     @Column(name = "discount_value")
     private BigDecimal discountValue;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
-    @NotNull(message = "Ngày bắt đầu không được để trống")
+//    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+//    @NotNull(message = "Ngày bắt đầu không được để trống")
     private LocalDateTime startDatetime;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
-    @NotNull(message = "Ngày kết thúc không được để trống")
+//    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+//    @NotNull(message = "Ngày kết thúc không được để trống")
     private LocalDateTime endDatetime;
 
-    @NotNull(message = "Giá trị đơn hàng tối thiểu không được để trống")
-    @DecimalMin(value = "0.0", inclusive = true, message = "Không được âm")
+//    @NotNull(message = "Giá trị đơn hàng tối thiểu không được để trống")
+//    @DecimalMin(value = "0.0", inclusive = true, message = "Không được âm")
     @Column(name = "min_purchase")
     private BigDecimal minPurchase;
-
+    @NotNull(message = "Giá trị tối đa không được để trống")
     @Column(name = "max_discount")
     private BigDecimal maxDiscount;
-
     @NotNull(message = "Số lượng sử dụng tối đa không được để trống")
     @Min(value = 0, message = "Không được âm")
+
     @Column(name = "usage_limit")
     private Integer usageLimit;
 

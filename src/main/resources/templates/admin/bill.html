@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/head :: head}">
+    <title>Quan ly khuyen mai | 4PStore</title>
+</head>
+<body>
+<header th:replace="~{admin/fragments/header :: header}"></header>
+<div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
+<section>
+    <div class="pc-container">
+        <div class="pc-content">
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="row align-items-center">
+                        <div class="col-md-12">
+                            <div class="page-header-title">
+                                <h5 class="m-b-10">Quản lý hoá đơn</h5>
+                            </div>
+                            <ul class="breadcrumb">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container discount-form-container">
+                <section class="container mt-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">Quản lý hóa đơn</h5>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-outline-primary">Tìm kiếm</button>
+                            <a href="" class="btn btn-outline-secondary">Hủy bỏ</a>
+                            <button type="button" class="btn btn-outline-success">Export</button>
+                        </div>
+                    </div>
+
+                    <form method="get" action="">
+                        <div class="row mb-3">
+                            <div class="col">
+                                <input type="text" name="code" class="form-control" placeholder="Mã hóa đơn">
+                            </div>
+                            <div class="col">
+                                <input type="date" name="startDate" class="form-control" placeholder="Bắt đầu">
+                            </div>
+                            <div class="col">
+                                <input type="date" name="endDate" class="form-control" placeholder="Kết thúc">
+                            </div>
+                            <div class="col">
+                                <select name="status" class="form-control">
+                                    <option value="">Trạng thái</option>
+                                    <option value="0">Chờ xác nhận</option>
+                                    <option value="1">Đã xác nhận</option>
+                                    <option value="2">Đang giao</option>
+                                    <option value="3">Hoàn thành</option>
+                                    <option value="4">Đã huỷ</option>
+                                </select>
+                            </div>
+                            <div class="col">
+                                <select name="type" class="form-control">
+                                    <option value="">Loại đơn</option>
+                                    <option value="0">Tại quầy</option>
+                                    <option value="1">Giao hàng</option>
+                                </select>
+                            </div>
+                            <div class="col">
+                                <input type="text" name="name" class="form-control" placeholder="Họ và tên">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3 align-items-end">
+                            <div class="col-3">
+                                <input type="text" name="phoneNumber" class="form-control" placeholder="Số điện thoại">
+                            </div>
+
+                        </div>
+                    </form>
+
+                    <table class="table table-bordered text-center">
+                        <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Mã hóa đơn</th>
+                            <th>Họ và tên</th>
+                            <th>SĐT</th>
+                            <th>Ngày đặt</th>
+                            <th>Tổng tiền</th>
+                            <th>Loại đơn</th>
+                            <th>Hình thức TT</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+                        <tr>
+
+                        </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="d-flex justify-content-end">
+                        <ul class="pagination">
+                            <li class="page-item"><a class="page-link" href="#">«</a></li>
+                            <li class="page-item"><a class="page-link" href="#">‹</a></li>
+                            <li class="page-item"><a class="page-link" href="#">›</a></li>
+                            <li class="page-item"><a class="page-link" href="#">»</a></li>
+                        </ul>
+                    </div>
+                </section>
+
+</section>
+<header th:replace="~{admin/fragments/footer :: footer}"></header>
+</body>
+</html>
