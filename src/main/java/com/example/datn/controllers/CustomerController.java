@@ -91,14 +91,22 @@ public class CustomerController {
                                  BindingResult result,
                                  RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
+            // Nếu có lỗi validation, quay lại form chỉnh sửa
             return "admin/customer/customerEdit";
         }
 
-        Customer updated = customerService.updateCustomer(dto.getId(), convertToEntity(dto));
-        if (updated == null) {
-            redirectAttributes.addFlashAttribute("error", "Không tìm thấy khách hàng để cập nhật!");
-        } else {
-            redirectAttributes.addFlashAttribute("message", "Cập nhật khách hàng thành công!");
+        try {
+            // KHÔNG CẦN convertToEntity ở đây vì service sẽ tự tìm và cập nhật entity
+            Customer updated = customerService.updateCustomer(dto);
+            if (updated == null) {
+                redirectAttributes.addFlashAttribute("error", "Không tìm thấy khách hàng để cập nhật!");
+            } else {
+                redirectAttributes.addFlashAttribute("message", "Cập nhật khách hàng thành công!");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Lỗi khi cập nhật khách hàng: " + e.getMessage());
+            // In lỗi ra console để debug, rất quan trọng!
+            e.printStackTrace();
         }
 
         return "redirect:/admin/customer/view";
@@ -134,6 +142,7 @@ public class CustomerController {
         dto.setEmail(customer.getEmail());
         dto.setPhoneNumber(customer.getPhoneNumber());
         dto.setAddress(customer.getAddress());
+        dto.setIsActive(customer.getIsActive()); // <-- Lấy giá trị isActive từ entity
         return dto;
     }
     // Hàm hỗ trợ convert từ dto -> entity
@@ -145,7 +154,7 @@ public class CustomerController {
         customer.setEmail(dto.getEmail());
         customer.setPhoneNumber(dto.getPhoneNumber());
         customer.setAddress(dto.getAddress());
-        customer.setIsActive(true);
+        customer.setIsActive(dto.getIsActive()); // <-- Lấy giá trị isActive từ DTO
         return customer;
     }
 }

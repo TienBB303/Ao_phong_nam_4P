@@ -26,7 +26,7 @@ public interface CustomerService {
     void softDeleteCustomer(Integer id);
 
     // Cập nhật khách hàng
-    Customer updateCustomer(Integer id, Customer customer);
+    Customer updateCustomer(CustomerDto dto);
 
     // Tạo khách hàng từ DTO (dùng cho controller)
     void createCustomer(CustomerDto dto);
