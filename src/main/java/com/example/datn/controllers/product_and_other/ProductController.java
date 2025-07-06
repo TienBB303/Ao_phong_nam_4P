@@ -335,17 +335,14 @@ public class ProductController {
     }
 
     @PostMapping("/add-nhanh/category")
-    public String addNhanh(@RequestParam("categoryName") String categoryName,
+    public String addNhanhCategory(@RequestParam("categoryName") String categoryName,
                            @RequestParam("categoryDescription") String categoryDescription,
                            HttpSession session,
                            Model model) {
         ProductForm productForm = (ProductForm) session.getAttribute(SESSION_PRODUCT_FORM_KEY);
         model.addAttribute("productForm", productForm);
-        model.addAttribute("listCategory", categoryService.getAll());
-        model.addAttribute("listBrand", brandService.getAll());
-        model.addAttribute("listMaterial", materialService.getAll());
         if (categoryName == null || categoryName.trim().isEmpty()) {
-            model.addAttribute("alert", "Tên sản phẩm không được để trống");
+            model.addAttribute("alert", "Tên kiểu loại không được để trống");
             model.addAttribute("type", "error");
             return "admin/product_and_other/product/ProductViewAdd";
         }
@@ -356,15 +353,83 @@ public class ProductController {
             model.addAttribute("type", "error");
             return "admin/product_and_other/product/ProductViewAdd";
         }
+        Category category = new Category();
+        category.setName(categoryName.trim());
+        category.setDescription(categoryDescription.trim());
 
-        categoryService.addCategory(categoryName.trim(), categoryDescription);
+        categoryService.addCategoryObj(category);
 
         model.addAttribute("alert", "Thêm kiểu loại thành công!");
         model.addAttribute("type", "success");
+        model.addAttribute("listCategory", categoryService.getAll());
+        model.addAttribute("listBrand", brandService.getAll());
+        model.addAttribute("listMaterial", materialService.getAll());
         return "admin/product_and_other/product/ProductViewAdd";
     }
 
+    @PostMapping("/add-nhanh/brand")
+    public String addNhanhBrand(@RequestParam("brandName") String brandName,
+                           HttpSession session,
+                           Model model) {
+        ProductForm productForm = (ProductForm) session.getAttribute(SESSION_PRODUCT_FORM_KEY);
+        model.addAttribute("productForm", productForm);
+        if (brandName == null || brandName.trim().isEmpty()) {
+            model.addAttribute("alert", "Tên hãng không được để trống");
+            model.addAttribute("type", "error");
+            return "admin/product_and_other/product/ProductViewAdd";
+        }
 
+        Brand checkTonTai = brandService.findByName(brandName.trim());
+        if (checkTonTai != null) {
+            model.addAttribute("alert", "Đã tồn tại hãng");
+            model.addAttribute("type", "error");
+            return "admin/product_and_other/product/ProductViewAdd";
+        }
+        Brand brand = new Brand();
+        brand.setCode(brandService.taoMaTuDongBrand());
+        brand.setName(brandName.trim());
+        brand.setStatus(true);
+        brandService.addBrand(brand);
+
+        model.addAttribute("alert", "Thêm hãng thành công!");
+        model.addAttribute("type", "success");
+        model.addAttribute("listCategory", categoryService.getAll());
+        model.addAttribute("listBrand", brandService.getAll());
+        model.addAttribute("listMaterial", materialService.getAll());
+        return "admin/product_and_other/product/ProductViewAdd";
+    }
+
+    @PostMapping("/add-nhanh/material")
+    public String addNhanhMaterial(@RequestParam("materialName") String materialName,
+                           HttpSession session,
+                           Model model) {
+        ProductForm productForm = (ProductForm) session.getAttribute(SESSION_PRODUCT_FORM_KEY);
+        model.addAttribute("productForm", productForm);
+        if (materialName == null || materialName.trim().isEmpty()) {
+            model.addAttribute("alert", "Tên chất liệu không được để trống");
+            model.addAttribute("type", "error");
+            return "admin/product_and_other/product/ProductViewAdd";
+        }
+
+        Material checkTonTai = materialService.findByName(materialName.trim());
+        if (checkTonTai != null) {
+            model.addAttribute("alert", "Đã tồn tại chất liệu");
+            model.addAttribute("type", "error");
+            return "admin/product_and_other/product/ProductViewAdd";
+        }
+        Material material = new Material();
+        material.setCode(materialService.taoMaTuDongMaterial());
+        material.setName(materialName.trim());
+        material.setStatus(true);
+        materialService.addMaterial(material);
+
+        model.addAttribute("alert", "Thêm chất liệu thành công!");
+        model.addAttribute("type", "success");
+        model.addAttribute("listCategory", categoryService.getAll());
+        model.addAttribute("listBrand", brandService.getAll());
+        model.addAttribute("listMaterial", materialService.getAll());
+        return "admin/product_and_other/product/ProductViewAdd";
+    }
 
 }
 

@@ -8,6 +8,9 @@ import java.util.List;
 
 public interface ProductDetailRepository extends JpaRepository<ProductDetail, Integer> {
 
+    @Query("select pd from ProductDetail pd")
+    List<ProductDetail> getAllProductDetails();
+
     List<ProductDetail> findByProductIdAndColorId(Integer productId, Integer colorId);
 
     @Query("SELECT pd FROM ProductDetail pd WHERE pd.id = :id")

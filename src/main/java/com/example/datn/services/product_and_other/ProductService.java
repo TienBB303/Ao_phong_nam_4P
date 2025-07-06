@@ -129,4 +129,8 @@ public class ProductService {
     public void updateProductDetail(ProductDetail productDetail){
         productDetailRepository.save(productDetail);
     }
+
+    public List<ProductDetail> getAllProductDetails(){
+        return productDetailRepository.getAllProductDetails();
+    }
 }

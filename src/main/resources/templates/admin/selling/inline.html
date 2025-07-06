@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Bán hàng tại quầy</title>
     <script src="https://cdn.tailwindcss.com"></script>
+
 </head>
 <body class="bg-gray-100 h-screen">
 
@@ -30,23 +31,28 @@
 <!-- Main -->
 <div class="flex h-[calc(100%-60px)]">
 
-    <!-- Sản phẩm bên trái -->
+    <!-- Giỏ hàng bên trái -->
     <div class="w-2/3 bg-white p-4 overflow-y-auto">
         <div id="cart-items" class="space-y-2">
             <!-- Item giỏ hàng sẽ được render tại đây -->
         </div>
     </div>
 
-    <!-- Giỏ hàng bên phải -->
+    <!-- Sản phẩm bên phải -->
     <div class="w-1/3 bg-gray-50 border-l p-4 flex flex-col justify-between">
 
         <!-- Tìm khách hàng -->
-        <div>
+        <div class="flex flex-col h-full">
             <input type="text" placeholder="Tìm khách hàng (F4)" class="px-3 py-2 w-full mb-3 rounded-md border" />
             <h2 class="font-bold mb-2">Danh sách sản phẩm</h2>
-            <div id="product-list" class="grid grid-cols-3 gap-4">
+            <div id="product-list" class="grid grid-cols-3 gap-4 overflow-y-auto pr-2" style="max-height: 400px;">
                 <!-- Card sản phẩm -->
-                <!-- Sẽ được đổ động từ JS hoặc Thymeleaf -->
+                <div th:each="pd : ${listProductDetail}"
+                     class="border p-2 rounded shadow hover:bg-gray-100 cursor-pointer"
+                     th:attr="onclick=|addToCartFE(${pd.id}, '${pd.product.name}', ${pd.price})|">
+                    <h3 class="font-semibold" th:text="${pd.product.name + ' (' + pd.color.name + '-' + pd.size.name + ')' }">Tên sản phẩm</h3>
+                    <p th:text="${pd.price}">100.000 đ</p>
+                </div>
             </div>
         </div>
 
@@ -69,26 +75,12 @@
 
 <!-- Script đơn giản -->
 <script>
-    // Sản phẩm mẫu
-    const products = [
-        { id: 1, name: "Áo Thun", price: 100000 },
-        { id: 2, name: "Quần Jean", price: 250000 },
-        { id: 3, name: "Giày Thể Thao", price: 500000 },
-    ];
 
     const productList = document.getElementById("product-list");
     const cartItems = document.getElementById("cart-items");
     const totalPrice = document.getElementById("total-price");
     const cart = {};
 
-    // Hiển thị danh sách sản phẩm
-    products.forEach(product => {
-        const div = document.createElement("div");
-        div.className = "border p-2 rounded shadow hover:bg-gray-100 cursor-pointer";
-        div.innerHTML = `<h3 class="font-semibold">${product.name}</h3><p>${product.price.toLocaleString()} đ</p>`;
-        div.onclick = () => addToCart(product);
-        productList.appendChild(div);
-    });
     let tabs = [
         { id: 1, name: "Hóa đơn 1", cart: {} }
     ];
@@ -140,6 +132,10 @@
         return currentTab ? currentTab.cart : {};
     }
 
+    function addToCartFE(id, name, price) {
+        addToCart({ id, name, price });
+    }
+
     function addToCart(product) {
         const cart = getCurrentCart();
         if (!cart[product.id]) {
@@ -149,6 +145,7 @@
         }
         renderCart();
     }
+
 
     function renderCart() {
         const cart = getCurrentCart();

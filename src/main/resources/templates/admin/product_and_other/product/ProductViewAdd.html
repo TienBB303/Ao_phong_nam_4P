@@ -63,11 +63,9 @@
                                             th:selected="${cate.id == productForm.categoryId}">
                                     </option>
                                 </select>
-                                <span id="add_category" class="btn btn-outline-secondary" data-bs-toggle="modal"
-                                      data-bs-target="#modalAddCategory">
-                                <i class="fas fa-plus"></i>
-                                    </button>
-                            </span>
+                                <span id="add_category" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalAddCategory">
+                                    <i class="fas fa-plus"></i>
+                                </span>
                             </div>
 
                         </div>
@@ -84,9 +82,9 @@
                                             th:selected="${brand.id == productForm.brandId}">
                                     </option>
                                 </select>
-                                <span id="add_brand" class="btn btn-outline-secondary">
-                            <i class="fas fa-plus"></i>
-                        </span>
+                                <span id="add_brand" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalAddBrand">
+                                    <i class="fas fa-plus"></i>
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -104,9 +102,9 @@
                                             th:selected="${mate.id == productForm.materialId}">
                                     </option>
                                 </select>
-                                <span id="add_material" class="btn btn-outline-secondary">
-                            <i class="fas fa-plus"></i>
-                        </span>
+                                <span id="add_material" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalAddMaterial">
+                                    <i class="fas fa-plus"></i>
+                                </span>
                             </div>
 
                         </div>
@@ -218,7 +216,7 @@
         </div>
     </section>
 </div>
-<!--Modal add thuộc tính nhanh-->
+<!--Modal add kiểu loại nhanh-->
 <div class="modal fade" id="modalAddCategory" tabindex="-1" aria-labelledby="modalAddCategoryLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -226,11 +224,9 @@
                 <h5 class="modal-title" id="modalAddCategoryLabel">Thêm mới kiểu loại</h5>
             </div>
             <div class="modal-body">
-                <form id="addCategory" method="post" action="/admin/product/add-nhanh/category"
-                      onsubmit="return submitAddNhanhCategory(event)">
+                <form id="addCategory" method="post" action="/admin/product/add-nhanh/category">
                     <div class="mb-3">
-                        <label for="category_name" class="form-label">Tên kiểu loại</label><span
-                            class="text-danger">*</span>
+                        <label for="category_name" class="form-label">Tên kiểu loại</label><span class="text-danger">*</span>
                         <input type="text" class="form-control" id="category_name" name="categoryName"
                                placeholder="Nhập tên kiểu loại">
                     </div>
@@ -252,7 +248,60 @@
         </div>
     </div>
 </div>
-
+<!--Modal add hãng nhanh-->
+<div class="modal fade" id="modalAddBrand" tabindex="-1" aria-labelledby="modalAddBrandLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAddBrandLabel">Thêm mới hãng</h5>
+            </div>
+            <div class="modal-body">
+                <form id="addBrand" method="post" action="/admin/product/add-nhanh/brand">
+                    <div class="mb-3">
+                        <label for="brand_name" class="form-label">Tên hãng</label><span class="text-danger">*</span>
+                        <input type="text" class="form-control" id="brand_name" name="brandName"
+                               placeholder="Nhập tên hãng">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-outline-success">
+                            <i class="bi bi-check-lg"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-warning" data-bs-dismiss="modal">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Modal add chất liệu nhanh-->
+<div class="modal fade" id="modalAddMaterial" tabindex="-1" aria-labelledby="modalAddMaterialLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAddMaterialLabel">Thêm mới chất liệu</h5>
+            </div>
+            <div class="modal-body">
+                <form id="addMaterial" method="post" action="/admin/product/add-nhanh/material">
+                    <div class="mb-3">
+                        <label for="material_name" class="form-label">Tên chất liệu</label><span class="text-danger">*</span>
+                        <input type="text" class="form-control" id="material_name" name="materialName"
+                               placeholder="Nhập tên chất liệu">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-outline-success">
+                            <i class="bi bi-check-lg"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-warning" data-bs-dismiss="modal">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 <footer th:replace="admin/fragments/footer :: footer"></footer>
 
 <!--báo lỗi-->
@@ -371,5 +420,6 @@
         });
     });
 </script>
+
 </body>
 </html>
