@@ -23,7 +23,9 @@ public class Customer {
     private String email;
     @Column(name = "is_active")
     private Boolean isActive = true;
-
+    @Nationalized
+    @Column(name = "address") 
+    private String address;
 
 //    @OneToOne(mappedBy = "customer")
 //    private Account account;

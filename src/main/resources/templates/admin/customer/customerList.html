@@ -63,6 +63,7 @@
                         <th>Họ tên</th>
                         <th>Email</th>
                         <th>Phone number</th>
+                        <th>Địa chỉ</th>
                         <th>Trạng thái</th>
                         <th>Thao tác</th>
                     </tr>
@@ -74,6 +75,7 @@
                         <td th:text="${c.name != null ? c.name : ''}"></td>
                         <td th:text="${c.email != null ? c.email : ''}"></td>
                         <td th:text="${c.phoneNumber != null ? c.phoneNumber : ''}"></td>
+                        <td th:text="${c.address != null ? c.address : ''}"></td>
                         <td>
                             <span th:if="${c.isActive != null and c.isActive}"
                                   class="badge badge-active">Hoạt động</span>
