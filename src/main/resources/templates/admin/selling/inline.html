@@ -11,6 +11,7 @@
 <!-- Navbar -->
 <div class="flex items-center justify-between bg-green-600 text-white p-3">
     <div class="flex items-center gap-2 flex-1 overflow-hidden">
+        <a th:href="@{/admin}" class="btn btn-cancel me-2">Quay lại</a>
         <input type="text" placeholder="Tìm hàng hóa" class="px-3 py-2 rounded-md w-72 text-black" />
 
         <div id="tabs" class="flex items-center overflow-x-auto whitespace-nowrap scrollbar-hide ml-2 space-x-2">
@@ -52,6 +53,7 @@
                      th:attr="onclick=|addToCartFE(${pd.id}, '${pd.product.name}', ${pd.price})|">
                     <h3 class="font-semibold" th:text="${pd.product.name + ' (' + pd.color.name + '-' + pd.size.name + ')' }">Tên sản phẩm</h3>
                     <p th:text="${pd.price}">100.000 đ</p>
+                    <p th:text="${pd.quantity}"></p>
                 </div>
             </div>
         </div>
