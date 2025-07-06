@@ -70,7 +70,7 @@
                 </div>
                 <div class="col-md-6 form-group">
                     <label class="form-label">Số tiền giảm tối đa (đ) *</label>
-                    <input type="number" class="form-control" th:field="*{maxDiscount}">
+                    <input type="number" class="form-control" id="maxDiscount" th:field="*{maxDiscount}">
                     <div class="text-danger" th:if="${#fields.hasErrors('maxDiscount')}" th:errors="*{maxDiscount}"></div>
                 </div>
                 <div class="col-md-6 form-group">
@@ -111,10 +111,12 @@
             discountInput.setAttribute('min', '1');
             discountInput.setAttribute('max', '95');
             maxDiscountInput.disabled = false;
+            maxDiscountGroup.style.display = 'block';
         } else {
             discountInput.removeAttribute('min');
             discountInput.removeAttribute('max');
-            maxDiscountInput.disabled = true;
+            maxDiscountInput.disabled = false;
+            maxDiscountGroup.style.display = 'block';
         }
     }
 
