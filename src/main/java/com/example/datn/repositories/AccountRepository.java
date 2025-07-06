@@ -18,16 +18,9 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     @Query("SELECT new com.example.datn.dto.response.AccountResponseDto(a.id, a.code, a.fullName, a.email, a.birthOfDate, a.addressDetail , a.gender, a.phoneNumber, a.role.name, a.created_at, a.updated_at, a.status) FROM Account a")
     List<AccountResponseDto> listAccountRes();
 
-
-    @Query(
-            value = "SELECT new com.example.datn.dto.response.AccountResponseDto(" +
-                    "a.id, a.code, a.fullName, a.email, a.birthOfDate, a.addressDetail, a.gender, a.phoneNumber, " +
-                    "a.role.name,  a.created_at, a.updated_at, a.status) " +
-                    "FROM Account a",
-
-            countQuery = "SELECT COUNT(a) FROM Account a"
-    )
-    Page<AccountResponseDto> paginate(Pageable pageable);
-
     Optional<Account> findTopByOrderByCodeDesc();
+
+    boolean existsByEmail(String email);
+    boolean existsByPhoneNumber(String phoneNumber);
+
 }

@@ -34,6 +34,13 @@ public class AccountService {
 
 
     public Account createNewAccount(AccountRequestDto accountRequestDto) {
+        if (accountRepository.existsByEmail(accountRequestDto.getEmail())) {
+            throw new RuntimeException("Email đã tồn tại!");
+        }
+
+        if (accountRepository.existsByPhoneNumber(accountRequestDto.getPhoneNumber())) {
+            throw new RuntimeException("Số điện thoại đã tồn tại!");
+        }
         Account account = new Account();
 
         account.setCode(generateNextAccountCode());
@@ -59,16 +66,16 @@ public class AccountService {
         if (lastAccountOpt.isPresent()) {
             String codeAuto = lastAccountOpt.get().getCode();
 
-            if (codeAuto != null && codeAuto.startsWith("TK")) {
+            if (codeAuto != null && codeAuto.startsWith("NV")) {
                 try {
                     int number = Integer.parseInt(codeAuto.substring(2));
-                    return String.format("TK%03d", number + 1);
+                    return String.format("NV%03d", number + 1);
                 } catch (NumberFormatException e) {
-                    return "TK001";
+                    return "NV001";
                 }
             }
         }
-        return "TK001";
+        return "NV001";
     }
 
     public Account getDetail(Integer id) {
