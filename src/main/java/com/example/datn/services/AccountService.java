@@ -47,7 +47,7 @@ public class AccountService {
         account.setGender(accountRequestDto.getGender());
         account.setStatus(Boolean.TRUE);
 
-        Role role = roleRepository.findByName("ROLE_CUSTOMER").orElseThrow(() -> new RuntimeException("Khong tim thay quyen hop le!"));
+        Role role = roleRepository.findByName("ROLE_EMPLOYEE").orElseThrow(() -> new RuntimeException("Khong tim thay quyen hop le!"));
         account.setRole(role);
 
         return accountRepository.save(account);
