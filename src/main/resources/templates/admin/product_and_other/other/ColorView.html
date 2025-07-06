@@ -80,8 +80,7 @@
                             <tbody>
                             <tr th:each="color, iter : ${listColor.content}" th:data-id="${color.id}">
                                 <td th:text="${listColor.number * listColor.size + iter.index + 1}"></td>
-                                <td th:text="${color.code}"></td>
-                                <td th:text="${color.name}"></td>
+                                <td th:text="${color.code}">mã</td>
                                 <td style="text-align: center">
                                     <span th:if="${color.status}" class="badge bg-success">Hoạt động</span>
                                     <span th:unless="${color.status}" class="badge bg-danger">Không hoạt động</span>
@@ -139,10 +138,11 @@
                 </div>
                 <div class="modal-body">
                     <form id="addSize" method="post" action="/admin/color/add">
-                        <!--                    <div class="mb-3">-->
-                        <!--                        <label for="color_code" class="form-label">Mã</label><span class="text-danger">*</span>-->
-                        <!--                        <input type="text" class="form-control" id="color_code" name="colorCode" placeholder="Nhập mã">-->
-                        <!--                    </div>-->
+                        <div class="mb-3">
+                            <label for="color_code" class="form-label">Mã màu (hiển thị)</label><span class="text-danger">*</span>
+                            <input type="color" class="form-control form-control-color" id="color_code" name="colorCode"
+                                   value="#000000" title="Chọn màu" required>
+                        </div>
                         <div class="mb-3">
                             <label for="color_name" class="form-label">Tên</label><span class="text-danger">*</span>
                             <input type="text" class="form-control" id="color_name" name="colorName" placeholder="Nhập tên màu sắc">

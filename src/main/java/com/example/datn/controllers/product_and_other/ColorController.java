@@ -37,7 +37,7 @@ public class ColorController {
 
     @PostMapping("/add")
     public String add(
-//                      @RequestParam("colorCode") String colorCode,
+                      @RequestParam("colorCode") String colorCode,
                       @RequestParam("colorName") String colorName,
                       RedirectAttributes redirectAttributes){
         if (colorName == null || colorName.trim().isEmpty()){
@@ -51,7 +51,8 @@ public class ColorController {
             redirectAttributes.addFlashAttribute("type", "error");
             return "redirect:/admin/color/hien-thi";
         } else {
-            String colorCode = colorService.taoMaTuDongColor();
+//            String colorCode = colorService.taoMaTuDongColor();
+
             colorService.addColor(colorCode.trim(), colorName.trim());
             redirectAttributes.addFlashAttribute("alert", "Thêm màu sắc thành công!");
             redirectAttributes.addFlashAttribute("type", "success");
