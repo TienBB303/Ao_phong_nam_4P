@@ -1,14 +1,16 @@
 package com.example.datn.repositories;
 
-//import com.example.datn.dto.customer.CustomerDto;
 import com.example.datn.entities.Customer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface CustomerRepository extends JpaRepository<Customer,Integer> {
+    boolean existsByEmail(String email);
     //check unique
     boolean existsByCode(String code);
 
@@ -16,14 +18,7 @@ public interface CustomerRepository extends JpaRepository<Customer,Integer> {
 
     @Query("SELECT c FROM Customer c WHERE c.isActive = true AND (c.name LIKE %:keyword% OR c.code LIKE %:keyword%)")
     Page<Customer> searchCustomerKeyword(@Param("keyword") String keyword, Pageable pageable);
-
-
-
-
-
-
-    Customer findTopByOrderByIdDesc();
     Page<Customer> findByIsActiveTrue(Pageable pageable);
-
-
+    // ma tu sinh
+    Customer findTopByOrderByIdDesc();
 }
