@@ -1,8 +1,8 @@
-<nav class="pc-sidebar" th:fragment="sidebar">
+<nav class="pc-sidebar" th:fragment="sidebar" xmlns:th="http://www.w3.org/1999/xhtml">
   <div class="navbar-wrapper">
     <div class="m-header">
       <a th:href="@{/admin}" class="b-brand text-primary">
-        <img th:src="@{/assets/images/logo-dark.svg}" alt="logo">
+        <img th:src="@{/images/logo1.png}" alt="logo">
       </a>
     </div>
     <div class="navbar-content">
@@ -20,7 +20,7 @@
           </a>
         </li>
         <li class="pc-item">
-          <a href="#" class="pc-link">
+          <a th:href="@{/admin/bill/view}" class="pc-link">
             <span class="pc-micon"><i class="ti ti-vocabulary"></i></span>
             <span class="pc-mtext">Quản lý hóa đơn</span>
           </a>
