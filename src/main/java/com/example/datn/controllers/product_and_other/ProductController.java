@@ -123,6 +123,8 @@ public class ProductController {
     @ResponseBody
     public String addVariant(@RequestParam Integer colorId,
                              @RequestParam Integer sizeId,
+//                            @RequestParam("all_price")  BigDecimal price,
+//                            @RequestParam("all_quantity") Integer quantity,
 //                             @RequestParam Integer quantity,
 //                             @RequestParam BigDecimal price,
                              HttpSession session) {
