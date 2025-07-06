@@ -4,7 +4,6 @@ import com.example.datn.dto.product.ProductDetailForm;
 import com.example.datn.dto.product.ProductForm;
 import com.example.datn.entities.product_and_other.*;
 import com.example.datn.services.product_and_other.*;
-import com.google.zxing.qrcode.decoder.Mode;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -12,7 +11,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 

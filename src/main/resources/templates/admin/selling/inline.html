@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Bán hàng tại quầy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 h-screen">
+
+<!-- Navbar -->
+<div class="flex items-center justify-between bg-green-600 text-white p-3">
+    <div class="flex items-center gap-2 flex-1 overflow-hidden">
+        <input type="text" placeholder="Tìm hàng hóa" class="px-3 py-2 rounded-md w-72 text-black" />
+
+        <div id="tabs" class="flex items-center overflow-x-auto whitespace-nowrap scrollbar-hide ml-2 space-x-2">
+            <!-- Tab sẽ render bằng JS -->
+        </div>
+        <button onclick="addTab()" class="ml-2 bg-white text-green-600 px-2 py-1 rounded">+</button>
+    </div>
+
+    <div class="flex items-center gap-4">
+        <span>🛒</span>
+        <span>🔄</span>
+        <span>🖨️</span>
+        <span class="font-semibold">0365142537</span>
+        <button>☰</button>
+    </div>
+</div>
+
+<!-- Main -->
+<div class="flex h-[calc(100%-60px)]">
+
+    <!-- Sản phẩm bên trái -->
+    <div class="w-2/3 bg-white p-4 overflow-y-auto">
+        <div id="cart-items" class="space-y-2">
+            <!-- Item giỏ hàng sẽ được render tại đây -->
+        </div>
+    </div>
+
+    <!-- Giỏ hàng bên phải -->
+    <div class="w-1/3 bg-gray-50 border-l p-4 flex flex-col justify-between">
+
+        <!-- Tìm khách hàng -->
+        <div>
+            <input type="text" placeholder="Tìm khách hàng (F4)" class="px-3 py-2 w-full mb-3 rounded-md border" />
+            <h2 class="font-bold mb-2">Danh sách sản phẩm</h2>
+            <div id="product-list" class="grid grid-cols-3 gap-4">
+                <!-- Card sản phẩm -->
+                <!-- Sẽ được đổ động từ JS hoặc Thymeleaf -->
+            </div>
+        </div>
+
+        <!-- Thanh toán -->
+        <div>
+            <div class="flex justify-between font-semibold mb-2">
+                <span>Ghi chú đơn hàng</span>
+                <input type="text" class="w-2/3 px-2 py-1 border rounded" placeholder="Ghi chú..."/>
+            </div>
+            <div class="flex justify-between items-center text-lg font-bold">
+                <span>Tổng tiền hàng:</span>
+                <span id="total-price">0 đ</span>
+            </div>
+            <button class="w-full mt-3 bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded">
+                THANH TOÁN
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Script đơn giản -->
+<script>
+    // Sản phẩm mẫu
+    const products = [
+        { id: 1, name: "Áo Thun", price: 100000 },
+        { id: 2, name: "Quần Jean", price: 250000 },
+        { id: 3, name: "Giày Thể Thao", price: 500000 },
+    ];
+
+    const productList = document.getElementById("product-list");
+    const cartItems = document.getElementById("cart-items");
+    const totalPrice = document.getElementById("total-price");
+    const cart = {};
+
+    // Hiển thị danh sách sản phẩm
+    products.forEach(product => {
+        const div = document.createElement("div");
+        div.className = "border p-2 rounded shadow hover:bg-gray-100 cursor-pointer";
+        div.innerHTML = `<h3 class="font-semibold">${product.name}</h3><p>${product.price.toLocaleString()} đ</p>`;
+        div.onclick = () => addToCart(product);
+        productList.appendChild(div);
+    });
+    let tabs = [
+        { id: 1, name: "Hóa đơn 1", cart: {} }
+    ];
+    let currentTabId = 1;
+
+    function addTab() {
+        const newId = tabs.length > 0 ? Math.max(...tabs.map(t => t.id)) + 1 : 1;
+        const newTab = { id: newId, name: `Hóa đơn ${newId}`, cart: {} };
+        tabs.push(newTab);
+        currentTabId = newId;
+        renderTabs();
+        renderCart();
+    }
+
+    function switchTab(id) {
+        currentTabId = id;
+        renderTabs();
+        renderCart();
+    }
+
+    function removeTab(id) {
+        tabs = tabs.filter(tab => tab.id !== id);
+        if (tabs.length === 0) {
+            addTab();
+        } else {
+            currentTabId = tabs[0].id;
+        }
+        renderTabs();
+        renderCart();
+    }
+
+    function renderTabs() {
+        const tabsDiv = document.getElementById("tabs");
+        tabsDiv.innerHTML = '';
+        tabs.forEach(tab => {
+            const tabBtn = document.createElement("div");
+            tabBtn.className = `px-3 py-1 rounded cursor-pointer ${tab.id === currentTabId ? 'bg-white text-green-600 font-bold' : 'bg-green-500 text-white'}`;
+            tabBtn.innerHTML = `
+      ${tab.name}
+      <button onclick="event.stopPropagation(); removeTab(${tab.id})">❌</button>
+    `;
+            tabBtn.onclick = () => switchTab(tab.id);
+            tabsDiv.appendChild(tabBtn);
+        });
+    }
+
+    function getCurrentCart() {
+        const currentTab = tabs.find(t => t.id === currentTabId);
+        return currentTab ? currentTab.cart : {};
+    }
+
+    function addToCart(product) {
+        const cart = getCurrentCart();
+        if (!cart[product.id]) {
+            cart[product.id] = { ...product, quantity: 1 };
+        } else {
+            cart[product.id].quantity += 1;
+        }
+        renderCart();
+    }
+
+    function renderCart() {
+        const cart = getCurrentCart();
+        const cartItems = document.getElementById("cart-items");
+        const totalPrice = document.getElementById("total-price");
+
+        cartItems.innerHTML = '';
+        let total = 0;
+
+        Object.values(cart).forEach(item => {
+            total += item.price * item.quantity;
+            const row = document.createElement("div");
+            row.className = "flex justify-between border-b pb-1";
+            row.innerHTML = `
+      <span>${item.name} x${item.quantity}</span>
+      <span>${(item.price * item.quantity).toLocaleString()} đ</span>
+    `;
+            cartItems.appendChild(row);
+        });
+
+        totalPrice.innerText = total.toLocaleString() + ' đ';
+    }
+
+    // Gọi khi load trang
+    renderTabs();
+    renderCart();
+
+</script>
+
+</body>
+</html>

@@ -1,115 +1,209 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments/head :: head}">
-    <title>Quan ly khuyen mai | 4PStore</title>
+    <title>Quản lý sản phẩm | 4PStore</title>
 </head>
 <body>
 <header th:replace="~{admin/fragments/header :: header}"></header>
 <div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
 <section>
-    <!-- Main-->
-    <div id="main" class="container mt-4">
-        <h3></h3>
-        <div class="card-header d-flex justify-content-between">
-            <div>
-                <a class="btn btn-outline-primary" href="/admin/product/hien-thi" style="width: 70px">
-                    <i class="bi bi-arrow-return-left"></i>
-                </a>
+    <div class="pc-container">
+        <div class="pc-content">
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="row align-items-center">
+                        <div class="col-md-12">
+                            <div class="page-header-title">
+                                <h5 class="m-b-10">Thông tin sản phẩm</h5>
+                            </div>
+                            <ul class="breadcrumb">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div>
-                <a class="btn btn-outline-success" href="/admin/product/view-add" style="width: 70px" title="Thêm sản phẩm mới">
-                    <i class="bi bi-plus"></i>
-                </a>
-                <a class="btn btn-outline-success" href="/admin/product/view-atribute" style="width: 70px" title="Thuộc tính">
-                    <i class="bi bi-play-fill"></i>
-                </a>
-            </div>
+            <!-- Main-->
+            <div id="main" class="container mt-4">
+                <h3></h3>
+                <div class="card-header d-flex justify-content-between">
+                    <div>
+                        <a class="btn btn-outline-primary" href="/admin/product/hien-thi" style="width: 70px">
+                            <i class="bi bi-arrow-return-left"></i>
+                        </a>
+                    </div>
+                    <div>
+                        <a class="btn btn-outline-success" href="/admin/product/view-add" style="width: 70px"
+                           title="Thêm sản phẩm mới">
+                            <i class="bi bi-plus"></i>
+                        </a>
+                    </div>
 
+                </div>
+
+
+                <form id="" class="p-4 bg-light rounded shadow-sm">
+
+                    <div class="row mb-3">
+                        <div class="col-md-4 form-floating">
+                            <input type="text" class="form-control" id="product_code" th:value="${productForm.code}"
+                                   readonly>
+                            <label for="product_code">Mã sản phẩm</label>
+                        </div>
+                        <div class="col-md-4 form-floating">
+                            <input type="text" class="form-control" id="product_name" th:value="${productForm.name}"
+                                   readonly>
+                            <label for="product_name">Tên sản phẩm</label>
+                        </div>
+                        <div class="col-md-4 form-floating">
+                            <input type="text" class="form-control" id="product_description"
+                                   th:value="${productForm.description}" readonly>
+                            <label for="product_description">Mô tả</label>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Loại sản phẩm</label>
+                            <select class="form-select" disabled>
+                                <option th:each="cate : ${listCategory}"
+                                        th:value="${cate.id}"
+                                        th:text="${cate.name}"
+                                        th:selected="${cate.id == productForm.categoryId}">...
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Hãng</label>
+                            <select class="form-select" disabled>
+                                <option th:each="brand : ${listBrand}"
+                                        th:value="${brand.id}"
+                                        th:text="${brand.name}"
+                                        th:selected="${brand.id == productForm.brandId}">...
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Chất liệu</label>
+                            <select class="form-select" disabled>
+                                <option th:each="mate : ${listMaterial}"
+                                        th:value="${mate.id}"
+                                        th:text="${mate.name}"
+                                        th:selected="${mate.id == productForm.materialId}">...
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h5 class="mb-3 text-success"><i class="bi bi-list-ul me-1"></i> Danh sách biến thể</h5>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped align-middle text-center">
+                            <thead class="table-primary">
+                            <tr>
+                                <th scope="col">Tên</th>
+                                <th scope="col">Màu</th>
+                                <th scope="col">Kích cỡ</th>
+                                <th scope="col">Giá</th>
+                                <th scope="col">Số lượng</th>
+                                <th scope="col">Hành động</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="detail : ${listProductDetail}">
+                                <td th:text="${detail.product.name + '(' + detail.color.name + ' - ' + detail.size.code + ' )'}">
+                                    Tên
+                                </td>
+                                <td th:text="${detail.color.name}">Màu</td>
+                                <td th:text="${detail.size.name}">Size</td>
+                                <td th:text="${detail.price}">Giá</td>
+                                <td th:text="${detail.quantity}">Số lượng</td>
+                                <td style="text-align: center">
+                                    <a class="btn btn-outline-warning hienThiThongTinModal"
+                                        style="width: 70px" title="Sửa"
+                                        th:attr="data-id=${detail.id}"
+                                        data-bs-toggle="modal" data-bs-target="#modalChinhSua">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                </td>
+
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
+                <div class="modal fade" id="modalChinhSua" tabindex="-1" aria-labelledby="modalChinhSuaLabel"
+                     aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="modalChinhSuaLabel">Chỉnh sửa sản phẩm </h5>
+                            </div>
+                            <div class="modal-body">
+                                <form id="updateProductDetail" method="post" action="/admin/product-detail/update">
+                                    <input type="hidden" id="product_detail_id" name="ProductDetailId">
+                                    <div class="mb-3">
+                                        <label for="product_price_update" class="form-label">Giá</label><span class="text-danger">*</span>
+                                        <input type="number" class="form-control" id="product_price_update" name="productPriceUpdate" placeholder="Nhập giá...">
+
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="product_quantity_update" class="form-label">Số lượng</label>
+                                        <input type="number" class="form-control" id="product_quantity_update" name="productQuantityUpdate" placeholder="Nhập số lượng...">
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-outline-success">
+                                            <i class="bi bi-check-lg"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-warning" data-bs-dismiss="modal">
+                                            <i class="bi bi-x"></i>
+                                        </button>
+                                    </div>
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer th:replace="admin/fragments/footer :: footer"></footer>
+            <!-- Script -->
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+            <script th:if="${alert != null}" th:inline="javascript">
+                Swal.fire({
+                    toast: true,
+                    icon: [[${type}]],
+                    title: '[[${alert}]]', // Thông báo từ controller
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true
+                });
+            </script>
+            <script>
+                $(document).on('click', '.hienThiThongTinModal', function () {
+                    const id = $(this).data('id');
+                    console.log("ID lấy được:", id);
+                    $('#product_detail_id').val(id); // Gắn ID vào input ẩn trong form
+
+                    $.ajax({
+                        url: `/admin/product-detail/detail/${id}`,
+                        type: 'GET',
+                        success: function (response) {
+                            console.log("Gia :", response.price);
+                            console.log("So luong :", response.quantity);
+                            $('#product_detail_id').val(response.id);
+                            $('#product_price_update').val(response.price);
+                            $('#product_quantity_update').val(response.quantity);
+                        },
+                        error: function (xhr) {
+                        }
+                    });
+                });
+            </script>
         </div>
-
-
-        <form id="" class="p-4 bg-light rounded shadow-sm">
-            <h5 class="mb-3 text-primary"><i class="bi bi-info-circle-fill me-1"></i> Thông tin sản phẩm</h5>
-
-            <div class="row mb-3">
-                <div class="col-md-4 form-floating">
-                    <input type="text" class="form-control" id="product_code" th:value="${productForm.code}" readonly>
-                    <label for="product_code">Mã sản phẩm</label>
-                </div>
-                <div class="col-md-4 form-floating">
-                    <input type="text" class="form-control" id="product_name" th:value="${productForm.name}" readonly>
-                    <label for="product_name">Tên sản phẩm</label>
-                </div>
-                <div class="col-md-4 form-floating">
-                    <input type="text" class="form-control" id="product_description" th:value="${productForm.description}" readonly>
-                    <label for="product_description">Mô tả</label>
-                </div>
-            </div>
-
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <label class="form-label">Loại sản phẩm</label>
-                    <select class="form-select" disabled>
-                        <option th:each="cate : ${listCategory}"
-                                th:value="${cate.id}"
-                                th:text="${cate.name}"
-                                th:selected="${cate.id == productForm.categoryId}">...</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Hãng</label>
-                    <select class="form-select" disabled>
-                        <option th:each="brand : ${listBrand}"
-                                th:value="${brand.id}"
-                                th:text="${brand.name}"
-                                th:selected="${brand.id == productForm.brandId}">...</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Chất liệu</label>
-                    <select class="form-select" disabled>
-                        <option th:each="mate : ${listMaterial}"
-                                th:value="${mate.id}"
-                                th:text="${mate.name}"
-                                th:selected="${mate.id == productForm.materialId}">...</option>
-                    </select>
-                </div>
-            </div>
-
-            <hr class="my-4">
-
-            <h5 class="mb-3 text-success"><i class="bi bi-list-ul me-1"></i> Danh sách biến thể</h5>
-
-        <div class="table-responsive">
-            <table class="table table-bordered table-striped align-middle text-center">
-                <thead class="table-primary">
-                <tr>
-                    <th scope="col">Tên</th>
-                    <th scope="col">Màu</th>
-                    <th scope="col">Kích cỡ</th>
-                    <th scope="col">Giá</th>
-                    <th scope="col">Số lượng</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="detail : ${listProductDetail}">
-                    <td th:text="${detail.product.name + '(' + detail.color.name + ' - ' + detail.size.code + ' )'}">Tên</td>
-                    <td th:text="${detail.color.name}">Màu</td>
-                    <td th:text="${detail.size.name}">Size</td>
-                    <td th:text="${detail.price}">Giá</td>
-                    <td th:text="${detail.quantity}">Số lượng</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-    </form>
-
-
-
     </div>
-    <footer th:replace="admin/fragments/footer :: footer"></footer>
-    <!-- Script -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
 </section>
 <footer th:replace="~{admin/fragments/footer :: footer}"></footer>
 </body>
