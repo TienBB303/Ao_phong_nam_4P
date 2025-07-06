@@ -41,6 +41,14 @@ public class ProductService {
         return productRepository.search(name,status, categoryId, brandId, materialId, pageable);
     }
 
+    public ProductDetail detailProductDetail(Integer id){
+        return productDetailRepository.findProductDetailById(id);
+    }
+
+    public ProductDetail findProductDetailById(Integer id){
+        return productDetailRepository.findProductDetailById(id);
+    }
+
     public Product findByIdProduct(Integer id){
         return productRepository.findByIdProduct(id);
     }
@@ -116,5 +124,13 @@ public class ProductService {
     }
     public Product findByCode(String code) {
         return productRepository.findByCode(code);
+    }
+
+    public void updateProductDetail(ProductDetail productDetail){
+        productDetailRepository.save(productDetail);
+    }
+
+    public List<ProductDetail> getAllProductDetails(){
+        return productDetailRepository.getAllProductDetails();
     }
 }

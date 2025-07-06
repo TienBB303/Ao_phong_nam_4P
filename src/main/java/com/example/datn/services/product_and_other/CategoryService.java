@@ -42,6 +42,10 @@ public class CategoryService {
         return categoryRepository.save(category);
     }
 
+
+    public Category addCategoryObj(Category category){
+        return categoryRepository.save(category);
+    }
     public Category addCategory(String name, String description){
         Category category = new Category();
         category.setName(name);
