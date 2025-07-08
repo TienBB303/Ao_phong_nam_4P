@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/head :: head}">
+    <title>Quản lý sản phẩm | 4PStore</title>
+
+</head>
+<body>
+<header th:replace="~{admin/fragments/header :: header}"></header>
+<div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
+<section>
+    <div class="pc-container">
+        <div class="pc-content">
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="row align-items-center">
+                        <div class="col-md-12">
+                            <div class="page-header-title">
+                                <h5 class="m-b-10">Thêm biến thể</h5>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="container discount-form-container">
+                <div class="container mt-5">
+                    <form id="TaoBienThe" th:object="${productForm}" th:action="@{/admin/product/save-product}" method="post" enctype="multipart/form-data">
+                        <input type="hidden" class="form-control" id="product_code" name="code" th:value="${productForm.code}">
+                        <input type="hidden" class="form-control" id="product_name" name="name" th:value="${productForm.name}">
+                        <input type="hidden" class="form-control" id="product_category" name="categoryId" th:value="${productForm.categoryId}">
+                        <input type="hidden" class="form-control" id="product_brand" name="brandId" th:value="${productForm.brandId}">
+                        <input type="hidden" class="form-control" id="product_material" name="materialId" th:value="${productForm.materialId}">
+                        <input type="hidden" class="form-control" id="product_description" name="description" th:value="${productForm.description}">
+
+                        <div>
+                            <a class="btn btn-secondary" id="return" href="/admin/product/view-add" title="Quay lại">
+                                <i class="bi bi-arrow-bar-left"></i>
+                            </a>
+                        </div>
+
+                        <br>
+                        <!-- Chọn nhiều màu và kích cỡ -->
+                        <div class="card shadow-sm rounded mb-4">
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="multi_color" class="form-label">Chọn nhiều màu sắc</label>
+                                        <select id="multi_color" class="form-select" name="selectedColorIds" multiple>
+                                            <option th:each="color : ${listColor}"
+                                                    th:value="${color.id}"
+                                                    th:text="${color.name}"
+                                                    th:attr="data-color=${color.code}"
+                                                    th:selected="${selectedColorIds != null and selectedColorIds.contains(color.id)}">
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="multi_size" class="form-label">Chọn nhiều kích cỡ</label>
+                                        <select id="multi_size" class="form-select" name="selectedSizeIds" multiple>
+                                            <option th:each="size : ${listSize}"
+                                                    th:value="${size.id}"
+                                                    th:text="${size.code}"
+                                                    th:selected="${selectedSizeIds != null and selectedSizeIds.contains(size.id)}">
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <!-- Ô nhập chung -->
+                        <div class="card shadow-sm rounded mb-4">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label for="inline_quantity">Số lượng</label>
+                                        <input type="number" id="inline_quantity" class="form-control" placeholder="Nhập số lượng">
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="inline_price">Giá</label>
+                                        <input type="number" id="inline_price" class="form-control" placeholder="Nhập giá">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+<!--                        <div id="variant-list">-->
+                        <div id="variant-group-list">
+                            <div th:each="variant, stat : ${productForm.variants}" class="variant-item row mb-3">
+                                <div class="col-md-2">
+                                    <label>Màu sắc</label>
+                                    <input class="form-control" th:each="color : ${listColor}" th:if="${color.id == variant.colorId}" th:value="${color.name}" disabled/>
+                                    <input type="hidden" th:name="'variants[' + ${stat.index} + '].colorId'" th:value="${variant.colorId}"/>
+                                </div>
+
+                                <!-- Kích cỡ -->
+                                <div class="col-md-2">
+                                    <label>Kích cỡ</label>
+                                    <input class="form-control" th:each="size : ${listSize}" th:if="${size.id == variant.sizeId}" th:value="${size.name}" disabled/>
+                                    <input type="hidden" th:name="'variants[' + ${stat.index} + '].sizeId'" th:value="${variant.sizeId}"/>
+                                </div>
+
+                                <!-- Số lượng -->
+                                <div class="col-md-2">
+                                    <label>Số lượng</label>
+                                    <input type="number" class="form-control" th:name="'variants[' + ${stat.index} + '].quantity'" th:value="${variant.quantity}">
+                                </div>
+
+                                <!-- Giá tiền -->
+                                <div class="col-md-2">
+                                    <label>Giá tiền</label>
+                                    <input type="number" class="form-control" th:name="'variants[' + ${stat.index} + '].price'" th:value="${variant.price}">
+                                </div>
+
+                                <!-- Nút Xóa -->
+                                <div class="col-md-2 d-flex align-items-end">
+                                    <button type="button" class="btn btn-danger remove-variant">Xóa</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-primary" id="add-variant-btn">
+                                <i class="bi bi-plus-circle"></i> Thêm biến thể
+                            </button>
+
+                            <button type="submit" class="btn btn-success" id="Confirm">
+                                <i class="bi bi-check-circle-fill"></i> Xác nhận
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</div>
+
+<footer th:replace="admin/fragments/footer :: footer"></footer>
+
+<!--báo lỗi-->
+<script th:if="${alert != null}" th:inline="javascript">
+    Swal.fire({
+        toast: true,
+        icon: [[${type}]],
+        title: '[[${alert}]]', // Thông báo từ controller
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true
+    });
+</script>
+
+<!--Thêm nhiều biến thể-->
+<script>
+    let variantIndex = $('#variant-group-list .variant-item').length;
+
+    function createVariantItem(colorId, colorName, sizeId, sizeName, quantity, price) {
+        return `
+    <div class="variant-item row mb-2">
+        <div class="col-md-3">
+            <input type="text" class="form-control" value="${sizeName}" disabled>
+            <input type="hidden" name="variants[${variantIndex}].sizeId" value="${sizeId}">
+        </div>
+        <div class="col-md-3">
+            <input type="number" class="form-control" name="variants[${variantIndex}].quantity" value="${quantity}">
+        </div>
+        <div class="col-md-3">
+            <input type="number" class="form-control" name="variants[${variantIndex}].price" value="${price}">
+        </div>
+        <div class="col-md-2 d-flex align-items-center">
+            <button type="button" class="btn btn-danger remove-variant">Xóa</button>
+        </div>
+        <input type="hidden" name="variants[${variantIndex}].colorId" value="${colorId}">
+    </div>`;
+    }
+
+    function createColorBlock(colorId, colorName) {
+        return `
+    <div class="card mb-3 color-block" data-color="${colorId}">
+        <div class="card-header d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#color-body-${colorId}" style="cursor: pointer;">
+            <strong>${colorName}</strong>
+            <i class="bi bi-chevron-down"></i>
+        </div>
+        <div class="collapse show" id="color-body-${colorId}">
+            <div class="card-body variant-list-inner">
+                <!-- Biến thể sẽ được thêm tại đây -->
+            </div>
+            <div class="form-group">
+                <label>Ảnh cho màu: <strong>${colorName}</strong></label>
+<!--                <input type="file" name="colorImages[${colorId}]" class="form-control" multiple accept="image/*">-->
+                <input type="file" name="colorImages[${colorId}][]" class="form-control" multiple accept="image/*">
+            </div>
+        </div>
+    </div>`;
+    }
+
+    function updateVariantIndexes() {
+        variantIndex = 0;
+        $('#variant-group-list .variant-item').each(function () {
+            $(this).find('input[name]').each(function () {
+                const name = $(this).attr('name');
+                const newName = name.replace(/\[\d+\]/, `[${variantIndex}]`);
+                $(this).attr('name', newName);
+            });
+            variantIndex++;
+        });
+    }
+
+    $(document).ready(function () {
+        $('#multi_color').select2({placeholder: 'Chọn màu sắc', templateResult: formatColor, templateSelection: formatColor});
+        $('#multi_size').select2({placeholder: 'Chọn kích cỡ'});
+
+        function formatColor(state) {
+            if (!state.id) return state.text;
+            const colorCode = $(state.element).data('color');
+            if (!colorCode) return state.text;
+
+            return $(`
+            <span>
+                <span style="display: inline-block; width: 15px; height: 15px; background-color: ${colorCode}; border-radius: 50%; border: 1px solid #ccc; margin-right: 8px;"></span>
+                ${state.text}
+            </span>
+        `);
+        }
+
+        $('#add-variant-btn').on('click', function () {
+            const selectedColors = $('#multi_color').val();
+            const selectedSizes = $('#multi_size').val();
+            const quantity = parseInt($('#inline_quantity').val());
+            const price = parseInt($('#inline_price').val());
+
+            // if (!selectedColors || !selectedSizes || isNaN(quantity) || isNaN(price)) {
+            //     Swal.fire("Lỗi", "Vui lòng chọn màu, size và nhập đầy đủ giá + số lượng!", "error");
+            //     return;
+            // }
+
+            if (quantity < 0 || price < 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Số lượng và giá tiền không được nhỏ hơn 0!',
+                    toast: true,
+                    position: 'top-end',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                return;
+            }
+
+            selectedColors.forEach(colorId => {
+                const colorName = $('#multi_color option[value="' + colorId + '"]').text();
+                let colorBlock = $(`.color-block[data-color="${colorId}"]`);
+
+                // Tạo block nếu chưa tồn tại
+                if (colorBlock.length === 0) {
+                    const htmlBlock = createColorBlock(colorId, colorName);
+                    $('#variant-group-list').append(htmlBlock);
+                    colorBlock = $(`.color-block[data-color="${colorId}"]`);
+                }
+
+                const variantListInner = colorBlock.find('.variant-list-inner');
+
+                selectedSizes.forEach(sizeId => {
+                    const sizeName = $('#multi_size option[value="' + sizeId + '"]').text();
+
+                    // Kiểm tra trùng
+                    const exists = variantListInner.find(`input[value="${sizeId}"][name$=".sizeId"]`).length > 0;
+                    if (exists) {
+                        Swal.fire("Thông báo", `Biến thể màu ${colorName} - size ${sizeName} đã tồn tại`, "info");
+                        return;
+                    }
+
+                    // Gọi controller lưu vào session
+                    $.post('/admin/product/add2', {
+                        colorId: colorId,
+                        sizeId: sizeId,
+                        quantity: quantity,
+                        price: price
+                    }, function (response) {
+                        if (response === 'success') {
+                            const html = createVariantItem(colorId, colorName, sizeId, sizeName, quantity, price);
+                            variantListInner.append(html);
+                            updateVariantIndexes();
+                        } else {
+                            Swal.fire("Thông báo", response, "info");
+                        }
+                    });
+                });
+            });
+        });
+
+        // Xóa biến thể
+        $(document).on('click', '.remove-variant', function () {
+            const variantItem = $(this).closest('.variant-item');
+            const variantContainer = variantItem.closest('.variant-list-inner');
+            variantItem.remove();
+
+            // Xóa block nếu không còn biến thể
+            if (variantContainer.children().length === 0) {
+                variantContainer.closest('.color-block').remove();
+            }
+
+            updateVariantIndexes();
+        });
+    });
+</script>
+<!--áp giá-->
+<script>
+    $(document).ready(function () {
+        $('#apply_common').click(function () {
+            const price = $('#common_price').val();
+            const quantity = $('#common_quantity').val();
+
+            if (!price && !quantity) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Vui lòng nhập giá hoặc số lượng để áp dụng!',
+                    toast: true,
+                    position: 'top-end',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                return;
+            }
+
+            $('#variant-list .variant-item').each(function () {
+                if (price) {
+                    $(this).find('input[name$=".price"]').val(price);
+                }
+                if (quantity) {
+                    $(this).find('input[name$=".quantity"]').val(quantity);
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>
