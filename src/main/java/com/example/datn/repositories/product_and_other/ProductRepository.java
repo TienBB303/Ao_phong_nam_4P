@@ -23,6 +23,9 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     @Query("SELECT p FROM Product p WHERE p.id = :id")
     Product findByIdProduct(Integer id);
 
+    @Query("SELECT p FROM Product p WHERE LOWER(p.code)  = LOWER(:code)")
+    Product findByCodeProduct(String code);
+
     @Query("SELECT MAX(p.code) FROM Product p WHERE p.code LIKE 'SP%' ")
     String findMaxCodeProduct();
 
@@ -39,6 +42,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 
     @Query("SELECT DISTINCT pd.size FROM ProductDetail pd WHERE pd.product.id = :productId")
     List<Size> findSizesByProductId(@Param("productId") Integer productId);
+
     Product findByCode(String code);
 
     @Query("SELECT p FROM Product p " +

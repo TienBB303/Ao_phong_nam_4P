@@ -81,6 +81,7 @@
                             <tr th:each="color, iter : ${listColor.content}" th:data-id="${color.id}">
                                 <td th:text="${listColor.number * listColor.size + iter.index + 1}"></td>
                                 <td th:text="${color.code}">mã</td>
+                                <td th:text="${color.name}">Tên</td>
                                 <td style="text-align: center">
                                     <span th:if="${color.status}" class="badge bg-success">Hoạt động</span>
                                     <span th:unless="${color.status}" class="badge bg-danger">Không hoạt động</span>

@@ -106,6 +106,11 @@ public class ProductService {
         return String.format("SP%03d",nextCode);
     }
 
+    public Boolean checkMaTrung(String code){
+        Product product = productRepository.findByCodeProduct(code);
+        return product != null;
+    }
+
     public Boolean checkNameTrung(String name){
         Product product = productRepository.findNameAlreadyHave(name);
         return product != null;
