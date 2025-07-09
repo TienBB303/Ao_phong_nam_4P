@@ -69,7 +69,7 @@ public class ColorController {
     @PostMapping("/update")
     public String updateColor(
             @RequestParam("colorId") Integer id,
-//            @RequestParam("colorCodeUpdate") String code,
+            @RequestParam("colorCodeUpdate") String code,
             @RequestParam("colorNameUpdate") String name,
             RedirectAttributes redirectAttributes){
         if (name == null || name.trim().isEmpty()){
@@ -83,7 +83,7 @@ public class ColorController {
             redirectAttributes.addFlashAttribute("type", "error");
             return "redirect:/admin/color/hien-thi";
         } else {
-            colorService.update(id, name.trim());
+            colorService.update(id,code, name.trim());
             redirectAttributes.addFlashAttribute("alert", "Cập nhật màu sắc thành công!");
             redirectAttributes.addFlashAttribute("type", "success");
             return "redirect:/admin/color/hien-thi";

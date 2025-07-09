@@ -1,9 +1,6 @@
 package com.example.datn.services.product_and_other;
 
-import com.example.datn.entities.product_and_other.Color;
-import com.example.datn.entities.product_and_other.Image;
-import com.example.datn.entities.product_and_other.Product;
-import com.example.datn.entities.product_and_other.ProductDetail;
+import com.example.datn.entities.product_and_other.*;
 import com.example.datn.repositories.product_and_other.ColorRepository;
 import com.example.datn.repositories.product_and_other.ImageRepository;
 import com.example.datn.repositories.product_and_other.ProductDetailRepository;
@@ -74,5 +71,7 @@ public class ImageService {
     public Page<Image> getAll(Pageable pageable){
         return imageRepository.getAll(pageable);
     }
-
+    public Image findById(Integer id){
+        return imageRepository.findByIdImage(id);
+    }
 }

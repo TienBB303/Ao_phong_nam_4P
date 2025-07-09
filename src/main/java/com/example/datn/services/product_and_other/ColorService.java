@@ -66,12 +66,13 @@ public class ColorService {
         return colorRepository.save(color);
     }
 
-    public Color update(Integer id,String colorName){
+    public Color update(Integer id, String code, String colorName){
         if (id == null){
             System.out.println("khong co color id = " + id);
             return null;
         }
         Color color = colorRepository.findByIdColor(id);
+        color.setCode(code);
         color.setName(colorName);
         return colorRepository.save(color);
     }
