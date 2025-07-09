@@ -21,6 +21,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Controller
 @RequestMapping("/admin/product")
@@ -116,7 +118,7 @@ public class ProductController {
     }
 
     @GetMapping("/view-add")
-    public String viewAdd(Model model, HttpSession session) {
+    public String viewAdd1(Model model, HttpSession session) {
         String sessionKey = (String) session.getAttribute("sessionKey");
         if (sessionKey == null) {
             sessionKey = UUID.randomUUID().toString();
@@ -134,6 +136,28 @@ public class ProductController {
         model.addAttribute("listSize", sizeService.getAll());
 
         return "admin/product_and_other/product/ProductViewAdd";
+    }
+
+    @GetMapping("/view-add2")
+    public String viewAdd2(Model model, HttpSession session) {
+        String sessionKey = (String) session.getAttribute("sessionKey");
+        if (sessionKey == null) {
+            sessionKey = UUID.randomUUID().toString();
+            session.setAttribute("sessionKey", sessionKey);
+        }
+
+        ProductForm productForm = (ProductForm) session.getAttribute("add1" + sessionKey);
+        if (productForm == null) {
+            productForm = new ProductForm();
+            session.setAttribute("add1" + sessionKey, productForm);
+        }
+
+        model.addAttribute("productForm", productForm);
+        model.addAttribute("listColor", colorService.getAll());
+        model.addAttribute("listSize", sizeService.getAll());
+
+
+        return "admin/product_and_other/product/ProductViewAddNext";
     }
 
 
@@ -173,10 +197,10 @@ public class ProductController {
     @PostMapping("/add2")
     @ResponseBody
     public String addVariant(@RequestParam("colorId") Integer colorId,
-                                             @RequestParam("sizeId") Integer sizeId,
-                                             @RequestParam(value = "quantity", required = false, defaultValue = "0") Integer quantity,
-                                             @RequestParam(value = "price", required = false, defaultValue = "0") BigDecimal price,
-                                             HttpSession session,Model model) {
+                             @RequestParam("sizeId") Integer sizeId,
+//                                             @RequestParam(value = "quantity", required = false, defaultValue = "0") Integer quantity,
+//                                             @RequestParam(value = "price", required = false, defaultValue = "0") BigDecimal price,
+                             HttpSession session,Model model) {
         String sessionKey = (String) session.getAttribute("sessionKey");
         ProductForm productForm = (ProductForm) session.getAttribute("add1" + sessionKey);
 
@@ -196,12 +220,13 @@ public class ProductController {
         ProductDetailForm newVariant = new ProductDetailForm();
         newVariant.setColorId(colorId);
         newVariant.setSizeId(sizeId);
-        newVariant.setQuantity(quantity);
-        newVariant.setPrice(price);
+//        newVariant.setQuantity(quantity);
+//        newVariant.setPrice(price);
 
         if (productForm.getVariants() == null) {
             productForm.setVariants(new ArrayList<>());
         }
+
         List<Integer> selectedColorIds = productForm.getVariants().stream()
                 .map(ProductDetailForm::getColorId)
                 .filter(Objects::nonNull)
@@ -217,6 +242,30 @@ public class ProductController {
         productForm.getVariants().add(newVariant);
         session.setAttribute("add1" + sessionKey, productForm);
 
+        return "success";
+    }
+
+    @PostMapping("/apply-price")
+    @ResponseBody
+    public String applyPriceAndQuantity(@RequestParam("colorId") Integer colorId,
+                                        @RequestParam("quantity") Integer quantity,
+                                        @RequestParam("price") BigDecimal price,
+                                        HttpSession session) {
+        String sessionKey = (String) session.getAttribute("sessionKey");
+        ProductForm productForm = (ProductForm) session.getAttribute("add1" + sessionKey);
+
+        if (productForm == null || productForm.getVariants() == null) {
+            return "Session hết hạn hoặc không có biến thể";
+        }
+
+        for (ProductDetailForm variant : productForm.getVariants()) {
+            if (variant.getColorId().equals(colorId)) {
+                variant.setQuantity(quantity);
+                variant.setPrice(price);
+            }
+        }
+
+        session.setAttribute("add1" + sessionKey, productForm);
         return "success";
     }
 
@@ -247,20 +296,25 @@ public class ProductController {
 
         // Map lưu image theo colorId
         Map<Integer, Image> colorImageMap = new HashMap<>();
-        for (String key : colorImages.keySet()) {
-            Integer colorId = Integer.parseInt(key.replaceAll("[^0-9]", ""));
-            List<MultipartFile> files = colorImages.get(key);
 
+        for (String key : colorImages.keySet()) {
+            // Lấy colorId từ key kiểu colorImages[1]
+            Matcher matcher = Pattern.compile("\\[(\\d+)]").matcher(key);
+            if (!matcher.find()) continue;
+            Integer colorId = Integer.parseInt(matcher.group(1));
+
+            List<MultipartFile> files = colorImages.get(key);
             if (files != null && !files.isEmpty()) {
                 for (MultipartFile file : files) {
                     if (!file.isEmpty()) {
-                        Image image = imageService.saveImage(file);
-//                        colorImageMap.putIfAbsent(colorId, image); // lấy ảnh đầu tiên làm đại diện
+                        Image image = imageService.saveImage(file); // tự triển khai lưu file + entity
+                        colorImageMap.putIfAbsent(colorId, image); // chỉ lấy ảnh đầu tiên làm đại diện
                         break;
                     }
                 }
             }
         }
+
 
         for (ProductDetailForm form : productForm.getVariants()) {
             ProductDetail detail = new ProductDetail();
@@ -287,6 +341,43 @@ public class ProductController {
         return "redirect:/admin/product/hien-thi";
     }
 
+    @PostMapping("/remove-variant")
+    @ResponseBody
+    public String removeVariant(@RequestParam("colorId") Integer colorId,
+                                @RequestParam("sizeId") Integer sizeId,
+                                HttpSession session, Model model) {
+        String sessionKey = (String) session.getAttribute("sessionKey");
+        ProductForm productForm = (ProductForm) session.getAttribute("add1" + sessionKey);
+
+        if (productForm == null || productForm.getVariants() == null) {
+            return "Session hết hạn";
+        }
+
+        // Xóa biến thể khớp colorId & sizeId
+        productForm.getVariants().removeIf(p ->
+                p.getColorId().equals(colorId) && p.getSizeId().equals(sizeId)
+        );
+
+        if (productForm.getVariants() == null) {
+            productForm.setVariants(new ArrayList<>());
+        }
+
+        List<Integer> selectedColorIds = productForm.getVariants().stream()
+                .map(ProductDetailForm::getColorId)
+                .filter(Objects::nonNull)
+                .distinct().toList();
+        List<Integer> selectedSizeIds = productForm.getVariants().stream()
+                .map(ProductDetailForm::getSizeId)
+                .filter(Objects::nonNull)
+                .distinct().toList();
+
+        model.addAttribute("selectedColorIds", selectedColorIds);
+        model.addAttribute("selectedSizeIds", selectedSizeIds);
+        // Cập nhật lại session
+        session.setAttribute("add1" + sessionKey, productForm);
+        return "success";
+    }
+
     @PostMapping("/add-nhanh/category")
     public String addNhanhCategory(@RequestParam("categoryName") String categoryName,
                                    @RequestParam("categoryDescription") String categoryDescription,
@@ -296,6 +387,9 @@ public class ProductController {
                                    HttpSession session,
                                    Model model,
                                    RedirectAttributes  redirectAttributes) {
+        String sessionKey = (String) session.getAttribute("sessionKey");
+        ProductForm productForm = (ProductForm) session.getAttribute("add1" + sessionKey);
+
         if (categoryName == null || categoryName.trim().isEmpty()) {
             redirectAttributes.addFlashAttribute("alert", "Tên kiểu loại không được để trống");
             redirectAttributes.addFlashAttribute("type", "error");
@@ -321,6 +415,8 @@ public class ProductController {
         model.addAttribute("listCategory", categoryService.getAll());
         model.addAttribute("listBrand", brandService.getAll());
         model.addAttribute("listMaterial", materialService.getAll());
+
+        session.setAttribute("add1" + sessionKey, productForm);
         return "redirect:/admin/product/view-add";
     }
 
@@ -329,6 +425,9 @@ public class ProductController {
                                 HttpSession session,
                                 Model model,
                                 RedirectAttributes redirectAttributes) {
+        String sessionKey = (String) session.getAttribute("sessionKey");
+        ProductForm productForm = (ProductForm) session.getAttribute("add1" + sessionKey);
+
         if (brandName == null || brandName.trim().isEmpty()) {
             redirectAttributes.addFlashAttribute("alert", "Tên hãng không được để trống");
             redirectAttributes.addFlashAttribute("type", "error");
@@ -352,6 +451,8 @@ public class ProductController {
         model.addAttribute("listCategory", categoryService.getAll());
         model.addAttribute("listBrand", brandService.getAll());
         model.addAttribute("listMaterial", materialService.getAll());
+
+        session.setAttribute("add1" + sessionKey, productForm);
         return "redirect:/admin/product/view-add";
     }
 
@@ -360,6 +461,9 @@ public class ProductController {
                                    HttpSession session,
                                    Model model,
                                    RedirectAttributes redirectAttributes) {
+        String sessionKey = (String) session.getAttribute("sessionKey");
+        ProductForm productForm = (ProductForm) session.getAttribute("add1" + sessionKey);
+
         if (materialName == null || materialName.trim().isEmpty()) {
             redirectAttributes.addFlashAttribute("alert", "Tên chất liệu không được để trống");
             redirectAttributes.addFlashAttribute("type", "error");
@@ -383,118 +487,88 @@ public class ProductController {
         model.addAttribute("listCategory", categoryService.getAll());
         model.addAttribute("listBrand", brandService.getAll());
         model.addAttribute("listMaterial", materialService.getAll());
+
+        session.setAttribute("add1" + sessionKey, productForm);
         return "redirect:/admin/product/view-add";
     }
-//
-//    @PostMapping("/add")
-//    public String AddNewProduct(HttpSession session,
-//                                @RequestParam Map<String, String> params,
-//                                @ModelAttribute("productForm") ProductForm productForm,
-//                                Model model) {
-//
-//        // Lấy từ session, giữ lại giá tri của ô select multi
-//        List<Integer> selectedColorIds = new ArrayList<>();
-//        List<Integer> selectedSizeIds = new ArrayList<>();
-//
-//        if (productForm.getVariants() != null) {
-//            selectedColorIds = productForm.getVariants().stream()
-//                    .map(ProductDetailForm::getColorId)
-//                    .filter(Objects::nonNull)
-//                    .distinct()
-//                    .toList();
-//
-//            selectedSizeIds = productForm.getVariants().stream()
-//                    .map(ProductDetailForm::getSizeId)
-//                    .filter(Objects::nonNull)
-//                    .distinct()
-//                    .toList();
-//        }
-//
-//        model.addAttribute("selectedColorIds", selectedColorIds);
-//        model.addAttribute("selectedSizeIds", selectedSizeIds);
-//        ProductForm sessionForm = (ProductForm) session.getAttribute(SESSION_PRODUCT_FORM_KEY);
-//        if (sessionForm == null) {
-//            sessionForm = new ProductForm();
-//        }
-//
-//        sessionForm.setName(productForm.getName());
-//        sessionForm.setCode(productForm.getCode());
-//        sessionForm.setCategoryId(productForm.getCategoryId());
-//        sessionForm.setBrandId(productForm.getBrandId());
-//        sessionForm.setMaterialId(productForm.getMaterialId());
-//        sessionForm.setDescription(productForm.getDescription());
-//
-//        sessionForm.setVariants(productForm.getVariants());
-//        // Cập nhật các giá trị từ variants đang submit (quantity, price)
-//        List<ProductDetailForm> currentVariants = sessionForm.getVariants();
-//
-//        // Validate
-//        if (sessionForm.getName() == null || sessionForm.getName().trim().isEmpty()) {
-//            model.addAttribute("alert", "Tên sản phẩm không được để trống");
-//            model.addAttribute("type", "error");
-//            model.addAttribute("productForm", sessionForm);
-//            return "admin/product_and_other/product/ProductViewAdd";
-//        }
-//
-//        if (productService.checkNameTrung(sessionForm.getName())) {
-//            model.addAttribute("alert", "Tên sản phẩm trùng sản phẩm đã có");
-//            model.addAttribute("type", "error");
-//            model.addAttribute("productForm", sessionForm);
-//            return "admin/product_and_other/product/ProductViewAdd";
-//        }
-//
-//        if (currentVariants == null || currentVariants.isEmpty()) {
-//            model.addAttribute("alert", "Cần ít nhất một biến thể");
-//            model.addAttribute("type", "error");
-//            model.addAttribute("productForm", sessionForm);
-//            return "admin/product_and_other/product/ProductViewAdd";
-//        }
-//
-//        for (ProductDetailForm pdf : currentVariants) {
-//            if (pdf.getQuantity() == null || pdf.getQuantity() < 0) {
-//                model.addAttribute("alert", "Số lượng không hợp lệ");
-//                model.addAttribute("type", "error");
-//                model.addAttribute("productForm", sessionForm);
-//                return "admin/product_and_other/product/ProductViewAdd";
-//            }
-//            if (pdf.getPrice() == null || pdf.getPrice().compareTo(BigDecimal.ZERO) < 0) {
-//                model.addAttribute("alert", "Giá không hợp lệ");
-//                model.addAttribute("type", "error");
-//                model.addAttribute("productForm", sessionForm);
-//                return "admin/product_and_other/product/ProductViewAdd";
-//            }
-//        }
-//
-//        Product product = new Product();
-//        String code = (sessionForm.getCode() == null || sessionForm.getCode().trim().isEmpty())
-//                ? productService.taoMaTuDongSanPham()
-//                : sessionForm.getCode().trim();
-//        product.setCode(code.trim());
-//        product.setName(sessionForm.getName().trim());
-//        product.setDescription(sessionForm.getDescription().trim());
-//        product.setStatus(true);
-//        product.setCategory(categoryService.findById(sessionForm.getCategoryId()));
-//        product.setBrand(brandService.findById(sessionForm.getBrandId()));
-//        product.setMaterial(materialService.findById(sessionForm.getMaterialId()));
-//
-//        productService.addProduct(product);
-//
-//        for (ProductDetailForm pdf : currentVariants) {
-//            ProductDetail productDetail = new ProductDetail();
-//            productDetail.setProduct(product);
-//            productDetail.setColor(colorService.findById(pdf.getColorId()));
-//            productDetail.setSize(sizeService.findById(pdf.getSizeId()));
-//            productDetail.setPrice(pdf.getPrice());
-//            productDetail.setQuantity(pdf.getQuantity());
-//            productDetail.setBarcode(product.getCode() + "-C" + pdf.getColorId() + "-S" + pdf.getSizeId());
-//
-//            productService.addProductDetail(productDetail);
-//        }
-//        session.removeAttribute(SESSION_PRODUCT_FORM_KEY);
-//        model.addAttribute("alert", "Thêm sản phẩm thành công");
-//        model.addAttribute("type", "success");
-//        return "redirect:/admin/product/hien-thi";
-//    }
+
+
+    @PostMapping("/add-nhanh/color")
+    public String addNhanhColor(@RequestParam("colorCode") String code,
+                                @RequestParam("colorName") String name,
+                                   HttpSession session,
+                                   Model model,
+                                   RedirectAttributes redirectAttributes) {
+        String sessionKey = (String) session.getAttribute("sessionKey");
+        ProductForm productForm = (ProductForm) session.getAttribute("add1" + sessionKey);
+
+        if (productForm == null || productForm.getVariants() == null) {
+            return "Session hết hạn";
+        }
+
+        if (name == null || name.trim().isEmpty()) {
+            redirectAttributes.addFlashAttribute("alert", "Tên không được để trống");
+            redirectAttributes.addFlashAttribute("type", "error");
+            return "redirect:/admin/product/view-add2";
+        }
+
+        Color checkTonTai = colorService.findByName(name.trim());
+        if (checkTonTai != null) {
+            redirectAttributes.addFlashAttribute("alert", "Đã tồn tại màu sắc");
+            redirectAttributes.addFlashAttribute("type", "error");
+            return "redirect:/admin/product/view-add2";
+        }
+        Color color = new Color();
+        color.setCode(code);
+        color.setName(name.trim());
+        color.setStatus(true);
+        colorService.addColor(color);
+
+        redirectAttributes.addFlashAttribute("alert", "Thêm màu sắc thành công!");
+        redirectAttributes.addFlashAttribute("type", "success");
+        model.addAttribute("listColor", colorService.getAll());
+        model.addAttribute("listSize", sizeService.getAll());
+
+        session.setAttribute("add1" + sessionKey, productForm);
+        return "redirect:/admin/product/view-add2";
+    }
+
+    @PostMapping("/add-nhanh/size")
+    public String addNhanhSize(@RequestParam("sizeCode") String code,
+                                @RequestParam("sizeName") String name,
+                                HttpSession session,
+                                Model model,
+                                RedirectAttributes redirectAttributes) {
+        String sessionKey = (String) session.getAttribute("sessionKey");
+        ProductForm productForm = (ProductForm) session.getAttribute("add1" + sessionKey);
+
+        if (code == null || code.trim().isEmpty()) {
+            redirectAttributes.addFlashAttribute("alert", "Tên không được để trống");
+            redirectAttributes.addFlashAttribute("type", "error");
+            return "redirect:/admin/product/view-add2";
+        }
+
+        Size checkTonTai = sizeService.findByCode(code.trim());
+        if (checkTonTai != null) {
+            redirectAttributes.addFlashAttribute("alert", "Đã tồn tại kích thước");
+            redirectAttributes.addFlashAttribute("type", "error");
+            return "redirect:/admin/product/view-add2";
+        }
+        Size size = new Size();
+        size.setCode(code);
+        size.setName(name.trim());
+        size.setStatus(true);
+        sizeService.addSize(size);
+
+        redirectAttributes.addFlashAttribute("alert", "Thêm kích thước thành công!");
+        redirectAttributes.addFlashAttribute("type", "success");
+        model.addAttribute("listColor", colorService.getAll());
+        model.addAttribute("listSize", sizeService.getAll());
+
+        session.setAttribute("add1" + sessionKey, productForm);
+        return "redirect:/admin/product/view-add2";
+    }
+
 
     @GetMapping("/view-detail/{id}")
     public String viewDetailProduct(@PathVariable("id") Integer id, Model model){

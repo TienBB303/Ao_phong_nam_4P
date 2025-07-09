@@ -54,6 +54,9 @@
                                                     th:selected="${selectedColorIds != null and selectedColorIds.contains(color.id)}">
                                             </option>
                                         </select>
+                                        <span id="add_color" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalAddColor">
+                                            <i class="fas fa-plus"></i>
+                                        </span>
                                     </div>
                                     <div class="col-md-6">
                                         <label for="multi_size" class="form-label">Chọn nhiều kích cỡ</label>
@@ -64,22 +67,9 @@
                                                     th:selected="${selectedSizeIds != null and selectedSizeIds.contains(size.id)}">
                                             </option>
                                         </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <hr>
-                        <!-- Ô nhập chung -->
-                        <div class="card shadow-sm rounded mb-4">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-6">
-                                        <label for="inline_quantity">Số lượng</label>
-                                        <input type="number" id="inline_quantity" class="form-control" placeholder="Nhập số lượng">
-                                    </div>
-                                    <div class="col-6">
-                                        <label for="inline_price">Giá</label>
-                                        <input type="number" id="inline_price" class="form-control" placeholder="Nhập giá">
+                                        <span id="add_size" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalAddSize">
+                                            <i class="fas fa-plus"></i>
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -136,6 +126,67 @@
 </section>
 </div>
 
+<!--modal add nhanh-->
+<div class="modal fade" id="modalAddColor" tabindex="-1" aria-labelledby="modalAddColorLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAddColorLabel">Thêm mới màu sắc</h5>
+            </div>
+            <div class="modal-body">
+                <form id="addColor" method="post" action="/admin/product/add-nhanh/color">
+                    <div class="mb-3">
+                        <label for="color_code" class="form-label">Mã màu</label><span class="text-danger">*</span>
+                        <input type="color" class="form-control form-control-color" id="color_code" name="colorCode"
+                               value="#000000" title="Chọn màu" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="color_name" class="form-label">Tên</label><span class="text-danger">*</span>
+                        <input type="text" class="form-control" id="color_name" name="colorName" placeholder="Nhập tên màu sắc">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-outline-success">
+                            <i class="bi bi-check-lg"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-warning" data-bs-dismiss="modal">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!--thêm nhanh kích thước-->
+<div class="modal fade" id="modalAddSize" tabindex="-1" aria-labelledby="modalAddSizeLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAddSizeLabel">Thêm mới kích thước</h5>
+            </div>
+            <div class="modal-body">
+                <form id="addSize" method="post" action="/admin/product/add-nhanh/size">
+                    <div class="mb-3">
+                        <label for="size_code" class="form-label">Mã</label><span class="text-danger">*</span>
+                        <input type="text" class="form-control" id="size_code" name="sizeCode" placeholder="Nhập mã">
+                    </div>
+                    <div class="mb-3">
+                        <label for="size_name" class="form-label">Tên</label>
+                        <input type="text" class="form-control" id="size_name" name="sizeName" placeholder="Nhập tên kích thước">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-outline-success">
+                            <i class="bi bi-check-lg"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-warning" data-bs-dismiss="modal">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 <footer th:replace="admin/fragments/footer :: footer"></footer>
 
 <!--báo lỗi-->
@@ -157,39 +208,62 @@
 
     function createVariantItem(colorId, colorName, sizeId, sizeName, quantity, price) {
         return `
-    <div class="variant-item row mb-2">
-        <div class="col-md-3">
+    <div class="variant-item row bg-light p-3 rounded-3 shadow-sm mb-2 mx-1 align-items-center">
+        <div class="col-md-3 mb-2 mb-md-0">
             <input type="text" class="form-control" value="${sizeName}" disabled>
             <input type="hidden" name="variants[${variantIndex}].sizeId" value="${sizeId}">
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3 mb-2 mb-md-0">
             <input type="number" class="form-control" name="variants[${variantIndex}].quantity" value="${quantity}">
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3 mb-2 mb-md-0">
             <input type="number" class="form-control" name="variants[${variantIndex}].price" value="${price}">
         </div>
-        <div class="col-md-2 d-flex align-items-center">
-            <button type="button" class="btn btn-danger remove-variant">Xóa</button>
+        <div class="col-md-3 text-end">
+            <button type="button" class="btn btn-outline-danger w-100 remove-variant">
+                <i class="bi bi-trash"></i> Xóa
+            </button>
         </div>
         <input type="hidden" name="variants[${variantIndex}].colorId" value="${colorId}">
     </div>`;
     }
 
-    function createColorBlock(colorId, colorName) {
+
+    function createColorBlock(colorId, colorName, colorCode) {
         return `
-    <div class="card mb-3 color-block" data-color="${colorId}">
-        <div class="card-header d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#color-body-${colorId}" style="cursor: pointer;">
+    <div class="card shadow rounded-3 mb-4 color-block" data-color="${colorId}">
+        <div class="card-header text-white d-flex justify-content-between align-items-center rounded-top"
+             data-bs-toggle="collapse" data-bs-target="#color-body-${colorId}" style="cursor: pointer; background-color: ${colorCode};">
             <strong>${colorName}</strong>
             <i class="bi bi-chevron-down"></i>
         </div>
         <div class="collapse show" id="color-body-${colorId}">
-            <div class="card-body variant-list-inner">
-                <!-- Biến thể sẽ được thêm tại đây -->
-            </div>
-            <div class="form-group">
-                <label>Ảnh cho màu: <strong>${colorName}</strong></label>
-<!--                <input type="file" name="colorImages[${colorId}]" class="form-control" multiple accept="image/*">-->
-                <input type="file" name="colorImages[${colorId}][]" class="form-control" multiple accept="image/*">
+            <div class="p-3">
+                <div class="variant-item row bg-light p-3 rounded-3 shadow-sm mb-2 mx-1 align-items-center">
+                    <div class="col-md-3 mb-2 mb-md-0">
+
+                    </div>
+                    <div class="col-md-3 mb-2 mb-md-0">
+                        <input type="number" class="form-control quantity-input" placeholder="Nhập số lượng" data-color-id="${colorId}">
+                    </div>
+                    <div class="col-md-3 mb-2 mb-md-0">
+                        <input type="number" class="form-control price-input" placeholder="Nhập giá" data-color-id="${colorId}">
+                    </div>
+                    <div class="col-md-3 text-end">
+                        <button type="button" class="btn btn-warning w-100 apply-price-quantity" data-color-id="${colorId}">
+                            Áp dụng
+                        </button>
+                    </div>
+                </div>
+
+                <div class="variant-list-inner">
+                    <!-- Biến thể sẽ được thêm tại đây -->
+                </div>
+
+                <div class="form-group mt-3">
+                    <input type="file" name="colorImages[${colorId}][]" class="form-control multi-image-input" multiple accept="image/*">
+                    <div class="selected-images mt-2 d-flex flex-wrap gap-2" id="preview-color-${colorId}"></div>
+                </div>
             </div>
         </div>
     </div>`;
@@ -227,18 +301,11 @@
         $('#add-variant-btn').on('click', function () {
             const selectedColors = $('#multi_color').val();
             const selectedSizes = $('#multi_size').val();
-            const quantity = parseInt($('#inline_quantity').val());
-            const price = parseInt($('#inline_price').val());
 
-            // if (!selectedColors || !selectedSizes || isNaN(quantity) || isNaN(price)) {
-            //     Swal.fire("Lỗi", "Vui lòng chọn màu, size và nhập đầy đủ giá + số lượng!", "error");
-            //     return;
-            // }
-
-            if (quantity < 0 || price < 0) {
+            if (!selectedColors || !selectedSizes) {
                 Swal.fire({
                     icon: 'warning',
-                    title: 'Số lượng và giá tiền không được nhỏ hơn 0!',
+                    title: 'Vui lòng chọn màu và kích cỡ!',
                     toast: true,
                     position: 'top-end',
                     timer: 2000,
@@ -249,11 +316,13 @@
 
             selectedColors.forEach(colorId => {
                 const colorName = $('#multi_color option[value="' + colorId + '"]').text();
+                const colorCode = $('#multi_color option[value="' + colorId + '"]').data('color'); // Lấy từ th:attr="data-color=${color.code}"
+
                 let colorBlock = $(`.color-block[data-color="${colorId}"]`);
 
                 // Tạo block nếu chưa tồn tại
                 if (colorBlock.length === 0) {
-                    const htmlBlock = createColorBlock(colorId, colorName);
+                    const htmlBlock = createColorBlock(colorId, colorName, colorCode);
                     $('#variant-group-list').append(htmlBlock);
                     colorBlock = $(`.color-block[data-color="${colorId}"]`);
                 }
@@ -266,19 +335,20 @@
                     // Kiểm tra trùng
                     const exists = variantListInner.find(`input[value="${sizeId}"][name$=".sizeId"]`).length > 0;
                     if (exists) {
-                        Swal.fire("Thông báo", `Biến thể màu ${colorName} - size ${sizeName} đã tồn tại`, "info");
+                        // Swal.fire("Thông báo", `Biến thể màu ${colorName} - size ${sizeName} đã tồn tại`, "info");
                         return;
                     }
 
-                    // Gọi controller lưu vào session
+                    // Gọi controller lưu session
                     $.post('/admin/product/add2', {
                         colorId: colorId,
                         sizeId: sizeId,
-                        quantity: quantity,
-                        price: price
+                        // quantity: quantity,
+                        // price: price
                     }, function (response) {
                         if (response === 'success') {
-                            const html = createVariantItem(colorId, colorName, sizeId, sizeName, quantity, price);
+                            const html = createVariantItem(colorId, colorName, sizeId, sizeName);
+                            // const html = createVariantItem(colorId, colorName, sizeId, sizeName, quantity, price);
                             variantListInner.append(html);
                             updateVariantIndexes();
                         } else {
@@ -292,45 +362,90 @@
         // Xóa biến thể
         $(document).on('click', '.remove-variant', function () {
             const variantItem = $(this).closest('.variant-item');
-            const variantContainer = variantItem.closest('.variant-list-inner');
-            variantItem.remove();
 
-            // Xóa block nếu không còn biến thể
-            if (variantContainer.children().length === 0) {
-                variantContainer.closest('.color-block').remove();
-            }
+            const colorId = variantItem.find('input[name$=".colorId"]').val();
+            const sizeId = variantItem.find('input[name$=".sizeId"]').val();
 
-            updateVariantIndexes();
+            // Gọi controller để xóa ở server
+            $.post('/admin/product/remove-variant', {
+                colorId: colorId,
+                sizeId: sizeId
+            }, function (response) {
+                if (response === 'success') {
+                    variantItem.remove();
+
+                    const variantContainer = variantItem.closest('.variant-list-inner');
+                    if (variantContainer.children().length === 0) {
+                        variantContainer.closest('.color-block').remove();
+                    }
+
+                    updateVariantIndexes();
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi',
+                        toast: true,
+                        position: 'top-end',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                }
+            });
         });
+
     });
 </script>
 <!--áp giá-->
 <script>
-    $(document).ready(function () {
-        $('#apply_common').click(function () {
-            const price = $('#common_price').val();
-            const quantity = $('#common_quantity').val();
+    $(document).on('click', '.apply-price-quantity', function () {
+        const colorId = $(this).data('color-id');
+        const colorBlock = $(`.color-block[data-color="${colorId}"]`);
+        const quantity = parseInt(colorBlock.find('.quantity-input').val());
+        const price = parseInt(colorBlock.find('.price-input').val());
 
-            if (!price && !quantity) {
+        if (isNaN(quantity) || isNaN(price) || quantity < 0 || price < 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Số lượng và giá phải >= 0',
+                toast: true,
+                position: 'top-end',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            return;
+        }
+
+        // Gọi controller riêng để cập nhật vào session
+        $.post('/admin/product/apply-price', {
+            colorId: colorId,
+            quantity: quantity,
+            price: price
+        }, function (response) {
+            if (response === 'success') {
+                // Áp dụng trên giao diện
+                colorBlock.find('.variant-item').each(function () {
+                    $(this).find('input[name$=".quantity"]').val(quantity);
+                    $(this).find('input[name$=".price"]').val(price);
+                });
+
                 Swal.fire({
-                    icon: 'warning',
-                    title: 'Vui lòng nhập giá hoặc số lượng để áp dụng!',
+                    icon: 'success',
+                    title: 'Đã áp dụng thành công',
                     toast: true,
                     position: 'top-end',
-                    timer: 2000,
+                    timer: 1500,
                     showConfirmButton: false
                 });
-                return;
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    toast: true,
+                    position: 'top-end',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
             }
-
-            $('#variant-list .variant-item').each(function () {
-                if (price) {
-                    $(this).find('input[name$=".price"]').val(price);
-                }
-                if (quantity) {
-                    $(this).find('input[name$=".quantity"]').val(quantity);
-                }
-            });
         });
     });
 </script>

@@ -140,7 +140,7 @@
                 <div class="modal-body">
                     <form id="addSize" method="post" action="/admin/color/add">
                         <div class="mb-3">
-                            <label for="color_code" class="form-label">Mã màu (hiển thị)</label><span class="text-danger">*</span>
+                            <label for="color_code" class="form-label">Mã màu</label><span class="text-danger">*</span>
                             <input type="color" class="form-control form-control-color" id="color_code" name="colorCode"
                                    value="#000000" title="Chọn màu" required>
                         </div>
@@ -172,10 +172,11 @@
                 <div class="modal-body">
                     <form id="updateSize" method="post" action="/admin/color/update">
                         <input type="hidden" id="color_id" name="colorId">
-                        <!--                    <div class="mb-3">-->
-                        <!--                        <label for="color_code_update" class="form-label">Mã</label><span class="text-danger">*</span>-->
-                        <!--                        <input type="text" class="form-control" id="color_code_update" name="colorCodeUpdate" placeholder="Nhập mã màu sắc">-->
-                        <!--                    </div>-->
+                        <div class="mb-3">
+                            <label for="color_code_update" class="form-label">Mã màu</label><span class="text-danger">*</span>
+                            <input type="color" class="form-control form-control-color" id="color_code_update" name="colorCodeUpdate"
+                                   value="#000000" title="Chọn màu" required>
+                        </div>
                         <div class="mb-3">
                             <label for="color_name_update" class="form-label">Tên</label><span class="text-danger">*</span>
                             <input type="text" class="form-control" id="color_name_update" name="colorNameUpdate" placeholder="Nhập tên màu sắc">
