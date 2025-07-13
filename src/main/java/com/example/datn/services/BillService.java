@@ -10,6 +10,8 @@ import com.example.datn.repositories.BillRepository;
 import com.example.datn.repositories.cart.CartRepository;
 import com.example.datn.repositories.product_and_other.BillDetailsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -51,6 +53,14 @@ public class BillService {
 //
 //        return billRepository.save(bill);
 //    }
+
+    public Page<Bill> getAllBills(Pageable pageable) {
+        return billRepository.findAll(pageable);
+    }
+
+    public Bill findById(Integer id) {
+        return billRepository.findById(id).orElse(null);
+    }
 
     public String findLastCodeBill(){
         return billRepository.findMaxCodeBill();
@@ -97,8 +107,8 @@ public class BillService {
         bill.setName("tien");
         bill.setPhoneNumber("0365142537");
         bill.setEmail("tien@gmail.com");
-        bill.setPaymentMethod(1); // sửa sau, tạm thời fix để bán thử
-        bill.setDiscountId(null); // fix cứng
+//        bill.setPaymentMethod(1); // sửa sau, tạm thời fix để bán thử
+//        bill.setDiscountId(null); // fix cứng
         bill.setCustomer(null);
         bill.setCreated_at(LocalDateTime.now());
 
