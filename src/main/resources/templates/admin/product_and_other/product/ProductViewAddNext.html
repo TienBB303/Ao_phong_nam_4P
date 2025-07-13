@@ -33,19 +33,14 @@
                         <input type="hidden" class="form-control" id="product_material" name="materialId" th:value="${productForm.materialId}">
                         <input type="hidden" class="form-control" id="product_description" name="description" th:value="${productForm.description}">
 
-                        <div>
-                            <a class="btn btn-secondary" id="return" href="/admin/product/view-add" title="Quay lại">
-                                <i class="bi bi-arrow-bar-left"></i>
-                            </a>
-                        </div>
-
                         <br>
-                        <!-- Chọn nhiều màu và kích cỡ -->
-                        <div class="card shadow-sm rounded mb-4">
-                            <div class="card-body">
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label for="multi_color" class="form-label">Chọn nhiều màu sắc</label>
+
+                        <div class="variant-item row bg-light p-3 rounded-3 shadow-sm mb-3 mx-1 align-items-end">
+                            <!-- Màu sắc -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="multi_color" class="form-label">Chọn nhiều màu sắc</label>
+                                    <div class="d-flex align-items-center">
                                         <select id="multi_color" class="form-select" name="selectedColorIds" multiple>
                                             <option th:each="color : ${listColor}"
                                                     th:value="${color.id}"
@@ -58,8 +53,13 @@
                                             <i class="fas fa-plus"></i>
                                         </span>
                                     </div>
-                                    <div class="col-md-6">
-                                        <label for="multi_size" class="form-label">Chọn nhiều kích cỡ</label>
+                                </div>
+                            </div>
+                            <!-- Kích cỡ -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="multi_size" class="form-label">Chọn nhiều kích cỡ</label>
+                                    <div class="d-flex align-items-center">
                                         <select id="multi_size" class="form-select" name="selectedSizeIds" multiple>
                                             <option th:each="size : ${listSize}"
                                                     th:value="${size.id}"
@@ -68,12 +68,13 @@
                                             </option>
                                         </select>
                                         <span id="add_size" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalAddSize">
-                                            <i class="fas fa-plus"></i>
-                                        </span>
+                                        <i class="fas fa-plus"></i>
+                                    </span>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
                         <hr>
 <!--                        <div id="variant-list">-->
                         <div id="variant-group-list">
@@ -114,9 +115,14 @@
                                 <i class="bi bi-plus-circle"></i> Thêm biến thể
                             </button>
 
-                            <button type="submit" class="btn btn-success" id="Confirm">
-                                <i class="bi bi-check-circle-fill"></i> Xác nhận
-                            </button>
+                            <div>
+                                <a type="button" class="btn btn-secondary" id="back" href="/admin/product/view-add" title="Quay lại">
+                                    <i class="bi bi-arrow-bar-left"></i>Quay lại
+                                </a>
+                                <button type="submit" class="btn btn-success" id="Confirm">
+                                    <i class="bi bi-check-circle-fill"></i> Xác nhận
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>
