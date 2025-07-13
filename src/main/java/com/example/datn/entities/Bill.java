@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -23,9 +24,11 @@ public class Bill {
     private BigDecimal totalAmount;
 
     @Column(name = "payment_status")
-    private Integer paymentStatus;
+    private Boolean paymentStatus;
 
     private Integer status;
+
+    private Boolean type_bill;
 
     @Column(name = "delivery_type")
     private Integer deliveryType;
@@ -33,7 +36,7 @@ public class Bill {
     @Column(name = "shipping_fee")
     private BigDecimal shippingFee;
 
-    @Column(name = "payment_method")
+    @Column(name = "payment_method_id")
     private Integer paymentMethod;
 
     @Column(name = "discount_id")
@@ -50,4 +53,6 @@ public class Bill {
     @JoinColumn(name = "customer_id")
     private Customer customer;
 
+    private LocalDateTime created_at; //map vposw datetime trong db
+    private LocalDateTime updated_at;
 }

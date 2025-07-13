@@ -116,6 +116,10 @@ public class ProductService {
         return product != null;
     }
 
+    public List<ProductDetail> searchProductDetail(String keyword){
+        return productDetailRepository.searchProductDetailByKeyword(keyword);
+    }
+
     public Integer tongSoLuongSPCT(Integer id){
         Integer result = productRepository.tongSoLuongTheoSanPham(id);
         return result != null ? result : 0;
@@ -138,4 +142,6 @@ public class ProductService {
     public List<ProductDetail> getAllProductDetails(){
         return productDetailRepository.getAllProductDetails();
     }
+
+
 }
