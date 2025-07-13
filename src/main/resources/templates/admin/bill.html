@@ -94,10 +94,9 @@
                             <td th:text="${bill.code}">HD001</td>
                             <td th:text="${bill.name}">Nguyễn Văn A</td>
                             <td th:text="${bill.phoneNumber}">0123456789</td>
-                            <td th:text="${#temporals.format(bill.created_at, 'dd/MM/yyyy HH:mm')}"></td>
-                            <td th:text="${#numbers.formatDecimal(bill.totalAmount, 0, 'COMMA', '.', 'VND')}"></td>
-                            <td th:text="${bill.typeBill} ? 'Online' : 'Tại quầy'">Tại quầy</td>
-                            <td th:text="${bill.paymentMethod != null ? bill.paymentMethod.name : 'Chưa chọn'}"></td>
+                            <td th:text="${bill.createdAt}">---</td>
+                            <td th:text="${bill.totalAmount}">0</td>
+                            <td th:text="${bill.typeBill != null and bill.typeBill == true ? 'Online' : 'Tại quầy'}">Tại quầy</td>
                             <td>
                                  <span th:switch="${bill.status}">
                                    <span th:case="0">Chờ xác nhận</span>
