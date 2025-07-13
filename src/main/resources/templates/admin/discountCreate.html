@@ -30,23 +30,23 @@
             <div class="row">
                 <div class="col-md-6 form-group">
                     <label class="form-label">Mã giảm giá *</label>
-                    <input type="text" class="form-control" th:field="*{code}" placeholder="Để trống sẽ tự sinh mã giảm giá">
+                    <input type="text" class="form-control"  th:field="*{code}" placeholder="Để trống sẽ tự sinh mã giảm giá">
                 </div>
                 <div class="col-md-6 form-group">
                     <label class="form-label">Tên giảm giá *</label>
-                    <input type="text" class="form-control" th:field="*{codeName}">
+                    <input type="text" class="form-control" id="codeName" th:field="*{codeName}">
                     <div class="text-danger" th:if="${#fields.hasErrors('codeName')}" th:errors="*{codeName}"></div>
                 </div>
 
                 <div class="col-md-6 form-group">
                     <label class="form-label">Ngày áp dụng *</label>
-                    <input type="datetime-local" class="form-control" th:field="*{startDatetime}">
+                    <input type="datetime-local" class="form-control" id="startDatetime" th:field="*{startDatetime}">
                     <div class="text-danger" th:if="${#fields.hasErrors('startDatetime')}" th:errors="*{startDatetime}"></div>
                 </div>
 
                 <div class="col-md-6 form-group">
                     <label class="form-label">Ngày kết thúc *</label>
-                    <input type="datetime-local" class="form-control" th:field="*{endDatetime}">
+                    <input type="datetime-local" class="form-control" id="endDatetime" th:field="*{endDatetime}">
                     <div class="text-danger" th:if="${#fields.hasErrors('endDatetime')}" th:errors="*{endDatetime}"></div>
                 </div>
 
@@ -65,7 +65,7 @@
                 </div>
                 <div class="col-md-6 form-group">
                     <label class="form-label">Giá trị giảm *</label>
-                    <input type="number" class="form-control" th:field="*{discountValue}">
+                    <input type="number" class="form-control" id="discountValue" th:field="*{discountValue}">
                     <div class="text-danger" th:if="${#fields.hasErrors('discountValue')}" th:errors="*{discountValue}"></div>
                 </div>
                 <div class="col-md-6 form-group">
@@ -75,13 +75,13 @@
                 </div>
                 <div class="col-md-6 form-group">
                     <label class="form-label">Số tiền áp dụng cho đơn tối thiểu từ (đ) *</label>
-                    <input type="number" class="form-control" th:field="*{minPurchase}">
+                    <input type="number" class="form-control" id="minPurchase" th:field="*{minPurchase}">
                     <div class="text-danger" th:if="${#fields.hasErrors('minPurchase')}" th:errors="*{minPurchase}"></div>
                 </div>
 
                 <div class="col-md-6 form-group">
                     <label class="form-label">Số lượng tối đa *</label>
-                    <input type="number" class="form-control" th:field="*{usageLimit}">
+                    <input type="number" class="form-control" id="usageLimit" th:field="*{usageLimit}">
                     <div class="text-danger" th:if="${#fields.hasErrors('usageLimit')}" th:errors="*{usageLimit}"></div>
                 </div>
 
@@ -102,20 +102,23 @@
     </div>
 </section>
 <script>
+
     function handleDiscountTypeChange() {
         const percentRadio = document.querySelector('input[name="discountType"][value="percent"]');
         const discountInput = document.getElementById('discountValue');
         const maxDiscountInput = document.getElementById('maxDiscount');
+        const maxDiscountGroup = maxDiscountInput.closest('.form-group'); // 👉 THÊM DÒNG NÀY
 
         if (percentRadio.checked) {
             discountInput.setAttribute('min', '1');
-            discountInput.setAttribute('max', '95');
-            maxDiscountInput.disabled = false;
-            maxDiscountGroup.style.display = 'block';
+            discountInput.setAttribute('max', '100');
         } else {
             discountInput.removeAttribute('min');
             discountInput.removeAttribute('max');
-            maxDiscountInput.disabled = false;
+        }
+
+        maxDiscountInput.disabled = false;
+        if (maxDiscountGroup) {
             maxDiscountGroup.style.display = 'block';
         }
     }
@@ -201,8 +204,8 @@
             return false;
         }
 
-        if (isPercent && (value < 1 || value > 95)) {
-            showError(input, "Giảm phần trăm chỉ từ 1 đến 95%");
+        if (isPercent && (value < 1 || value > 100)) {
+            showError(input, "Giảm phần trăm chỉ từ 1 đến 100%");
             return false;
         }
 
@@ -244,7 +247,7 @@
         return valid;
     }
 
-
+    let isSubmit = false;
     window.onload = function () {
         handleDiscountTypeChange();
 
