@@ -101,7 +101,7 @@ public class BillService {
         bill.setTotalAmount(totalAmount);
         bill.setPaymentStatus(true);
         bill.setStatus(1);
-        bill.setType_bill(false); // bán tại quầy
+        bill.setTypeBill(false); // bán tại quầy
         bill.setDeliveryType(0); // 0 = không giao hàng
         bill.setShippingFee(BigDecimal.ZERO);
         bill.setName("tien");
@@ -110,7 +110,7 @@ public class BillService {
 //        bill.setPaymentMethod(1); // sửa sau, tạm thời fix để bán thử
 //        bill.setDiscountId(null); // fix cứng
         bill.setCustomer(null);
-        bill.setCreated_at(LocalDateTime.now());
+        bill.setCreatedAt(LocalDateTime.now());
 
         billRepository.save(bill);
         System.out.println("Thong tin bill :" + bill);

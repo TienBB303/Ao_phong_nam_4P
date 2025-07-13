@@ -28,7 +28,9 @@ public class Bill {
 
     private Integer status;
 
-    private Boolean type_bill;
+    @Column(name = "type_bill")
+    private Boolean typeBill;
+
 
     @Column(name = "delivery_type")
     private Integer deliveryType;
@@ -42,8 +44,12 @@ public class Bill {
     private String phoneNumber;
 
     private String email;
-    private LocalDateTime created_at;
-    private LocalDateTime updated_at;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
 
     @ManyToOne
     @JoinColumn(name = "customer_id")
