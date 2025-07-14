@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments/head :: head}">
-    <title>Quan ly khuyen mai | 4PStore</title>
+    <title>Quan ly hoá đơn | 4PStore</title>
 </head>
 <body>
 <header th:replace="~{admin/fragments/header :: header}"></header>
@@ -46,11 +46,11 @@
                             <div class="col">
                                 <select name="status" class="form-control">
                                     <option value="">Trạng thái</option>
-                                    <option value="0">Chờ xác nhận</option>
-                                    <option value="1">Đã xác nhận</option>
-                                    <option value="2">Đang giao</option>
-                                    <option value="3">Hoàn thành</option>
-                                    <option value="4">Đã huỷ</option>
+                                    <option value="1">Chờ xác nhận</option>
+                                    <option value="2">Đã xác nhận</option>
+                                    <option value="3">Đang giao</option>
+                                    <option value="4">Hoàn thành</option>
+                                    <option value="5">Đã huỷ</option>
                                 </select>
                             </div>
                             <div class="col">
@@ -97,18 +97,19 @@
                             <td th:text="${bill.createdAt}">---</td>
                             <td th:text="${bill.totalAmount}">0</td>
                             <td th:text="${bill.typeBill != null and bill.typeBill == true ? 'Online' : 'Tại quầy'}">Tại quầy</td>
+                            <td></td>
                             <td>
                                  <span th:switch="${bill.status}">
-                                   <span th:case="0">Chờ xác nhận</span>
-                                   <span th:case="1">Đã xác nhận</span>
-                                   <span th:case="2">Đang giao</span>
-                                   <span th:case="3">Hoàn thành</span>
-                                   <span th:case="4">Đã huỷ</span>
-                                   <span th:case="*">Không rõ</span>
+                                   <span th:case="1">Chờ xác nhận</span>
+                                   <span th:case="2">Đã xác nhận</span>
+                                   <span th:case="3">Đang giao</span>
+                                   <span th:case="4">Hoàn thành</span>
+                                   <span th:case="5">Đã huỷ</span>
+                                   <span th:case="6">Không rõ</span>
                                  </span>
                             </td>
                             <td>
-                                <a th:href="@{'/admin/bill/detail/' + ${bill.id}}" class="btn btn-sm btn-primary">Xem</a>
+                                <a th:href="@{'/admin/bill/getbill-detail/' + ${bill.id}}" class="btn btn-sm btn-primary">Xem</a>
                             </td>
                         </tr>
                         </tbody>
