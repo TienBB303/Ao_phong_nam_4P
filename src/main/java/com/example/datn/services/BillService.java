@@ -1,14 +1,16 @@
 package com.example.datn.services;
 
-import com.example.datn.dto.selling_inline.BillDetailDto;
-import com.example.datn.dto.selling_inline.BillSessionDto;
+
 import com.example.datn.entities.Bill;
 import com.example.datn.entities.BillDetails;
 import com.example.datn.entities.Selling.Cart;
 import com.example.datn.entities.Selling.CartDetail;
+import com.example.datn.entities.product_and_other.ProductDetail;
+import com.example.datn.repositories.BillDetailRepository;
 import com.example.datn.repositories.BillRepository;
 import com.example.datn.repositories.cart.CartRepository;
-import com.example.datn.repositories.product_and_other.BillDetailsRepository;
+import com.example.datn.repositories.product_and_other.ProductDetailRepository;
+import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,10 +28,12 @@ public class BillService {
     BillRepository billRepository;
 
     @Autowired
-    BillDetailsRepository billDetailsRepository;
+    BillDetailRepository billDetailRepository;
 
     @Autowired
     CartRepository cartRepository;
+    @Autowired
+    ProductDetailRepository productDetailRepository;
 //
 //    @Autowired
 //    CustomerService customerService;
@@ -100,7 +104,7 @@ public class BillService {
         bill.setDiscountAmount(BigDecimal.ZERO); // fix cứng
         bill.setTotalAmount(totalAmount);
         bill.setPaymentStatus(true);
-        bill.setStatus(1);
+        bill.setStatus(4);
         bill.setTypeBill(false); // bán tại quầy
         bill.setDeliveryType(0); // 0 = không giao hàng
         bill.setShippingFee(BigDecimal.ZERO);
@@ -120,11 +124,73 @@ public class BillService {
             billDetails.setQuantity(cartDetail.getQuantity());
             billDetails.setBill(bill);
             billDetails.setProductDetail(cartDetail.getProductDetail());
-            billDetailsRepository.save(billDetails);
+            billDetailRepository.save(billDetails);
         }
 
         cart.setStatus(false); // không hiển thị lên list nữa
         cart.setUpdated_at(new Date());
         cartRepository.save(cart);
+    }
+    public Bill updateStatus(String statusString, Integer id) {
+        Bill bill = billRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn có id: " + id));
+
+        int newStatus;
+        try {
+            newStatus = Integer.parseInt(statusString);
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("Trạng thái không hợp lệ: " + statusString);
+        }
+
+        int currentStatus = bill.getStatus();
+
+        // Nếu chuyển từ CHỜ XÁC NHẬN (1) → ĐÃ XÁC NHẬN (2) thì trừ tồn kho
+        if (currentStatus == 1 && newStatus == 2) {
+            try {
+                deductProductQuantitiesOnStatusChange(id);
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException("Trừ tồn kho thất bại.");
+            }
+        }
+
+        // Nếu chuyển sang HUỶ (5) từ trạng thái khác CHỜ XÁC NHẬN (1) thì cộng lại tồn kho
+        if (newStatus == 5 && currentStatus != 1) {
+            List<BillDetails> billDetailsList = billDetailRepository.findByBillId(id);
+            for (BillDetails detail : billDetailsList) {
+                ProductDetail productDetail = detail.getProductDetail();
+                if (productDetail != null) {
+                    productDetail.setQuantity(productDetail.getQuantity() + detail.getQuantity());
+                }
+            }
+        }
+
+        bill.setStatus(newStatus);
+        bill.setUpdatedAt(LocalDateTime.now());
+
+        return billRepository.save(bill);
+    }
+    private void deductProductQuantitiesOnStatusChange(Integer billId) {
+        List<BillDetails> billDetailsList = billDetailRepository.findByBillId(billId);
+
+        for (BillDetails detail : billDetailsList) {
+            ProductDetail productDetail = detail.getProductDetail();
+            if (productDetail == null) {
+                throw new RuntimeException("Không tìm thấy thông tin sản phẩm chi tiết.");
+            }
+
+            int currentQuantity = productDetail.getQuantity();
+            int requiredQuantity = detail.getQuantity();
+
+            if (currentQuantity < requiredQuantity) {
+                throw new RuntimeException("Sản phẩm ID " + productDetail.getId() + " không đủ số lượng tồn.");
+            }
+
+            productDetail.setQuantity(currentQuantity - requiredQuantity);
+            productDetailRepository.save(productDetail);
+        }
+    }
+    public List<BillDetails> findBillDetailsByBillId(Integer billId) {
+        return billDetailRepository.findByBillId(billId);
     }
 }
