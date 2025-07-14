@@ -31,6 +31,9 @@
                         <p class="card-text text-muted">
                             Số lượng: <span th:text="${totalQuantity[product.id]}"></span>
                         </p>
+                        <p class="card-text text-danger fw-bold">
+                            <span th:text="${priceRanges[product.id]}">100.000 - 150.000đ</span>
+                        </p>
                         <a th:href="@{'/product-detail/' + ${product.code}}" class="btn btn-outline-primary btn-sm">Chi tiết</a>
                     </div>
                 </div>

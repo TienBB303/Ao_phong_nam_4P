@@ -22,8 +22,8 @@
 
                 <!-- Thông tin sản phẩm -->
                 <div class="col-md-6">
-                    <div class="p-3">
-                        <div class="d-flex align-items-center mb-3">
+                    <div class="p-3" id="productInfo" th:data-product-id="${product.id}">
+                    <div class="d-flex align-items-center mb-3">
                             <span class="badge bg-dark me-2" th:text="${product.brand.name}"></span>
                             <span class="badge bg-danger" th:text="${product.material.name}"></span>
                         </div>
@@ -49,11 +49,22 @@
                                 <label for="quantity" class="form-label">Số lượng:</label>
                                 <input type="number" id="quantity" name="quantity" value="1" min="1" class="form-control w-25">
                             </div>
+                        <div class="mb-3">
+                            <label class="form-label">Giá: </label>
+                            <span id="priceDisplay" class="fw-bold text-danger">--</span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Tồn kho: </label>
+                            <span id="quantityDisplay" class="fw-bold text-success">--</span>
+                        </div>
 
                             <button type="submit" class="btn btn-primary">
                                 Thêm vào giỏ
                             </button>
-
+                        <button type="submit" class="btn btn-primary">
+                            Mua ngay
+                        </button>
                     </div>
                 </div>
             </div>
@@ -61,19 +72,57 @@
             <!-- Divider -->
             <hr class="my-5"/>
 
-            <!-- Sản phẩm liên quan -->
-            <h4 class="mb-4 text-center">Sản phẩm liên quan</h4>
-            <div class="row">
-                <div class="col-md-4 mb-4">
-                    <img src="" class="img-fluid rounded shadow-sm" alt="">
-                    <h5 class="card-title" th:text="${product.name}">Tên sản phẩm</h5>
-                    <a th:href="@{'/product-detail/' + ${product.code}}" class="btn btn-outline-primary btn-sm">Chi tiết</a>
-                </div>
-            </div>
+<!--            &lt;!&ndash; Sản phẩm liên quan &ndash;&gt;-->
+<!--            <h4 class="mb-4 text-center">Sản phẩm liên quan</h4>-->
+<!--            <div class="row">-->
+<!--                <div class="col-md-4 mb-4">-->
+<!--                    <img src="" class="img-fluid rounded shadow-sm" alt="">-->
+<!--                    <h5 class="card-title" th:text="${product.name}">Tên sản phẩm</h5>-->
+<!--                    <a th:href="@{'/product-detail/' + ${product.code}}" class="btn btn-outline-primary btn-sm">Chi tiết</a>-->
+<!--                </div>-->
+<!--            </div>-->
         </div>
+        <script>
+            const colorSelect = document.getElementById("colorSelect");
+            const sizeSelect = document.getElementById("sizeSelect");
+            const priceDisplay = document.getElementById("priceDisplay");
+            const quantityDisplay = document.getElementById("quantityDisplay");
+
+            const productId = document.getElementById("productInfo").getAttribute("data-product-id");
+
+            function fetchPriceAndQuantity() {
+                const colorId = colorSelect.value;
+                const sizeId = sizeSelect.value;
+
+                if (colorId && sizeId) {
+                    fetch(`/api/product-detail/price?productId=${productId}&colorId=${colorId}&sizeId=${sizeId}`)
+                        .then(response => {
+                            if (!response.ok) throw new Error("Không tìm thấy biến thể");
+                            return response.json();
+                        })
+                        .then(data => {
+                            const priceFormatted = new Intl.NumberFormat('vi-VN', {
+                                style: 'currency',
+                                currency: 'VND'
+                            }).format(data.price);
+                            priceDisplay.textContent = priceFormatted;
+                            quantityDisplay.textContent = data.quantity;
+                        })
+                        .catch(error => {
+                            priceDisplay.textContent = "--";
+                            quantityDisplay.textContent = "--";
+                            console.error("Lỗi khi lấy biến thể:", error);
+                        });
+                } else {
+                    console.log("Chưa chọn đủ màu và size");
+                }
+            }
+
+            colorSelect.addEventListener("change", fetchPriceAndQuantity);
+            sizeSelect.addEventListener("change", fetchPriceAndQuantity);
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.js"></script>
     </main>
 </div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.js"></script>
 </body>
 </html>
