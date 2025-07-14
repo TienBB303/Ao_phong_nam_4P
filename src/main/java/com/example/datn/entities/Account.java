@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Setter
@@ -14,6 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Table(name = "account")
 public class Account {
 
     @Id
@@ -22,30 +22,26 @@ public class Account {
 
     private String code;
 
-    private String fullName;
-
     private String email;
 
     private String password;
 
-    private String phoneNumber;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
-    private LocalDate birthOfDate;
-
-    private String addressDetail;
-
-    private String gender;
-
-    private LocalDateTime created_at;
-
-    private LocalDateTime updated_at;
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     private Boolean status;
+
+    @Column(name = "avatar_username")
+    private String avatarUsername;
 
     @OneToOne
     @JoinColumn(name = "role_id")
     private Role role;
-//    @OneToOne
-//    @JoinColumn(name = "customer_id")
-//    private Customer customer;
+
+    @OneToOne
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
 }

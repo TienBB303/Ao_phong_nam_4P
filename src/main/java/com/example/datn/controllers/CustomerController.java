@@ -1,7 +1,6 @@
 package com.example.datn.controllers;
 import com.example.datn.dto.customer.CustomerDto;
 import com.example.datn.entities.Customer;
-import com.example.datn.repositories.CustomerRepository;
 import com.example.datn.services.CustomerService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +12,9 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.example.datn.dto.AddressDto;
+import com.example.datn.entities.ShippingAddress;
 
-import java.util.Optional;
 
 @Controller
 @RequestMapping("/admin/customer")
@@ -34,7 +34,7 @@ public class CustomerController {
             customerPage = customerService.searchCustomerEntity(keyword, pageable);
         } else {
             customerPage =customerService.getAllCustomersEntity(pageable);
-            ;
+
         }
 
         model.addAttribute("customerPage", customerPage);
@@ -69,7 +69,7 @@ public class CustomerController {
             return "admin/customer/customerCreate1";
         }
 
-        customerService.createCustomer(dto);
+        customerService.createCustomerWithAddressAndAccount(dto);
         redirectAttributes.addFlashAttribute("message", "Lưu khách hàng thành công!");
         return "redirect:/admin/customer/view";
     }
@@ -99,7 +99,8 @@ public class CustomerController {
             // KHÔNG CẦN convertToEntity ở đây vì service sẽ tự tìm và cập nhật entity
             Customer updated = customerService.updateCustomer(dto);
             if (updated == null) {
-                redirectAttributes.addFlashAttribute("error", "Không tìm thấy khách hàng để cập nhật!");
+                result.reject("error", "Không tìm thấy khách hàng để cập nhật!");
+                return "admin/customer/customerEdit";
             } else {
                 redirectAttributes.addFlashAttribute("message", "Cập nhật khách hàng thành công!");
             }
@@ -139,10 +140,28 @@ public class CustomerController {
         dto.setId(customer.getId());
         dto.setCode(customer.getCode());
         dto.setName(customer.getName());
-        dto.setEmail(customer.getEmail());
+        dto.setGender(customer.getGender());
+        dto.setBirthday(customer.getBirthDate());
         dto.setPhoneNumber(customer.getPhoneNumber());
-        dto.setAddress(customer.getAddress());
-        dto.setIsActive(customer.getIsActive()); // <-- Lấy giá trị isActive từ entity
+        dto.setIsActive(customer.getIsActive());
+        if (customer.getAccount() != null) {
+            dto.setEmail(customer.getAccount().getEmail());
+        }
+        if (customer.getAddresses() != null && !customer.getAddresses().isEmpty()) {
+            ShippingAddress address = customer.getAddresses().get(0); // hoặc lấy địa chỉ mặc định
+            AddressDto addressDto = new AddressDto();
+            addressDto.setAddressDetail(address.getAddressDetail() != null ? address.getAddressDetail() : "");
+            addressDto.setProvinceId(address.getProvinceId() != null ? address.getProvinceId() : 0);
+            addressDto.setProvinceName(address.getProvinceName() != null ? address.getProvinceName() : "");
+            addressDto.setDistrictId(address.getDistrictId() != null ? address.getDistrictId() : 0);
+            addressDto.setDistrictName(address.getDistrictName() != null ? address.getDistrictName() : "");
+            addressDto.setWardId(address.getWardId() != null ? address.getWardId() : "");
+            addressDto.setWardName(address.getWardName() != null ? address.getWardName() : "");
+            addressDto.setReceiverName(address.getReceiverName() != null ? address.getReceiverName() : "");
+            addressDto.setReceiverPhoneNumber(address.getReceiverPhoneNumber() != null ? address.getReceiverPhoneNumber() : "");
+            addressDto.setIsDefault(address.getIsDefault() != null ? address.getIsDefault() : false);
+            dto.setAddress(addressDto);
+        }
         return dto;
     }
     // Hàm hỗ trợ convert từ dto -> entity
@@ -151,9 +170,9 @@ public class CustomerController {
         customer.setId(dto.getId());
         customer.setCode(dto.getCode());
         customer.setName(dto.getName());
-        customer.setEmail(dto.getEmail());
+        customer.setGender(dto.getGender());
+        customer.setBirthDate(dto.getBirthday());
         customer.setPhoneNumber(dto.getPhoneNumber());
-        customer.setAddress(dto.getAddress());
         customer.setIsActive(dto.getIsActive()); // <-- Lấy giá trị isActive từ DTO
         return customer;
     }

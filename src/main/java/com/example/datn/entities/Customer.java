@@ -3,6 +3,9 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.Nationalized;
 
+import java.time.LocalDate;
+import java.util.List;
+
 @Data
 @Entity
 @Table(name = "customer")
@@ -17,17 +20,17 @@ public class Customer {
     @Nationalized
     @Column(name = "name", nullable = false)
     private String name;
+    private Boolean gender; // true = nam, false = nữ
     @Column(name = "phone_number", unique = true) // Số điện thoại thường là duy nhất
     private String phoneNumber;
-    @Column(name = "email", unique = true)
-    private String email;
+    @Column(name = "birth_of_date")
+    private LocalDate birthDate;
     @Column(name = "is_active")
     private Boolean isActive = true;
-    @Nationalized
-    @Column(name = "address") 
-    private String address;
+    @OneToOne(mappedBy = "customer", cascade = CascadeType.ALL)
+    private Account account;
 
-//    @OneToOne(mappedBy = "customer")
-//    private Account account;
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ShippingAddress> addresses;
 
 }
