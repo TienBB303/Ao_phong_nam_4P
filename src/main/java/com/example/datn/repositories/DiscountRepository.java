@@ -44,7 +44,9 @@ public interface DiscountRepository extends JpaRepository<Discount,Integer> {
     Optional<Discount> findByCode(String code);
 
     //TienBB
-    @Query("select d from Discount d where d.minPurchase <= :minPrice")
+    @Query("select d from Discount d where d.minPurchase <= :minPrice " +
+            "AND d.status = 1 " +
+            "AND d.usageLimit >= 0") // lấy discount đang hoạt động và sl lớn hơn 0 thôi
     List<Discount> getAllDiscountByMinPurchase(BigDecimal minPrice);
 
     //TienBB
