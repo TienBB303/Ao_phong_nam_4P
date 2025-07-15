@@ -192,16 +192,25 @@
                             </div>
                             <div class="card-body py-2">
                                 <div class="row gx-1 gy-2 align-items-end">
-                                    <div class="col-md-12 position-relative">
+<!--                                    <div class="col-md-12 position-relative">-->
+                                    <div class="position-relative d-flex gap-2">
                                         <select class="form-select" id="discount_select" name="discountId" th:attr="data-id=${idCart}">
                                             <option value="">-- Chọn mã giảm giá --</option>
                                             <option th:each="discount : ${discountCanApply}"
                                                     th:value="${discount.id}"
                                                     th:data-amount="${discount.discountValue}"
                                                     th:selected="${cart.discount != null and cart.discount.id == discount.id}"
-                                                    th:text="${discount.code + ' - giảm ' + discount.discountValue + '₫ nếu mua ≥ ' + discount.minPurchase + '₫'}">
+                                                    th:text="${discount.code + ' - giảm ' +
+                                                         (discount.discountType == 'percent'
+                                                            ? #numbers.formatDecimal(discount.discountValue, 0, 'POINT', 0, 'NONE') + '%'
+                                                            : #numbers.formatDecimal(discount.discountValue, 0, 'POINT', 0, 'NONE') + ' ₫')
+                                                         + ' nếu mua ≥ ' + #numbers.formatDecimal(discount.minPurchase, 0, 'POINT', 0, 'NONE') + ' ₫' + ' (giảm tối đa ' + #numbers.formatDecimal(discount.maxDiscount, 0, 'POINT', 0, 'NONE') + ' ₫' + ' )'}" >
+
                                             </option>
                                         </select>
+                                        <button class="btn btn-outline-danger" id="remove_discount" th:attr="data-id=${idCart}" title="Bỏ mã giảm">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </button>
                                     </div>
                                 </div>
                             </div>

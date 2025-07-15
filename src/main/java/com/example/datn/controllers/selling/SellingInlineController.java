@@ -132,15 +132,7 @@ public class SellingInlineController {
     public ResponseEntity<?> addToCart(@RequestParam("idCart") Integer idCart,
                                        @RequestParam("productDetailId") Integer productDetailId, Model model){
         try {
-//            Cart cart = cartService.findCartById(idCart);
             cartService.addProductToCart(idCart,productDetailId);
-//            Integer itemInCart = countItemInCart(idCart);
-//            Integer allItemInCart = countAllItemInCart(idCart);
-//            BigDecimal totalPriceCheckOut = cart.getTotal_price_checkout();
-//
-//            model.addAttribute("itemInCart",itemInCart);
-//            model.addAttribute("allItemInCart",allItemInCart);
-//            model.addAttribute("totalPriceCheckOut",totalPriceCheckOut);
 
             return ResponseEntity.ok().body("Thêm sản phẩm vào giỏ thành công");
         }catch (Exception e){
@@ -235,9 +227,20 @@ public class SellingInlineController {
                                                  @RequestParam("discountId") Integer discountId) {
         try {
             cartService.applyDiscountToCart(idCart, discountId);
-            return ResponseEntity.ok("Thêm mã thành công");
+            return ResponseEntity.ok("Áp dụng mã giảm giá thành công");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/remove-discount")
+    @ResponseBody
+    public ResponseEntity<?> removeDiscount(@RequestParam("idCart") Integer idCart){
+        try {
+            cartService.removeDiscountFromCart(idCart);
+            return ResponseEntity.ok("Bỏ mã giảm giá thành công");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

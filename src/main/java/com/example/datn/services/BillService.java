@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 
 import org.springframework.stereotype.Service;
 
+import javax.smartcardio.Card;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -37,8 +38,12 @@ public class BillService {
 
     @Autowired
     CartRepository cartRepository;
+
     @Autowired
     ProductDetailRepository productDetailRepository;
+
+    @Autowired
+    DiscountService discountService;
 //
 //    @Autowired
 //    CustomerService customerService;
@@ -95,11 +100,29 @@ public class BillService {
         return String.format("HD%03d",nextCode);
     }
 
+
+    public void checkDiscountBelongToCart(){
+
+
+    }
+
+    public void checkDiscountBelongToCart(Cart cart) throws Exception {
+        Discount discount = cart.getDiscount();
+        if (discount == null) return;
+
+        Discount activeDiscount = discountService.findDiscountById(discount.getId());
+        if (activeDiscount == null || !activeDiscount.getStatus().equals(1) || activeDiscount.getUsageLimit() <= 0) {
+            throw new Exception("Mã giảm giá không còn hợp lệ. Vui lòng chọn lại mã khác.");
+        }
+    }
+
     public void checkOut(Integer cartId) throws Exception{
         Cart cart = cartRepository.findByIdCart(cartId);
         if(cart == null || cart.getStatus() == false){
             throw new Exception("Giỏ hàng không tồn tại hoặc đã được thanh toán");
         }
+
+        checkDiscountBelongToCart(cart); // kierm tra discout còn hoạt động không
 
         List<CartDetail> listCartDetails = cartRepository.findAllCartDetailByCartId(cartId);
         if(listCartDetails == null || listCartDetails.isEmpty()){
@@ -111,7 +134,7 @@ public class BillService {
 
         Bill bill = new Bill();
         bill.setCode(taoMaTuDongBill());
-        bill.setDiscountAmount(BigDecimal.ZERO); // fix cứng
+        bill.setDiscountAmount(cart.getTotal_discount());
         bill.setTotalAmount(totalAmount);
         bill.setPaymentStatus(true);
         bill.setStatus(4);
@@ -122,10 +145,12 @@ public class BillService {
         bill.setPhoneNumber("0365142537");
         bill.setEmail("tien@gmail.com");
 //        bill.setPaymentMethod(1); // sửa sau, tạm thời fix để bán thử
-        bill.setDiscount(cart.getDiscount()); // nếu cart đã có discount
-        bill.setDiscountAmount(cart.getTotal_discount()); // nếu muốn lưu số tiền đã giảm
+
+        bill.setDiscount(cart.getDiscount());
+        bill.setTotal_checkout(totalAmount.subtract(cart.getTotal_discount()));
         bill.setCustomer(null);
         bill.setCreatedAt(LocalDateTime.now());
+
 
         billRepository.save(bill);
         System.out.println("Thong tin bill :" + bill);

@@ -310,8 +310,7 @@ $('#discount_select').change(function () {
         error: function (err) {
             Swal.fire({
                 icon: 'error',
-                title: 'Lỗi áp dụng mã',
-                text: err.responseText,
+                title: err.responseText,
                 toast: true,
                 position: 'top-end',
                 timer: 1500,
@@ -321,18 +320,58 @@ $('#discount_select').change(function () {
     });
 });
 
-// if (!discountId) {
-//     $.post('/admin/sell-inline/remove-discount', { cartId: cartId }, function (res) {
-//         location.reload(); // Gỡ mã rồi reload lại
-//     }).fail(function (err) {
-//         Swal.fire({
-//             icon: 'error',
-//             title: err.responseText,
-//             toast: true,
-//             position: 'top-end',
-//             timer: 1500,
-//             showConfirmButton: false
-//         });
-//     });
-//     return;
+
+$('#remove_discount').click(function () {
+    const idCart = $(this).data('id');
+
+    if(idCart != null){
+        $.ajax({
+            url: '/admin/sell-inline/remove-discount',
+            method: 'POST',
+            data: {
+                idCart: idCart
+            },
+            success: function (res) {
+                Swal.fire({
+                    icon: 'info',
+                    title: res,
+                    toast: true,
+                    position: 'top-end',
+                    timer: 1200,
+                    showConfirmButton: false
+                }).then(() => {
+                    location.reload();
+                });
+            },
+            error: function (err) {
+                Swal.fire({
+                    icon: 'error',
+                    title: err.responseText,
+                    toast: true,
+                    position: 'top-end',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            }
+        });
+    }else{
+        return;
+    }
+});
+
+// function toggleRemoveButton() {
+//     const selected = $('#discount_select').val();
+//     if (!selected) {
+//         $('#remove_discount').hide();
+//     } else {
+//         $('#remove_discount').show();
+//     }
 // }
+//
+// $(document).ready(function () {
+//     toggleRemoveButton(); // Khi load trang
+//
+//     $('#discount_select').on('change', function () {
+//         toggleRemoveButton(); // Khi chọn lại
+//     });
+// });
