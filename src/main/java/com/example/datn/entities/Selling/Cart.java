@@ -1,6 +1,7 @@
 package com.example.datn.entities.Selling;
 
 import com.example.datn.entities.Account;
+import com.example.datn.entities.Discount;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,6 +30,8 @@ public class Cart {
 
     private BigDecimal total_price_cart;
     private Integer total_quantity;
+    private BigDecimal total_discount;
+    private BigDecimal total_price_checkout;
     private Date created_at;
     private Date updated_at;
     private Boolean status;
@@ -36,4 +39,8 @@ public class Cart {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id")
     private Account account;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "discount_id")
+    private Discount discount;
 }

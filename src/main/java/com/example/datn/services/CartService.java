@@ -2,6 +2,7 @@ package com.example.datn.services;
 
 import com.example.datn.entities.Bill;
 import com.example.datn.entities.BillDetails;
+import com.example.datn.entities.Discount;
 import com.example.datn.entities.Selling.Cart;
 import com.example.datn.entities.Selling.CartDetail;
 import com.example.datn.entities.product_and_other.ProductDetail;
@@ -9,6 +10,7 @@ import com.example.datn.repositories.cart.CartDetailRepositoty;
 import com.example.datn.repositories.cart.CartRepository;
 import com.example.datn.repositories.product_and_other.ProductDetailRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -27,6 +29,9 @@ public class CartService {
     @Autowired
     ProductDetailRepository productDetailRepository;
 
+    @Autowired
+    private DiscountService  discountService;
+
     public List<Cart> getAllCarts(){
         return cartRepository.findAll();
     }
@@ -38,8 +43,13 @@ public class CartService {
     public Cart findCartById(Integer idCart){
         return cartRepository.findByIdCart(idCart);
     }
+
     public CartDetail findCartDetailById(Integer idCartDetail){
         return cartDetailRepositoty.findCartDetailById(idCartDetail);
+    }
+
+    public Cart findCartByCartDetailId(Integer idCartDetail){
+        return cartRepository.findCartByCartDetailId(idCartDetail);
     }
 
     public List<CartDetail> findAllCartDetailsByCartId(Integer idCart){
@@ -85,6 +95,16 @@ public class CartService {
 
         cart.setTotal_price_cart(totalPrice);
         cart.setTotal_quantity(totalQuantity);
+
+        Discount discount = cart.getDiscount();
+        if(discount != null){
+            cart.setTotal_discount(discount.getDiscountValue());
+            cart.setTotal_price_checkout(cart.getTotal_price_cart().subtract(cart.getTotal_discount()));
+        }else {
+            cart.setTotal_discount(BigDecimal.ZERO);
+            cart.setTotal_price_checkout(cart.getTotal_price_cart());
+        }
+
         cart.setUpdated_at(new Date());
         cartRepository.save(cart);
     }
@@ -138,6 +158,16 @@ public class CartService {
 
         cart.setTotal_price_cart(totalPrice);
         cart.setTotal_quantity(totalQuantity);
+
+        Discount discount = cart.getDiscount();
+        if(discount != null){
+            cart.setTotal_discount(discount.getDiscountValue());
+            cart.setTotal_price_checkout(cart.getTotal_price_cart().subtract(cart.getTotal_discount()));
+        }else {
+            cart.setTotal_discount(BigDecimal.ZERO);
+            cart.setTotal_price_checkout(cart.getTotal_price_cart());
+        }
+
         cart.setUpdated_at(new Date());
         cartRepository.save(cart);
     }
@@ -161,6 +191,20 @@ public class CartService {
 
         cart.setTotal_price_cart(totalPrice);
         cart.setTotal_quantity(totalQuantity);
+
+        Discount discount = cart.getDiscount();
+        if(discount != null){
+            cart.setTotal_discount(discount.getDiscountValue());
+            if (cart.getTotal_discount().compareTo(cart.getTotal_price_cart()) > 0) {
+                cart.setTotal_price_checkout(BigDecimal.ZERO);
+            }else {
+                cart.setTotal_price_checkout(cart.getTotal_price_cart().subtract(cart.getTotal_discount()));
+            }
+        }else {
+            cart.setTotal_discount(BigDecimal.ZERO);
+            cart.setTotal_price_checkout(cart.getTotal_price_cart());
+        }
+
         cart.setUpdated_at(new Date());
         cartRepository.save(cart);
     }
@@ -181,6 +225,38 @@ public class CartService {
         cartDetailRepositoty.deleteAll(listCartDetails); // xóa tất cả item trong cart
 
         cartRepository.delete(cart);
+    }
+
+    public void applyDiscountToCart(Integer cartId, Integer discountId) throws  Exception{
+        Cart cart = cartRepository.findByIdCart(cartId);
+        Discount discount = discountService.findDiscountById(discountId);
+
+        if (cart == null || discount == null || discount.getUsageLimit() <= 0) {
+            throw new Exception("Không thể áp dụng mã giảm giá");
+        }
+
+        BigDecimal discountValue = discount.getDiscountValue();
+        if (discountValue == null) {                                            // đảm bảo ko dc null
+            discountValue = BigDecimal.ZERO;
+        }
+
+        cart.setTotal_discount(discountValue);
+        BigDecimal totalPriceCart = cart.getTotal_price_cart();                 // lấy tỏng tiền cart hieenjt ại
+        BigDecimal totalDisCount = cart.getTotal_discount();                    // tổng tiền giảm giá, sau update theo %
+        if(totalDisCount == null){
+            cart.setTotal_price_checkout(totalPriceCart);
+        }else {
+            if(cart.getTotal_discount().compareTo(totalPriceCart) > 0){         // tiền giảm lớn hơn tiền tổng -> free
+                cart.setTotal_price_checkout(BigDecimal.ZERO);
+            }else{
+                cart.setTotal_price_checkout(totalPriceCart.subtract(totalDisCount));   // subtract : trừ 2 bigdecimal
+            }
+        }
+        cart.setDiscount(discount);
+        cartRepository.save(cart);
+
+        discount.setUsageLimit(discount.getUsageLimit() - 1);
+        discountService.saveDiscount_Cart(discount);
     }
 
 }

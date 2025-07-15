@@ -4,12 +4,14 @@ import com.example.datn.dto.selling_inline.BillDetailDto;
 import com.example.datn.dto.selling_inline.BillSessionDto;
 import com.example.datn.entities.Bill;
 import com.example.datn.entities.BillDetails;
+import com.example.datn.entities.Discount;
 import com.example.datn.entities.Selling.Cart;
 import com.example.datn.entities.Selling.CartDetail;
 import com.example.datn.repositories.BillRepository;
 import com.example.datn.repositories.cart.CartRepository;
 import com.example.datn.repositories.product_and_other.BillDetailsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;

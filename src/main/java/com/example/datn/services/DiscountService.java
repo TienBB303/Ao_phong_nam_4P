@@ -8,8 +8,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -136,4 +138,23 @@ public class DiscountService {
         return "Cập nhật trạng thái thành công!";
     }
 
+    //TienBB
+    public List<Discount> getAllDiscountByMinPurchase(BigDecimal minPrice) {
+        return discountRepository.getAllDiscountByMinPurchase(minPrice);
+    }
+
+    //TienBB
+    public Discount findDiscountById(Integer discountId) {
+        return discountRepository.findById(discountId).orElse(null);
+    }
+
+    //TienBB
+    public Discount saveDiscount_Cart(Discount discount){
+        return discountRepository.save(discount);
+    }
+
+    //TienBB
+    public Discount findDiscountByCartId(Integer cartId) {
+        return discountRepository.findDiscountByCartId(cartId);
+    }
 }

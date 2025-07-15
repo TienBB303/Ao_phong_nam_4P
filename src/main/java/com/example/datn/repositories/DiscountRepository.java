@@ -7,7 +7,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface DiscountRepository extends JpaRepository<Discount,Integer> {
@@ -41,4 +43,11 @@ public interface DiscountRepository extends JpaRepository<Discount,Integer> {
     Integer findMaxCodeNumber();
     Optional<Discount> findByCode(String code);
 
+    //TienBB
+    @Query("select d from Discount d where d.minPurchase <= :minPrice")
+    List<Discount> getAllDiscountByMinPurchase(BigDecimal minPrice);
+
+    //TienBB
+    @Query("select c.discount from Cart c where c.id = :id")
+    Discount findDiscountByCartId(Integer id);
 }
