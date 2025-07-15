@@ -71,6 +71,11 @@ public class BillService {
     public Page<Bill> getAllBills(Pageable pageable) {
         return billRepository.findAll(pageable);
     }
+    public Page<Bill> searchBills(String code, String name, String phoneNumber,
+                                  LocalDateTime startDate, LocalDateTime endDate,
+                                  Integer status, Boolean typeBill, Pageable pageable) {
+        return billRepository.filterBills(code, name, phoneNumber, startDate, endDate, status, typeBill, pageable);
+    }
 
     public Bill findById(Integer id) {
         return billRepository.findById(id).orElse(null);
@@ -140,9 +145,9 @@ public class BillService {
         bill.setPhoneNumber("0365142537");
         bill.setEmail("tien@gmail.com");
 //        bill.setPaymentMethod(1); // sửa sau, tạm thời fix để bán thử
-//        bill.setDiscountId(null); // fix cứng
-        bill.setTotal_checkout(totalAmount.subtract(cart.getTotal_discount()));
 
+        bill.setDiscount(cart.getDiscount());
+        bill.setTotal_checkout(totalAmount.subtract(cart.getTotal_discount()));
         bill.setCustomer(null);
         bill.setCreatedAt(LocalDateTime.now());
 
@@ -223,5 +228,8 @@ public class BillService {
     }
     public List<BillDetails> findBillDetailsByBillId(Integer billId) {
         return billDetailRepository.findByBillId(billId);
+    }
+    public Bill findByIdWithDiscount(Integer id) {
+        return billRepository.findWithDiscountById(id);
     }
 }
