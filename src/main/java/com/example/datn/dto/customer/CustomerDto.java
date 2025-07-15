@@ -19,13 +19,12 @@ public class CustomerDto {
     @NotBlank(message = "Họ tên không được để trống")
     @Size(min = 2, max = 50)
     private String name;
-
     @NotBlank(message = "Email không được để trống")
     @Email(message = "Email không hợp lệ")
     private String email;
 
     @NotBlank(message = "SĐT không được để trống")
-    @Pattern(regexp = "^(0[0-9]{9,11})$", message = "Số điện thoại không hợp lệ")
+    @Pattern(regexp = "^0\\d{9}$", message = "Số điện thoại phải bắt đầu bằng 0 và gồm đúng 10 chữ số.")
     private String phoneNumber;
 
     @NotBlank(message = "Địa chỉ không được để trống")

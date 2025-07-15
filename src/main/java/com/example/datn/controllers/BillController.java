@@ -1,3 +1,4 @@
+
 package com.example.datn.controllers;
 
 import org.springframework.stereotype.Controller;
@@ -8,9 +9,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("admin/bill")
 public class BillController {
 
-    @GetMapping
+    @GetMapping("/view")
     public String index() {
 
         return "admin/bill";
     }
 }
+

@@ -94,5 +94,47 @@
     </div>
 </section>
 <footer th:replace="~{admin/fragments/footer :: footer}"></footer>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector("form");
+        const nameInput = document.getElementById("name");
+        const emailInput = document.getElementById("email");
+        const phoneInput = document.getElementById("phoneNumber");
+
+        form.addEventListener("submit", function (e) {
+            let isValid = true;
+
+            // Tên
+            nameInput.setCustomValidity("");
+            const nameRegex = /^[a-zA-ZÀ-ỹ\s]+$/;
+            if (!nameRegex.test(nameInput.value.trim())) {
+                nameInput.setCustomValidity("Tên không được chứa ký tự đặc biệt hoặc số.");
+                isValid = false;
+            }
+            nameInput.reportValidity();
+
+            // Email
+            emailInput.setCustomValidity("");
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(emailInput.value.trim())) {
+                emailInput.setCustomValidity("Email không đúng định dạng.");
+                isValid = false;
+            }
+            emailInput.reportValidity();
+            phoneInput.setCustomValidity("");
+            // Regex chuẩn cho SĐT Việt Nam 10 số (bắt đầu bằng 0 và đầu số hợp lệ)
+            const phoneRegex = /^0\d{9}$/;
+            if (!phoneRegex.test(phoneInput.value.trim())) {
+                phoneInput.setCustomValidity("Số điện thoại phải bắt đầu bằng 0 và có độ dài từ 10 đến 12 chữ số.");
+                isValid = false;
+            }
+            phoneInput.reportValidity();
+
+            if (!isValid) {
+                e.preventDefault(); // Ngăn chặn submit form nếu có lỗi
+            }
+        });
+    });
+</script>
 </body>
 </html>

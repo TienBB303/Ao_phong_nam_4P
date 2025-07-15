@@ -3,62 +3,15 @@
 <head th:replace="~{admin/fragments/head :: head}">
     <title>Quan ly khach hang | 4PStore</title>
     <!-- Select2 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
 </head>
 <body>
 <header th:replace="~{admin/fragments/header :: header}"></header>
 <div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
-<style>
-    /* Đảm bảo Select2 chiếm đủ chiều rộng */
-    .select2-container {
-        width: 100% !important;
-    }
-
-    /* Căn chỉnh chiều cao và border giống với Bootstrap input */
-    .select2-selection--single {
-        height: 38px !important;
-        padding: 6px 12px;
-        font-size: 14px;
-        border: 1px solid #ced4da;
-        border-radius: 0.375rem;
-        display: flex;
-        align-items: center;
-    }
-
-    /* Căn giữa văn bản hiển thị */
-    .select2-selection__rendered {
-        line-height: 24px !important;
-    }
-
-    /* Đảm bảo icon mũi tên căn chỉnh đúng */
-    .select2-selection__arrow {
-        height: 100% !important;
-    }
-
-    /* Dropdown menu không đè lên input */
-    .select2-dropdown {
-        z-index: 9999;
-    }
-</style>
 <section>
     <section>
         <div class="pc-container">
             <div class="pc-content">
-<!--                <div class="page-header">-->
-<!--                    <div class="page-block">-->
-<!--                        <div class="row align-items-center">-->
-<!--                            <div class="col-md-12">-->
-<!--                                <div class="page-header-title">-->
-<!--                                    <h5 class="m-b-10">Quản lý khách hàng</h5>-->
-<!--                                </div>-->
-<!--                                <ul class="breadcrumb">-->
-<!--                                    <li class="breadcrumb-item" aria-current="page">Thêm khách hàng</li>-->
-<!--                                </ul>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-
                 <div class="container mt-5">
                     <!-- Hiển thị thông báo lỗi -->
                     <div th:if="${errorMessage}" class="alert alert-warning alert-dismissible fade show" role="alert">
@@ -71,51 +24,42 @@
                         <span th:text="${message}"></span>
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
-
                     <h4 class="mb-4 fw-semibold">Thêm mới khách hàng</h4>
-
-                    <!-- Form thêm khách hàng -->
                     <form th:action="@{/admin/customer/save}" th:object="${customerDto}" method="post">
                         <div class="mb-3">
                             <label class="form-label">Mã khách hàng:</label>
                             <input type="text" th:field="*{code}" class="form-control" readonly/>
                         </div>
-
                         <div class="mb-3">
                             <label class="form-label">Tên:</label>
                             <input type="text" th:field="*{name}" id="name" class="form-control" required/>
                             <div class="text-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
                         </div>
-
                         <div class="mb-3">
                             <label class="form-label">Email:</label>
                             <input type="email" th:field="*{email}" id="email" class="form-control" required/>
                             <div class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
                         </div>
-
                         <div class="mb-3">
                             <label class="form-label">Số điện thoại:</label>
-                            <input type="text" th:field="*{phoneNumber}" id="phoneNumber" class="form-control" required/>
-                            <div class="text-danger" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></div>
+                            <input type="text" th:field="*{phoneNumber}" id="phoneNumber" class="form-control"
+                                   required/>
+                            <div class="text-danger" th:if="${#fields.hasErrors('phoneNumber')}"
+                                 th:errors="*{phoneNumber}"></div>
                         </div>
                         <div class="mb-3">
                             <label for="province" class="form-label">Tỉnh/Thành phố</label>
-                            <select id="province" name="province">
-                                <option value="">-- Chọn Tỉnh/Thành phố --</option>
-                                <option value="01">Hà Nội</option>
-                            </select>
+                            <select id="province" class="form-select" onchange="updateFullAddress()"></select>
                         </div>
                         <div class="mb-3">
                             <label for="district" class="form-label">Quận/Huyện</label>
-                            <input type="text" id="district" class="form-control" required/>
+                            <select id="district" class="form-select" onchange="updateFullAddress()"></select>
                         </div>
-
                         <div class="mb-3">
                             <label for="ward" class="form-label">Phường/Xã</label>
-                            <input type="text" id="ward" class="form-control" required/>
+                            <select id="ward" class="form-select" onchange="updateFullAddress()"></select>
                         </div>
-                        <!-- Ẩn input cuối cùng để bind về địa chỉ đầy đủ -->
-                        <input type="hidden" name="address" id="fullAddress" th:field="*{address}" />
+                        <input type="hidden" name="address" id="fullAddress" th:field="*{address}"/>
 
                         <div class="d-flex justify-content-between">
                             <a th:href="@{/admin/customer/view}" class="btn btn-outline-secondary">⬅ Quay lại</a>
@@ -128,172 +72,115 @@
     </section> <!-- đóng section trong -->
 </section> <!-- đóng section ngoài -->
 <!-- Select2 JS -->
+<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-<!-- Script validation -->
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const form = document.querySelector("form");
-        // Gọi update mỗi khi người dùng gõ vào input
-        document.getElementById("district").addEventListener("input", updateFullAddress);
-        document.getElementById("ward").addEventListener("input", updateFullAddress);
-        document.getElementById("province").addEventListener("change", updateFullAddress);
+    const token = '9c1ee582-5a3b-11f0-99f8-027692bb547c';
+    const provinceSelect = document.getElementById('province');
+    const districtSelect = document.getElementById('district');
+    const wardSelect = document.getElementById('ward');
+    const fullAddressInput = document.getElementById("fullAddress");
 
-        // Gọi lại trước khi submit
-        form.addEventListener("submit", function (e) {
-            updateFullAddress();
+    // Load tỉnh
+    fetch('https://online-gateway.ghn.vn/shiip/public-api/master-data/province', {
+        headers: { 'token': token }
+    })
+        .then(res => res.json())
+        .then(data => {
+            data.data.forEach(province => {
+                provinceSelect.innerHTML += `<option value="${province.ProvinceID}">${province.ProvinceName}</option>`;
+            });
         });
+
+    // Load quận khi chọn tỉnh
+    provinceSelect.addEventListener('change', () => {
+        districtSelect.innerHTML = '<option>Loading...</option>';
+        fetch('https://online-gateway.ghn.vn/shiip/public-api/master-data/district', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'token': token
+            },
+            body: JSON.stringify({ province_id: parseInt(provinceSelect.value) })
+        })
+            .then(res => res.json())
+            .then(data => {
+                districtSelect.innerHTML = '';
+                data.data.forEach(district => {
+                    districtSelect.innerHTML += `<option value="${district.DistrictID}">${district.DistrictName}</option>`;
+                });
+            });
+    });
+
+    // Load phường khi chọn quận
+    districtSelect.addEventListener('change', () => {
+        wardSelect.innerHTML = '<option>Loading...</option>';
+        fetch(`https://online-gateway.ghn.vn/shiip/public-api/master-data/ward?district_id=${districtSelect.value}`, {
+            headers: { 'token': token }
+        })
+            .then(res => res.json())
+            .then(data => {
+                wardSelect.innerHTML = '';
+                data.data.forEach(ward => {
+                    wardSelect.innerHTML += `<option value="${ward.WardCode}">${ward.WardName}</option>`;
+                });
+            });
+    });
+
+    // Cập nhật địa chỉ khi chọn phường
+    wardSelect.addEventListener('change', () => {
+        updateFullAddress();
+    });
+
+    function updateFullAddress() {
+        const provinceText = provinceSelect.options[provinceSelect.selectedIndex]?.text || "";
+        const districtText = districtSelect.options[districtSelect.selectedIndex]?.text || "";
+        const wardText = wardSelect.options[wardSelect.selectedIndex]?.text || "";
+        const fullAddress = `${wardText}, ${districtText}, ${provinceText}`;
+        fullAddressInput.value = fullAddress;
+    }
+
+    document.getElementById('addressForm').addEventListener('submit', (e) => {
+        let isValid = true;
         const nameInput = document.getElementById("name");
         const emailInput = document.getElementById("email");
         const phoneInput = document.getElementById("phoneNumber");
 
-        fetchProvinces();
-
-        form.addEventListener("submit", function (e) {
-            updateFullAddress();
-            let isValid = true;
-
-            // Tên
-            nameInput.setCustomValidity("");
-            const nameRegex = /^[a-zA-ZÀ-ỹ\s]+$/;
-            if (!nameRegex.test(nameInput.value.trim())) {
-                nameInput.setCustomValidity("Tên không được chứa ký tự đặc biệt hoặc số.");
-                isValid = false;
-            }
-            nameInput.reportValidity();
-
-            // Email
-            emailInput.setCustomValidity("");
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(emailInput.value.trim())) {
-                emailInput.setCustomValidity("Email không đúng định dạng.");
-                isValid = false;
-            }
-            emailInput.reportValidity();
-
-            // SĐT
-            phoneInput.setCustomValidity("");
-            const phoneRegex = /^(0[3|5|7|8|9])[0-9]{8}$/;
-            if (!phoneRegex.test(phoneInput.value.trim())) {
-                phoneInput.setCustomValidity("Số điện thoại phải gồm 10 chữ số.");
-                isValid = false;
-            }
-            phoneInput.reportValidity();
-
-            if (!isValid) e.preventDefault();
-        });
-
-        // Sự kiện onchange
-
-        document.getElementById("district").addEventListener("change", function () {
-            const districtCode = this.value;
-            if (districtCode) fetchWards(districtCode);
-            else {
-                document.getElementById("ward").innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
-                $('#ward').select2({
-                    placeholder: "-- Chọn hoặc nhập Phường/Xã --",
-                    tags: true,
-                    allowClear: true
-                });
-            }
-            updateFullAddress();
-        });
-
-        document.getElementById("ward").addEventListener("change", updateFullAddress);
-    });
-
-    async function fetchProvinces() {
-        const provinceSelect = document.getElementById("province");
-        provinceSelect.innerHTML = '<option>Đang tải...</option>';
-        try {
-            const res = await fetch("/api/geo/provinces");
-            const provinces = await res.json();
-
-            // Gán lại HTML không có placeholder, vì mặc định là Hà Nội
-            provinceSelect.innerHTML = '';
-            let haNoiCode = '';
-
-            provinces.forEach(p => {
-                const selected = p.name === "Hà Nội" ? 'selected' : '';
-                if (selected) haNoiCode = p.code;
-                provinceSelect.innerHTML += `<option value="${p.code}" ${selected}>${p.name}</option>`;
-            });
-
-            // Gọi luôn fetchDistricts nếu mặc định là Hà Nội
-            if (haNoiCode) {
-                await fetchDistricts(haNoiCode);
-            }
-
-        } catch (err) {
-            console.error("Lỗi tỉnh/thành:", err);
-            provinceSelect.innerHTML = '<option value="">-- Lỗi tải dữ liệu --</option>';
-        } finally {
-            $('#province').select2({
-                placeholder: "-- Chọn Tỉnh/Thành phố --",
-                allowClear: true
-            });
+        // Validate tên
+        nameInput.setCustomValidity("");
+        const nameRegex = /^[a-zA-ZÀ-ỹ\s]+$/;
+        if (!nameRegex.test(nameInput.value.trim())) {
+            nameInput.setCustomValidity("Tên không được chứa ký tự đặc biệt hoặc số.");
+            isValid = false;
         }
-    }
 
-    // async function fetchDistricts(provinceCode) {
-    //     const districtSelect = document.getElementById("district");
-    //     districtSelect.innerHTML = '<option>Đang tải...</option>';
-    //     try {
-    //         const res = await fetch(`/api/geo/districts/${provinceCode}`);
-    //         const data = await res.json();
-    //         const districts = data.districts || [];
-    //         districtSelect.innerHTML = '<option value="">-- Chọn Quận/Huyện --</option>';
-    //         districts.forEach(d => {
-    //             districtSelect.innerHTML += `<option value="${d.code}">${d.name}</option>`;
-    //         });
-    //     } catch (err) {
-    //         console.error("Lỗi quận/huyện:", err);
-    //         districtSelect.innerHTML = '<option value="">-- Lỗi tải dữ liệu --</option>';
-    //     } finally {
-    //         $('#district').select2({
-    //             placeholder: "-- Chọn hoặc nhập Quận/Huyện --",
-    //             tags: true,
-    //             allowClear: true
-    //         });
-    //     }
-    // }
-    //
-    // async function fetchWards(districtCode) {
-    //     const wardSelect = document.getElementById("ward");
-    //     wardSelect.innerHTML = '<option>Đang tải...</option>';
-    //     try {
-    //         const res = await fetch(`/api/geo/wards/${districtCode}`);
-    //         const data = await res.json();
-    //         const wards = data.wards || [];
-    //         wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
-    //         wards.forEach(w => {
-    //             wardSelect.innerHTML += `<option value="${w.code}">${w.name}</option>`;
-    //         });
-    //     } catch (err) {
-    //         console.error("Lỗi phường/xã:", err);
-    //         wardSelect.innerHTML = '<option value="">-- Lỗi tải dữ liệu --</option>';
-    //     } finally {
-    //         $('#ward').select2({
-    //             placeholder: "-- Chọn hoặc nhập Phường/Xã --",
-    //             tags: true,
-    //             allowClear: true
-    //         });
-    //     }
-    // }
+        // Validate email
+        emailInput.setCustomValidity("");
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(emailInput.value.trim())) {
+            emailInput.setCustomValidity("Email không đúng định dạng.");
+            isValid = false;
+        }
 
-    function updateFullAddress() {
-        const province = document.getElementById("province");
-        const provinceText = province.options[province.selectedIndex]?.text?.trim() || "";
+        // Validate số điện thoại
+        phoneInput.setCustomValidity("");
+        const phoneRegex = /^0\d{9}$/;
+        if (!phoneRegex.test(phoneInput.value.trim())) {
+            phoneInput.setCustomValidity("Số điện thoại phải bắt đầu bằng 0 và có đúng 10 chữ số.");
+            isValid = false;
+        }
 
-        const district = document.getElementById("district").value.trim();
-        const ward = document.getElementById("ward").value.trim();
+        nameInput.reportValidity();
+        emailInput.reportValidity();
+        phoneInput.reportValidity();
 
-        const full = [ward, district, provinceText].filter(Boolean).join(", ");
-        document.getElementById("fullAddress").value = full;
-    }
+        updateFullAddress();
+
+        if (!isValid) {
+            e.preventDefault();
+        }
+    });
 </script>
-
-<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
 </body>
 </html>

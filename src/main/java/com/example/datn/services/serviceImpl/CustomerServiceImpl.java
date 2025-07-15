@@ -4,15 +4,17 @@ import com.example.datn.dto.customer.CustomerDto;
 import com.example.datn.entities.Customer;
 import com.example.datn.repositories.CustomerRepository;
 import com.example.datn.services.CustomerService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CustomerServiceImpl implements CustomerService {
 
     private final CustomerRepository customerRepository;
-
+    @Autowired
     public CustomerServiceImpl(CustomerRepository customerRepository) {
         this.customerRepository = customerRepository;
     }
@@ -73,14 +75,16 @@ public class CustomerServiceImpl implements CustomerService {
 
     // Cập nhật thông tin khách hàng
     @Override
-    public Customer updateCustomer(Integer id, Customer customer) {
-        Customer existing = customerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng có id = " + id));
+    @Transactional
+    public Customer updateCustomer(CustomerDto dto) { // Chữ ký đã thay đổi thành nhận CustomerDto
+        Customer existing = customerRepository.findById(dto.getId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng có id = " + dto.getId())); // Sửa lỗi nếu id không tồn tại
 
-        existing.setName(customer.getName());
-        existing.setPhoneNumber(customer.getPhoneNumber());
-        existing.setEmail(customer.getEmail());
-        existing.setAddress(customer.getAddress());
+        existing.setName(dto.getName());
+        existing.setPhoneNumber(dto.getPhoneNumber());
+        existing.setEmail(dto.getEmail());
+        existing.setAddress(dto.getAddress());
+        existing.setIsActive(dto.getIsActive()); // <-- THÊM DÒNG NÀY ĐỂ CẬP NHẬT TRẠNG THÁI!
 
         return customerRepository.save(existing);
     }
@@ -88,6 +92,7 @@ public class CustomerServiceImpl implements CustomerService {
     public Customer findById(int id) {
         return customerRepository.findById(id).orElse(null);
     }
+
     @Override
     public boolean isEmailExists(String email) {
         return customerRepository.existsByEmail(email);
