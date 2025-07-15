@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/head :: head}">
+    <title>Quản lý hoá đơn chi tiết | 4PStore</title>
+</head>
+<body>
+<header th:replace="~{admin/fragments/header :: header}"></header>
+<div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
+
+<section>
+    <div class="pc-container">
+        <div class="pc-content">
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="row align-items-center">
+                        <div class="col-md-12">
+                            <div class="page-header-title">
+                                <h5 class="m-b-10"></h5>
+                            </div>
+                            <ul class="breadcrumb">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    <div class="container mt-4 mb-5">
+        <!-- Tiêu đề -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold text-dark">Mã HD: <span th:text="${bill.code}">HD001</span></h4>
+            <span class="fw-bold">
+        <span th:switch="${bill.status}">
+            <span th:case="1" class="text-warning">Chờ xác nhận</span>
+            <span th:case="2" class="text-primary">Đã xác nhận</span>
+            <span th:case="3" class="text-info">Đang giao</span>
+            <span th:case="4" class="text-success">Hoàn thành</span>
+            <span th:case="5" class="text-danger">Đã huỷ</span>
+            <span th:case="*" class="text-muted">Không rõ</span>
+        </span>
+    </span>
+        </div>
+
+        <!-- Thông tin cửa hàng -->
+        <div class="mb-4">
+            <h5 class="fw-bold text-dark"> 4PStore</h5>
+            <p class="text-muted mb-1">Đ/C: FPT Polytechnic Trịnh Văn Bô</p>
+            <p class="text-muted mb-1">Email: 4PStore@gmail.com</p>
+            <p class="text-muted mb-0">SDT: 0398121210</p>
+        </div>
+<hr>
+        <!-- Thông tin khách hàng & hóa đơn -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h6 class="fw-bold">Khách hàng:</h6>
+                <p th:text="${bill.name}" class="mb-1"</p>
+                <p th:text="${bill.phoneNumber}" class="mb-1"></p>
+                <p class="mb-1">
+                    <strong>Voucher:</strong>
+                    <span th:text="${bill.discount != null ? bill.discount.code : 'Không sử dụng'}" class="text-muted"></span>
+                </p>
+                <p>
+                    <strong>Loại đơn:</strong>
+                    <span th:text="${bill.typeBill == true ? 'Online' : 'Tại quầy'}"
+                          th:classappend="${bill.typeBill == true ? 'text-success' : 'text-primary'}">Tại quầy</span>
+                </p>
+            </div>
+            <div class="col-md-6 text-end">
+                <p>
+                    <strong>Ngày mua hàng:</strong>
+                    <span th:text="${#temporals.format(bill.createdAt, 'dd-MM-yyyy HH:mm')}"></span>
+                </p>
+
+                <div class="d-flex justify-content-end gap-2 mt-3">
+                    <a class="btn btn-outline-danger">❌ Hủy đơn này</a>
+                    <a class="btn btn-outline-secondary">✔️ Xác nhận, duyệt đơn</a>
+                </div>
+            </div>
+
+        <!-- Bảng chi tiết đơn hàng -->
+        <h6 class="mt-4">Danh sách sản phẩm</h6>
+        <div class="table-responsive">
+            <table class="table table-bordered text-center align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>Sản phẩm</th>
+                    <th>Màu sắc</th>
+                    <th>Kích cỡ</th>
+                    <th>Giá tiền</th>
+                    <th>Số lượng</th>
+                    <th>Thành tiền</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="detail : ${billDetails}">
+                    <td th:text="${detail.productDetail?.product?.name}">Áo thun</td>
+                    <td th:text="${detail.productDetail?.color?.name}">Đỏ</td>
+                    <td th:text="${detail.productDetail?.size?.name}">L</td>
+                    <td th:text="${detail.price}"></td>
+                    <td th:text="${detail.quantity}"></td>
+                    <td th:text="${detail.price * detail.quantity}"></td>
+                </tr>
+                </tbody>
+                <tfoot>
+                <tr>
+                    <td colspan="5" class="text-end fw-bold">Tổng thanh toán sản phẩm:</td>
+                    <td th:text="${bill.totalAmount}"></td>
+                </tr>
+                </tfoot>
+            </table>
+            <div class="d-print-none mt-4">
+                <div class="float-end">
+                    <a th:href="@{/}"
+                       class="btn btn-success me-1"><i class="fa fa-print"></i></a>
+                    <a th:href="@{'/admin/bill/view'}">
+                        <button type="button" class="btn btn-secondary w-md" data-dismiss="modal">
+                            Đóng
+                        </button>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</section>
+
+<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
+</body>
+</html>

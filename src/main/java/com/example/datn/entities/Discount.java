@@ -46,6 +46,7 @@ public class Discount {
     @Column(name = "min_purchase")
     private BigDecimal minPurchase;
     @NotNull(message = "Giá trị tối đa không được để trống")
+    @Min(value = 0, message = "Không được âm")
     @Column(name = "max_discount")
     private BigDecimal maxDiscount;
     @NotNull(message = "Số lượng sử dụng tối đa không được để trống")

@@ -1,13 +1,13 @@
 package com.example.datn.dto.customer;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import com.example.datn.dto.AddressDto;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -19,18 +19,17 @@ public class CustomerDto {
     @NotBlank(message = "Họ tên không được để trống")
     @Size(min = 2, max = 50)
     private String name;
-    @NotBlank(message = "Email không được để trống")
-    @Email(message = "Email không hợp lệ")
-    private String email;
-
+    private Boolean gender; // true = nam, false = nữ
+    @NotNull(message = "Ngày sinh không được để trống")
+    private LocalDate birthday;
     @NotBlank(message = "SĐT không được để trống")
     @Pattern(regexp = "^0\\d{9}$", message = "Số điện thoại phải bắt đầu bằng 0 và gồm đúng 10 chữ số.")
     private String phoneNumber;
-
-    @NotBlank(message = "Địa chỉ không được để trống")
-    @Size(max = 255, message = "Địa chỉ tối đa 255 ký tự")
-    private String address;
+    @Email(message = "Email không đúng định dạng!")
+    private String email;
     private Boolean isActive;
+    // Địa chỉ được thêm nhanh khi tạo mới
+    private AddressDto address;
 
     // getter/setter hoặc @Data của Lombok
 }

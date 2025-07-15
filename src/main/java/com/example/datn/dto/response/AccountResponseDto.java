@@ -15,26 +15,11 @@ import java.time.LocalDateTime;
 public class AccountResponseDto {
 
     private Integer id;
-
     private String code;
-
-    private String fullName;
-
     private String email;
-
-    private LocalDate birthOfDate;
-
-    private String addressDetail;
-
-    private String phoneNumber;
-
-    private String gender;
-
     private String roleName;
-
-    private LocalDateTime created_at;
-
-    private LocalDateTime updated_at;
-
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private Boolean status;
+    private String avatarUsername;
 }

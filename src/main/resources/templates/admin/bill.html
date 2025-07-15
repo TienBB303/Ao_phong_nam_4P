@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments/head :: head}">
-    <title>Quan ly khuyen mai | 4PStore</title>
+    <title>Quan ly hoá đơn | 4PStore</title>
 </head>
 <body>
 <header th:replace="~{admin/fragments/header :: header}"></header>
@@ -23,7 +23,6 @@
                 </div>
             </div>
             <div class="container discount-form-container">
-                <section class="container mt-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="mb-0">Quản lý hóa đơn</h5>
                         <div class="d-flex gap-2">
@@ -47,11 +46,11 @@
                             <div class="col">
                                 <select name="status" class="form-control">
                                     <option value="">Trạng thái</option>
-                                    <option value="0">Chờ xác nhận</option>
-                                    <option value="1">Đã xác nhận</option>
-                                    <option value="2">Đang giao</option>
-                                    <option value="3">Hoàn thành</option>
-                                    <option value="4">Đã huỷ</option>
+                                    <option value="1">Chờ xác nhận</option>
+                                    <option value="2">Đã xác nhận</option>
+                                    <option value="3">Đang giao</option>
+                                    <option value="4">Hoàn thành</option>
+                                    <option value="5">Đã huỷ</option>
                                 </select>
                             </div>
                             <div class="col">
@@ -90,23 +89,50 @@
                         </tr>
                         </thead>
                         <tbody>
-
-                        <tr>
-
+                        <tr th:each="bill, iterStat : ${bills}">
+                            <td th:text="${iterStat.index + 1}">1</td>
+                            <td th:text="${bill.code}">HD001</td>
+                            <td th:text="${bill.name}">Nguyễn Văn A</td>
+                            <td th:text="${bill.phoneNumber}">0123456789</td>
+                            <td th:text="${bill.createdAt}">---</td>
+                            <td th:text="${bill.totalAmount}">0</td>
+                            <td th:text="${bill.typeBill != null and bill.typeBill == true ? 'Online' : 'Tại quầy'}">Tại quầy</td>
+                            <td></td>
+                            <td>
+                                 <span th:switch="${bill.status}">
+                                   <span th:case="1">Chờ xác nhận</span>
+                                   <span th:case="2">Đã xác nhận</span>
+                                   <span th:case="3">Đang giao</span>
+                                   <span th:case="4">Hoàn thành</span>
+                                   <span th:case="5">Đã huỷ</span>
+                                   <span th:case="6">Không rõ</span>
+                                 </span>
+                            </td>
+                            <td>
+                                <a th:href="@{'/admin/bill/getbill-detail/' + ${bill.id}}" class="btn btn-sm btn-primary">Xem</a>
+                            </td>
                         </tr>
                         </tbody>
                     </table>
 
                     <div class="d-flex justify-content-end">
                         <ul class="pagination">
-                            <li class="page-item"><a class="page-link" href="#">«</a></li>
-                            <li class="page-item"><a class="page-link" href="#">‹</a></li>
-                            <li class="page-item"><a class="page-link" href="#">›</a></li>
-                            <li class="page-item"><a class="page-link" href="#">»</a></li>
+                            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                <a class="page-link" th:href="@{/admin/bill/view(page=${currentPage - 1})}">«</a>
+                            </li>
+                            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                th:classappend="${i == currentPage} ? 'active'">
+                                <a class="page-link" th:href="@{/admin/bill/view(page=${i})}" th:text="${i + 1}">1</a>
+                            </li>
+                            <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                                <a class="page-link" th:href="@{/admin/bill/view(page=${currentPage + 1})}">»</a>
+                            </li>
                         </ul>
                     </div>
-                </section>
 
+            </div>
+        </div>
+    </div>
 </section>
 <header th:replace="~{admin/fragments/footer :: footer}"></header>
 </body>

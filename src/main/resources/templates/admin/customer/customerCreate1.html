@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments/head :: head}">
-    <title>Quan ly khach hang | 4PStore</title>
+    <title>Quản lý khách hàng | 4PStore</title>
     <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
 </head>
@@ -18,7 +18,6 @@
                         <span th:text="${errorMessage}"></span>
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
-
                     <!-- Hiển thị thông báo thành công -->
                     <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
                         <span th:text="${message}"></span>
@@ -31,46 +30,93 @@
                             <input type="text" th:field="*{code}" class="form-control" readonly/>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Tên:</label>
+                            <label class="form-label">Họ tên khách hàng:</label>
                             <input type="text" th:field="*{name}" id="name" class="form-control" required/>
                             <div class="text-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Email:</label>
-                            <input type="email" th:field="*{email}" id="email" class="form-control" required/>
+                            <label class="form-label">Số điện thoại:</label>
+                            <input type="text" th:field="*{phoneNumber}" id="phoneNumber" class="form-control" required/>
+                            <div class="text-danger" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Giới tính:</label>
+                            <div>
+                                <input type="radio" th:field="*{gender}" value="true" id="male" checked>
+                                <label for="male">Nam</label>
+                                <input type="radio" th:field="*{gender}" value="false" id="female">
+                                <label for="female">Nữ</label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Ngày sinh:</label>
+                            <input type="date" th:field="*{birthday}" class="form-control"/>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email (nếu cần):</label>
+                            <input type="email" th:field="*{email}" id="email" class="form-control" placeholder="Nhập email nếu có"/>
                             <div class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Số điện thoại:</label>
-                            <input type="text" th:field="*{phoneNumber}" id="phoneNumber" class="form-control"
-                                   required/>
-                            <div class="text-danger" th:if="${#fields.hasErrors('phoneNumber')}"
-                                 th:errors="*{phoneNumber}"></div>
+                            <label for="isActive" class="form-label">Trạng thái</label>
+                            <select id="isActive" th:field="*{isActive}" class="form-select">
+                                <option th:value="true">Hoạt động</option>
+                                <option th:value="false">Không hoạt động</option>
+                            </select>
                         </div>
+                        <hr/>
+                        <h5 class="fw-semibold">ĐỊA CHỈ GIAO HÀNG</h5>
                         <div class="mb-3">
                             <label for="province" class="form-label">Tỉnh/Thành phố</label>
-                            <select id="province" class="form-select" onchange="updateFullAddress()"></select>
+                            <select th:field="*{address.provinceId}" id="province" class="form-select"></select>
+                            <input type="hidden" th:field="*{address.provinceName}" id="provinceName"/>
                         </div>
                         <div class="mb-3">
                             <label for="district" class="form-label">Quận/Huyện</label>
-                            <select id="district" class="form-select" onchange="updateFullAddress()"></select>
+                            <select th:field="*{address.districtId}" id="district" class="form-select"></select>
+                            <input type="hidden" th:field="*{address.districtName}" id="districtName"/>
                         </div>
                         <div class="mb-3">
                             <label for="ward" class="form-label">Phường/Xã</label>
-                            <select id="ward" class="form-select" onchange="updateFullAddress()"></select>
+                            <select th:field="*{address.wardId}" id="ward" class="form-select"></select>
+                            <input type="hidden" th:field="*{address.wardName}" id="wardName"/>
                         </div>
-                        <input type="hidden" name="address" id="fullAddress" th:field="*{address}"/>
-
+                        <div class="mb-3">
+                            <label class="form-label">Địa chỉ chi tiết:</label>
+                            <input type="text" th:field="*{address.addressDetail}" class="form-control"/>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" th:field="*{address.isDefault}" id="isDefault">
+                            <label class="form-check-label" for="isDefault">
+                                Đây là địa chỉ mặc định
+                            </label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="otherReceiver" onclick="toggleReceiverForm()">
+                            <label class="form-check-label" for="otherReceiver">
+                                Người nhận khác người mua
+                            </label>
+                        </div>
+                        <div id="receiverForm" style="display:none;">
+                            <div class="mb-3">
+                                <label class="form-label">Tên người nhận:</label>
+                                <input type="text" th:field="*{address.receiverName}" class="form-control"/>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">SĐT người nhận:</label>
+                                <input type="text" th:field="*{address.receiverPhoneNumber}" class="form-control"/>
+                            </div>
+                        </div>
                         <div class="d-flex justify-content-between">
                             <a th:href="@{/admin/customer/view}" class="btn btn-outline-secondary">⬅ Quay lại</a>
                             <button type="submit" class="btn btn-primary">💾 Lưu khách hàng</button>
                         </div>
                     </form>
-                </div> <!-- đóng .container -->
-            </div> <!-- đóng .pc-content -->
-        </div> <!-- đóng .pc-container -->
-    </section> <!-- đóng section trong -->
-</section> <!-- đóng section ngoài -->
+                </div> <!-- .container -->
+            </div> <!-- .pc-content -->
+        </div> <!-- .pc-container -->
+    </section> <!-- section trong -->
+</section> <!-- section ngoài -->
 <!-- Select2 JS -->
 <footer th:replace="~{admin/fragments/footer :: footer}"></footer>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -80,7 +126,6 @@
     const provinceSelect = document.getElementById('province');
     const districtSelect = document.getElementById('district');
     const wardSelect = document.getElementById('ward');
-    const fullAddressInput = document.getElementById("fullAddress");
 
     // Load tỉnh
     fetch('https://online-gateway.ghn.vn/shiip/public-api/master-data/province', {
@@ -92,7 +137,6 @@
                 provinceSelect.innerHTML += `<option value="${province.ProvinceID}">${province.ProvinceName}</option>`;
             });
         });
-
     // Load quận khi chọn tỉnh
     provinceSelect.addEventListener('change', () => {
         districtSelect.innerHTML = '<option>Loading...</option>';
@@ -112,7 +156,6 @@
                 });
             });
     });
-
     // Load phường khi chọn quận
     districtSelect.addEventListener('change', () => {
         wardSelect.innerHTML = '<option>Loading...</option>';
@@ -125,61 +168,76 @@
                 data.data.forEach(ward => {
                     wardSelect.innerHTML += `<option value="${ward.WardCode}">${ward.WardName}</option>`;
                 });
+                if (wardSelect.options.length > 0) {
+                    document.getElementById("wardName").value = wardSelect.options[0].text;
+                }
             });
     });
-
     // Cập nhật địa chỉ khi chọn phường
     wardSelect.addEventListener('change', () => {
         updateFullAddress();
     });
-
     function updateFullAddress() {
         const provinceText = provinceSelect.options[provinceSelect.selectedIndex]?.text || "";
         const districtText = districtSelect.options[districtSelect.selectedIndex]?.text || "";
         const wardText = wardSelect.options[wardSelect.selectedIndex]?.text || "";
-        const fullAddress = `${wardText}, ${districtText}, ${provinceText}`;
-        fullAddressInput.value = fullAddress;
+        document.getElementById("provinceName").value = provinceText;
+        document.getElementById("districtName").value = districtText;
+        document.getElementById("wardName").value = wardText;
     }
-
-    document.getElementById('addressForm').addEventListener('submit', (e) => {
-        let isValid = true;
+    function toggleReceiverForm() {
+        var checkBox = document.getElementById("otherReceiver");
+        var form = document.getElementById("receiverForm");
+        form.style.display = checkBox.checked ? "block" : "none";
+    }
+    // Gộp validate và cập nhật input ẩn vào DOMContentLoaded
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector("form");
         const nameInput = document.getElementById("name");
         const emailInput = document.getElementById("email");
         const phoneInput = document.getElementById("phoneNumber");
-
-        // Validate tên
-        nameInput.setCustomValidity("");
-        const nameRegex = /^[a-zA-ZÀ-ỹ\s]+$/;
-        if (!nameRegex.test(nameInput.value.trim())) {
-            nameInput.setCustomValidity("Tên không được chứa ký tự đặc biệt hoặc số.");
-            isValid = false;
-        }
-
-        // Validate email
-        emailInput.setCustomValidity("");
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(emailInput.value.trim())) {
-            emailInput.setCustomValidity("Email không đúng định dạng.");
-            isValid = false;
-        }
-
-        // Validate số điện thoại
-        phoneInput.setCustomValidity("");
-        const phoneRegex = /^0\d{9}$/;
-        if (!phoneRegex.test(phoneInput.value.trim())) {
-            phoneInput.setCustomValidity("Số điện thoại phải bắt đầu bằng 0 và có đúng 10 chữ số.");
-            isValid = false;
-        }
-
-        nameInput.reportValidity();
-        emailInput.reportValidity();
-        phoneInput.reportValidity();
-
-        updateFullAddress();
-
-        if (!isValid) {
-            e.preventDefault();
-        }
+        // Cập nhật input ẩn khi chọn
+        $('#province').on('change', function() {
+            $('#provinceName').val($("#province option:selected").text());
+        });
+        $('#district').on('change', function() {
+            $('#districtName').val($("#district option:selected").text());
+        });
+        $('#ward').on('change', function() {
+            $('#wardName').val($("#ward option:selected").text());
+        });
+        // Đảm bảo wardName luôn đúng khi submit
+        $('form').on('submit', function() {
+            $('#wardName').val($("#ward option:selected").text());
+        });
+        // Validate các trường cơ bản
+        form.addEventListener("submit", function (e) {
+            let isValid = true;
+            nameInput.setCustomValidity("");
+            const nameRegex = /^[a-zA-ZÀ-ỹ\s]+$/;
+            if (!nameRegex.test(nameInput.value.trim())) {
+                nameInput.setCustomValidity("Tên không được chứa ký tự đặc biệt hoặc số.");
+                isValid = false;
+            }
+            nameInput.reportValidity();
+            emailInput.setCustomValidity("");
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(emailInput.value.trim())) {
+                emailInput.setCustomValidity("Email không đúng định dạng.");
+                isValid = false;
+            }
+            emailInput.reportValidity();
+            phoneInput.setCustomValidity("");
+            const phoneRegex = /^0\d{9}$/;
+            if (!phoneRegex.test(phoneInput.value.trim())) {
+                phoneInput.setCustomValidity("Số điện thoại phải bắt đầu bằng 0 và có độ dài từ 10 đến 12 chữ số.");
+                isValid = false;
+            }
+            phoneInput.reportValidity();
+            if (!isValid) {
+                e.preventDefault();
+            }
+        });
     });
 </script>
 </body>

@@ -28,7 +28,9 @@ public class Bill {
 
     private Integer status;
 
-    private Boolean type_bill;
+    @Column(name = "type_bill")
+    private Boolean typeBill;
+
 
     @Column(name = "delivery_type")
     private Integer deliveryType;
@@ -36,25 +38,33 @@ public class Bill {
     @Column(name = "shipping_fee")
     private BigDecimal shippingFee;
 
-    @Column(name = "payment_method_id")
-    private Integer paymentMethod;
-
-    @Column(name = "discount_id")
-    private Long discountId;
-
     private String name;
 
     @Column(name = "phone_number")
     private String phoneNumber;
 
     private String email;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
 
     @ManyToOne
     @JoinColumn(name = "customer_id")
     private Customer customer;
+    @ManyToOne
+    @JoinColumn(name = "discount_id")
+    private Discount discount;
+    @ManyToOne
+    @JoinColumn(name = "payment_method_id")
+    private PaymentMethod paymentMethod;
+
 
     private LocalDateTime created_at; //map vposw datetime trong db
     private LocalDateTime updated_at;
 
     private BigDecimal total_checkout; // thành tiền
+
 }

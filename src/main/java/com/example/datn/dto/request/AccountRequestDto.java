@@ -16,35 +16,18 @@ import java.time.LocalDateTime;
 public class AccountRequestDto {
 
     private Integer id;
-
     private String code;
 
-    @NotBlank(message = "Ho ten khong duoc bo trong!")
-    private String fullName;
-
-    @Email(message = "Dinh dang email khong hop le!")
-    @NotBlank(message = "Email khong duoc bo trong!")
+    @Email(message = "Định dạng email không hợp lệ!")
+    @NotBlank(message = "Email không được bỏ trống!")
     private String email;
 
-    @NotBlank(message = "Mat khau khong duoc bo trong!")
-    @Size(min = 6, message = "Mat khau toi thieu 8 ky tu!")
+    @NotBlank(message = "Mật khẩu không được bỏ trống!")
+    @Size(min = 6, message = "Mật khẩu tối thiểu 6 ký tự!")
     private String password;
 
-    @Pattern(regexp = "^\\+?[0-9]{9,15}$", message = "SDT chua dung dinh dang!")
-    private String phoneNumber;
-
-    @Past(message = "Ngay sinh phai o qua khu!")
-    private LocalDate birthOfDate;
-
-
-    private String addressDetail;
-
-    @Pattern(regexp = "^(Nam|Nữ)$", message = "Gioi tinh phai la Nam hoac Nu!")
-    private String gender;
-
-    private LocalDateTime created_at;
-
-    private LocalDateTime updated_at;
-
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private Boolean status;
+    private String avatarUsername; // Thêm nếu muốn cập nhật avatar
 }

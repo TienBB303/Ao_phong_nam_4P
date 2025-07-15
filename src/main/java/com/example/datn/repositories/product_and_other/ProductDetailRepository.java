@@ -26,4 +26,12 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, In
             "OR LOWER(s.code) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(pd.barcode) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<ProductDetail> searchProductDetailByKeyword(@Param("keyword") String keyword);
+
+    @Query("SELECT pd.product.id, MIN(pd.price), MAX(pd.price) " +
+            "FROM ProductDetail pd " +
+            "GROUP BY pd.product.id")
+    List<Object[]> findMinMaxPricesGroupedByProductId();
+
+    ProductDetail findByProductIdAndColorIdAndSizeId(Integer productId, Integer colorId, Integer sizeId);
+
 }
