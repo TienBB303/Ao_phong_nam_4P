@@ -27,7 +27,7 @@
         <!-- Tiêu đề -->
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4 class="fw-bold text-dark">Mã HD: <span th:text="${bill.code}">HD001</span></h4>
-            <span class="fw-bold">
+            <span class="fw-bold fs-4">
         <span th:switch="${bill.status}">
             <span th:case="1" class="text-warning">Chờ xác nhận</span>
             <span th:case="2" class="text-primary">Đã xác nhận</span>
@@ -51,12 +51,17 @@
         <div class="row mb-4">
             <div class="col-md-6">
                 <h6 class="fw-bold">Khách hàng:</h6>
-                <p th:text="${bill.name}" class="mb-1"</p>
+                <p th:text="${bill.name}" class="mb-1"></p>
                 <p th:text="${bill.phoneNumber}" class="mb-1"></p>
                 <p class="mb-1">
                     <strong>Voucher:</strong>
                     <span th:text="${bill.discount != null ? bill.discount.code : 'Không sử dụng'}" class="text-muted"></span>
                 </p>
+                <p>
+                    <strong>Giá trị giảm:</strong>
+                    <span th:text="${bill.discountAmount != null ? #numbers.formatDecimal(bill.discountAmount, 0, 'POINT', 0, 'COMMA') + '₫' : '0₫'}" class="text-danger"></span>
+                </p>
+
                 <p>
                     <strong>Loại đơn:</strong>
                     <span th:text="${bill.typeBill == true ? 'Online' : 'Tại quầy'}"
@@ -94,21 +99,31 @@
                     <td th:text="${detail.productDetail?.product?.name}">Áo thun</td>
                     <td th:text="${detail.productDetail?.color?.name}">Đỏ</td>
                     <td th:text="${detail.productDetail?.size?.name}">L</td>
-                    <td th:text="${detail.price}"></td>
+                    <td th:text="${detail.price != null ? #numbers.formatDecimal(detail.price, 0, 'POINT', 0, 'COMMA') + '₫' : '0₫'}"></td>
                     <td th:text="${detail.quantity}"></td>
-                    <td th:text="${detail.price * detail.quantity}"></td>
+                    <td th:text="${detail.price != null && detail.quantity != null ? #numbers.formatDecimal(detail.price * detail.quantity, 0, 'POINT', 0, 'COMMA') + '₫' : '0₫'}"></td>
                 </tr>
                 </tbody>
                 <tfoot>
                 <tr>
-                    <td colspan="5" class="text-end fw-bold">Tổng thanh toán sản phẩm:</td>
-                    <td th:text="${bill.totalAmount}"></td>
+                    <td colspan="5" class="text-end fw-bold">Tổng tiền hàng:</td>
+                    <td th:text="${#numbers.formatDecimal(total, 0, 'POINT', 0, 'COMMA') + '₫'}">0₫</td>
+                </tr>
+                <tr>
+                    <td colspan="5" class="text-end fw-bold">Giảm giá (voucher):</td>
+                    <td th:text="${bill.discountAmount != null ? #numbers.formatDecimal(bill.discountAmount, 0, 'POINT', 0, 'COMMA') + '₫' : '0₫'}">0₫</td>
+                </tr>
+                <tr>
+                    <td colspan="5" class="text-end fw-bold text-success">Tổng thanh toán:</td>
+                    <td th:text="${#numbers.formatDecimal(total - (bill.discountAmount != null ? bill.discountAmount : 0), 0, 'POINT', 0, 'COMMA') + '₫'}"
+                        class="text-success fw-bold">0₫</td>
                 </tr>
                 </tfoot>
+
             </table>
             <div class="d-print-none mt-4">
                 <div class="float-end">
-                    <a th:href="@{/}"
+                    <a href=""
                        class="btn btn-success me-1"><i class="fa fa-print"></i></a>
                     <a th:href="@{'/admin/bill/view'}">
                         <button type="button" class="btn btn-secondary w-md" data-dismiss="modal">
@@ -120,6 +135,7 @@
         </div>
     </div>
         </div>
+    </div>
     </div>
 </section>
 
