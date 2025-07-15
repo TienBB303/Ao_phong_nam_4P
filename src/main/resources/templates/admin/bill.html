@@ -23,51 +23,55 @@
                 </div>
             </div>
             <div class="container discount-form-container">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="mb-0">Quản lý hóa đơn</h5>
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-outline-primary">Tìm kiếm</button>
-                            <a href="" class="btn btn-outline-secondary">Hủy bỏ</a>
-                            <button type="button" class="btn btn-outline-success">Export</button>
-                        </div>
-                    </div>
+
 
                     <form method="get" action="">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">Quản lý hóa đơn</h5>
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary" id="search-btn">🔍 Tìm kiếm</button>
+                                <a th:href="@{/admin/bill/view}" class="btn btn-outline-secondary">🧹 Hủy</a>
+                                <button type="button" class="btn btn-outline-success">Export</button>
+                            </div>
+                        </div>
                         <div class="row mb-3">
                             <div class="col">
-                                <input type="text" name="code" class="form-control" placeholder="Mã hóa đơn">
+                                <input type="text" name="code" class="form-control" placeholder="Mã hóa đơn"
+                                       th:value="${code}">
                             </div>
                             <div class="col">
-                                <input type="date" name="startDate" class="form-control" placeholder="Bắt đầu">
+                                <input type="date" name="startDate" class="form-control" th:value="${startDate}" />
                             </div>
                             <div class="col">
-                                <input type="date" name="endDate" class="form-control" placeholder="Kết thúc">
+                                <input type="date" name="endDate" class="form-control" th:value="${endDate}" />
                             </div>
                             <div class="col">
                                 <select name="status" class="form-control">
                                     <option value="">Trạng thái</option>
-                                    <option value="1">Chờ xác nhận</option>
-                                    <option value="2">Đã xác nhận</option>
-                                    <option value="3">Đang giao</option>
-                                    <option value="4">Hoàn thành</option>
-                                    <option value="5">Đã huỷ</option>
+                                    <option value="1" th:selected="${status == 1}">Chờ xác nhận</option>
+                                    <option value="2" th:selected="${status == 2}">Đã xác nhận</option>
+                                    <option value="3" th:selected="${status == 3}">Đang giao</option>
+                                    <option value="4" th:selected="${status == 4}">Hoàn thành</option>
+                                    <option value="5" th:selected="${status == 5}">Đã huỷ</option>
                                 </select>
                             </div>
                             <div class="col">
                                 <select name="type" class="form-control">
                                     <option value="">Loại đơn</option>
-                                    <option value="0">Tại quầy</option>
-                                    <option value="1">Giao hàng</option>
+                                    <option value="0" th:selected="${type == false}">Tại quầy</option>
+                                    <option value="1" th:selected="${type == true}">Online</option>
                                 </select>
                             </div>
                             <div class="col">
-                                <input type="text" name="name" class="form-control" placeholder="Họ và tên">
+                                <input type="text" name="name" class="form-control" placeholder="Họ và tên"
+                                       th:value="${name}">
                             </div>
                         </div>
 
                         <div class="row mb-3 align-items-end">
                             <div class="col-3">
-                                <input type="text" name="phoneNumber" class="form-control" placeholder="Số điện thoại">
+                                <input type="text" name="phoneNumber" class="form-control" placeholder="Số điện thoại"
+                                       th:value="${phoneNumber}">
                             </div>
 
                         </div>
@@ -94,8 +98,8 @@
                             <td th:text="${bill.code}">HD001</td>
                             <td th:text="${bill.name}">Nguyễn Văn A</td>
                             <td th:text="${bill.phoneNumber}">0123456789</td>
-                            <td th:text="${bill.createdAt}">---</td>
-                            <td th:text="${bill.totalAmount}">0</td>
+                            <td th:text="${#temporals.format(bill.createdAt, 'dd-MM-yyyy HH:mm')}">---</td>
+                            <td th:text="${bill.totalAmount != null ? #numbers.formatDecimal(bill.totalAmount, 0, 'POINT', 0, 'COMMA') + '₫' : '0₫'}">0₫</td>
                             <td th:text="${bill.typeBill != null and bill.typeBill == true ? 'Online' : 'Tại quầy'}">Tại quầy</td>
                             <td></td>
                             <td>
