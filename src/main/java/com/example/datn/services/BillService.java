@@ -3,6 +3,7 @@ package com.example.datn.services;
 
 import com.example.datn.entities.Bill;
 import com.example.datn.entities.BillDetails;
+import com.example.datn.entities.Discount;
 import com.example.datn.entities.Selling.Cart;
 import com.example.datn.entities.Selling.CartDetail;
 import com.example.datn.entities.product_and_other.ProductDetail;
@@ -12,8 +13,12 @@ import com.example.datn.repositories.cart.CartRepository;
 import com.example.datn.repositories.product_and_other.ProductDetailRepository;
 import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.http.ResponseEntity;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;

@@ -18,15 +18,16 @@
                                     <!-- Tab giỏ hàng -->
                                     <a class="nav-link px-2 py-1 rounded-3 shadow-sm text-nowrap"
                                        th:classappend="${cart.id == idCart ? 'active' : 'text-dark bg-white'}"
-                                       th:text="'Giỏ hàng ' + ${stat.index + 1}"
                                        th:href="@{/admin/sell-inline/cart-detail(idCart=${cart.id})}">
+                                        Giỏ hàng <span th:text="${stat.index + 1}"></span>
+                                        <span class="badge text-bg-warning ms-1" th:text="${cart.getTotal_quantity()}">0</span>
                                     </a>
                                     <!-- Nút xóa -->
                                     <a href="javascript:void(0);"
                                        class="text-danger fw-bold ms-1 hover-shadow delete-cart"
                                        th:data-id="${cart.id}"
                                        style="font-size: 1rem;">
-                                        <i class="bi bi-x-circle-fill"></i>
+                                        <i class="bi bi-x-circle-fill" title="Đóng"></i>
                                     </a>
                                 </li>
                             </ul>
@@ -165,39 +166,65 @@
                 <div th:if="${idCart != null}" class="row gx-3 mb-3">
                     <!-- tìm giảm giá -->
                     <div class="col-md-6">
-                        <div class="card shadow-sm rounded-3 h-100">
+<!--                        <div class="card shadow-sm rounded-3 h-100">-->
+<!--                            <div class="card-header fw-bold bg-light">-->
+<!--                                Chọn giảm giá-->
+<!--                            </div>-->
+<!--                            <div class="card-body py-2">-->
+<!--                                <div class="row gx-1 gy-2 align-items-end">-->
+<!--                                    <div class="col-md-12 position-relative">-->
+<!--                                        <input type="text" id="discount_search" class="form-control" placeholder="Tìm phiếu giảm giá..." autocomplete="off">-->
+<!--                                        <div id="suggestionBox_discount"-->
+<!--                                             class="border bg-white rounded mt-1 position-absolute z-10 shadow-sm"-->
+<!--                                             style="width: 100%; display: none; max-height: 300px; overflow-y: auto; z-index: 1055;">-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+                    </div>
+
+                    <!-- Thông tin -->
+                    <div class="col-md-6">
+                        <div class="card shadow-sm rounded-3">
                             <div class="card-header fw-bold bg-light">
                                 Chọn giảm giá
                             </div>
                             <div class="card-body py-2">
                                 <div class="row gx-1 gy-2 align-items-end">
                                     <div class="col-md-12 position-relative">
-                                        <input type="text" id="discount_search" class="form-control" placeholder="Tìm phiếu giảm giá..." autocomplete="off">
-                                        <div id="suggestionBox_discount"
-                                             class="border bg-white rounded mt-1 position-absolute z-10 shadow-sm"
-                                             style="width: 100%; display: none; max-height: 300px; overflow-y: auto; z-index: 1055;">
-                                        </div>
+                                        <select class="form-select" id="discount_select" name="discountId" th:attr="data-id=${idCart}">
+                                            <option value="">-- Chọn mã giảm giá --</option>
+                                            <option th:each="discount : ${discountCanApply}"
+                                                    th:value="${discount.id}"
+                                                    th:data-amount="${discount.discountValue}"
+                                                    th:selected="${cart.discount != null and cart.discount.id == discount.id}"
+                                                    th:text="${discount.code + ' - giảm ' + discount.discountValue + '₫ nếu mua ≥ ' + discount.minPurchase + '₫'}">
+                                            </option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Thông tin -->
-                    <div class="col-md-6">
-                        <div class="card shadow-sm rounded-3 h-100">
+                        <div class="card shadow-sm rounded-3">
                             <div class="card-header fw-bold bg-light">
                                 thông tin thanh toán - tổng sản phẩm(<span th:text="${allItemInCart}">0</span>)
                             </div>
                             <div class="card-body py-2">
                                 <div class="row gx-1 gy-2 align-items-end">
                                     <div class="col-md-6 position-relative">
-                                        <label for="totalPrice">Tiền được giảm</label>
-                                        <input type="text" id="totalPriceDiscount" class="form-control giaVND" th:value="${0}" readonly>
+                                        <label for="total_price_all_product">Tổng tiền sản phẩm</label>
+                                        <input type="text" id="total_price_all_product" class="form-control giaVND" th:value="${totalPriceInCart}" readonly>
                                     </div>
                                     <div class="col-md-6 position-relative">
-                                        <label for="totalPrice">Tổng Tiền</label>
-                                        <input type="text" id="totalPrice" class="form-control giaVND" th:value="${totalPriceInCart}" readonly>
+                                        <label for="total_price_discount">Tiền được giảm</label>
+                                        <input type="text" id="total_price_discount" class="form-control giaVND" th:value="${totalPriceDiscount}" readonly>
+                                    </div>
+                                </div>
+                                <div class="row gx-1 gy-2 align-items-end">
+                                    <div class="col-md-12 position-relative">
+                                        <label for="total_price_checkout">Thành tiền</label>
+                                        <input type="text" id="total_price_checkout" class="form-control giaVND" th:value="${totalPriceCheckOut}" readonly>
                                     </div>
                                 </div>
                             </div>
@@ -217,39 +244,6 @@
     </div>
 </section>
 
-<!-- Modal chọn hình thức thanh toán -->
-<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content shadow rounded-3">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="paymentModalLabel">Chọn hình thức thanh toán</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="paymentForm">
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Hình thức mua hàng:</label>
-                        <select class="form-select" name="deliveryType" required>
-                            <option value="">-- Chọn --</option>
-                            <option value="0">Mua trực tiếp tại quầy</option>
-                            <option value="1">Giao hàng tận nơi</option>
-                        </select>
-                    </div>
-                    <div class="mb-3" id="shippingInfo" style="display: none;">
-                        <label class="form-label">Phí giao hàng (VND):</label>
-                        <input type="number" class="form-control" name="shippingFee" value="0">
-                    </div>
-                    <input type="hidden" name="idCart" id="modalCartId">
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-success" id="confirmPaymentBtn">Xác nhận</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <footer th:replace="~{admin/fragments/footer :: footer}"></footer>
 <script th:inline="javascript">
     const idCartFromPage = /*[[${idCart}]]*/ null; // gắn idCart cho frompage để dùng js ngoài
@@ -258,8 +252,8 @@
 <script th:if="${alert != null}" th:inline="javascript">
     Swal.fire({
         toast: true,
-        icon: [[${type}]],
-        title: [[${alert}]],
+        icon: /*[[${type}]]*/ null, //[[${type}]],
+        title: /*[[${alert}]]*/ null, // [[${alert}]],
         position: 'top-end',
         showConfirmButton: false,
         timer: 2000,
