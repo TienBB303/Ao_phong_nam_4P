@@ -44,6 +44,7 @@ public class Bill {
     private String phoneNumber;
 
     private String email;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -60,6 +61,10 @@ public class Bill {
     @ManyToOne
     @JoinColumn(name = "payment_method_id")
     private PaymentMethod paymentMethod;
+
+
+//    private LocalDateTime created_at; //map vposw datetime trong db
+//    private LocalDateTime updated_at;
 
     private BigDecimal total_checkout; // thành tiền
 
