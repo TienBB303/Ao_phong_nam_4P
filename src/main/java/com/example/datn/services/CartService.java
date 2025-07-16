@@ -2,6 +2,7 @@ package com.example.datn.services;
 
 import com.example.datn.entities.Bill;
 import com.example.datn.entities.BillDetails;
+import com.example.datn.entities.Discount;
 import com.example.datn.entities.Selling.Cart;
 import com.example.datn.entities.Selling.CartDetail;
 import com.example.datn.entities.product_and_other.ProductDetail;
@@ -9,6 +10,7 @@ import com.example.datn.repositories.cart.CartDetailRepositoty;
 import com.example.datn.repositories.cart.CartRepository;
 import com.example.datn.repositories.product_and_other.ProductDetailRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -27,6 +29,9 @@ public class CartService {
     @Autowired
     ProductDetailRepository productDetailRepository;
 
+    @Autowired
+    private DiscountService  discountService;
+
     public List<Cart> getAllCarts(){
         return cartRepository.findAll();
     }
@@ -38,8 +43,13 @@ public class CartService {
     public Cart findCartById(Integer idCart){
         return cartRepository.findByIdCart(idCart);
     }
+
     public CartDetail findCartDetailById(Integer idCartDetail){
         return cartDetailRepositoty.findCartDetailById(idCartDetail);
+    }
+
+    public Cart findCartByCartDetailId(Integer idCartDetail){
+        return cartRepository.findCartByCartDetailId(idCartDetail);
     }
 
     public List<CartDetail> findAllCartDetailsByCartId(Integer idCart){
@@ -85,6 +95,17 @@ public class CartService {
 
         cart.setTotal_price_cart(totalPrice);
         cart.setTotal_quantity(totalQuantity);
+
+        recalculateCartTotalWithDiscount(cart);
+//        Discount discount = cart.getDiscount();
+//        if(discount != null){
+//            cart.setTotal_discount(discount.getDiscountValue());
+//            cart.setTotal_price_checkout(cart.getTotal_price_cart().subtract(cart.getTotal_discount()));
+//        }else {
+//            cart.setTotal_discount(BigDecimal.ZERO);
+//            cart.setTotal_price_checkout(cart.getTotal_price_cart());
+//        }
+
         cart.setUpdated_at(new Date());
         cartRepository.save(cart);
     }
@@ -138,6 +159,17 @@ public class CartService {
 
         cart.setTotal_price_cart(totalPrice);
         cart.setTotal_quantity(totalQuantity);
+
+        recalculateCartTotalWithDiscount(cart);
+//        Discount discount = cart.getDiscount();
+//        if(discount != null){
+//            cart.setTotal_discount(discount.getDiscountValue());
+//            cart.setTotal_price_checkout(cart.getTotal_price_cart().subtract(cart.getTotal_discount()));
+//        }else {
+//            cart.setTotal_discount(BigDecimal.ZERO);
+//            cart.setTotal_price_checkout(cart.getTotal_price_cart());
+//        }
+
         cart.setUpdated_at(new Date());
         cartRepository.save(cart);
     }
@@ -161,6 +193,21 @@ public class CartService {
 
         cart.setTotal_price_cart(totalPrice);
         cart.setTotal_quantity(totalQuantity);
+
+        recalculateCartTotalWithDiscount(cart);
+//        Discount discount = cart.getDiscount();
+//        if(discount != null){
+//            cart.setTotal_discount(discount.getDiscountValue());
+//            if (cart.getTotal_discount().compareTo(cart.getTotal_price_cart()) > 0) {
+//                cart.setTotal_price_checkout(BigDecimal.ZERO);
+//            }else {
+//                cart.setTotal_price_checkout(cart.getTotal_price_cart().subtract(cart.getTotal_discount()));
+//            }
+//        }else {
+//            cart.setTotal_discount(BigDecimal.ZERO);
+//            cart.setTotal_price_checkout(cart.getTotal_price_cart());
+//        }
+
         cart.setUpdated_at(new Date());
         cartRepository.save(cart);
     }
@@ -182,5 +229,122 @@ public class CartService {
 
         cartRepository.delete(cart);
     }
+
+    public void applyDiscountToCart(Integer cartId, Integer discountId) throws  Exception{
+        Cart cart = cartRepository.findByIdCart(cartId);
+        Discount discount = discountService.findDiscountById(discountId);
+
+        if (cart == null || discount == null || discount.getUsageLimit() <= 0) {
+            throw new Exception("Không thể áp dụng mã giảm giá");
+        }
+
+        Discount currentDiscount = cart.getDiscount();
+        if (currentDiscount != null) {
+            currentDiscount.setUsageLimit(currentDiscount.getUsageLimit() + 1); // hoàn lại lượt
+            discountService.saveDiscount_Cart(currentDiscount); // lưu lại mã cũ
+        }
+
+        BigDecimal totalPriceCart = cart.getTotal_price_cart();
+        if (totalPriceCart == null){
+            totalPriceCart = BigDecimal.ZERO;
+        }
+
+        BigDecimal discountValue = discount.getDiscountValue();
+        if (discountValue == null) {
+            discountValue = BigDecimal.ZERO;
+        }
+
+        BigDecimal totalDiscount;
+
+        if (discount.getDiscountType().equals("amount")) {
+            totalDiscount = discountValue;
+
+            // Giảm không vượt quá maxDiscount nếu có
+            BigDecimal maxDiscount = discount.getMaxDiscount();
+            if (maxDiscount != null && totalDiscount.compareTo(maxDiscount) > 0) {
+                totalDiscount = maxDiscount;
+            }
+        } else if (discount.getDiscountType().equals("percent")) {
+            totalDiscount = totalPriceCart.multiply(discountValue).divide(BigDecimal.valueOf(100));
+
+            // Giảm không vượt quá maxDiscount nếu có
+            BigDecimal maxDiscount = discount.getMaxDiscount();
+            if (maxDiscount != null && totalDiscount.compareTo(maxDiscount) > 0) {
+                totalDiscount = maxDiscount;
+            }
+        } else {
+            throw new Exception("Loại mã giảm giá không hợp lệ");
+        }
+
+        // Đảm bảo không giảm quá tổng tiền -> tổng discount không âm
+        if (totalDiscount.compareTo(totalPriceCart) > 0) {
+            totalDiscount = totalPriceCart;
+        }
+
+        cart.setTotal_discount(totalDiscount);
+        cart.setTotal_price_checkout(totalPriceCart.subtract(totalDiscount));
+
+        cart.setDiscount(discount);
+        cartRepository.save(cart);
+
+        discount.setUsageLimit(discount.getUsageLimit() - 1);
+        discountService.saveDiscount_Cart(discount);
+    }
+
+    public void removeDiscountFromCart(Integer cartId) throws Exception {
+        Cart cart = cartRepository.findByIdCart(cartId);
+        Discount discount = cart.getDiscount();
+
+        if (cart == null || discount == null) {
+            return;
+        }
+
+        // Tăng lại số lượng mã đã dùng
+        discount.setUsageLimit(discount.getUsageLimit() + 1);
+        discountService.saveDiscount_Cart(discount);
+
+        // Xoá discount khỏi cart
+        cart.setDiscount(null);
+        cart.setTotal_discount(BigDecimal.ZERO);
+        cart.setTotal_price_checkout(cart.getTotal_price_cart());
+        cart.setUpdated_at(new Date());
+        cartRepository.save(cart);
+    }
+
+    //Tính toán lại tiền và giá giảm
+    private void recalculateCartTotalWithDiscount(Cart cart) {
+        BigDecimal totalPrice = cart.getTotal_price_cart();
+        Discount discount = cart.getDiscount();
+
+        if (discount != null && discount.getUsageLimit() > 0) {
+            BigDecimal discountValue = discount.getDiscountValue() != null ? discount.getDiscountValue() : BigDecimal.ZERO;
+
+            if ("percent".equalsIgnoreCase(discount.getDiscountType())) {
+                BigDecimal discountAmount = totalPrice.multiply(discountValue).divide(BigDecimal.valueOf(100));
+                BigDecimal maxDiscount = discount.getMaxDiscount() != null ? discount.getMaxDiscount() : BigDecimal.ZERO;
+
+                if (discountAmount.compareTo(maxDiscount) > 0) {
+                    discountAmount = maxDiscount;
+                }
+                cart.setTotal_discount(discountAmount);
+
+            } else { // amount
+                cart.setTotal_discount(discountValue);
+            }
+
+            // Trường hợp tổng tiền bị giảm hết
+            if (cart.getTotal_discount().compareTo(totalPrice) >= 0) {
+                cart.setTotal_price_checkout(BigDecimal.ZERO);
+            } else {
+                cart.setTotal_price_checkout(totalPrice.subtract(cart.getTotal_discount()));
+            }
+
+        } else {
+            cart.setTotal_discount(BigDecimal.ZERO);
+            cart.setTotal_price_checkout(totalPrice);
+        }
+    }
+
+
 
 }

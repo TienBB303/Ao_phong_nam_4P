@@ -3,6 +3,7 @@ package com.example.datn.services;
 
 import com.example.datn.entities.Bill;
 import com.example.datn.entities.BillDetails;
+import com.example.datn.entities.Discount;
 import com.example.datn.entities.Selling.Cart;
 import com.example.datn.entities.Selling.CartDetail;
 import com.example.datn.entities.product_and_other.ProductDetail;
@@ -12,9 +13,14 @@ import com.example.datn.repositories.cart.CartRepository;
 import com.example.datn.repositories.product_and_other.ProductDetailRepository;
 import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.http.ResponseEntity;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
 import org.springframework.stereotype.Service;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -32,8 +38,12 @@ public class BillService {
 
     @Autowired
     CartRepository cartRepository;
+
     @Autowired
     ProductDetailRepository productDetailRepository;
+
+    @Autowired
+    DiscountService discountService;
 //
 //    @Autowired
 //    CustomerService customerService;
@@ -61,6 +71,11 @@ public class BillService {
     public Page<Bill> getAllBills(Pageable pageable) {
         return billRepository.findAll(pageable);
     }
+    public Page<Bill> searchBills(String code, String name, String phoneNumber,
+                                  LocalDateTime startDate, LocalDateTime endDate,
+                                  Integer status, Boolean typeBill, Pageable pageable) {
+        return billRepository.filterBills(code, name, phoneNumber, startDate, endDate, status, typeBill, pageable);
+    }
 
     public Bill findById(Integer id) {
         return billRepository.findById(id).orElse(null);
@@ -85,11 +100,29 @@ public class BillService {
         return String.format("HD%03d",nextCode);
     }
 
+
+    public void checkDiscountBelongToCart(){
+
+
+    }
+
+    public void checkDiscountBelongToCart(Cart cart) throws Exception {
+        Discount discount = cart.getDiscount();
+        if (discount == null) return;
+
+        Discount activeDiscount = discountService.findDiscountById(discount.getId());
+        if (activeDiscount == null || !activeDiscount.getStatus().equals(1) || activeDiscount.getUsageLimit() <= 0) {
+            throw new Exception("Mã giảm giá không còn hợp lệ. Vui lòng chọn lại mã khác.");
+        }
+    }
+
     public void checkOut(Integer cartId) throws Exception{
         Cart cart = cartRepository.findByIdCart(cartId);
         if(cart == null || cart.getStatus() == false){
             throw new Exception("Giỏ hàng không tồn tại hoặc đã được thanh toán");
         }
+
+        checkDiscountBelongToCart(cart); // kierm tra discout còn hoạt động không
 
         List<CartDetail> listCartDetails = cartRepository.findAllCartDetailByCartId(cartId);
         if(listCartDetails == null || listCartDetails.isEmpty()){
@@ -101,7 +134,7 @@ public class BillService {
 
         Bill bill = new Bill();
         bill.setCode(taoMaTuDongBill());
-        bill.setDiscountAmount(BigDecimal.ZERO); // fix cứng
+        bill.setDiscountAmount(cart.getTotal_discount());
         bill.setTotalAmount(totalAmount);
         bill.setPaymentStatus(true);
         bill.setStatus(4);
@@ -112,9 +145,12 @@ public class BillService {
         bill.setPhoneNumber("0365142537");
         bill.setEmail("tien@gmail.com");
 //        bill.setPaymentMethod(1); // sửa sau, tạm thời fix để bán thử
-//        bill.setDiscountId(null); // fix cứng
+
+        bill.setDiscount(cart.getDiscount());
+        bill.setTotal_checkout(totalAmount.subtract(cart.getTotal_discount()));
         bill.setCustomer(null);
         bill.setCreatedAt(LocalDateTime.now());
+
 
         billRepository.save(bill);
         System.out.println("Thong tin bill :" + bill);
@@ -192,5 +228,8 @@ public class BillService {
     }
     public List<BillDetails> findBillDetailsByBillId(Integer billId) {
         return billDetailRepository.findByBillId(billId);
+    }
+    public Bill findByIdWithDiscount(Integer id) {
+        return billRepository.findWithDiscountById(id);
     }
 }

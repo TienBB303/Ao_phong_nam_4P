@@ -58,4 +58,26 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
                          @Param("brandId") Integer brandId,
                          @Param("materialId") Integer materialId,
                          Pageable pageable);
+
+    //Khanh: tim kiem san pham tren web
+    @Query("SELECT p FROM Product p " +
+            "JOIN p.brand b " +
+            "JOIN p.category c " +
+            "JOIN p.material m " +
+            "WHERE p.status = true " +
+            "AND b.status = true " +
+            "AND c.status = true " +
+            "AND m.status = true " +
+            "AND (:name IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%'))) " +
+            "AND (:categoryId IS NULL OR p.category.id = :categoryId) " +
+            "AND (:brandId IS NULL OR p.brand.id = :brandId) " +
+            "AND (:materialId IS NULL OR p.material.id = :materialId) " +
+            "ORDER BY p.id DESC")
+    Page<Product> searchAllFields(
+            @Param("name") String name,
+            @Param("categoryId") Integer categoryId,
+            @Param("brandId") Integer brandId,
+            @Param("materialId") Integer materialId,
+            Pageable pageable);
+
 }

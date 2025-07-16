@@ -3,6 +3,7 @@ package com.example.datn.controllers.selling;
 import com.example.datn.dto.selling_inline.BillDetailDto;
 import com.example.datn.dto.selling_inline.BillSessionDto;
 import com.example.datn.dto.selling_inline.ProductDetailDto;
+import com.example.datn.entities.Discount;
 import com.example.datn.entities.Selling.Cart;
 import com.example.datn.entities.Selling.CartDetail;
 import com.example.datn.entities.product_and_other.Product;
@@ -10,6 +11,7 @@ import com.example.datn.entities.product_and_other.ProductDetail;
 import com.example.datn.repositories.product_and_other.ProductDetailRepository;
 import com.example.datn.services.BillService;
 import com.example.datn.services.CartService;
+import com.example.datn.services.DiscountService;
 import com.example.datn.services.product_and_other.ProductService;
 import com.google.zxing.qrcode.decoder.Mode;
 import jakarta.servlet.http.HttpSession;
@@ -37,6 +39,9 @@ public class SellingInlineController {
     @Autowired
     private CartService cartService;
 
+    @Autowired
+    private DiscountService  discountService;
+
     @ModelAttribute("listProduct")
     public List<Product> listProduct() {
         return productService.getAll();
@@ -51,7 +56,7 @@ public class SellingInlineController {
     public String sellInlineView( Model model, HttpSession session){
         List<Cart> listAllCart = cartService.getAllCarts();
         List<Cart> activeCarts = listAllCart.stream()
-                .filter(Cart::getStatus) // hoặc cart -> cart.getStatus() == true
+                .filter(Cart::getStatus) // true -> chỉ hiện các cart có trạng thái là true lên
                 .collect(Collectors.toList());
         model.addAttribute("listCart", activeCarts);
 //        model.addAttribute("listCart",listAllCart);
@@ -88,16 +93,22 @@ public class SellingInlineController {
 
         List<Cart> listAllCart = cartService.getAllCarts();
         List<Cart> activeCarts = listAllCart.stream()
-                .filter(Cart::getStatus) // hoặc cart -> cart.getStatus() == true
+                .filter(Cart::getStatus)
                 .collect(Collectors.toList());
         Integer itemInCart = countItemInCart(idCart);
         Integer allItemInCart = countAllItemInCart(idCart);
-        BigDecimal totalPriceInCart = cartService.plusAllItemInCartByCartId(idCart);
+        BigDecimal totalPriceInCart = totalPriceInCart(idCart);
+        List<Discount> discountCanApply = listDiscountCanApply(totalPriceInCart);
+        BigDecimal totalPriceDiscount = cart.getTotal_discount();
+        BigDecimal totalPriceCheckOut = cart.getTotal_price_checkout();
 
         model.addAttribute("listCart",activeCarts);
         model.addAttribute("itemInCart",itemInCart);
         model.addAttribute("allItemInCart",allItemInCart);
         model.addAttribute("totalPriceInCart",totalPriceInCart);
+        model.addAttribute("discountCanApply",discountCanApply);
+        model.addAttribute("totalPriceDiscount",totalPriceDiscount);
+        model.addAttribute("totalPriceCheckOut",totalPriceCheckOut);
 
         model.addAttribute("idCart", idCart);
         model.addAttribute("cart",cart);
@@ -122,11 +133,6 @@ public class SellingInlineController {
                                        @RequestParam("productDetailId") Integer productDetailId, Model model){
         try {
             cartService.addProductToCart(idCart,productDetailId);
-            Integer itemInCart = countItemInCart(idCart);
-            Integer allItemInCart = countAllItemInCart(idCart);
-
-            model.addAttribute("itemInCart",itemInCart);
-            model.addAttribute("allItemInCart",allItemInCart);
 
             return ResponseEntity.ok().body("Thêm sản phẩm vào giỏ thành công");
         }catch (Exception e){
@@ -210,4 +216,31 @@ public class SellingInlineController {
         return "redirect:/admin/sell-inline/hien-thi";
     }
 
+    //Hiện list discount
+    public List<Discount> listDiscountCanApply(BigDecimal minPrice) {
+        return discountService.getAllDiscountByMinPurchase(minPrice);
+    }
+
+    @PostMapping("/apply-discount")
+    @ResponseBody
+    public ResponseEntity<?> applyDiscountToCart(@RequestParam("idCart") Integer idCart,
+                                                 @RequestParam("discountId") Integer discountId) {
+        try {
+            cartService.applyDiscountToCart(idCart, discountId);
+            return ResponseEntity.ok("Áp dụng mã giảm giá thành công");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/remove-discount")
+    @ResponseBody
+    public ResponseEntity<?> removeDiscount(@RequestParam("idCart") Integer idCart){
+        try {
+            cartService.removeDiscountFromCart(idCart);
+            return ResponseEntity.ok("Bỏ mã giảm giá thành công");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

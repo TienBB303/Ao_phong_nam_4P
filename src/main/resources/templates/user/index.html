@@ -86,11 +86,8 @@
 
             <a class="nav-link position-relative" href="#">
                 <i class="fas fa-shopping-cart fa-lg"></i>
-                <span class="badge bg-danger position-absolute top-0 start-100 translate-middle rounded-pill">1</span>
+                <span class="badge bg-danger position-absolute top-0 start-100 translate-middle rounded-pill"></span>
             </a>
-
-            <a class="nav-link text-primary" href="#"><i class="fab fa-facebook-f fa-lg"></i></a>
-            <a class="nav-link text-info" href="#"><i class="fab fa-twitter fa-lg"></i></a>
         </div>
 
         <!-- Right elements -->
@@ -134,7 +131,47 @@
 <!--    </div>-->
 <!--</nav>-->
 
+<section class="container my-4">
+    <form method="get" class="row g-3">
+        <div class="col-md-3">
+            <input class="form-control" name="name" placeholder="Tên sản phẩm"
+                   th:value="${name}">
+        </div>
+        <div class="col-md-2">
+            <select class="form-select" name="brandId">
+                <option value="">-- Hãng --</option>
+                <option th:each="b : ${listBrand}" th:value="${b.id}"
+                        th:text="${b.name}" th:selected="${brandId == b.id}"></option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select class="form-select" name="categoryId">
+                <option value="">-- Danh mục --</option>
+                <option th:each="c : ${listCategory}" th:value="${c.id}"
+                        th:text="${c.name}" th:selected="${categoryId == c.id}"></option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select class="form-select" name="materialId">
+                <option value="">-- Chất liệu --</option>
+                <option th:each="m : ${listMaterial}" th:value="${m.id}"
+                        th:text="${m.name}" th:selected="${materialId == m.id}"></option>
+            </select>
+        </div>
+        <div class="col-md-2 d-flex align-items-center gap-2">
+            <button class="btn btn-sm btn-primary w-50" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+            <a th:href="@{/}" class="btn btn-sm btn-outline-secondary w-50">
+                <i class="fas fa-eraser"></i>
+            </a>
+        </div>
+
+    </form>
+</section>
+
 <!-- Danh sách sản phẩm -->
+
 <section class="container mb-5">
     <div class="row">
         <div class="col-md-3 mb-4" th:each="product : ${listProduct.content}">
@@ -150,9 +187,9 @@
                 </div>
                 <div class="card-body text-center">
                     <h5 class="card-title" th:text="${product.name}">Tên sản phẩm</h5>
-                    <p class="card-text text-muted">
-                        Số lượng: <span th:text="${totalQuantity[product.id]}"></span>
-                    </p>
+<!--                    <p class="card-text text-muted">-->
+<!--                        Số lượng: <span th:text="${totalQuantity[product.id]}"></span>-->
+<!--                    </p>-->
                     <p class="card-text text-danger fw-bold">
                         <span th:text="${priceRanges[product.id]}">100.000 - 150.000đ</span>
                     </p>
@@ -163,23 +200,43 @@
     </div>
 </section>
 
-        <!-- Pagination -->
-<nav th:if="${listProduct.totalPages > 1}">
+<nav th:if="${listProduct.totalPages > 0}">
     <ul class="pagination justify-content-center mt-4">
+
+        <!-- Previous -->
         <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-            <a class="page-link" th:href="@{/product(page=${currentPage - 1})}">«</a>
+            <a class="page-link"
+               th:href="@{/(page=${currentPage - 1},
+                            name=${name},
+                            brandId=${brandId},
+                            categoryId=${categoryId},
+                            materialId=${materialId})}">«</a>
         </li>
+
+        <!-- Pages -->
         <li class="page-item"
-            th:each="page : ${#numbers.sequence(0, listProduct.totalPages - 1)}"
-            th:classappend="${page == currentPage} ? 'active'">
-            <a class="page-link" th:href="@{/product(page=${page})}" th:text="${page + 1}">1</a>
+            th:each="pageNum : ${#numbers.sequence(0, listProduct.totalPages - 1)}"
+            th:classappend="${pageNum == currentPage} ? 'active'">
+            <a class="page-link"
+               th:href="@{/(page=${pageNum},
+                            name=${name},
+                            brandId=${brandId},
+                            categoryId=${categoryId},
+                            materialId=${materialId})}"
+               th:text="${pageNum + 1}">1</a>
         </li>
+
+        <!-- Next -->
         <li class="page-item" th:classappend="${currentPage + 1 == listProduct.totalPages} ? 'disabled'">
-            <a class="page-link" th:href="@{/product(page=${currentPage + 1})}">»</a>
+            <a class="page-link"
+               th:href="@{/(page=${currentPage + 1},
+                            name=${name},
+                            brandId=${brandId},
+                            categoryId=${categoryId},
+                            materialId=${materialId})}">»</a>
         </li>
     </ul>
 </nav>
-        <!-- Pagination -->
     </div>
 </main>
 <!--Main layout-->

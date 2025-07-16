@@ -1,10 +1,11 @@
 <nav class="pc-sidebar" th:fragment="sidebar" xmlns:th="http://www.w3.org/1999/xhtml">
   <div class="navbar-wrapper">
-    <div class="m-header">
-      <a th:href="@{/admin}" class="b-brand text-primary">
-        <img th:src="@{/images/logo1.png}" alt="logo">
+    <div class="m-header" style="text-align: center;">
+      <a th:href="@{/}" class="b-brand text-primary">
+        <img th:src="@{/assets/images/logo1.png}" alt="logo" style="width: 100px;">
       </a>
     </div>
+
     <div class="navbar-content">
       <ul class="pc-navbar">
         <li class="pc-item">
@@ -20,19 +21,13 @@
           </a>
         </li>
         <li class="pc-item">
-          <a th:href="@{/}" class="pc-link">
-            <span class="pc-micon"><i class="ti ti-home"></i></span>
-            <span class="pc-mtext">Trang chủ</span>
-          </a>
-        </li>
-        <li class="pc-item">
           <a th:href="@{/admin/bill/view}" class="pc-link">
             <span class="pc-micon"><i class="ti ti-vocabulary"></i></span>
             <span class="pc-mtext">Quản lý hóa đơn</span>
           </a>
         </li>
         <li class="pc-item pc-hasmenu">
-          <a href="#!" class="pc-link">
+          <a href="javascript:void(0);" class="pc-link">
             <span class="pc-micon"><i class="ti ti-shirt"></i></span>
             <span class="pc-mtext">Quản lý sản phẩm</span>
             <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
@@ -40,7 +35,7 @@
           <ul class="pc-submenu">
             <li class="pc-item"><a class="pc-link" th:href="@{/admin/product/hien-thi}">Sản phẩm</a></li>
             <li class="pc-item pc-hasmenu">
-              <a href="#!" class="pc-link">Thuộc tính<span class="pc-arrow"><i data-feather="chevron-right"></i></span></a>
+              <a href="javascript:void(0);" class="pc-link">Thuộc tính<span class="pc-arrow"><i data-feather="chevron-right"></i></span></a>
               <ul class="pc-submenu">
                 <li class="pc-item"><a class="pc-link" th:href="@{/admin/color/hien-thi}">Màu sắc</a></li>
                 <li class="pc-item"><a class="pc-link" th:href="@{/admin/category/hien-thi}">Danh mục</a></li>
@@ -58,7 +53,7 @@
           </a>
         </li>
         <li class="pc-item pc-hasmenu">
-          <a href="#!" class="pc-link">
+          <a href="javascript:void(0);" class="pc-link">
             <span class="pc-micon"><i class="ti ti-users"></i></span>
             <span class="pc-mtext">Quản lý tài khoản</span>
             <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
@@ -69,7 +64,7 @@
           </ul>
         </li>
         <li class="pc-item pc-hasmenu">
-          <a href="#!" class="pc-link">
+          <a href="javascript:void(0);" class="pc-link">
             <span class="pc-micon"><i class="ti ti-antenna-bars-5"></i></span>
             <span class="pc-mtext">Thống kê</span>
             <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
