@@ -181,5 +181,10 @@ public class ProductService {
         return productDetailRepository.findByProductIdAndColorIdAndSizeId(productId, colorId, sizeId);
     }
 
+    public Page<Product> searchAllFields(String name, Integer categoryId, Integer brandId, Integer materialId, Pageable pageable) {
+        return productRepository.searchAllFields(name, categoryId, brandId, materialId, pageable);
+    }
+
+
 }
 

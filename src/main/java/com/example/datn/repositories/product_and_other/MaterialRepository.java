@@ -34,4 +34,9 @@ public interface MaterialRepository extends JpaRepository<Material, Integer> {
 
     @Query("SELECT MAX(m.code) FROM Material m WHERE m.code LIKE 'MA%'")
     String findMaxCodeMaterial();
+
+    //Khanh
+    @Query("SELECT b FROM Material b WHERE b.status = true")
+    List<Material> findAllActive();
+
 }
