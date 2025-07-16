@@ -130,17 +130,18 @@
     </span>            </td>
 
                 <td>
-
-                    <a th:href="@{'/admin/discount/toggle-status/' + ${d.id}}"
+                    <a  class="btn btn-outline-success" th:href="@{'/admin/discount/toggle-status/' + ${d.id}}"
                        onclick="return confirm('Bạn có chắc chắn muốn đổi trạng thái?')">
-                        <button type="button" class="btn-icon text-danger">🔄</button>
+<!--                        <button type="button" class="btn-icon text-danger">🔄</button>-->
+                        🔄
                     </a>
-                    <a th:href="@{'/admin/discount/detail/' + ${d.id}}">
-                        <button class="btn-icon text-primary">👁️</button>
+                    <a class="btn btn-outline-warning" th:href="@{'/admin/discount/edit/' + ${d.id}}">
+                        <!--                        <button class="btn-icon text-dark">✏️</button>-->
+                        ✏️
                     </a>
-
-                    <a th:href="@{'/admin/discount/edit/' + ${d.id}}">
-                        <button class="btn-icon text-dark">✏️</button>
+                    <a class="btn btn-outline-primary" th:href="@{'/admin/discount/detail/' + ${d.id}}">
+<!--                        <button class="btn-icon text-primary">👁️</button>-->
+                        👁️
                     </a>
                 </td>
             </tr>
