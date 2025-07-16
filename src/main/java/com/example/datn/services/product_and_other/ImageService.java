@@ -33,22 +33,7 @@ public class ImageService {
     @Autowired
     private ProductDetailRepository productDetailRepository;
 
-//    public String saveFile(MultipartFile file) {
-//        try {
-//            String originalFilename = file.getOriginalFilename();
-//            String fileName = UUID.randomUUID() + "_" + originalFilename;
-//
-//            Path path = Paths.get("D:/pictures/" + fileName); // dùng dấu /
-//            Files.createDirectories(path.getParent());
-//            Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-//
-//            return "/pictures/" + fileName; // trả đường dẫn tương đối
-//        } catch (IOException e) {
-//            throw new RuntimeException("Không thể lưu file: " + file.getOriginalFilename(), e);
-//        }
-//    }
-
-    public Image saveImage(MultipartFile file) {
+    public Image saveImage(MultipartFile file, ProductDetail productDetail) throws IOException {
         try {
             String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
             Path path = Paths.get("D:/pictures/" + fileName);
@@ -57,8 +42,9 @@ public class ImageService {
             Image image = new Image();
             image.setName(file.getOriginalFilename());
             image.setPath_file("/pictures/" + fileName);
+            image.setProductDetail(productDetail);
+            System.out.println("Lưu ảnh: " + file.getOriginalFilename());
             return imageRepository.save(image); // Lưu vào DB
-
         } catch (IOException e) {
             throw new RuntimeException("Lỗi lưu ảnh: " + e.getMessage());
         }
@@ -74,4 +60,20 @@ public class ImageService {
     public Image findById(Integer id){
         return imageRepository.findByIdImage(id);
     }
+
+
+//    public String saveFile(MultipartFile file) {
+//        try {
+//            String originalFilename = file.getOriginalFilename();
+//            String fileName = UUID.randomUUID() + "_" + originalFilename;
+//
+//            Path path = Paths.get("D:/pictures/" + fileName); // dùng dấu /
+//            Files.createDirectories(path.getParent());
+//            Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+//
+//            return "/pictures/" + fileName; // trả đường dẫn tương đối
+//        } catch (IOException e) {
+//            throw new RuntimeException("Không thể lưu file: " + file.getOriginalFilename(), e);
+//        }
+//    }
 }
