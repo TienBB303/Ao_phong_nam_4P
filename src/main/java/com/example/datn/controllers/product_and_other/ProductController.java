@@ -5,6 +5,7 @@ import com.example.datn.dto.product.ProductForm;
 import com.example.datn.entities.product_and_other.*;
 import com.example.datn.repositories.product_and_other.ProductRepository;
 import com.example.datn.services.product_and_other.*;
+import com.google.zxing.WriterException;
 import com.google.zxing.qrcode.decoder.Mode;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -50,8 +52,12 @@ public class ProductController {
 
     @Autowired
     ImageService imageService;
+
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private Barcode barcodeService;
 
     @ModelAttribute("listCategory")
     public List<Category> listCategory() {
@@ -272,7 +278,7 @@ public class ProductController {
     @PostMapping("/save-product")
     public String saveProduct(@RequestParam MultiValueMap<String, MultipartFile> colorImages,
                               HttpSession session,
-                              RedirectAttributes redirectAttributes) {
+                              RedirectAttributes redirectAttributes) throws IOException {
         String sessionKey = (String) session.getAttribute("sessionKey");
         ProductForm productForm = (ProductForm) session.getAttribute("add1" + sessionKey);
 
@@ -294,28 +300,6 @@ public class ProductController {
 
         product = productRepository.save(product);
 
-        // Map lưu image theo colorId
-        Map<Integer, Image> colorImageMap = new HashMap<>();
-
-        for (String key : colorImages.keySet()) {
-            // Lấy colorId từ key kiểu colorImages[1]
-            Matcher matcher = Pattern.compile("\\[(\\d+)]").matcher(key);
-            if (!matcher.find()) continue;
-            Integer colorId = Integer.parseInt(matcher.group(1));
-
-            List<MultipartFile> files = colorImages.get(key);
-            if (files != null && !files.isEmpty()) {
-                for (MultipartFile file : files) {
-                    if (!file.isEmpty()) {
-                        Image image = imageService.saveImage(file); // tự triển khai lưu file + entity
-                        colorImageMap.putIfAbsent(colorId, image); // chỉ lấy ảnh đầu tiên làm đại diện
-                        break;
-                    }
-                }
-            }
-        }
-
-
         for (ProductDetailForm form : productForm.getVariants()) {
             ProductDetail detail = new ProductDetail();
             detail.setProduct(product);
@@ -323,13 +307,35 @@ public class ProductController {
             detail.setSize(sizeService.findById(form.getSizeId()));
             detail.setQuantity(form.getQuantity());
             detail.setPrice(form.getPrice());
+
+            // ====================tạo barcode=========================================================
             detail.setBarcode(product.getCode() + "-C" + form.getColorId() + "-S" + form.getSizeId());
 
-            if (colorImageMap.containsKey(form.getColorId())) {
-                detail.setImage(colorImageMap.get(form.getColorId()));
+            String barcode = product.getCode() + "-C" + form.getColorId() + "-S" + form.getSizeId();
+            detail.setBarcode(barcode);
+            // Sinh ảnh barcode và lưu vào thư mục D:\barcode ở bên bảcode sẻvice
+            try {
+                barcodeService.generateBarcodeImage(barcode);
+            } catch (IOException | WriterException e) {
+                e.printStackTrace();
+                // Option: có thể log thêm hoặc hiển thị thông báo lỗi ở redirectAttributes
+            }
+            //=============================kết thúc tạo barcode ==================================
+
+            // Lưu ProductDetail trước để có ID để lưu nhièu ảnh theo id đó
+            productService.addProductDetail(detail);
+
+            String key = "colorImages[" + form.getColorId() + "]";
+            List<MultipartFile> files = colorImages.get(key);
+
+            if(files != null){
+                for(MultipartFile file : files){
+                    if(!file.isEmpty()){
+                        imageService.saveImage(file,detail);
+                    }
+                }
             }
 
-            productService.addProductDetail(detail);
         }
 
         // clear session

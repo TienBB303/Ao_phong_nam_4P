@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -14,17 +16,17 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "product_detail")
-public class ProductDetail {
-//    CREATE TABLE product_detail (
-//            id INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-//    price DECIMAL(10, 2),
-//    quantity INT,
-//    barcode NVARCHAR(100),
-//    product_id INT FOREIGN KEY REFERENCES product(id),
-//    color_id INT FOREIGN KEY REFERENCES color(id),
-//    size_id INT FOREIGN KEY REFERENCES size(id),
-//    image_id INT FOREIGN KEY REFERENCES image(id)
+//CREATE TABLE product_detail (
+//id INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+//price DECIMAL(10, 2),
+//quantity INT,
+//barcode NVARCHAR(100),
+//product_id INT FOREIGN KEY REFERENCES product(id),
+//color_id INT FOREIGN KEY REFERENCES color(id),
+//size_id INT FOREIGN KEY REFERENCES size(id),
+//--image_id INT FOREIGN KEY REFERENCES image(id)					-- 17/07/2025 bỏ image trong product detail
 //);
+public class ProductDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -47,7 +49,6 @@ public class ProductDetail {
     @JoinColumn(name = "size_id")
     private Size size;
 
-    @ManyToOne
-    @JoinColumn(name = "image_id")
-    private Image image;
+    @OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Image> images = new ArrayList<>();
 }

@@ -12,13 +12,14 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "image")
-public class Image {
-//    CREATE TABLE image (
-//            id INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-//    name NVARCHAR(100),
-//    path_file NVARCHAR(200),
-//    product_id INT FOREIGN KEY REFERENCES product(id)
+//CREATE TABLE image (
+    //id INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    //name NVARCHAR(100),
+    //path_file NVARCHAR(200),
+    //product_detail_id INT FOREIGN KEY REFERENCES product_detail(id)			-- 17/07/2025 : thêm product detail ở đây
 //);
+public class Image {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -27,7 +28,7 @@ public class Image {
 
     private String path_file;
 
-//    @ManyToOne
-//    @JoinColumn(name = "product_id")
-//    private Product product;
+    @ManyToOne
+    @JoinColumn(name = "product_detail_id")
+    private ProductDetail productDetail;
 }

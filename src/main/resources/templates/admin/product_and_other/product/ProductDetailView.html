@@ -103,6 +103,7 @@
                             <thead class="table-primary">
                             <tr>
                                 <th scope="col">Tên</th>
+                                <th scope="col">Barcode</th>
                                 <th scope="col">Màu</th>
                                 <th scope="col">Kích cỡ</th>
                                 <th scope="col">Giá</th>
@@ -114,6 +115,9 @@
                             <tr th:each="detail : ${listProductDetail}">
                                 <td th:text="${detail.product.name + '(' + detail.color.name + ' - ' + detail.size.code + ' )'}">
                                     Tên
+                                </td>
+                                <td>
+                                    <img th:src="@{'/barcode-images/' + ${detail.barcode} + '.png'}" width="150" alt="Barcode"/>
                                 </td>
                                 <td th:text="${detail.color.name}">Màu</td>
                                 <td th:text="${detail.size.name}">Size</td>
