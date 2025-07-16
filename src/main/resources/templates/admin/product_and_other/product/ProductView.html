@@ -25,82 +25,96 @@
                 </div>
             </div>
             <div class="container">
-                <form class="bg-white border p-4 rounded shadow-sm mb-4" method="get">
-                    <div class="row g-3 align-items-end">
-                        <!-- Ô tìm kiếm và trạng thái -->
-                        <label for="searchInput" class="form-label">Tìm kiếm sản phẩm</label>
-                        <div class="row">
-                            <div class="col-4">
-                                <select id="category_search" name="productCategorySearch" class="form-select">
-                                    <option value="" th:selected="${productCategorySearch == null}">Tất cả loại</option>
-                                    <option th:each="cate : ${listCategory}"
-                                            th:value="${cate.id}"
-                                            th:text="${cate.name}"
-                                            th:if="${cate.status}"
-                                            th:selected="${cate.id == productCategorySearch}">
-                                    </option>
-                                </select>
-                            </div>
-                            <div class="col-4">
-                                <select id="brand_search" name="productBrandSearch" class="form-select">
-                                    <option value="" th:selected="${productBrandSearch == null}">Tất cả hãng</option>
-                                    <option th:each="brand : ${listBrand}"
-                                            th:value="${brand.id}"
-                                            th:text="${brand.name}"
-                                            th:if="${brand.status}"
-                                            th:selected="${brand.id == productBrandSearch}">
-                                    </option>
-                                </select>
-                            </div>
-                            <div class="col-4">
-                                <select id="material_search" name="productMaterialSearch" class="form-select">
-                                    <option value="" th:selected="${productMaterialSearch == null}">Tất cả chất liệu</option>
-                                    <option th:each="mate : ${listMaterial}"
-                                            th:value="${mate.id}"
-                                            th:text="${mate.name}"
-                                            th:if="${mate.status}"
-                                            th:selected="${mate.id == productMaterialSearch}">
-                                    </option>
-                                </select>
-                            </div>
-
-
-                        </div>
-                        <div class="row">
-                            <div class="col-md-8">
-                                <div class="input-group">
-                                    <input type="text" id="searchInput" name="productNameSearch"
-                                           class="form-control" placeholder="Nhập tên..."
-                                           th:value="${param.productNameSearch}">
-
-                                    <select id="status" name="productStatusSearch" class="form-select">
-                                        <option value="" th:selected="${productStatusSearch == null}">Tất cả trạng thái</option>
-                                        <option value="true" th:selected="${productStatusSearch == true}">Hoạt động</option>
-                                        <option value="false" th:selected="${productStatusSearch == false}">Không hoạt động</option>
-                                    </select>
-
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-search"></i>
-                                    </button>
-                                </div>
-                                <ul class="breadcrumb">
-                                </ul>
+                <form class="bg-white border rounded shadow-sm p-4 mb-4" method="get">
+<!--                    <div class="row mb-3">-->
+<!--                        <div class="col-12">-->
+<!--                            <label for="searchInput" class="form-label fw-semibold text-dark">🔎 Tìm kiếm sản phẩm</label>-->
+<!--                        </div>-->
+<!--                    </div>-->
+                    <!-- Dòng nhập tên và trạng thái -->
+                    <div class="row g-3 align-items-end mb-3">
+                        <div class="col-md-8">
+                            <label for="searchInput" class="form-label">Tên sản phẩm</label>
+                            <div class="input-group shadow-sm">
+                                <input type="text" id="searchInput" name="productNameSearch"
+                                       class="form-control" placeholder="Nhập tên..."
+                                       th:value="${param.productNameSearch}">
                             </div>
                         </div>
+                        <div class="col-md-2">
+                            <label for="status_search" class="form-label">Loại sản phẩm</label>
+                            <select id="status_search" name="productStatusSearch" class="form-select shadow-sm">
+                                <option value="" th:selected="${productStatusSearch == null}">Tất cả trạng thái</option>
+                                <option value="true" th:selected="${productStatusSearch == true}">Hoạt động</option>
+                                <option value="false" th:selected="${productStatusSearch == false}">Không hoạt động</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1">
+                            <button type="submit" class="btn btn-primary" title="Tìm kiếm" style="width: 80px;">
+                                🔍
+                            </button>
+                        </div>
+                        <div class="col-md-1">
+                            <button type="button" class="btn btn-secondary" id="clear_search" title="Xóa tìm kiếm" style="width: 80px;">
+                                🧹
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Dòng dropdown: Loại - Hãng - Chất liệu -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label for="category_search" class="form-label">Loại sản phẩm</label>
+                            <select id="category_search" name="productCategorySearch" class="form-select shadow-sm">
+                                <option value="" th:selected="${productCategorySearch == null}">Tất cả loại</option>
+                                <option th:each="cate : ${listCategory}"
+                                        th:value="${cate.id}"
+                                        th:text="${cate.name}"
+                                        th:if="${cate.status}"
+                                        th:selected="${cate.id == productCategorySearch}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="brand_search" class="form-label">Hãng sản xuất</label>
+                            <select id="brand_search" name="productBrandSearch" class="form-select shadow-sm">
+                                <option value="" th:selected="${productBrandSearch == null}">Tất cả hãng</option>
+                                <option th:each="brand : ${listBrand}"
+                                        th:value="${brand.id}"
+                                        th:text="${brand.name}"
+                                        th:if="${brand.status}"
+                                        th:selected="${brand.id == productBrandSearch}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="material_search" class="form-label">Chất liệu</label>
+                            <select id="material_search" name="productMaterialSearch" class="form-select shadow-sm">
+                                <option value="" th:selected="${productMaterialSearch == null}">Tất cả chất liệu</option>
+                                <option th:each="mate : ${listMaterial}"
+                                        th:value="${mate.id}"
+                                        th:text="${mate.name}"
+                                        th:if="${mate.status}"
+                                        th:selected="${mate.id == productMaterialSearch}">
+                                </option>
+                            </select>
+                        </div>
+                    </div>
 
 
-                        <!-- Nút chức năng bên phải -->
-                        <div class="text-end mt-3">
-                            <a th:href="@{/admin/product/view-add}" class="btn btn-primary mb-2">
+                    <!-- Nút chức năng -->
+                    <div class="row mt-3">
+                        <div class="col-12 text-end">
+                            <a th:href="@{/admin/product/view-add}" class="btn btn-primary shadow-sm">
                                 ➕ Thêm sản phẩm
                             </a>
-                            <a th:href="@{/admin/product/view-atribute}" class="btn btn-outline-secondary ms-2">
+                            <a th:href="@{/admin/product/view-atribute}" class="btn btn-outline-secondary ms-2 shadow-sm">
                                 ⚙️ Thuộc tính
                             </a>
                         </div>
-
                     </div>
                 </form>
+
 
 
                 <div th:if="${#lists.isEmpty(listProduct.content)}" class="d-flex flex-column justify-content-center align-items-center" style="height: 400px;">
@@ -136,10 +150,12 @@
                             </td>
                             <td style="text-align: center">
                                 <a class="btn btn-outline-warning hienThiThongTinModal" th:attr="data-id=${sp.id}" style="width: 70px" title="Sửa" data-bs-toggle="modal" data-bs-target="#modalChinhSua">
-                                    <i class="bi bi-pencil-square"></i>
+<!--                                    <i class="bi bi-pencil-square"></i>-->
+                                    ✏️️
                                 </a>
                                 <a class="btn btn-outline-info" th:href="@{'/admin/product/view-detail/' + ${sp.id}}" style="width: 70px" title="Xem">
-                                    <i class="bi bi-eye"></i>
+<!--                                    <i class="bi bi-eye"></i>-->
+                                    ️ 👁️
                                 </a>
                             </td>
                         </tr>
