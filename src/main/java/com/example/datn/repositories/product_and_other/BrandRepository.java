@@ -34,4 +34,9 @@ public interface BrandRepository extends JpaRepository<Brand, Integer> {
 
     @Query("SELECT MAX(b.code) FROM Brand b WHERE b.code LIKE 'BR%'")
     String findMaxCodeBrand();
+
+    //Khanh
+    @Query("SELECT b FROM Brand b WHERE b.status = true")
+    List<Brand> findAllActive();
+
 }

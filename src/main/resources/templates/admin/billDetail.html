@@ -115,7 +115,7 @@
                 </tr>
                 <tr>
                     <td colspan="5" class="text-end fw-bold text-success">Tổng thanh toán:</td>
-                    <td th:text="${#numbers.formatDecimal(total - (bill.discountAmount != null ? bill.discountAmount : 0), 0, 'POINT', 0, 'COMMA') + '₫'}"
+                    <td th:text="${#numbers.formatDecimal(bill.total_checkout, 0, 'POINT', 0, 'COMMA') + '₫'}"
                         class="text-success fw-bold">0₫</td>
                 </tr>
                 </tfoot>
