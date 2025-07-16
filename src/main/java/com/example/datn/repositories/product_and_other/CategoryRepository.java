@@ -28,4 +28,9 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
             "ORDER BY c.id DESC")
     Page<Category> search(String name, Boolean status, Pageable pageable);
 
+    //Khanh
+    @Query("SELECT b FROM Category b WHERE b.status = true")
+    List<Category> findAllActive();
+
+
 }
