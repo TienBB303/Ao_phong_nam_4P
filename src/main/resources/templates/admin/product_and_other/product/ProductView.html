@@ -90,17 +90,15 @@
 
 
                         <!-- Nút chức năng bên phải -->
-                        <div class="col-md-4 text-end">
-                            <label class="form-label d-none d-md-block">&nbsp;</label>
-                            <div class="d-flex justify-content-end gap-2">
-                                <a th:href="@{/admin/product/view-add}" class="btn btn-outline-success">
-                                    <i class="bi bi-plus-circle me-1"></i> Thêm sản phẩm
-                                </a>
-                                <a th:href="@{/admin/product/view-atribute}" class="btn btn-outline-secondary">
-                                    <i class="bi bi-sliders me-1"></i> Thuộc tính
-                                </a>
-                            </div>
+                        <div class="text-end mt-3">
+                            <a th:href="@{/admin/product/view-add}" class="btn btn-primary mb-2">
+                                ➕ Thêm sản phẩm
+                            </a>
+                            <a th:href="@{/admin/product/view-atribute}" class="btn btn-outline-secondary ms-2">
+                                ⚙️ Thuộc tính
+                            </a>
                         </div>
+
                     </div>
                 </form>
 

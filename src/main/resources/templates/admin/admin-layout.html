@@ -127,11 +127,12 @@
 <!-- [ Sidebar Menu ] start -->
 <nav class="pc-sidebar">
     <div class="navbar-wrapper">
-        <div class="m-header">
-            <a th:href="@{/admin}" class="b-brand text-primary">
-                <img th:src="@{/assets/images/logo-dark.svg}" alt="logo">
+        <div class="m-header" style="text-align: center;">
+            <a th:href="@{/}" class="b-brand text-primary">
+                <img th:src="@{/assets/images/logo1.png}" alt="logo" style="width: 100px;">
             </a>
         </div>
+
         <div class="navbar-content">
             <ul class="pc-navbar">
                 <li class="pc-item">
@@ -141,33 +142,33 @@
                     </a>
                 </li>
                 <li class="pc-item">
-                    <a href="#" class="pc-link">
+                    <a th:href="@{/admin/sell-inline/hien-thi}" class="pc-link">
                         <span class="pc-micon"><i class="ti ti-shopping-cart"></i></span>
                         <span class="pc-mtext">Bán hàng tại quầy</span>
                     </a>
                 </li>
                 <li class="pc-item">
-                    <a href="#" class="pc-link">
+                    <a th:href="@{/admin/bill/view}" class="pc-link">
                         <span class="pc-micon"><i class="ti ti-vocabulary"></i></span>
                         <span class="pc-mtext">Quản lý hóa đơn</span>
                     </a>
                 </li>
                 <li class="pc-item pc-hasmenu">
-                    <a href="#!" class="pc-link">
+                    <a href="javascript:void(0);" class="pc-link">
                         <span class="pc-micon"><i class="ti ti-shirt"></i></span>
                         <span class="pc-mtext">Quản lý sản phẩm</span>
                         <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
                     </a>
                     <ul class="pc-submenu">
-                        <li class="pc-item"><a class="pc-link" href="/admin/product/hien-thi">Sản phẩm</a></li>
+                        <li class="pc-item"><a class="pc-link" th:href="@{/admin/product/hien-thi}">Sản phẩm</a></li>
                         <li class="pc-item pc-hasmenu">
-                            <a href="#!" class="pc-link">Thuộc tính<span class="pc-arrow"><i data-feather="chevron-right"></i></span></a>
+                            <a href="javascript:void(0);" class="pc-link">Thuộc tính<span class="pc-arrow"><i data-feather="chevron-right"></i></span></a>
                             <ul class="pc-submenu">
-                                <li class="pc-item"><a class="pc-link" href="/admin/color/hien-thi">Màu sắc</a></li>
-                                <li class="pc-item"><a class="pc-link" href="/admin/category/hien-thi">Danh mục</a></li>
-                                <li class="pc-item"><a class="pc-link" href="/admin/brand/hien-thi">Hãng</a></li>
-                                <li class="pc-item"><a class="pc-link" href="/admin/material/hien-thi">Chất liệu</a></li>
-                                <li class="pc-item"><a class="pc-link" href="/admin/size/hien-thi">Kích thước</a></li>
+                                <li class="pc-item"><a class="pc-link" th:href="@{/admin/color/hien-thi}">Màu sắc</a></li>
+                                <li class="pc-item"><a class="pc-link" th:href="@{/admin/category/hien-thi}">Danh mục</a></li>
+                                <li class="pc-item"><a class="pc-link" th:href="@{/admin/brand/hien-thi}">Hãng</a></li>
+                                <li class="pc-item"><a class="pc-link" th:href="@{/admin/material/hien-thi}">Chất liệu</a></li>
+                                <li class="pc-item"><a class="pc-link" th:href="@{/admin/size/hien-thi}">Kích thước</a></li>
                             </ul>
                         </li>
                     </ul>
@@ -179,18 +180,18 @@
                     </a>
                 </li>
                 <li class="pc-item pc-hasmenu">
-                    <a href="#!" class="pc-link">
+                    <a href="javascript:void(0);" class="pc-link">
                         <span class="pc-micon"><i class="ti ti-users"></i></span>
                         <span class="pc-mtext">Quản lý tài khoản</span>
                         <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
                     </a>
                     <ul class="pc-submenu">
-                        <li class="pc-item"><a class="pc-link" href="/admin/employee">Nhân viên</a></li>
-                        <li class="pc-item"><a class="pc-link" href="#!">Khách hàng</a></li>
+                        <li class="pc-item"><a class="pc-link" th:href="@{/admin/employee}">Nhân viên</a></li>
+                        <li class="pc-item"><a class="pc-link" th:href="@{/admin/customer/view}">Khách hàng</a></li>
                     </ul>
                 </li>
                 <li class="pc-item pc-hasmenu">
-                    <a href="#!" class="pc-link">
+                    <a href="javascript:void(0);" class="pc-link">
                         <span class="pc-micon"><i class="ti ti-antenna-bars-5"></i></span>
                         <span class="pc-mtext">Thống kê</span>
                         <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
@@ -215,12 +216,37 @@
 <script th:src="@{/assets/js/plugins/simplebar.min.js}"></script>
 <script th:src="@{/assets/js/plugins/bootstrap.min.js}"></script>
 <script th:src="@{/assets/js/fonts/custom-font.js}"></script>
-<script th:src="@{/assets/js/pcoded.js}"></script>
+<script th:src="@{/assets/js/plugins/pcoded.js}"></script>
 <script th:src="@{/assets/js/plugins/feather.min.js}"></script>
 <script>layout_change('light');</script>
 <script>change_box_container('false');</script>
 <script>layout_rtl_change('false');</script>
 <script>preset_change("preset-1");</script>
 <script>font_change("Public-Sans");</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const menuLinks = document.querySelectorAll(".pc-hasmenu > a");
+
+        menuLinks.forEach(function (link) {
+            link.addEventListener("click", function (e) {
+                e.preventDefault();
+                const parent = this.parentElement;
+                const isActive = parent.classList.contains("active");
+
+                // Toggle active
+                if (isActive) {
+                    parent.classList.remove("active");
+                } else {
+                    parent.classList.add("active");
+                }
+            });
+        });
+
+        // Kích hoạt feather icons nếu có
+        if (typeof feather !== 'undefined') {
+            feather.replace();
+        }
+    });
+</script>
 </body>
 </html>
