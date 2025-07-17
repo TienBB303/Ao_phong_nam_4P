@@ -22,38 +22,6 @@ public class ProductDetailController {
         return productService.detailProductDetail(id);
     }
 
-//    @PostMapping("/update")
-//    public String updateProductDetail(@RequestParam("ProductDetailId") Integer id,
-//                                      @RequestParam("productPriceUpdate") BigDecimal price,
-//                                      @RequestParam("productQuantityUpdate") Integer quantity,
-//                                      RedirectAttributes redirectAttributes, Model model) {
-//        ProductDetail productDetail = productService.findProductDetailById(id);
-//        if(String.valueOf(price) == null || String.valueOf(price).isEmpty() || price.compareTo(BigDecimal.ZERO) <= 0){
-//            redirectAttributes.addFlashAttribute("alert", "Giá không hợp lệ");
-//            redirectAttributes.addFlashAttribute("type", "error");
-//            return "redirect:/admin/product/view-detail/" + productDetail.getProduct().getId();
-//        }
-////        if(price.compareTo(BigDecimal.ZERO) <= 0){
-////            redirectAttributes.addFlashAttribute("alert", "Giá không được nhỏ hơn 0");
-////            redirectAttributes.addFlashAttribute("type", "error");
-////            return "redirect:/admin/product/view-detail/" + productDetail.getProduct().getId();
-////        }
-//        if(String.valueOf(quantity) == null || String.valueOf(quantity).isEmpty() ){
-//            redirectAttributes.addFlashAttribute("alert", "Số lượng không được để trống");
-//            redirectAttributes.addFlashAttribute("type", "error");
-//            return "redirect:/admin/product/view-detail/" + productDetail.getProduct().getId();
-//        }
-//        if(quantity <= 0){
-//            redirectAttributes.addFlashAttribute("alert", "Số lượng không được nhỏ hơn 0");
-//            redirectAttributes.addFlashAttribute("type", "error");
-//            return "redirect:/admin/product/view-detail/" + productDetail.getProduct().getId();
-//        }
-//        productDetail.setPrice(price);
-//        productDetail.setQuantity(quantity);
-//
-//        productService.updateProductDetail(productDetail);
-//        return "redirect:/admin/product/view-detail/" + productDetail.getProduct().getId();
-//    }
     @PostMapping("/update")
     public String updateProductDetail(
             @RequestParam("ProductDetailId") Integer id,

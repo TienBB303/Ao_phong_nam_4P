@@ -25,4 +25,6 @@ public interface ImageRepository extends JpaRepository<Image, Integer> {
     List<ProductDetail> findByProductIdAndColorId(@Param("productId") Integer productId,
                                                   @Param("colorId") Integer colorId);
 
+    @Query("select i from Image i where i.productDetail.id = :id")
+    List<ProductDetail> findAllImageByProductDetailId(Integer id);
 }

@@ -221,6 +221,12 @@ public class SellingInlineController {
 
     @PostMapping("/thanh-toan")
     @ResponseBody
+// <<<<<<< TienBB
+//     public ResponseEntity<?> checkOut(@RequestParam("idCart") Integer idCart,
+//                                       @RequestParam("typePayment") String typePayment) {
+//         try {
+//             billService.checkOut(idCart, typePayment);
+// =======
     public ResponseEntity<?> checkOut(@RequestParam("idCart") Integer idCart, HttpSession session) {
         try {
             // Lấy thông tin khách hàng đã chọn cho cart này
@@ -238,6 +244,7 @@ public class SellingInlineController {
                 session.setAttribute("cartCustomers", cartCustomers);
             }
 
+// >>>>>>> master
             return ResponseEntity.ok("Thanh toán thành công!");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -265,6 +272,7 @@ public class SellingInlineController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
 
     @PostMapping("/remove-discount")
     @ResponseBody

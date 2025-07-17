@@ -41,28 +41,6 @@
                                        th:value="${param.productNameSearch}">
                             </div>
                         </div>
-                        <div class="col-md-2">
-                            <label for="status_search" class="form-label">Loại sản phẩm</label>
-                            <select id="status_search" name="productStatusSearch" class="form-select shadow-sm">
-                                <option value="" th:selected="${productStatusSearch == null}">Tất cả trạng thái</option>
-                                <option value="true" th:selected="${productStatusSearch == true}">Hoạt động</option>
-                                <option value="false" th:selected="${productStatusSearch == false}">Không hoạt động</option>
-                            </select>
-                        </div>
-                        <div class="col-md-1">
-                            <button type="submit" class="btn btn-primary" title="Tìm kiếm" style="width: 80px;">
-                                🔍
-                            </button>
-                        </div>
-                        <div class="col-md-1">
-                            <button type="button" class="btn btn-secondary" id="clear_search" title="Xóa tìm kiếm" style="width: 80px;">
-                                🧹
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Dòng dropdown: Loại - Hãng - Chất liệu -->
-                    <div class="row g-3 mb-3">
                         <div class="col-md-4">
                             <label for="category_search" class="form-label">Loại sản phẩm</label>
                             <select id="category_search" name="productCategorySearch" class="form-select shadow-sm">
@@ -75,6 +53,10 @@
                                 </option>
                             </select>
                         </div>
+                    </div>
+
+                    <!-- Dòng dropdown: Loại - Hãng - Chất liệu -->
+                    <div class="row g-3 mb-3">
                         <div class="col-md-4">
                             <label for="brand_search" class="form-label">Hãng sản xuất</label>
                             <select id="brand_search" name="productBrandSearch" class="form-select shadow-sm">
@@ -98,6 +80,24 @@
                                         th:selected="${mate.id == productMaterialSearch}">
                                 </option>
                             </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="status_search" class="form-label">Loại sản phẩm</label>
+                            <select id="status_search" name="productStatusSearch" class="form-select shadow-sm">
+                                <option value="" th:selected="${productStatusSearch == null}">Tất cả trạng thái</option>
+                                <option value="true" th:selected="${productStatusSearch == true}">Hoạt động</option>
+                                <option value="false" th:selected="${productStatusSearch == false}">Không hoạt động</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1 d-grid">
+                            <button type="submit" class="btn btn-primary mt-4" id="search_product_btn" title="Tìm kiếm">
+                                🔍
+                            </button>
+                        </div>
+                        <div class="col-md-1 d-grid">
+                            <button type="button" class="btn btn-secondary mt-4" id="clear_search" title="Xóa tìm kiếm">
+                                🧹
+                            </button>
                         </div>
                     </div>
 

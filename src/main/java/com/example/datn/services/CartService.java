@@ -345,6 +345,10 @@ public class CartService {
         }
     }
 
+//    private void chosePaymentMethod(Integer cartId, String paymentMethod) throws Exception {
+//        Cart cart = cartRepository.findByIdCart(cartId);
+//        cart.set
+//    }
 
 
 }

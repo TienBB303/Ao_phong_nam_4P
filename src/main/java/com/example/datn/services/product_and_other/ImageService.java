@@ -41,7 +41,8 @@ public class ImageService {
 
             Image image = new Image();
             image.setName(file.getOriginalFilename());
-            image.setPath_file("/pictures/" + fileName);
+//            image.setPath_file("/pictures/" + fileName);
+            image.setPath_file(fileName);
             image.setProductDetail(productDetail);
             System.out.println("Lưu ảnh: " + file.getOriginalFilename());
             return imageRepository.save(image); // Lưu vào DB

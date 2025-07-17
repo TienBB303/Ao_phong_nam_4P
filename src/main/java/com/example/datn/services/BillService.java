@@ -5,6 +5,7 @@ import com.example.datn.entities.Bill;
 import com.example.datn.entities.BillDetails;
 import com.example.datn.entities.Customer;
 import com.example.datn.entities.Discount;
+import com.example.datn.entities.PaymentMethod;
 import com.example.datn.entities.Selling.Cart;
 import com.example.datn.entities.Selling.CartDetail;
 import com.example.datn.entities.product_and_other.ProductDetail;
@@ -48,7 +49,11 @@ public class BillService {
     DiscountService discountService;
 
     @Autowired
+// <<<<<<< TienBB
+    PaymentMethodService paymentMethodService;
+// =======
     CustomerRepository customerRepository;
+// >>>>>>> master
 //
 //    @Autowired
 //    CustomerService customerService;
@@ -121,7 +126,11 @@ public class BillService {
         }
     }
 
-    public void checkOut(Integer cartId, Integer customerId) throws Exception{
+// <<<<<<< TienBB
+//     public void checkOut(Integer cartId, String paymentMethodStr) throws Exception{
+// =======
+    public void checkOut(Integer cartId, String paymentMethodStr, Integer customerId) throws Exception{
+// >>>>>>> master
         Cart cart = cartRepository.findByIdCart(cartId);
         if(cart == null || cart.getStatus() == false){
             throw new Exception("Giỏ hàng không tồn tại hoặc đã được thanh toán");
@@ -146,6 +155,14 @@ public class BillService {
         bill.setTypeBill(false); // bán tại quầy
         bill.setDeliveryType(0); // 0 = không giao hàng
         bill.setShippingFee(BigDecimal.ZERO);
+// <<<<<<< TienBB
+//         bill.setName("tien");
+//         bill.setPhoneNumber("0365142537");
+//         bill.setEmail("tien@gmail.com");
+
+        PaymentMethod paymentMethod = paymentMethodService.findByPaymentMethodName(paymentMethodStr);
+        bill.setPaymentMethod(paymentMethod);
+// =======
         // Sử dụng thông tin khách hàng nếu có, nếu không thì dùng thông tin mặc định
         if (customerId != null) {
             try {
@@ -177,6 +194,7 @@ public class BillService {
             bill.setCustomer(null);
         }
 //        bill.setPaymentMethod(1); // sửa sau, tạm thời fix để bán thử
+// >>>>>>> master
 
         bill.setDiscount(cart.getDiscount());
         bill.setTotal_checkout(totalAmount.subtract(cart.getTotal_discount()));
@@ -198,6 +216,7 @@ public class BillService {
         cart.setUpdated_at(new Date());
         cartRepository.save(cart);
     }
+
     public Bill updateStatus(String statusString, Integer id) {
         Bill bill = billRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn có id: " + id));
