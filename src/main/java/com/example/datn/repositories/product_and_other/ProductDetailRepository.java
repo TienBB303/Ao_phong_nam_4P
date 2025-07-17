@@ -34,4 +34,5 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, In
 
     ProductDetail findByProductIdAndColorIdAndSizeId(Integer productId, Integer colorId, Integer sizeId);
 
+
 }

@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 
 
 @Controller
-public class BarcodeController {
+public class BarcodeAndImageController {
 
     @GetMapping("/barcode-images/{filename:.+}")
     @ResponseBody
@@ -29,4 +29,20 @@ public class BarcodeController {
                 .contentType(MediaType.IMAGE_PNG)
                 .body(resource); // KHÔNG cần ép kiểu nữa
     }
+
+    @GetMapping("/image-detail/{filename:.+}")
+    @ResponseBody
+    public ResponseEntity<Resource> getImageDetail(@PathVariable String filename) throws IOException {
+        Path imagePath = Paths.get("D:/pictures").resolve(filename); // Thư mục chứa ảnh
+        Resource resource = new UrlResource(imagePath.toUri());
+
+        if (!resource.exists() || !resource.isReadable()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_JPEG) // hoặc IMAGE_PNG tùy loại ảnh
+                .body(resource);
+    }
+
 }

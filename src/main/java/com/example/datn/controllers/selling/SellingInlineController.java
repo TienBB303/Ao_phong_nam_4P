@@ -202,9 +202,10 @@ public class SellingInlineController {
 
     @PostMapping("/thanh-toan")
     @ResponseBody
-    public ResponseEntity<?> checkOut(@RequestParam("idCart") Integer idCart) {
+    public ResponseEntity<?> checkOut(@RequestParam("idCart") Integer idCart,
+                                      @RequestParam("typePayment") String typePayment) {
         try {
-            billService.checkOut(idCart);
+            billService.checkOut(idCart, typePayment);
             return ResponseEntity.ok("Thanh toán thành công!");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -232,6 +233,7 @@ public class SellingInlineController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
 
     @PostMapping("/remove-discount")
     @ResponseBody

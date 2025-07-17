@@ -241,7 +241,7 @@ $(document).on('click', '.delete-cart', function (){
 // thanh toán
 $('#thanhToanBtn').click(function () {
     const idCart = $(this).data('id');
-
+    const typePayment = $('#type_payment_select').val();
 
     Swal.fire({
         title: 'Xác nhận thanh toán?',
@@ -254,7 +254,7 @@ $('#thanhToanBtn').click(function () {
             $.ajax({
                 url: '/admin/sell-inline/thanh-toan',
                 method: 'POST',
-                data: { idCart: idCart },
+                data: { idCart: idCart , typePayment: typePayment },
                 success: function (res) {
                     Swal.fire({
                         icon: 'success',
@@ -319,7 +319,6 @@ $('#discount_select').change(function () {
         }
     });
 });
-
 
 $('#remove_discount').click(function () {
     const idCart = $(this).data('id');

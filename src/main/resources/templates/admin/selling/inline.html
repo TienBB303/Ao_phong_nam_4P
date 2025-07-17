@@ -164,24 +164,24 @@
                     </div>
                 </div>
                 <div th:if="${idCart != null}" class="row gx-3 mb-3">
-                    <!-- tìm giảm giá -->
+                    <!-- Chọn hình thức thanh toán + giao hàng -->
                     <div class="col-md-6">
-<!--                        <div class="card shadow-sm rounded-3 h-100">-->
-<!--                            <div class="card-header fw-bold bg-light">-->
-<!--                                Chọn giảm giá-->
-<!--                            </div>-->
-<!--                            <div class="card-body py-2">-->
-<!--                                <div class="row gx-1 gy-2 align-items-end">-->
-<!--                                    <div class="col-md-12 position-relative">-->
-<!--                                        <input type="text" id="discount_search" class="form-control" placeholder="Tìm phiếu giảm giá..." autocomplete="off">-->
-<!--                                        <div id="suggestionBox_discount"-->
-<!--                                             class="border bg-white rounded mt-1 position-absolute z-10 shadow-sm"-->
-<!--                                             style="width: 100%; display: none; max-height: 300px; overflow-y: auto; z-index: 1055;">-->
-<!--                                        </div>-->
-<!--                                    </div>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
+                        <div class="card shadow-sm rounded-3">
+                            <div class="card-header fw-bold bg-light">
+                                Chọn hình thức thanh toán
+                            </div>
+                            <div class="card-body py-2">
+                                <div class="row gx-1 gy-2 align-items-end">
+                                    <div class="position-relative d-flex gap-2">
+                                        <input type="hidden" name="idCart" th:value="${idCart}" />
+                                        <select class="form-select" id="type_payment_select" name="typePayment">
+                                            <option value="Tiền mặt">Tiền mặt</option>
+                                            <option value="Chuyển khoản">Chuyển khoản</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Thông tin -->

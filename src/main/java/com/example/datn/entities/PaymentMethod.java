@@ -1,16 +1,23 @@
 package com.example.datn.entities;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
-@Data
+//-- Bảng payment_method
+//CREATE TABLE payment_method (
+//id INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+//name NVARCHAR(100)
+//);
 @Entity
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "payment_method")
 public class PaymentMethod {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Integer id;
-    private String name;
+    private int id;
 
+    private String name;
 }

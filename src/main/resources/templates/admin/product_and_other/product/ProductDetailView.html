@@ -103,6 +103,7 @@
                             <thead class="table-primary">
                             <tr>
                                 <th scope="col">Tên</th>
+                                <th scope="col">Ảnh</th>
                                 <th scope="col">Barcode</th>
                                 <th scope="col">Màu</th>
                                 <th scope="col">Kích cỡ</th>
@@ -117,11 +118,23 @@
                                     Tên
                                 </td>
                                 <td>
+                                    <img th:if="${!detail.images.isEmpty()}"
+                                         th:src="@{'/image-detail/' + ${detail.images.get(0).path_file}}"
+                                         width="100" alt="Ảnh sản phẩm"/>
+                                    <span th:if="${detail.images.isEmpty()}">Không có ảnh</span>
+                                </td>
+                                <td>
                                     <img th:src="@{'/barcode-images/' + ${detail.barcode} + '.png'}" width="150" alt="Barcode"/>
                                 </td>
-                                <td th:text="${detail.color.name}">Màu</td>
+                                <td>
+                                    <span class="px-2 py-1 rounded text-white border shadow-sm d-inline-block text-center"
+                                          style="width: 80px"
+                                          th:text="${detail.color.name}"
+                                          th:style="'background-color:' + ${detail.color.code}">
+                                    </span>
+                                </td>
                                 <td th:text="${detail.size.name}">Size</td>
-                                <td th:text="${detail.price}">Giá</td>
+                                <td th:text="${detail.price}" class="giaVND">Giá</td>
                                 <td th:text="${detail.quantity}">Số lượng</td>
                                 <td style="text-align: center">
                                     <a class="btn btn-outline-warning hienThiThongTinModal"
@@ -149,7 +162,7 @@
                                     <input type="hidden" id="product_detail_id" name="ProductDetailId">
                                     <div class="mb-3">
                                         <label for="product_price_update" class="form-label">Giá</label><span class="text-danger">*</span>
-                                        <input type="number" class="form-control" id="product_price_update" name="productPriceUpdate" placeholder="Nhập giá...">
+                                        <input type="number" class="form-control giaVND" id="product_price_update" name="productPriceUpdate" placeholder="Nhập giá...">
 
                                     </div>
                                     <div class="mb-3">
@@ -177,7 +190,7 @@
             <script th:if="${alert != null}" th:inline="javascript">
                 Swal.fire({
                     toast: true,
-                    icon: [[${type}]],
+                    icon: /*[[${type}]]*/ null,
                     title: '[[${alert}]]', // Thông báo từ controller
                     position: 'top-end',
                     showConfirmButton: false,
@@ -210,5 +223,21 @@
     </div>
 </section>
 <footer th:replace="~{admin/fragments/footer :: footer}"></footer>
+<script>
+    function formatCurrencyVND(value) {
+        return Number(value).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+    }
+
+    $(document).ready(function () {
+        $('.giaVND').each(function () {
+            const raw = $(this).text().trim(); // lấy text thay vì value
+            if (!isNaN(raw) && raw.length > 0) {
+                const formatted = formatCurrencyVND(raw);
+                $(this).text(formatted); // gán lại text đã format
+            }
+        });
+    });
+</script>
+
 </body>
 </html>
