@@ -14,12 +14,35 @@
         <div class="container mt-5">
             <div class="row g-4">
                 <!-- Ảnh sản phẩm -->
-                <div class="col-md-6">
+                <div class="col-md-6" th:if="${!listProductDetail.isEmpty()}">
+                    <!-- Container giới hạn kích thước -->
                     <div class="position-relative bg-light rounded shadow-sm p-3">
-                        <!-- Ảnh sản phẩm -->
-                        <img th:src="@{/images/default-product.jpg}" class="img-fluid rounded" alt="Hình ảnh sản phẩm">
+                        <div id="productImageCarousel" class="carousel slide" data-mdb-ride="carousel" style="max-width: 100%; height: 450px; overflow: hidden;">
+                            <div class="carousel-inner h-100">
+                                <div th:each="image, iterStat : ${uniqueImages}"
+                                     th:class="'carousel-item h-100' + (${iterStat.index == 0} ? ' active' : '')">
+                                    <img th:src="@{'/image-detail/' + ${image.path_file}}"
+                                         class="d-block mx-auto"
+                                         alt="Ảnh sản phẩm"
+                                         style="max-height: 450px; object-fit: contain;">
+                                </div>
+                                <div th:if="${uniqueImages.isEmpty()}">
+                                    <p class="text-center">Không có ảnh</p>
+                                </div>
+                            </div>
+
+
+                            <!-- Nút điều hướng -->
+                            <button class="carousel-control-prev" type="button" data-mdb-target="#productImageCarousel" data-mdb-slide="prev">
+                                <span class="carousel-control-prev-icon"></span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-mdb-target="#productImageCarousel" data-mdb-slide="next">
+                                <span class="carousel-control-next-icon"></span>
+                            </button>
+                        </div>
                     </div>
                 </div>
+
 
                 <!-- Thông tin sản phẩm -->
                 <div class="col-md-6">

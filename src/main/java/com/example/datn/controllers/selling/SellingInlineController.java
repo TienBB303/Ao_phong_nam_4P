@@ -227,7 +227,7 @@ public class SellingInlineController {
 //         try {
 //             billService.checkOut(idCart, typePayment);
 // =======
-    public ResponseEntity<?> checkOut(@RequestParam("idCart") Integer idCart, HttpSession session) {
+    public ResponseEntity<?> checkOut(@RequestParam("idCart") Integer idCart,@RequestParam("typePayment") String typePayment, HttpSession session) {
         try {
             // Lấy thông tin khách hàng đã chọn cho cart này
             Map<Integer, Integer> cartCustomers = (Map<Integer, Integer>) session.getAttribute("cartCustomers");
@@ -236,7 +236,7 @@ public class SellingInlineController {
                 customerId = cartCustomers.get(idCart);
             }
 
-            billService.checkOut(idCart, customerId);
+            billService.checkOut(idCart, typePayment, customerId);
 
             // Xóa thông tin khách hàng khỏi session sau khi thanh toán thành công
             if (cartCustomers != null) {

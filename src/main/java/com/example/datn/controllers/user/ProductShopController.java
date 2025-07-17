@@ -1,5 +1,6 @@
 package com.example.datn.controllers.user;
 
+import com.example.datn.entities.product_and_other.Image;
 import com.example.datn.entities.product_and_other.Product;
 import com.example.datn.entities.product_and_other.ProductDetail;
 import com.example.datn.repositories.product_and_other.BrandRepository;
@@ -18,8 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 public class ProductShopController {
@@ -98,6 +98,22 @@ public class ProductShopController {
             return "redirect:/product";
         }
 
+        List<ProductDetail> listProductDetail = productService.findAllProductDetailByIdProduct(product.getId());
+
+        Set<String> seenFilenames = new HashSet<>();
+        List<Image> uniqueImages = new ArrayList<>();
+
+        for (ProductDetail detail : listProductDetail) {
+            for (Image image : detail.getImages()) {
+                if (seenFilenames.add(image.getPath_file())) {
+                    uniqueImages.add(image);
+                }
+            }
+        }
+
+        model.addAttribute("listProductDetail", listProductDetail);
+        model.addAttribute("uniqueImages", uniqueImages);
+
         model.addAttribute("product", product);
         model.addAttribute("productDetails", productService.findAllProductDetailByIdProduct(product.getId()));
         model.addAttribute("totalQuantity", productService.tongSoLuongSPCT(product.getId()));
@@ -109,6 +125,5 @@ public class ProductShopController {
         model.addAttribute("sizes", productService.findSizesByProductId(product.getId()));
         return "user/productDetail";
     }
-
 
 }

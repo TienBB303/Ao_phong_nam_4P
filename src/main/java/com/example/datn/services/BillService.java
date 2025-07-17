@@ -193,7 +193,6 @@ public class BillService {
             bill.setEmail("");
             bill.setCustomer(null);
         }
-//        bill.setPaymentMethod(1); // sửa sau, tạm thời fix để bán thử
 // >>>>>>> master
 
         bill.setDiscount(cart.getDiscount());
