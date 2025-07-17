@@ -84,15 +84,29 @@
                             <div class="card-body py-2">
                                 <div class="row gx-1 gy-2 align-items-end">
                                     <div class="col-md-11 position-relative">
-                                        <input type="hidden" id="customer_id" class="form-control" name="customerId">
-                                        <input type="text" id="customer_name" class="form-control" name="customerName" placeholder="Tìm khách hàng...">
+                                        <input type="hidden" id="selectedCustomerId" name="customerId" th:value="${selectedCustomer?.id}">
+                                        <input type="text" id="customerSearchInput" class="form-control"
+                                               th:value="${selectedCustomer?.name}"
+                                               placeholder="Tìm khách hàng theo tên hoặc SĐT..." autocomplete="off">
+                                        <div id="customerSuggestionBox"
+                                             class="border bg-white rounded mt-1 position-absolute shadow-sm"
+                                             style="width: 100%; display: none; max-height: 300px; overflow-y: auto; z-index: 1055;">
+                                        </div>
                                     </div>
                                     <div class="col-md-1">
                                         <div class="input-group">
-                                            <span class="input-group-text bg-white" id="customerSearch" data-bs-toggle="modal" data-bs-target="#customerModal">
-                                                <i class="bi bi-person-fill"></i>
-                                            </span>
+                                            <button type="button" class="btn btn-outline-secondary" id="clearCustomerBtn" title="Xóa khách hàng">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
                                         </div>
+                                    </div>
+                                </div>
+                                <!-- Hiển thị thông tin khách hàng đã chọn -->
+                                <div id="selectedCustomerInfo" class="mt-2" th:style="${selectedCustomer != null ? 'display: block;' : 'display: none;'}">
+                                    <div class="alert alert-info py-2 mb-0">
+                                        <i class="bi bi-person-check-fill me-2"></i>
+                                        <strong>Khách hàng:</strong> <span id="customerDisplayName" th:text="${selectedCustomer?.name}"></span><br>
+                                        <small><strong>SĐT:</strong> <span id="customerDisplayPhone" th:text="${selectedCustomer?.phoneNumber}"></span> | <strong>Email:</strong> <span id="customerDisplayEmail" th:text="${selectedCustomer?.account?.email ?: 'Chưa có email'}"></span></small>
                                     </div>
                                 </div>
                             </div>
@@ -192,7 +206,7 @@
                             </div>
                             <div class="card-body py-2">
                                 <div class="row gx-1 gy-2 align-items-end">
-<!--                                    <div class="col-md-12 position-relative">-->
+                                    <!--                                    <div class="col-md-12 position-relative">-->
                                     <div class="position-relative d-flex gap-2">
                                         <select class="form-select" id="discount_select" name="discountId" th:attr="data-id=${idCart}">
                                             <option value="">-- Chọn mã giảm giá --</option>

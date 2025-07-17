@@ -3,6 +3,7 @@ package com.example.datn.controllers.selling;
 import com.example.datn.dto.selling_inline.BillDetailDto;
 import com.example.datn.dto.selling_inline.BillSessionDto;
 import com.example.datn.dto.selling_inline.ProductDetailDto;
+import com.example.datn.entities.Customer;
 import com.example.datn.entities.Discount;
 import com.example.datn.entities.Selling.Cart;
 import com.example.datn.entities.Selling.CartDetail;
@@ -11,6 +12,7 @@ import com.example.datn.entities.product_and_other.ProductDetail;
 import com.example.datn.repositories.product_and_other.ProductDetailRepository;
 import com.example.datn.services.BillService;
 import com.example.datn.services.CartService;
+import com.example.datn.services.CustomerService;
 import com.example.datn.services.DiscountService;
 import com.example.datn.services.product_and_other.ProductService;
 import com.google.zxing.qrcode.decoder.Mode;
@@ -21,10 +23,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.data.domain.PageRequest;
+
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
@@ -41,6 +43,9 @@ public class SellingInlineController {
 
     @Autowired
     private DiscountService  discountService;
+
+    @Autowired
+    private CustomerService customerService;
 
     @ModelAttribute("listProduct")
     public List<Product> listProduct() {
@@ -110,9 +115,23 @@ public class SellingInlineController {
         model.addAttribute("totalPriceDiscount",totalPriceDiscount);
         model.addAttribute("totalPriceCheckOut",totalPriceCheckOut);
 
+        // Lấy thông tin khách hàng đã chọn cho cart này
+        Map<Integer, Integer> cartCustomers = (Map<Integer, Integer>) session.getAttribute("cartCustomers");
+        Customer selectedCustomer = null;
+        if (cartCustomers != null && cartCustomers.containsKey(idCart)) {
+            try {
+                selectedCustomer = customerService.findById(cartCustomers.get(idCart));
+            } catch (Exception e) {
+                // Khách hàng có thể đã bị xóa, remove khỏi session
+                cartCustomers.remove(idCart);
+                session.setAttribute("cartCustomers", cartCustomers);
+            }
+        }
+
         model.addAttribute("idCart", idCart);
         model.addAttribute("cart",cart);
         model.addAttribute("listCartDetail",listCartDetails);
+        model.addAttribute("selectedCustomer", selectedCustomer);
         return "admin/selling/inline";
     }
 
@@ -202,10 +221,30 @@ public class SellingInlineController {
 
     @PostMapping("/thanh-toan")
     @ResponseBody
-    public ResponseEntity<?> checkOut(@RequestParam("idCart") Integer idCart,
-                                      @RequestParam("typePayment") String typePayment) {
+// <<<<<<< TienBB
+//     public ResponseEntity<?> checkOut(@RequestParam("idCart") Integer idCart,
+//                                       @RequestParam("typePayment") String typePayment) {
+//         try {
+//             billService.checkOut(idCart, typePayment);
+// =======
+    public ResponseEntity<?> checkOut(@RequestParam("idCart") Integer idCart, HttpSession session) {
         try {
-            billService.checkOut(idCart, typePayment);
+            // Lấy thông tin khách hàng đã chọn cho cart này
+            Map<Integer, Integer> cartCustomers = (Map<Integer, Integer>) session.getAttribute("cartCustomers");
+            Integer customerId = null;
+            if (cartCustomers != null && cartCustomers.containsKey(idCart)) {
+                customerId = cartCustomers.get(idCart);
+            }
+
+            billService.checkOut(idCart, customerId);
+
+            // Xóa thông tin khách hàng khỏi session sau khi thanh toán thành công
+            if (cartCustomers != null) {
+                cartCustomers.remove(idCart);
+                session.setAttribute("cartCustomers", cartCustomers);
+            }
+
+// >>>>>>> master
             return ResponseEntity.ok("Thanh toán thành công!");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -243,6 +282,115 @@ public class SellingInlineController {
             return ResponseEntity.ok("Bỏ mã giảm giá thành công");
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    // API tìm kiếm khách hàng theo tên hoặc số điện thoại
+    @GetMapping("/search-customer")
+    @ResponseBody
+    public ResponseEntity<?> searchCustomer(@RequestParam("keyword") String keyword) {
+        try {
+            if (keyword == null || keyword.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Từ khóa tìm kiếm không được để trống");
+            }
+
+            // Sử dụng repository có sẵn để tìm kiếm khách hàng
+            List<Customer> customers = customerService.searchCustomerEntity(keyword.trim(),
+                    PageRequest.of(0, 10)).getContent(); // Lấy tối đa 10 kết quả
+
+            // Chuyển đổi dữ liệu để trả về frontend
+            List<Map<String, Object>> customerList = customers.stream()
+                    .map(customer -> {
+                        Map<String, Object> customerData = new HashMap<>();
+                        customerData.put("id", customer.getId());
+                        customerData.put("name", customer.getName());
+                        customerData.put("phoneNumber", customer.getPhoneNumber());
+                        customerData.put("email", customer.getAccount() != null ? customer.getAccount().getEmail() : null);
+                        customerData.put("gender", customer.getGender() != null ? (customer.getGender() ? "Nam" : "Nữ") : "");
+                        return customerData;
+                    })
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(customerList);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi tìm kiếm khách hàng: " + e.getMessage());
+        }
+    }
+
+    // API lấy thông tin chi tiết khách hàng theo ID
+    @GetMapping("/customer/{id}")
+    @ResponseBody
+    public ResponseEntity<?> getCustomerById(@PathVariable("id") Integer customerId) {
+        try {
+            Customer customer = customerService.findById(customerId);
+            if (customer == null) {
+                return ResponseEntity.badRequest().body("Không tìm thấy khách hàng");
+            }
+
+            Map<String, Object> customerData = new HashMap<>();
+            customerData.put("id", customer.getId());
+            customerData.put("name", customer.getName());
+            customerData.put("phoneNumber", customer.getPhoneNumber());
+            customerData.put("email", customer.getAccount() != null ? customer.getAccount().getEmail() : null);
+            customerData.put("gender", customer.getGender() != null ? (customer.getGender() ? "Nam" : "Nữ") : "");
+            customerData.put("birthDate", customer.getBirthDate());
+
+            return ResponseEntity.ok(customerData);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi lấy thông tin khách hàng: " + e.getMessage());
+        }
+    }
+    // API gắn khách hàng vào cart
+    @PostMapping("/assign-customer")
+    @ResponseBody
+    public ResponseEntity<?> assignCustomerToCart(@RequestParam("cartId") Integer cartId,
+                                                  @RequestParam("customerId") Integer customerId,
+                                                  HttpSession session) {
+        try {
+            Cart cart = cartService.findCartById(cartId);
+            if (cart == null || !cart.getStatus()) {
+                return ResponseEntity.badRequest().body("Giỏ hàng không tồn tại hoặc đã được thanh toán");
+            }
+
+            Customer customer = customerService.findById(customerId);
+            if (customer == null || !customer.getIsActive()) {
+                return ResponseEntity.badRequest().body("Khách hàng không tồn tại hoặc đã bị vô hiệu hóa");
+            }
+
+            // Lưu thông tin khách hàng vào session cho cart này
+            Map<Integer, Integer> cartCustomers = (Map<Integer, Integer>) session.getAttribute("cartCustomers");
+            if (cartCustomers == null) {
+                cartCustomers = new HashMap<>();
+            }
+            cartCustomers.put(cartId, customerId);
+            session.setAttribute("cartCustomers", cartCustomers);
+
+            return ResponseEntity.ok("Đã gắn khách hàng " + customer.getName() + " vào giỏ hàng");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi gắn khách hàng: " + e.getMessage());
+        }
+    }
+    // API xóa khách hàng khỏi cart
+    @PostMapping("/clear-customer")
+    @ResponseBody
+    public ResponseEntity<?> clearCustomerFromCart(@RequestParam("cartId") Integer cartId,
+                                                   HttpSession session) {
+        try {
+            Cart cart = cartService.findCartById(cartId);
+            if (cart == null || !cart.getStatus()) {
+                return ResponseEntity.badRequest().body("Giỏ hàng không tồn tại hoặc đã được thanh toán");
+            }
+
+            // Xóa thông tin khách hàng khỏi session cho cart này
+            Map<Integer, Integer> cartCustomers = (Map<Integer, Integer>) session.getAttribute("cartCustomers");
+            if (cartCustomers != null) {
+                cartCustomers.remove(cartId);
+                session.setAttribute("cartCustomers", cartCustomers);
+            }
+
+            return ResponseEntity.ok("Đã xóa khách hàng khỏi giỏ hàng");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi xóa khách hàng: " + e.getMessage());
         }
     }
 }

@@ -366,11 +366,159 @@ $('#remove_discount').click(function () {
 //         $('#remove_discount').show();
 //     }
 // }
-//
-// $(document).ready(function () {
-//     toggleRemoveButton(); // Khi load trang
-//
-//     $('#discount_select').on('change', function () {
-//         toggleRemoveButton(); // Khi chọn lại
-//     });
-// });
+// Tìm kiếm khách hàng
+$('#customerSearchInput').on('input', function () {
+    const keyword = $(this).val();
+    if (keyword.length < 2) {
+        $('#customerSuggestionBox').hide();
+        return;
+    }
+
+    $.ajax({
+        url: '/admin/sell-inline/search-customer',
+        method: 'GET',
+        data: { keyword: keyword },
+        success: function (data) {
+            let html = '';
+            if (data.length > 0) {
+                data.forEach(function (customer) {
+                    html += '<div class="suggestion-item p-2 border-bottom cursor-pointer hover-bg-light" ' +
+                        'data-customer-id="' + customer.id + '" ' +
+                        'data-customer-name="' + customer.name + '" ' +
+                        'data-customer-phone="' + customer.phoneNumber + '" ' +
+                        'data-customer-email="' + (customer.email || 'Chưa có email') + '">' +
+                        '<div class="fw-bold">' + customer.name + '</div>' +
+                        '<small class="text-muted">SĐT: ' + customer.phoneNumber + ' | Email: ' + (customer.email || 'Chưa có email') + '</small>' +
+                        '</div>';
+                });
+            } else {
+                html = '<div class="p-2 text-muted">Không tìm thấy khách hàng nào</div>';
+            }
+            $('#customerSuggestionBox').html(html).show();
+        },
+        error: function (err) {
+            console.error('Lỗi tìm kiếm khách hàng:', err);
+            $('#customerSuggestionBox').hide();
+        }
+    });
+});
+
+// Chọn khách hàng từ danh sách gợi ý
+$(document).on('click', '.suggestion-item', function () {
+    const customerId = $(this).data('customer-id');
+    const customerName = $(this).data('customer-name');
+    const customerPhone = $(this).data('customer-phone');
+    const customerEmail = $(this).data('customer-email');
+
+    // Lưu thông tin khách hàng
+    $('#selectedCustomerId').val(customerId);
+    $('#customerSearchInput').val(customerName);
+
+    // Hiển thị thông tin khách hàng đã chọn
+    $('#customerDisplayName').text(customerName);
+    $('#customerDisplayPhone').text(customerPhone);
+    $('#customerDisplayEmail').text(customerEmail);
+    $('#selectedCustomerInfo').show();
+
+    // Ẩn danh sách gợi ý
+    $('#customerSuggestionBox').hide();
+
+    // Gọi API để gắn khách hàng vào cart hiện tại (nếu có)
+    const currentCartId = idCartFromPage; // Biến global được set từ template
+    if (currentCartId) {
+        $.ajax({
+            url: '/admin/sell-inline/assign-customer',
+            method: 'POST',
+            data: {
+                cartId: currentCartId,
+                customerId: customerId
+            },
+            success: function (response) {
+                console.log('Gắn khách hàng thành công:', response);
+            },
+            error: function (err) {
+                console.error('Lỗi gắn khách hàng:', err);
+                Swal.fire({
+                    toast: true,
+                    icon: 'error',
+                    title: 'Lỗi gắn khách hàng: ' + err.responseText,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true
+                });
+            }
+        });
+    }
+});
+
+// Xóa khách hàng đã chọn
+$('#clearCustomerBtn').on('click', function () {
+    const currentCartId = idCartFromPage;
+
+    if (currentCartId) {
+        $.ajax({
+            url: '/admin/sell-inline/clear-customer',
+            method: 'POST',
+            data: { cartId: currentCartId },
+            success: function (response) {
+                console.log('Xóa khách hàng thành công:', response);
+                // Clear UI
+                $('#selectedCustomerId').val('');
+                $('#customerSearchInput').val('');
+                $('#selectedCustomerInfo').hide();
+                $('#customerSuggestionBox').hide();
+
+                Swal.fire({
+                    toast: true,
+                    icon: 'success',
+                    title: 'Đã hủy chọn khách hàng',
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 1500,
+                    timerProgressBar: true
+                });
+            },
+            error: function (err) {
+                console.error('Lỗi xóa khách hàng:', err);
+                $('#selectedCustomerId').val('');
+                $('#customerSearchInput').val('');
+                $('#selectedCustomerInfo').hide();
+                $('#customerSuggestionBox').hide();
+
+                Swal.fire({
+                    toast: true,
+                    icon: 'warning',
+                    title: 'Đã hủy chọn khách hàng (có thể có lỗi xóa khỏi session)',
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true
+                });
+            }
+        });
+    } else {
+        $('#selectedCustomerId').val('');
+        $('#customerSearchInput').val('');
+        $('#selectedCustomerInfo').hide();
+        $('#customerSuggestionBox').hide();
+    }
+});
+
+// Ẩn danh sách gợi ý khi click ra ngoài
+$(document).on('click', function (e) {
+    if (!$(e.target).closest('#customerSearchInput, #customerSuggestionBox').length) {
+        $('#customerSuggestionBox').hide();
+    }
+});
+
+// CSS cho hover effect
+$('<style>').text(`
+    .suggestion-item:hover, .hover-bg-light:hover {
+        background-color: #f8f9fa !important;
+        cursor: pointer;
+    }
+    .cursor-pointer {
+        cursor: pointer;
+    }
+`).appendTo('head');

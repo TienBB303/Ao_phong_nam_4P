@@ -49,7 +49,9 @@ public class CustomerController {
     //Dùng DTO, có validate
     @GetMapping("/create")
     public String create(Model model) {
-        model.addAttribute("customerDto", new CustomerDto());
+        CustomerDto dto = new CustomerDto();
+        dto.setIsActive(true); // Mặc định là "Hoạt động"
+        model.addAttribute("customerDto", dto);
         return "admin/customer/customerCreate1";
     }
     // Xử lý lưu khách hàng,Dùng DTO, validate, update theo id
