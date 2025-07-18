@@ -28,7 +28,7 @@ public class RevenueController {
         RevenueSummaryDto summary = revenueService.getRevenueSummary();
         model.addAttribute("revenueSummary", summary);
         model.addAttribute("currentYear", LocalDate.now().getYear());
-        return "admin/revenue/statistic";
+        return "admin/revenue/stats";
     }
 
     // ==================== API ENDPOINTS ====================
