@@ -117,7 +117,7 @@ public class CartService {
     public Integer countAllItemInCartByCartId(Integer idCart){
         return cartDetailRepositoty.countAllItemInCartByCartId(idCart);
     }
-    
+
     public BigDecimal plusAllItemInCartByCartId(Integer idCart){
         Cart cart = cartRepository.findByIdCart(idCart);
         List<CartDetail> listCartDetails = cartRepository.findAllCartDetailByCartId(cart.getId());
@@ -345,10 +345,6 @@ public class CartService {
         }
     }
 
-//    private void chosePaymentMethod(Integer cartId, String paymentMethod) throws Exception {
-//        Cart cart = cartRepository.findByIdCart(cartId);
-//        cart.set
-//    }
 
 
 }

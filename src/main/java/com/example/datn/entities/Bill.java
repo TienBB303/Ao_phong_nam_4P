@@ -1,12 +1,14 @@
 package com.example.datn.entities;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "bill")
 public class Bill {
@@ -68,4 +70,16 @@ public class Bill {
 
     private BigDecimal total_checkout; // thành tiền
 
+    @Override
+    public String toString() {
+        return "Bill{" +
+                "id=" + id +
+                ", code='" + code + '\'' +
+                ", totalAmount=" + totalAmount +
+                ", status=" + status +
+                ", name='" + name + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", customerId=" + (customer != null ? customer.getId() : null) +
+                '}';
+    }
 }
