@@ -19,6 +19,7 @@ public class Main {
         SpringApplication.run(Main.class, args);
     }
 
+
     @Bean
     public CommandLineRunner testMailConfiguration(@Autowired JavaMailSender mailSender) {
         return args -> {
@@ -36,4 +37,5 @@ public class Main {
             logger.info("=== KẾT THÚC KIỂM TRA ===");
         };
     }
+
 }

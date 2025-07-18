@@ -1,28 +1,13 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments/head :: head}">
-    <title>Quan ly hoá đơn | 4PStore</title>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/admin-layout}">
+
+<head>
+    <title></title>
 </head>
 <body>
-<header th:replace="~{admin/fragments/header :: header}"></header>
-<div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
-<section>
-    <div class="pc-container">
-        <div class="pc-content">
-            <div class="page-header">
-                <div class="page-block">
-                    <div class="row align-items-center">
-                        <div class="col-md-12">
-                            <div class="page-header-title">
-                                <h5 class="m-b-10">Quản lý hoá đơn</h5>
-                            </div>
-                            <ul class="breadcrumb">
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="container discount-form-container">
+<div layout:fragment="content">
 
 
                     <form method="get" action="">
@@ -99,7 +84,7 @@
                             <td th:text="${bill.name}">Nguyễn Văn A</td>
                             <td th:text="${bill.phoneNumber}">0123456789</td>
                             <td th:text="${#temporals.format(bill.createdAt, 'dd-MM-yyyy HH:mm')}">---</td>
-                            <td th:text="${bill.totalAmount != null ? #numbers.formatDecimal(bill.totalAmount, 0, 'POINT', 0, 'COMMA') + '₫' : '0₫'}">0₫</td>
+                            <td th:text="${bill.total_checkout != null ? #numbers.formatDecimal(bill.total_checkout, 0, 'POINT', 0, 'COMMA') + '₫' : '0₫'}">0₫</td>
                             <td th:text="${bill.typeBill != null and bill.typeBill == true ? 'Online' : 'Tại quầy'}">Tại quầy</td>
                             <td th:text="${bill.paymentMethod != null ? bill.paymentMethod.name : 'Tiền mặt'}"></td>
                             <td>
@@ -134,10 +119,8 @@
                         </ul>
                     </div>
 
-            </div>
-        </div>
-    </div>
-</section>
+</div>
+
 <header th:replace="~{admin/fragments/footer :: footer}"></header>
 </body>
 </html>

@@ -2,72 +2,12 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{admin/admin-layout}">
+
 <head>
-    <title>Chi tiết mã giảm giá</title>
-    <meta charset="UTF-8">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 40px;
-        }
-
-        .card {
-            max-width: 600px;
-            margin: 0 auto;
-            border: 1px solid #ccc;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-        }
-
-        h2 {
-            text-align: center;
-            margin-bottom: 24px;
-            color: #333;
-        }
-
-        .info {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 16px;
-            border-bottom: 1px dashed #ddd;
-            padding-bottom: 6px;
-        }
-
-        .label {
-            font-weight: bold;
-            color: #444;
-        }
-
-        .value {
-            color: #222;
-        }
-
-        .button-container {
-            text-align: center;
-            margin-top: 30px;
-        }
-
-        button {
-            padding: 8px 16px;
-            border: none;
-            background-color: #007bff;
-            color: white;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-        .content-wrapper {
-            padding-top: 80px;
-        }
-    </style>
+    <title></title>
 </head>
 <body>
-<section layout:fragment="content" class="content-wrapper">
+<div layout:fragment="content">
 <div class="card">
     <h2>Chi tiết mã giảm giá</h2>
 
@@ -138,7 +78,6 @@
         </a>
     </div>
 </div>
-</section>
-<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
+</div>
 </body>
 </html>
