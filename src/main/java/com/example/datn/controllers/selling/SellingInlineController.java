@@ -221,12 +221,6 @@ public class SellingInlineController {
 
     @PostMapping("/thanh-toan")
     @ResponseBody
-// <<<<<<< TienBB
-//     public ResponseEntity<?> checkOut(@RequestParam("idCart") Integer idCart,
-//                                       @RequestParam("typePayment") String typePayment) {
-//         try {
-//             billService.checkOut(idCart, typePayment);
-// =======
     public ResponseEntity<?> checkOut(@RequestParam("idCart") Integer idCart, HttpSession session) {
         try {
             // Lấy thông tin khách hàng đã chọn cho cart này
@@ -244,7 +238,6 @@ public class SellingInlineController {
                 session.setAttribute("cartCustomers", cartCustomers);
             }
 
-// >>>>>>> master
             return ResponseEntity.ok("Thanh toán thành công!");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -272,7 +265,6 @@ public class SellingInlineController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
 
     @PostMapping("/remove-discount")
     @ResponseBody
@@ -340,6 +332,7 @@ public class SellingInlineController {
             return ResponseEntity.badRequest().body("Lỗi lấy thông tin khách hàng: " + e.getMessage());
         }
     }
+
     // API gắn khách hàng vào cart
     @PostMapping("/assign-customer")
     @ResponseBody
@@ -368,29 +361,6 @@ public class SellingInlineController {
             return ResponseEntity.ok("Đã gắn khách hàng " + customer.getName() + " vào giỏ hàng");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Lỗi gắn khách hàng: " + e.getMessage());
-        }
-    }
-    // API xóa khách hàng khỏi cart
-    @PostMapping("/clear-customer")
-    @ResponseBody
-    public ResponseEntity<?> clearCustomerFromCart(@RequestParam("cartId") Integer cartId,
-                                                   HttpSession session) {
-        try {
-            Cart cart = cartService.findCartById(cartId);
-            if (cart == null || !cart.getStatus()) {
-                return ResponseEntity.badRequest().body("Giỏ hàng không tồn tại hoặc đã được thanh toán");
-            }
-
-            // Xóa thông tin khách hàng khỏi session cho cart này
-            Map<Integer, Integer> cartCustomers = (Map<Integer, Integer>) session.getAttribute("cartCustomers");
-            if (cartCustomers != null) {
-                cartCustomers.remove(cartId);
-                session.setAttribute("cartCustomers", cartCustomers);
-            }
-
-            return ResponseEntity.ok("Đã xóa khách hàng khỏi giỏ hàng");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Lỗi xóa khách hàng: " + e.getMessage());
         }
     }
 }
