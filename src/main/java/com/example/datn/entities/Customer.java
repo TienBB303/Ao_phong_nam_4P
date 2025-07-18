@@ -1,12 +1,14 @@
 package com.example.datn.entities;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 
 import java.time.LocalDate;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "customer")
 public class Customer {
@@ -33,4 +35,14 @@ public class Customer {
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ShippingAddress> addresses;
 
+    @Override
+    public String toString() {
+        return "Customer{" +
+                "id=" + id +
+                ", code='" + code + '\'' +
+                ", name='" + name + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", isActive=" + isActive +
+                '}';
+    }
 }

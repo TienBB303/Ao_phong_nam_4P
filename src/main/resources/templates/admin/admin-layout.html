@@ -16,6 +16,50 @@
     <!-- Template CSS Files -->
     <link rel="stylesheet" th:href="@{/assets/css/style.css}" id="main-style-link">
     <link rel="stylesheet" th:href="@{/assets/css/style-preset.css}">
+
+    <!-- Layout Fix CSS -->
+    <style>
+        /* Ensure proper layout spacing */
+        .pc-container {
+            margin-left: 260px; /* Sidebar width + padding */
+            padding-top: 70px; /* Header height + padding */
+            min-height: calc(100vh - 70px);
+            transition: margin-left 0.3s ease;
+        }
+
+        .pc-content {
+            padding: 20px;
+            background-color: #f8f9fa;
+            min-height: calc(100vh - 110px);
+        }
+
+        /* Responsive sidebar */
+        @media (max-width: 1024px) {
+            .pc-container {
+                margin-left: 0;
+                padding-top: 70px;
+            }
+        }
+
+        /* Ensure cards don't overlap */
+        .card {
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Fix chart containers */
+        .chart-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
+        }
+
+        /* Responsive table */
+        .table-responsive {
+            border-radius: 0.375rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+        }
+    </style>
 </head>
 <body>
 <header class="pc-header">
@@ -125,10 +169,96 @@
 <!-- [ Header ] end -->
 
 <!-- [ Sidebar Menu ] start -->
-<nav th:replace="~{admin/fragments/sidebar :: sidebar}"></nav>
-<section layout:fragment="content">
+<nav class="pc-sidebar">
+    <div class="navbar-wrapper">
+        <div class="m-header" style="text-align: center;">
+            <a th:href="@{/}" class="b-brand text-primary">
+                <img th:src="@{/assets/images/logo1.png}" alt="logo" style="width: 100px;">
+            </a>
+        </div>
 
-</section>>
+        <div class="navbar-content">
+            <ul class="pc-navbar">
+                <li class="pc-item">
+                    <a th:href="@{/admin}" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-dashboard"></i></span>
+                        <span class="pc-mtext">Dashboard</span>
+                    </a>
+                </li>
+                <li class="pc-item">
+                    <a th:href="@{/admin/sell-inline/hien-thi}" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-shopping-cart"></i></span>
+                        <span class="pc-mtext">Bán hàng tại quầy</span>
+                    </a>
+                </li>
+                <li class="pc-item">
+                    <a th:href="@{/admin/bill/view}" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-vocabulary"></i></span>
+                        <span class="pc-mtext">Quản lý hóa đơn</span>
+                    </a>
+                </li>
+                <li class="pc-item pc-hasmenu">
+                    <a href="javascript:void(0);" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-shirt"></i></span>
+                        <span class="pc-mtext">Quản lý sản phẩm</span>
+                        <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+                    </a>
+                    <ul class="pc-submenu">
+                        <li class="pc-item"><a class="pc-link" th:href="@{/admin/product/hien-thi}">Sản phẩm</a></li>
+                        <li class="pc-item pc-hasmenu">
+                            <a href="javascript:void(0);" class="pc-link">Thuộc tính<span class="pc-arrow"><i data-feather="chevron-right"></i></span></a>
+                            <ul class="pc-submenu">
+                                <li class="pc-item"><a class="pc-link" th:href="@{/admin/color/hien-thi}">Màu sắc</a></li>
+                                <li class="pc-item"><a class="pc-link" th:href="@{/admin/category/hien-thi}">Danh mục</a></li>
+                                <li class="pc-item"><a class="pc-link" th:href="@{/admin/brand/hien-thi}">Hãng</a></li>
+                                <li class="pc-item"><a class="pc-link" th:href="@{/admin/material/hien-thi}">Chất liệu</a></li>
+                                <li class="pc-item"><a class="pc-link" th:href="@{/admin/size/hien-thi}">Kích thước</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li class="pc-item">
+                    <a th:href="@{/admin/discount/view}" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-discount-2"></i></span>
+                        <span class="pc-mtext">Quản lý khuyến mại</span>
+                    </a>
+                </li>
+                <li class="pc-item pc-hasmenu">
+                    <a href="javascript:void(0);" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-users"></i></span>
+                        <span class="pc-mtext">Quản lý tài khoản</span>
+                        <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+                    </a>
+                    <ul class="pc-submenu">
+                        <li class="pc-item"><a class="pc-link" href="/admin/employee">Nhân viên</a></li>
+                        <li class="pc-item"><a class="pc-link" href="/admin/customer/view">Khách hàng</a></li>
+
+                    </ul>
+                </li>
+                <li class="pc-item pc-hasmenu">
+                    <a href="javascript:void(0);" class="pc-link">
+                        <span class="pc-micon"><i class="ti ti-antenna-bars-5"></i></span>
+                        <span class="pc-mtext">Thống kê</span>
+                        <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+                    </a>
+                    <ul class="pc-submenu">
+                        <li class="pc-item"><a class="pc-link" th:href="@{/admin/revenue}">Doanh thu</a></li>
+                        <li class="pc-item"><a class="pc-link" th:href="@{/admin/product-stats}">Sản phẩm</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<!-- [ Main Content ] start -->
+<div class="pc-container">
+    <div class="pc-content">
+        <section layout:fragment="content">
+            <!-- Content will be inserted here -->
+        </section>
+    </div>
+</div>
+<!-- [ Main Content ] end -->
 
 <!-- Scripts -->
 <script th:src="@{/assets/js/plugins/apexcharts.min.js}"></script>
@@ -139,6 +269,15 @@
 <script th:src="@{/assets/js/fonts/custom-font.js}"></script>
 <script th:src="@{/assets/js/plugins/pcoded.js}"></script>
 <script th:src="@{/assets/js/plugins/feather.min.js}"></script>
+
+<!-- Chart.js for Revenue Statistics -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+<script>
+    // Ensure Chart.js is loaded before any page scripts
+    window.addEventListener('load', function() {
+        console.log('Chart.js loaded:', typeof Chart !== 'undefined');
+    });
+</script>
 <script>layout_change('light');</script>
 <script>change_box_container('false');</script>
 <script>layout_rtl_change('false');</script>
@@ -183,5 +322,9 @@
         }
     });
 </script>
+
+<!-- Page-specific scripts -->
+<div layout:fragment="script"></div>
+
 </body>
 </html>
