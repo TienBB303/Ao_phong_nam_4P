@@ -39,51 +39,64 @@
 
                         </div>
                         <div class="col-md-2">
-                            <a th:href="@{/admin/employee}" class="btn btn-outline-secondary w-100">
+                            <a th:href="@{/admin/users}" class="btn btn-outline-secondary w-100">
                                 Hủy
                             </a>
                         </div>
                     </div>
                 </form>
                 <div class="d-flex justify-content-end mb-3">
-                    <a th:href="@{/admin/employee/add}" class="btn btn-primary">➕ Thêm mới nhân viên</a>
+                    <a th:href="@{/admin/users/save}" class="btn btn-primary">➕ Thêm mới nhân viên</a>
                 </div>
                 <table id="multi-colum-dt" class="table table-bordered table-hover">
                     <thead>
-                        <tr>
-                            <th>STT</th>
-                            <th>Mã NV</th>
-                            <th>Họ và tên</th>
-                            <th>Email</th>
-                            <th>SĐT</th>
-                            <th>Ngày sinh</th>
-                            <th>Giới tính</th>
-                            <th>Địa chỉ</th>
-                            <th>Trạng thái</th>
-                            <th>Hành động</th>
-                        </tr>
+                    <tr>
+                        <th>STT</th>
+                        <th>Mã NV</th>
+                        <th>Họ và tên</th>
+                        <th>Email</th>
+                        <th>SĐT</th>
+                        <th>Ngày sinh</th>
+                        <th>Giới tính</th>
+                        <th>Địa chỉ</th>
+                        <th>Trạng thái</th>
+                        <th>Hành động</th>
+                    </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="e, i : ${listEmployee}">
-                            <td th:text="${i.index + 1}"></td>
-                            <td th:text="${e.code}"></td>
-                            <td th:text="${e.fullName}"></td>
-                            <td th:text="${e.email}"></td>
-                            <td th:text="${e.phoneNumber}"></td>
-                            <td th:text="${e.birthOfDate}"></td>
-                            <td th:text="${e.gender}"></td>
-                            <td th:text="${e.addressDetail}"></td>
-                            <td>
+                    <tr th:each="e, i : ${accountPage.content}">
+                        <td th:text="${i.index + 1}"></td>
+                        <td th:text="${e.code}"></td>
+                        <td th:text="${e.customer.name}"></td>
+                        <td th:text="${e.email}"></td>
+                        <td th:text="${e.customer.phoneNumber}"></td>
+                        <td th:text="${e.customer.birthDate}"></td>
+                        <td th:text="${e.customer.gender == true ? 'Nam' : 'Nữ'}"></td>
+                        <td>
+        <span th:if="${e.customer.addresses != null and !e.customer.addresses.isEmpty()}"
+              th:text="${e.customer.addresses[0].addressDetail
+                + (e.customer.addresses[0].wardName != null ? ', ' + e.customer.addresses[0].wardName : '')
+                + (e.customer.addresses[0].districtName != null ? ', ' + e.customer.addresses[0].districtName : '')
+                + (e.customer.addresses[0].provinceName != null ? ', ' + e.customer.addresses[0].provinceName : '')}">
+        </span>
+                            <span th:if="${e.customer.addresses == null or e.customer.addresses.isEmpty()}" th:text="''"></span>
+                        </td>
+
+                        <!--                            <td th:text="${e.phoneNumber}"></td>-->
+                        <!--                            <td th:text="${e.birthOfDate}"></td>-->
+                        <!--                            <td th:text="${e.gender}"></td>-->
+                        <!--                            <td th:text="${e.addressDetail}"></td>-->
+                        <td>
     <span th:class="${e.status} ? 'badge bg-success' : 'badge bg-danger'"
           th:text="${e.status} ? 'Đang hoạt động' : 'Đã khóa'"></span>
-                            </td>
+                        </td>
 
-                            <td>
-                                <a th:href="@{'/admin/employee/detail'(id=${e.id})}">
+                        <td>
+                            <a th:href="@{'/admin/employee/detail'(id=${e.id})}">
                                 <button class="btn-icon text-dark">✏️</button>
                             </a>
-                            </td>
-                        </tr>
+                        </td>
+                    </tr>
                     </tbody>
                 </table>
                 <nav aria-label="Page navigation">

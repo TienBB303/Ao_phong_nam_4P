@@ -84,7 +84,7 @@
                 <a href="#" class="text-dark text-decoration-none">Đăng ký</a>
             </div>
 
-            <a class="nav-link position-relative" href="#">
+            <a class="nav-link position-relative" href="/cart">
                 <i class="fas fa-shopping-cart fa-lg"></i>
                 <span class="badge bg-danger position-absolute top-0 start-100 translate-middle rounded-pill"></span>
             </a>
@@ -187,9 +187,9 @@
                 </div>
                 <div class="card-body text-center">
                     <h5 class="card-title" th:text="${product.name}">Tên sản phẩm</h5>
-<!--                    <p class="card-text text-muted">-->
-<!--                        Số lượng: <span th:text="${totalQuantity[product.id]}"></span>-->
-<!--                    </p>-->
+                    <!--                    <p class="card-text text-muted">-->
+                    <!--                        Số lượng: <span th:text="${totalQuantity[product.id]}"></span>-->
+                    <!--                    </p>-->
                     <p class="card-text text-danger fw-bold">
                         <span th:text="${priceRanges[product.id]}">100.000 - 150.000đ</span>
                     </p>
@@ -237,7 +237,7 @@
         </li>
     </ul>
 </nav>
-    </div>
+</div>
 </main>
 <!--Main layout-->
 
