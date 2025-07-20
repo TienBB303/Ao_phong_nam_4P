@@ -35,7 +35,7 @@ public class ProductStatsController {
             System.out.println("Total Stock: " + summary.getTotalStock());
 
             model.addAttribute("productStatsSummary", summary);
-            return "admin/product-stats/stats";
+            return "admin/product-stats/product-stats";
         } catch (Exception e) {
             System.err.println("Error in productStatsPage: " + e.getMessage());
             e.printStackTrace();
@@ -51,7 +51,7 @@ public class ProductStatsController {
             emptySummary.setTotalStock(0L);
 
             model.addAttribute("productStatsSummary", emptySummary);
-            return "admin/product-stats/stats";
+            return "admin/product-stats/product-stats";
         }
     }
 

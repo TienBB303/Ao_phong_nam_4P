@@ -5,6 +5,7 @@ import com.example.datn.entities.Bill;
 import com.example.datn.entities.BillDetails;
 import com.example.datn.entities.Customer;
 import com.example.datn.entities.Discount;
+import com.example.datn.entities.PaymentMethod;
 import com.example.datn.entities.Selling.Cart;
 import com.example.datn.entities.Selling.CartDetail;
 import com.example.datn.entities.product_and_other.ProductDetail;
@@ -49,6 +50,9 @@ public class BillService {
 
     @Autowired
     CustomerRepository customerRepository;
+
+    @Autowired
+    com.example.datn.repositories.PaymentMethodRepository paymentMethodRepository;
 //
 //    @Autowired
 //    CustomerService customerService;
@@ -121,7 +125,7 @@ public class BillService {
         }
     }
 
-    public void checkOut(Integer cartId, Integer customerId) throws Exception{
+    public void checkOut(Integer cartId, String typePayment, Integer customerId) throws Exception{
         Cart cart = cartRepository.findByIdCart(cartId);
         if(cart == null || cart.getStatus() == false){
             throw new Exception("Giỏ hàng không tồn tại hoặc đã được thanh toán");
@@ -176,7 +180,9 @@ public class BillService {
             bill.setEmail("");
             bill.setCustomer(null);
         }
-//        bill.setPaymentMethod(1); // sửa sau, tạm thời fix để bán thử
+        // Set payment method mặc định cho bán tại quầy (ID = 1: Tiền mặt)
+        PaymentMethod defaultPaymentMethod = paymentMethodRepository.findById(1).orElse(null);
+        bill.setPaymentMethod(defaultPaymentMethod);
 
         bill.setDiscount(cart.getDiscount());
         bill.setTotal_checkout(totalAmount.subtract(cart.getTotal_discount()));

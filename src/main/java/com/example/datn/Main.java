@@ -35,6 +35,8 @@ public class Main {
                 logger.warn("mailSender không phải là JavaMailSenderImpl, không thể kiểm tra cấu hình chi tiết.");
             }
             logger.info("=== KẾT THÚC KIỂM TRA ===");
+
         };
     }
 }
+
