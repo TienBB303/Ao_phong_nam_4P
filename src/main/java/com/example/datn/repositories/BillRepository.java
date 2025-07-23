@@ -125,4 +125,15 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
             "AND b.createdAt >= :startDate AND b.createdAt <= :endDate")
     Long getSimpleOrderCount(@Param("startDate") LocalDateTime startDate,
                              @Param("endDate") LocalDateTime endDate);
+
+    // Đếm số đơn theo status
+    long countByStatus(int status);
+
+    // Tổng doanh thu
+    @Query("SELECT COALESCE(SUM(b.total_checkout), 0) FROM Bill b WHERE b.paymentStatus = true")
+    java.math.BigDecimal getTotalRevenue();
+
+    // Thống kê số lượng đơn hàng theo trạng thái
+    @Query("SELECT b.status, COUNT(b) FROM Bill b GROUP BY b.status")
+    java.util.List<Object[]> countOrdersByStatus();
 }
