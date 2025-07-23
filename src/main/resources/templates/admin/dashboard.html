@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{admin/admin-layout}">
+<head>
+    <title>Dashboard</title>
+</head>
+<div layout:fragment="content">
+    <div class="container py-4">
+        <h4 class="mb-4">Xin chào</h4>
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="card text-center p-3">
+                    <div class="h6">Tổng đơn đặt hàng</div>
+                    <div class="h4" th:text="${totalOrders}">0</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-center p-3">
+                    <div class="h6">Số đơn chờ xử lý</div>
+                    <div class="h4" th:text="${pendingOrders}">0</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-center p-3">
+                    <div class="h6">Tổng doanh thu</div>
+                    <div class="h4" th:text="${totalRevenue}">0</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-center p-3">
+                    <div class="h6">Số sản phẩm</div>
+                    <div class="h4" th:text="${totalProducts}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="h6 mb-2">Khách hàng</div>
+                        <canvas id="customerChart"
+                                th:data-count="${customerCount}"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="h6 mb-2">Đơn hàng</div>
+                        <canvas id="orderPieChart"
+                                th:data-labels="${orderStatusMap.keySet()}"
+                                th:data-values="${orderStatusMap.values()}"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script layout:fragment="script">
+    document.addEventListener('DOMContentLoaded', function() {
+        // Biểu đồ khách hàng: chỉ 1 cột tổng số khách hàng
+        const cchart = document.getElementById('customerChart');
+        let ccount = cchart.getAttribute('data-count');
+        ccount = parseInt(ccount || '0');
+        new Chart(cchart.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ['Tổng khách hàng'],
+                datasets: [{
+                    label: 'Tổng khách hàng',
+                    data: [ccount],
+                    backgroundColor: 'rgba(0,200,150,0.7)',
+                    borderColor: 'rgba(0,200,150,1)',
+                    borderWidth: 2
+                }]
+            },
+            options: {responsive:true, plugins:{legend:{display:false}}}
+        });
+        // Biểu đồ tròn đơn hàng (dữ liệu động)
+        const pie = document.getElementById('orderPieChart');
+        let labels = pie.getAttribute('data-labels');
+        let values = pie.getAttribute('data-values');
+        try {
+            labels = JSON.parse(labels.replace(/'/g, '"'));
+            values = JSON.parse(values.replace(/'/g, '"'));
+        } catch (e) {
+            labels = labels ? labels.split(',') : [];
+            values = values ? values.split(',') : [];
+        }
+        new Chart(pie.getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Đơn hàng',
+                    data: values,
+                    backgroundColor: [
+                        'rgba(0,200,150,0.7)',
+                        'rgba(0,123,255,0.7)',
+                        'rgba(255,193,7,0.7)',
+                        'rgba(220,53,69,0.7)',
+                        'rgba(40,167,69,0.7)',
+                        'rgba(108,117,125,0.7)'
+                    ]
+                }]
+            },
+            options: {responsive:true, plugins:{legend:{display:true}}}
+        });
+    });
+</script> 
