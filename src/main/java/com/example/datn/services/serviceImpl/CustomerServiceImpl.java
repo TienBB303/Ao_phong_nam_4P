@@ -248,4 +248,13 @@ public class CustomerServiceImpl implements CustomerService {
 
         return savedCustomer;
     }
+
+    @Override
+    public long countAllCustomers() {
+        // Nếu chỉ muốn đếm khách hàng đang hoạt động:
+        return customerRepository.countByIsActiveTrue();
+        // Nếu muốn đếm tất cả khách hàng (kể cả đã bị xóa mềm):
+        // return customerRepository.count();
+    }
+
 }

@@ -49,31 +49,42 @@ public class CustomerController {
     //Dùng DTO, có validate
     @GetMapping("/create")
     public String create(Model model) {
-        CustomerDto dto = new CustomerDto();
-        dto.setIsActive(true); // Mặc định là "Hoạt động"
-        model.addAttribute("customerDto", dto);
+        model.addAttribute("customerDto", new CustomerDto());
         return "admin/customer/customerCreate1";
     }
     // Xử lý lưu khách hàng,Dùng DTO, validate, update theo id
     @PostMapping("/save")
     public String save(@Valid @ModelAttribute("customerDto") CustomerDto dto,
                        BindingResult result,
+                       Model model,
                        RedirectAttributes redirectAttributes) {
-        System.out.println("DTO nhận được: " + dto);
         if (result.hasErrors()) {
-            System.out.println("Lỗi validate: " + result.getAllErrors());
             return "admin/customer/customerCreate1";
         }
 
-        // Kiểm tra email đã tồn tại
         if (customerService.isEmailExists(dto.getEmail())) {
             result.rejectValue("email", "error.customerDto", "Email đã tồn tại trong hệ thống.");
             return "admin/customer/customerCreate1";
         }
 
-        customerService.createCustomerWithAddressAndAccount(dto);
+        try {
+            customerService.createCustomerWithAddressAndAccount(dto);
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("Số điện thoại")) {
+                result.rejectValue("phoneNumber", "error.customerDto", e.getMessage());
+                return "admin/customer/customerCreate1";
+            }
+            result.reject("error", e.getMessage());
+            return "admin/customer/customerCreate1";
+        }
+
+        // Tính trang cuối cùng
+        int pageSize = 5; // giống như trong viewCustomers
+        long totalCustomers = customerService.countAllCustomers(); // cần thêm hàm này
+        int lastPage = (int) ((totalCustomers - 1) / pageSize);
+
         redirectAttributes.addFlashAttribute("message", "Lưu khách hàng thành công!");
-        return "redirect:/admin/customer/view";
+        return "redirect:/admin/customer/view?page=" + lastPage;
     }
     // Hiển thị form chỉnh sửa khách hàng
     @GetMapping("/edit/{id}")
@@ -84,6 +95,8 @@ public class CustomerController {
             return "redirect:/admin/customer/view";
         }
         CustomerDto dto = convertToDto(customer);
+        System.out.println("Birthday in entity: " + customer.getBirthDate());
+        System.out.println("Birthday in DTO: " + dto.getBirthday());
         model.addAttribute("customerDto", dto);
         return "admin/customer/customerEdit";
     }
