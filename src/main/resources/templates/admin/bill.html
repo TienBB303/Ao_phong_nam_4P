@@ -85,7 +85,7 @@
                             <td th:text="${#temporals.format(bill.createdAt, 'dd-MM-yyyy HH:mm')}">---</td>
                             <td th:text="${bill.total_checkout != null ? #numbers.formatDecimal(bill.total_checkout, 0, 'POINT', 0, 'COMMA') + '₫' : '0₫'}">0₫</td>
                             <td th:text="${bill.typeBill != null and bill.typeBill == true ? 'Online' : 'Tại quầy'}">Tại quầy</td>
-                            <td th:text="${bill.paymentMethod.name}"></td>
+                            <td th:text="${bill.paymentMethod != null ? bill.paymentMethod.name : 'Tiền mặt'}"></td>
                             <td>
                                  <span th:switch="${bill.status}">
                                    <span th:case="1">Chờ xác nhận</span>
