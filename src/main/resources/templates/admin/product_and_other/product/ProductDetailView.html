@@ -32,197 +32,194 @@
                         </a>
                     </div>
                     <div>
-                        <a class="btn btn-outline-success" href="/admin/product/view-add" style="width: 70px"
-                           title="Thêm sản phẩm mới">
+                        <button class="btn btn-outline-primary mb-3" data-bs-toggle="modal" data-bs-target="#modalThemBienThe" title="Bổ sung sản phẩm">
                             <i class="bi bi-plus"></i>
-                        </a>
+                        </button>
                     </div>
 
                 </div>
 
-
-                <form id="" class="p-4 bg-light rounded shadow-sm">
-
-                    <div class="row mb-3">
-                        <div class="col-md-4 form-floating">
-                            <input type="text" class="form-control" id="product_code" th:value="${productForm.code}"
-                                   readonly>
-                            <label for="product_code">Mã sản phẩm</label>
+                <h5 class="mb-3 text-success"><i class="bi bi-list-ul me-1"></i> Thông tin sản phẩm</h5>
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body row g-3">
+                        <!-- Tên sản phẩm -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Tên sản phẩm</label>
+                            <input type="text" class="form-control border rounded-3 shadow-sm" th:value="${productForm.name}" readonly>
                         </div>
-                        <div class="col-md-4 form-floating">
-                            <input type="text" class="form-control" id="product_name" th:value="${productForm.name}"
-                                   readonly>
-                            <label for="product_name">Tên sản phẩm</label>
-                        </div>
-                        <div class="col-md-4 form-floating">
-                            <input type="text" class="form-control" id="product_description"
-                                   th:value="${productForm.description}" readonly>
-                            <label for="product_description">Mô tả</label>
-                        </div>
-                    </div>
 
-                    <div class="row mb-3">
+                        <!-- Mã sản phẩm -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Mã sản phẩm</label>
+                            <input type="text" class="form-control border rounded-3 shadow-sm" th:value="${productForm.code}" readonly>
+                        </div>
+
+                        <!-- Loại sản phẩm -->
                         <div class="col-md-4">
-                            <label class="form-label">Loại sản phẩm</label>
-                            <select class="form-select" disabled>
-                                <option th:each="cate : ${listCategory}"
-                                        th:value="${cate.id}"
-                                        th:text="${cate.name}"
-                                        th:selected="${cate.id == productForm.categoryId}">...
-                                </option>
-                            </select>
+                            <label class="form-label fw-semibold">Loại sản phẩm</label>
+                            <input type="text" class="form-control border rounded-3 shadow-sm"
+                                   th:each="cate : ${listCategory}" th:if="${cate.id == productForm.categoryId}"
+                                   th:value="${cate.name}" readonly>
                         </div>
+
+                        <!-- Hãng -->
                         <div class="col-md-4">
-                            <label class="form-label">Hãng</label>
-                            <select class="form-select" disabled>
-                                <option th:each="brand : ${listBrand}"
-                                        th:value="${brand.id}"
-                                        th:text="${brand.name}"
-                                        th:selected="${brand.id == productForm.brandId}">...
-                                </option>
-                            </select>
+                            <label class="form-label fw-semibold">Hãng</label>
+                            <input type="text" class="form-control border rounded-3 shadow-sm"
+                                   th:each="b : ${listBrand}" th:if="${b.id == productForm.brandId}"
+                                   th:value="${b.name}" readonly>
                         </div>
+
+                        <!-- Chất liệu -->
                         <div class="col-md-4">
-                            <label class="form-label">Chất liệu</label>
-                            <select class="form-select" disabled>
-                                <option th:each="mate : ${listMaterial}"
-                                        th:value="${mate.id}"
-                                        th:text="${mate.name}"
-                                        th:selected="${mate.id == productForm.materialId}">...
-                                </option>
-                            </select>
+                            <label class="form-label fw-semibold">Chất liệu</label>
+                            <input type="text" class="form-control border rounded-3 shadow-sm"
+                                   th:each="m : ${listMaterial}" th:if="${m.id == productForm.materialId}"
+                                   th:value="${m.name}" readonly>
                         </div>
                     </div>
+                </div>
 
-                    <hr class="my-4">
+                <h5 class="mb-3 text-success"><i class="bi bi-list-ul me-1"></i> Danh sách biến thể</h5>
 
-                    <h5 class="mb-3 text-success"><i class="bi bi-list-ul me-1"></i> Danh sách biến thể</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped align-middle text-center">
+                        <thead class="table-primary">
+                        <tr>
+                            <th scope="col">Tên</th>
+                            <th scope="col">Ảnh</th>
+                            <th scope="col">Barcode</th>
+                            <th scope="col">Màu</th>
+                            <th scope="col">Kích cỡ</th>
+                            <th scope="col">Giá</th>
+                            <th scope="col">Số lượng</th>
+                            <th scope="col">Hành động</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="detail : ${listProductDetail}">
+                            <td th:text="${detail.product.name + '(' + detail.color.name + ' - ' + detail.size.code + ' )'}">
+                                Tên
+                            </td>
+                            <td>
+                                <img th:if="${!detail.images.isEmpty()}"
+                                     th:src="@{'/image-detail/' + ${detail.images.get(0).path_file}}"
+                                     width="100" alt="Ảnh sản phẩm"/>
+                                <span th:if="${detail.images.isEmpty()}">Không có ảnh</span>
+                            </td>
+                            <td>
+                                <img th:src="@{'/barcode-images/' + ${detail.barcode} + '.png'}" width="150" alt="Barcode"/>
+                            </td>
+                            <td>
+                                <span class="px-2 py-1 rounded text-white border shadow-sm d-inline-block text-center"
+                                      style="width: 80px"
+                                      th:text="${detail.color.name}"
+                                      th:style="'background-color:' + ${detail.color.code}">
+                                </span>
+                            </td>
+                            <td th:text="${detail.size.name}">Size</td>
+                            <td th:text="${detail.price}" class="giaVND">Giá</td>
+                            <td th:text="${detail.quantity}">Số lượng</td>
+                            <td style="text-align: center">
+                                <a class="btn btn-outline-warning hienThiThongTinModal"
+                                    style="width: 70px" title="Sửa"
+                                    th:attr="data-id=${detail.id}"
+                                    data-bs-toggle="modal" data-bs-target="#modalChinhSua">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                            </td>
 
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-striped align-middle text-center">
-                            <thead class="table-primary">
-                            <tr>
-                                <th scope="col">Tên</th>
-                                <th scope="col">Ảnh</th>
-                                <th scope="col">Barcode</th>
-                                <th scope="col">Màu</th>
-                                <th scope="col">Kích cỡ</th>
-                                <th scope="col">Giá</th>
-                                <th scope="col">Số lượng</th>
-                                <th scope="col">Hành động</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:each="detail : ${listProductDetail}">
-                                <td th:text="${detail.product.name + '(' + detail.color.name + ' - ' + detail.size.code + ' )'}">
-                                    Tên
-                                </td>
-                                <td>
-                                    <img th:if="${!detail.images.isEmpty()}"
-                                         th:src="@{'/image-detail/' + ${detail.images.get(0).path_file}}"
-                                         width="100" alt="Ảnh sản phẩm"/>
-                                    <span th:if="${detail.images.isEmpty()}">Không có ảnh</span>
-                                </td>
-                                <td>
-                                    <img th:src="@{'/barcode-images/' + ${detail.barcode} + '.png'}" width="150" alt="Barcode"/>
-                                </td>
-                                <td>
-                                    <span class="px-2 py-1 rounded text-white border shadow-sm d-inline-block text-center"
-                                          style="width: 80px"
-                                          th:text="${detail.color.name}"
-                                          th:style="'background-color:' + ${detail.color.code}">
-                                    </span>
-                                </td>
-                                <td th:text="${detail.size.name}">Size</td>
-                                <td th:text="${detail.price}" class="giaVND">Giá</td>
-                                <td th:text="${detail.quantity}">Số lượng</td>
-                                <td style="text-align: center">
-                                    <a class="btn btn-outline-warning hienThiThongTinModal"
-                                        style="width: 70px" title="Sửa"
-                                        th:attr="data-id=${detail.id}"
-                                        data-bs-toggle="modal" data-bs-target="#modalChinhSua">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </a>
-                                </td>
-
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </form>
-                <div class="modal fade" id="modalChinhSua" tabindex="-1" aria-labelledby="modalChinhSuaLabel"
-                     aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="modalChinhSuaLabel">Chỉnh sửa sản phẩm </h5>
-                            </div>
-                            <div class="modal-body">
-                                <form id="updateProductDetail" method="post" action="/admin/product-detail/update">
-                                    <input type="hidden" id="product_detail_id" name="ProductDetailId">
-                                    <div class="mb-3">
-                                        <label for="product_price_update" class="form-label">Giá</label><span class="text-danger">*</span>
-                                        <input type="number" class="form-control giaVND" id="product_price_update" name="productPriceUpdate" placeholder="Nhập giá...">
-
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="product_quantity_update" class="form-label">Số lượng</label>
-                                        <input type="number" class="form-control" id="product_quantity_update" name="productQuantityUpdate" placeholder="Nhập số lượng...">
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="submit" class="btn btn-outline-success">
-                                            <i class="bi bi-check-lg"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-outline-warning" data-bs-dismiss="modal">
-                                            <i class="bi bi-x"></i>
-                                        </button>
-                                    </div>
-                                </form>
-
-                            </div>
-                        </div>
-                    </div>
+                        </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
             <footer th:replace="admin/fragments/footer :: footer"></footer>
-            <!-- Script -->
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
-            <script th:if="${alert != null}" th:inline="javascript">
-                Swal.fire({
-                    toast: true,
-                    icon: /*[[${type}]]*/ null,
-                    title: '[[${alert}]]', // Thông báo từ controller
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 2000,
-                    timerProgressBar: true
-                });
-            </script>
-            <script>
-                $(document).on('click', '.hienThiThongTinModal', function () {
-                    const id = $(this).data('id');
-                    console.log("ID lấy được:", id);
-                    $('#product_detail_id').val(id); // Gắn ID vào input ẩn trong form
-
-                    $.ajax({
-                        url: `/admin/product-detail/detail/${id}`,
-                        type: 'GET',
-                        success: function (response) {
-                            console.log("Gia :", response.price);
-                            console.log("So luong :", response.quantity);
-                            $('#product_detail_id').val(response.id);
-                            $('#product_price_update').val(response.price);
-                            $('#product_quantity_update').val(response.quantity);
-                        },
-                        error: function (xhr) {
-                        }
-                    });
-                });
-            </script>
         </div>
     </div>
 </section>
 <footer th:replace="~{admin/fragments/footer :: footer}"></footer>
+<div class="modal fade" id="modalThemBienThe" tabindex="-1" aria-labelledby="modalThemBienTheLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content shadow">
+            <form method="post" action="/admin/product-detail/add">
+                <div class="modal-header">
+                    <h5 class="modal-title">Thêm biến thể sản phẩm</h5>
+                </div>
+                <div class="modal-body row g-3 p-3">
+                    <input type="hidden" name="productId" th:value="${idProduct}" />
+
+                    <div class="col-md-6">
+                        <label class="form-label">Giá</label>
+                        <input type="number" name="price" class="form-control" placeholder="Nhập giá" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Số lượng</label>
+                        <input type="number" name="quantity" class="form-control" placeholder="Nhập số lượng" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Màu</label>
+                        <select name="colorId" class="form-select" required>
+                            <option th:each="c : ${listColor}" th:value="${c.id}" th:text="${c.name}"></option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Kích cỡ</label>
+                        <select name="sizeId" class="form-select" required>
+                            <option th:each="s : ${listSize}" th:value="${s.id}" th:text="${s.name}"></option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-outline-success">
+                        <i class="bi bi-check-lg"></i> Thêm
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        Hủy
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalChinhSua" tabindex="-1" aria-labelledby="modalChinhSuaLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalChinhSuaLabel">Chỉnh sửa sản phẩm </h5>
+            </div>
+            <div class="modal-body">
+                <form id="updateProductDetail" method="post" action="/admin/product-detail/update">
+                    <input type="hidden" id="product_detail_id" name="ProductDetailId">
+                    <div class="mb-3">
+                        <label for="product_price_update" class="form-label">Giá</label><span class="text-danger">*</span>
+                        <input type="number" class="form-control giaVND" id="product_price_update" name="productPriceUpdate" placeholder="Nhập giá...">
+
+                    </div>
+                    <div class="mb-3">
+                        <label for="product_quantity_update" class="form-label">Số lượng</label>
+                        <input type="number" class="form-control" id="product_quantity_update" name="productQuantityUpdate" placeholder="Nhập số lượng...">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-outline-success">
+                            <i class="bi bi-check-lg"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-warning" data-bs-dismiss="modal">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
 <script>
     function formatCurrencyVND(value) {
         return Number(value).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
@@ -238,6 +235,39 @@
         });
     });
 </script>
+<!-- Script -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+<script th:if="${alert != null}" th:inline="javascript">
+    Swal.fire({
+        toast: true,
+        icon: /*[[${type}]]*/ null,
+        title: '[[${alert}]]', // Thông báo từ controller
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true
+    });
+</script>
+<script>
+    $(document).on('click', '.hienThiThongTinModal', function () {
+        const id = $(this).data('id');
+        console.log("ID lấy được:", id);
+        $('#product_detail_id').val(id); // Gắn ID vào input ẩn trong form
 
+        $.ajax({
+            url: `/admin/product-detail/detail/${id}`,
+            type: 'GET',
+            success: function (response) {
+                console.log("Gia :", response.price);
+                console.log("So luong :", response.quantity);
+                $('#product_detail_id').val(response.id);
+                $('#product_price_update').val(response.price);
+                $('#product_quantity_update').val(response.quantity);
+            },
+            error: function (xhr) {
+            }
+        });
+    });
+</script>
 </body>
 </html>

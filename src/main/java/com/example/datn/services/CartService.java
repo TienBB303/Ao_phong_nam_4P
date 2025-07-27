@@ -2,6 +2,7 @@ package com.example.datn.services;
 
 import com.example.datn.entities.Bill;
 import com.example.datn.entities.BillDetails;
+import com.example.datn.entities.Customer;
 import com.example.datn.entities.Discount;
 import com.example.datn.entities.Selling.Cart;
 import com.example.datn.entities.Selling.CartDetail;
@@ -28,6 +29,9 @@ public class CartService {
 
     @Autowired
     ProductDetailRepository productDetailRepository;
+
+    @Autowired
+    CustomerService customerService;
 
     @Autowired
     private DiscountService  discountService;
@@ -97,14 +101,6 @@ public class CartService {
         cart.setTotal_quantity(totalQuantity);
 
         recalculateCartTotalWithDiscount(cart);
-//        Discount discount = cart.getDiscount();
-//        if(discount != null){
-//            cart.setTotal_discount(discount.getDiscountValue());
-//            cart.setTotal_price_checkout(cart.getTotal_price_cart().subtract(cart.getTotal_discount()));
-//        }else {
-//            cart.setTotal_discount(BigDecimal.ZERO);
-//            cart.setTotal_price_checkout(cart.getTotal_price_cart());
-//        }
 
         cart.setUpdated_at(new Date());
         cartRepository.save(cart);
@@ -161,14 +157,6 @@ public class CartService {
         cart.setTotal_quantity(totalQuantity);
 
         recalculateCartTotalWithDiscount(cart);
-//        Discount discount = cart.getDiscount();
-//        if(discount != null){
-//            cart.setTotal_discount(discount.getDiscountValue());
-//            cart.setTotal_price_checkout(cart.getTotal_price_cart().subtract(cart.getTotal_discount()));
-//        }else {
-//            cart.setTotal_discount(BigDecimal.ZERO);
-//            cart.setTotal_price_checkout(cart.getTotal_price_cart());
-//        }
 
         cart.setUpdated_at(new Date());
         cartRepository.save(cart);
@@ -195,18 +183,6 @@ public class CartService {
         cart.setTotal_quantity(totalQuantity);
 
         recalculateCartTotalWithDiscount(cart);
-//        Discount discount = cart.getDiscount();
-//        if(discount != null){
-//            cart.setTotal_discount(discount.getDiscountValue());
-//            if (cart.getTotal_discount().compareTo(cart.getTotal_price_cart()) > 0) {
-//                cart.setTotal_price_checkout(BigDecimal.ZERO);
-//            }else {
-//                cart.setTotal_price_checkout(cart.getTotal_price_cart().subtract(cart.getTotal_discount()));
-//            }
-//        }else {
-//            cart.setTotal_discount(BigDecimal.ZERO);
-//            cart.setTotal_price_checkout(cart.getTotal_price_cart());
-//        }
 
         cart.setUpdated_at(new Date());
         cartRepository.save(cart);
@@ -312,7 +288,7 @@ public class CartService {
     }
 
     //Tính toán lại tiền và giá giảm
-    private void recalculateCartTotalWithDiscount(Cart cart) {
+    public void recalculateCartTotalWithDiscount(Cart cart) {
         BigDecimal totalPrice = cart.getTotal_price_cart();
         Discount discount = cart.getDiscount();
 
@@ -345,6 +321,30 @@ public class CartService {
         }
     }
 
+// <<<<<<< TienBB
+//     public void addCustomerToCart(Integer cartId, Integer customerId) throws Exception {
+//         Cart cart = cartRepository.findByIdCart(cartId);
+//         if (cart == null) {
+//             throw new Exception("Không tìm thấy giỏ hàng");
+//         }
+
+//         Customer customer = customerService.findById(customerId);
+//         if (customer == null) {
+//             throw new Exception("Không tìm thấy khách hàng");
+//         }
+
+//         cart.setAccount(customer.getAccount());
+//         cartRepository.save(cart);
+//     }
+
+//     public void removeCustomerFromCart(Integer cartId) throws Exception {
+//         Cart cart = cartRepository.findByIdCart(cartId);
+//         if (cart == null) {
+//             throw new Exception("Không tìm thấy giỏ hàng");
+//         }
+
+//         cart.setAccount(null);
+// =======
     // ban hang online ne ca nhom :D
 
     public void addProductOnlineToCart(Integer cartId, Integer productDetailId, Integer quantity) throws Exception {

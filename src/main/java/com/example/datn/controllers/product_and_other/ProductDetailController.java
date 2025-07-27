@@ -22,6 +22,29 @@ public class ProductDetailController {
         return productService.detailProductDetail(id);
     }
 
+//    @PostMapping("/add")
+//    public String addProductDetail(@RequestParam("productId") Integer productId,
+//                                   @RequestParam("price") String priceStr,
+//                                   @RequestParam("quantity") String quantityStr,
+//                                   @RequestParam("colorId") Integer colorId,
+//                                   @RequestParam("sizeId") Integer sizeId,
+//                                   RedirectAttributes redirectAttributes) {
+//        try {
+//            BigDecimal price = new BigDecimal(priceStr);
+//            Integer quantity = Integer.parseInt(quantityStr);
+//
+//            productService.addProductDetail(productId, price, quantity, colorId, sizeId);
+//            redirectAttributes.addFlashAttribute("alert", "Thêm biến thể thành công");
+//            redirectAttributes.addFlashAttribute("type", "success");
+//
+//        } catch (Exception e) {
+//            redirectAttributes.addFlashAttribute("alert", "Thêm biến thể thất bại: " + e.getMessage());
+//            redirectAttributes.addFlashAttribute("type", "error");
+//        }
+//
+//        return "redirect:/admin/product/view-detail/" + productId;
+//    }
+
     @PostMapping("/update")
     public String updateProductDetail(
             @RequestParam("ProductDetailId") Integer id,

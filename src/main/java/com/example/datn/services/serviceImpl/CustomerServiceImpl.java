@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -122,8 +123,6 @@ public class CustomerServiceImpl implements CustomerService {
 
         return shippingAddressRepository.save(address);
     }
-
-
 
     @Override
     public Customer findById(int id) {
@@ -247,5 +246,12 @@ public class CustomerServiceImpl implements CustomerService {
         emailService.sendAccountCreatedMail(dto.getEmail(), dto.getName(), dto.getEmail(), rawPassword);
 
         return savedCustomer;
+    }
+
+
+    //TienBB
+    @Override
+    public List<Customer> searchCustomerInline(String keyword) {
+        return customerRepository.searchCustomerByKeywordInline(keyword);
     }
 }
