@@ -1,247 +1,184 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Trang thanh toán</title>
-  <link
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-          rel="stylesheet"
-  />
-  <style>
-    .form-control,
-    .form-select {
-      border-radius: 0;
-    }
-
-    .payment-method {
-      border: 1px solid #ccc;
-      padding: 15px;
-      cursor: pointer;
-      margin-bottom: 10px;
-    }
-
-    .payment-method.active {
-      border: 2px solid #000;
-      background-color: #f9f9f9;
-    }
-
-    .order-summary {
-      border-left: 1px solid #dee2e6;
-    }
-
-    .btn-dark {
-      border-radius: 0;
-    }
-  </style>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Trang thanh toán</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <style>
+        .form-control, .form-select {
+            border-radius: 0;
+        }
+        .payment-method {
+            border: 1px solid #ccc;
+            padding: 15px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .payment-method.active {
+            border: 2px solid #000;
+            background-color: #f9f9f9;
+        }
+        .order-summary {
+            border-left: 1px solid #dee2e6;
+        }
+        .btn-dark {
+            border-radius: 0;
+        }
+    </style>
 </head>
 <body>
 <div class="container py-5">
-  <h4 class="mb-4">Thông tin giao hàng</h4>
-  <div class="row">
-    <!-- Form thông tin giao hàng -->
-    <div class="col-md-7">
-      <form>
-        <div class="row mb-3">
-          <div class="col-md-6">
-            <input
-                    type="text"
-                    class="form-control"
-                    placeholder="Họ và tên"
-            />
-          </div>
-          <div class="col-md-6">
-            <input
-                    type="text"
-                    class="form-control"
-                    placeholder="Số điện thoại"
-            />
-          </div>
-        </div>
-        <div class="mb-3">
-          <input
-                  type="email"
-                  class="form-control"
-                  placeholder="Địa chỉ Email"
-          />
-        </div>
-        <div class="mb-3">
-          <input type="text" class="form-control" placeholder="Địa chỉ"/>
-        </div>
-        <div class="row mb-3">
-          <!-- Tỉnh/Thành phố -->
-          <div class="col-md-4">
-            <select id="select-province" class="form-select">
-              <option selected>Chọn Tỉnh/Thành phố</option>
-            </select>
-          </div>
+    <h4 class="mb-4">Thông tin giao hàng</h4>
+    <div class="row">
+        <!-- Form thông tin giao hàng -->
+        <div class="col-md-7">
+            <form th:action="@{/order}" method="post">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" placeholder="Họ và tên" name="fullName" required/>
+                    </div>
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" placeholder="Số điện thoại" name="phone" required/>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <input type="email" class="form-control" placeholder="Địa chỉ Email" name="email" required/>
+                </div>
+                <div class="mb-3">
+                    <input type="text" class="form-control" placeholder="Địa chỉ" name="address" required/>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <select id="select-province" name="province" class="form-select" required>
+                            <option selected>Chọn Tỉnh/Thành phố</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <select id="select-district" name="district" class="form-select" required>
+                            <option selected>Chọn Quận/Huyện</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <select id="select-ward" name="ward" class="form-select" required>
+                            <option selected>Chọn Phường/Xã</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <textarea class="form-control" name="note" placeholder="Ghi chú thêm (Ví dụ: Giao hàng giờ hành chính)" rows="3"></textarea>
+                </div>
 
-          <!-- Quận/Huyện -->
-          <div class="col-md-4">
-            <select id="select-district" class="form-select">
-              <option selected>Chọn Quận/Huyện</option>
-            </select>
-          </div>
+                <h5 class="mb-3">Phương thức thanh toán</h5>
+                <div class="form-check payment-method active">
+                    <input class="form-check-input" type="radio" name="paymentMethod" id="cod" value="COD" checked/>
+                    <label class="form-check-label" for="cod">Thanh toán khi nhận hàng (COD)</label>
+                </div>
+                <div class="form-check payment-method">
+                    <input class="form-check-input" type="radio" name="paymentMethod" id="bank" value="BANK"/>
+                    <label class="form-check-label" for="bank">Thanh toán chuyển khoản</label>
+                </div>
 
-          <!-- Phường/Xã -->
-          <div class="col-md-4">
-            <select id="select-ward" class="form-select">
-              <option selected>Chọn Phường/Xã</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="mb-4">
-              <textarea
-                      class="form-control"
-                      placeholder="Ghi chú thêm (Ví dụ: Giao hàng giờ hành chính)"
-                      rows="3"
-              ></textarea>
+                <button type="submit" class="btn btn-dark w-100 mt-4">ĐẶT HÀNG NGAY</button>
+            </form>
         </div>
 
-        <!-- Phương thức thanh toán -->
-        <h5 class="mb-3">Phương thức thanh toán</h5>
-        <div class="form-check payment-method active">
-          <input
-                  class="form-check-input"
-                  type="radio"
-                  name="payment"
-                  id="cod"
-                  checked
-          />
-          <label class="form-check-label" for="cod">
-            Thanh toán khi nhận hàng (COD)
-          </label>
-        </div>
-        <div class="form-check payment-method">
-          <input
-                  class="form-check-input"
-                  type="radio"
-                  name="payment"
-                  id="bank"
-          />
-          <label class="form-check-label" for="bank">
-            Thanh toán chuyển khoản
-          </label>
-        </div>
+        <!-- Tóm tắt đơn hàng -->
+        <div class="col-md-5 order-summary ps-md-5 mt-5 mt-md-0">
+            <div th:each="item : ${cart.cartDetails}" class="d-flex mb-3">
+                <div>
+                    <p class="mb-1" th:text="${item.productDetail.product.name} + ' - ' + ${item.productDetail.color.name} + ' - ' + ${item.productDetail.size.name}"></p>
+                    <span class="fw-bold text-danger" th:text="${#numbers.formatInteger(item.productDetail.price, 0, 'POINT')} + 'đ'"></span>
+                    <a href="#" class="ms-3 text-decoration-underline">Sửa</a>
+                    <div class="mt-2">
+                        <button class="btn btn-sm btn-outline-secondary">-</button>
+                        <span class="mx-2" th:text="${item.quantity}">1</span>
+                        <button class="btn btn-sm btn-outline-secondary">+</button>
+                    </div>
+                </div>
+            </div>
 
-        <button type="submit" class="btn btn-dark w-100 mt-4">
-          ĐẶT HÀNG NGAY
-        </button>
-      </form>
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" placeholder="Nhập mã giảm giá"/>
+                <button class="btn btn-dark">ÁP DỤNG</button>
+            </div>
+
+            <ul class="list-group list-group-flush mb-3">
+                <li class="list-group-item d-flex justify-content-between">
+                    Tổng tiền hàng: <span th:text="${#numbers.formatInteger(cart.total_price_cart, 0, 'POINT')} + 'đ'">0đ</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    Giảm giá: <span>- 0đ</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    Tạm tính: <span th:text="${#numbers.formatInteger(cart.total_price_cart, 0, 'POINT')} + 'đ'">0đ</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    Chiết khấu: <span>- 0đ</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    Phí ship: <span>0đ</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between fw-bold fs-5 text-danger">
+                    Cần thanh toán: <span th:text="${#numbers.formatInteger(cart.total_price_checkout, 0, 'POINT')} + 'đ'">0đ</span>
+                </li>
+            </ul>
+        </div>
     </div>
-
-    <!-- Tóm tắt đơn hàng -->
-    <div class="col-md-5 order-summary ps-md-5 mt-5 mt-md-0">
-      <div class="d-flex mb-3">
-        <img
-                src="https://via.placeholder.com/80"
-                class="me-3"
-                alt="Sản phẩm"
-        />
-        <div>
-          <p class="mb-1">Áo Blazer peplum cổ chống cao - Đen - M</p>
-          <span class="fw-bold text-danger">1,855,000đ</span>
-          <a href="#" class="ms-3 text-decoration-underline">Sửa</a>
-          <div class="mt-2">
-            <button class="btn btn-sm btn-outline-secondary">-</button>
-            <span class="mx-2">1</span>
-            <button class="btn btn-sm btn-outline-secondary">+</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="input-group mb-3">
-        <input
-                type="text"
-                class="form-control"
-                placeholder="Nhập mã giảm giá"
-        />
-        <button class="btn btn-dark">ÁP DỤNG</button>
-      </div>
-
-      <ul class="list-group list-group-flush mb-3">
-        <li class="list-group-item d-flex justify-content-between">
-          Tổng tiền hàng: <span>1,855,000đ</span>
-        </li>
-        <li class="list-group-item d-flex justify-content-between">
-          Giảm giá: <span>- 0đ</span>
-        </li>
-        <li class="list-group-item d-flex justify-content-between">
-          Tạm tính: <span>1,855,000đ</span>
-        </li>
-        <li class="list-group-item d-flex justify-content-between">
-          Chiết khấu: <span>- 0đ</span>
-        </li>
-        <li class="list-group-item d-flex justify-content-between">
-          Phí ship: <span>0đ</span>
-        </li>
-        <li
-                class="list-group-item d-flex justify-content-between fw-bold fs-5 text-danger"
-        >
-          Cần thanh toán: <span>1,855,000đ</span>
-        </li>
-      </ul>
-    </div>
-  </div>
 </div>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const provinceSelect = document.getElementById("select-province");
-    const districtSelect = document.getElementById("select-district");
-    const wardSelect = document.getElementById("select-ward");
+    document.addEventListener("DOMContentLoaded", function () {
+        const provinceSelect = document.getElementById("select-province");
+        const districtSelect = document.getElementById("select-district");
+        const wardSelect = document.getElementById("select-ward");
 
-    // Bước 1: Load Tỉnh/Thành phố
-    fetch("https://esgoo.net/api-tinhthanh/1/0.htm")
+        fetch("https://esgoo.net/api-tinhthanh/1/0.htm")
             .then(res => res.json())
             .then(data => {
-              provinceSelect.innerHTML = '<option selected disabled hidden>Chọn Tỉnh/Thành phố</option>';
-              data.data.forEach(p => {
-                provinceSelect.innerHTML += `<option value="${p.id}">${p.full_name}</option>`;
-              });
+                provinceSelect.innerHTML = '<option selected disabled hidden>Chọn Tỉnh/Thành phố</option>';
+                data.data.forEach(p => {
+                    provinceSelect.innerHTML += `<option value="${p.full_name}">${p.full_name}</option>`;
+                });
             });
-    provinceSelect.addEventListener("change", function () {
-      const provinceId = this.value;
 
-      // Reset danh sách quận và phường
-      districtSelect.innerHTML = '<option selected>Đang tải Quận/Huyện...</option>';
-      wardSelect.innerHTML = '<option selected>Chọn Phường/Xã</option>';
+        provinceSelect.addEventListener("change", function () {
+            const provinceId = this.value;
+            districtSelect.innerHTML = '<option selected>Đang tải Quận/Huyện...</option>';
+            wardSelect.innerHTML = '<option selected>Chọn Phường/Xã</option>';
 
-      fetch(`https://esgoo.net/api-tinhthanh/2/${provinceId}.htm`)
-              .then(res => res.json())
-              .then(data => {
-                districtSelect.innerHTML = '<option selected disabled hidden>Chọn Quận/Huyện</option>';
-                data.data.forEach(d => {
-                  districtSelect.innerHTML += `<option value="${d.id}">${d.full_name}</option>`;
+            fetch(`https://esgoo.net/api-tinhthanh/2/${provinceId}.htm`)
+                .then(res => res.json())
+                .then(data => {
+                    districtSelect.innerHTML = '<option selected disabled hidden>Chọn Quận/Huyện</option>';
+                    data.data.forEach(d => {
+                        districtSelect.innerHTML += `<option value="${d.full_name}">${d.full_name}</option>`;
+                    });
                 });
-              });
-    });
+        });
 
-    districtSelect.addEventListener("change", function () {
-      const districtId = this.value;
+        districtSelect.addEventListener("change", function () {
+            const districtId = this.value;
+            wardSelect.innerHTML = '<option selected>Đang tải Phường/Xã...</option>';
 
-      wardSelect.innerHTML = '<option selected>Đang tải Phường/Xã...</option>';
-
-      fetch(`https://esgoo.net/api-tinhthanh/3/${districtId}.htm`)
-              .then(res => res.json())
-              .then(data => {
-                wardSelect.innerHTML = '<option selected disabled hidden>Chọn Phường/Xã</option>';
-                data.data.forEach(w => {
-                  wardSelect.innerHTML += `<option value="${w.id}">${w.full_name}</option>`;
+            fetch(`https://esgoo.net/api-tinhthanh/3/${districtId}.htm`)
+                .then(res => res.json())
+                .then(data => {
+                    wardSelect.innerHTML = '<option selected disabled hidden>Chọn Phường/Xã</option>';
+                    data.data.forEach(w => {
+                        wardSelect.innerHTML += `<option value="${w.full_name}">${w.full_name}</option>`;
+                    });
                 });
-              });
+        });
+
+        document.querySelectorAll(".payment-method").forEach((item) => {
+            item.addEventListener("click", () => {
+                document.querySelectorAll(".payment-method").forEach((i) => i.classList.remove("active"));
+                item.classList.add("active");
+                item.querySelector("input").checked = true;
+            });
+        });
     });
-  });
-  document.querySelectorAll(".payment-method").forEach((item) => {
-    item.addEventListener("click", () => {
-      document
-              .querySelectorAll(".payment-method")
-              .forEach((i) => i.classList.remove("active"));
-      item.classList.add("active");
-      item.querySelector("input").checked = true;
-    });
-  });
 </script>
 </body>
 </html>

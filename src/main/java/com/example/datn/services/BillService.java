@@ -269,4 +269,17 @@ public class BillService {
     public Bill findByIdWithDiscount(Integer id) {
         return billRepository.findWithDiscountById(id);
     }
+
+    public void saveBillWithDetails(Bill bill, Cart cart) {
+        Bill savedBill = billRepository.save(bill);
+
+        for (CartDetail cd : cart.getCartDetails()) {
+            BillDetails detail = new BillDetails();
+            detail.setBill(savedBill);
+            detail.setProductDetail(cd.getProductDetail());
+            detail.setQuantity(cd.getQuantity());
+            detail.setPrice(cd.getProductDetail().getPrice());
+            billDetailRepository.save(detail);
+        }
+    }
 }

@@ -7,6 +7,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Getter
@@ -43,4 +44,7 @@ public class Cart {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "discount_id")
     private Discount discount;
+
+    @OneToMany(mappedBy = "cart", fetch = FetchType.LAZY)
+    private List<CartDetail> cartDetails;
 }
