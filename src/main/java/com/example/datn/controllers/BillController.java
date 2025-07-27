@@ -89,7 +89,8 @@ public class BillController {
             redirectAttributes.addFlashAttribute("error", "Đã xảy ra lỗi khi cập nhật trạng thái.");
         }
 
-        return "redirect:/admin/getbill-detail/" + billId;
+        return "redirect:/admin/bill/getbill-detail/" + billId;
+
     }
     @GetMapping("/getbill-detail/{maHoaDon}")
     public String getBillDetail(Model model, @PathVariable("maHoaDon") Integer maHoaDon) {
