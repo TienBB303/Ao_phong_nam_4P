@@ -195,24 +195,26 @@ public class RevenueService {
         LocalDateTime startOfToday = today.atStartOfDay();
         LocalDateTime endOfToday = today.atTime(LocalTime.MAX);
 
-        BigDecimal todayRevenue = billRepository.getTodayRevenue(startOfToday, endOfToday);
-        Long todayOrders = billRepository.getTodayOrderCount(startOfToday, endOfToday);
-
+        // Doanh thu hôm nay chỉ lấy bill hoàn thành
+        BigDecimal todayRevenue = billRepository.getSimpleRevenueSumWithStatus(startOfToday, endOfToday, 4);
+        Long todayOrders = billRepository.getSimpleOrderCountWithStatus(startOfToday, endOfToday, 4);
         summary.setTotalRevenueToday(todayRevenue);
         summary.setTotalOrdersToday(todayOrders);
+
+        // Tổng số đơn đặt hàng toàn hệ thống (chỉ lấy bill hoàn thành)
+        summary.setTotalOrders(billRepository.countByStatusAndPaid(4,1));
+
+        // Tổng doanh thu toàn hệ thống (không lọc thời gian, chỉ bill hoàn thành)
+        summary.setTotalRevenue(billRepository.getTotalRevenueCompleted());
 
         // Thống kê tháng này
         LocalDate startOfMonth = today.withDayOfMonth(1);
         LocalDateTime startOfMonthDateTime = startOfMonth.atStartOfDay();
         LocalDateTime endOfMonthDateTime = today.atTime(LocalTime.MAX);
-
-        // Use separate queries instead of combined one
-        BigDecimal monthRevenue = billRepository.getSimpleRevenueSum(startOfMonthDateTime, endOfMonthDateTime);
-        Long monthOrders = billRepository.getSimpleOrderCount(startOfMonthDateTime, endOfMonthDateTime);
-
+        BigDecimal monthRevenue = billRepository.getSimpleRevenueSumWithStatus(startOfMonthDateTime, endOfMonthDateTime, 4);
+        Long monthOrders = billRepository.getSimpleOrderCountWithStatus(startOfMonthDateTime, endOfMonthDateTime, 4);
         if (monthRevenue == null) monthRevenue = BigDecimal.ZERO;
         if (monthOrders == null) monthOrders = 0L;
-
         summary.setTotalRevenueThisMonth(monthRevenue);
         summary.setTotalOrdersThisMonth(monthOrders);
 
@@ -220,13 +222,11 @@ public class RevenueService {
         LocalDate startOfYear = today.withDayOfYear(1);
         LocalDateTime startOfYearDateTime = startOfYear.atStartOfDay();
         LocalDateTime endOfYearDateTime = today.atTime(LocalTime.MAX);
-
-        BigDecimal yearRevenue = billRepository.getSimpleRevenueSum(startOfYearDateTime, endOfYearDateTime);
-        Long yearOrders = billRepository.getSimpleOrderCount(startOfYearDateTime, endOfYearDateTime);
-
+        // Tổng đơn hàng từ đầu năm (cho thống kê có lọc)
+        BigDecimal yearRevenue = billRepository.getSimpleRevenueSumWithStatus(startOfYearDateTime, endOfYearDateTime, 4);
+        Long yearOrders = billRepository.getSimpleOrderCountWithStatus(startOfYearDateTime, endOfYearDateTime, 4);
         if (yearRevenue == null) yearRevenue = BigDecimal.ZERO;
         if (yearOrders == null) yearOrders = 0L;
-
         summary.setTotalRevenueThisYear(yearRevenue);
         summary.setTotalOrdersThisYear(yearOrders);
 
@@ -244,9 +244,10 @@ public class RevenueService {
         LocalDate startOfLastMonth = startOfMonth.minusMonths(1);
         LocalDate endOfLastMonth = startOfMonth.minusDays(1);
 
-        BigDecimal lastMonthRevenue = billRepository.getSimpleRevenueSum(
+        BigDecimal lastMonthRevenue = billRepository.getSimpleRevenueSumWithStatus(
                 startOfLastMonth.atStartOfDay(),
-                endOfLastMonth.atTime(LocalTime.MAX)
+                endOfLastMonth.atTime(LocalTime.MAX),
+                4  // chỉ lấy đơn hoàn thành
         );
 
         if (lastMonthRevenue == null) lastMonthRevenue = BigDecimal.ZERO;
@@ -277,7 +278,7 @@ public class RevenueService {
         LocalDateTime startOfToday = today.atStartOfDay();
         LocalDateTime endOfToday = today.atTime(LocalTime.MAX);
 
-        BigDecimal revenue = billRepository.getTodayRevenue(startOfToday, endOfToday);
+        BigDecimal revenue = billRepository.getSimpleRevenueSumWithStatus(startOfToday, endOfToday, 4);
         return revenue != null ? revenue : BigDecimal.ZERO;
     }
 

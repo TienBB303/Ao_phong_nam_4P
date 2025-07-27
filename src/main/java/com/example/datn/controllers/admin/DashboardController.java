@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.ui.Model;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Controller
@@ -24,11 +25,14 @@ public class DashboardController {
     @GetMapping
     public String dashboardGUI(Model model) {
         // Tổng đơn hàng
-        long totalOrders = billRepository.count();
-        // Số đơn chờ xử lý (giả sử status = 1 là chờ xử lý, bạn chỉnh lại nếu khác)
-        long pendingOrders = billRepository.countByStatus(1);
+        long totalOrders = billRepository.countByStatusAndPaid(4,1); // Đếm hóa đơn hoàn thành + đã thanh toán // Status = 4 (hoàn thành), Paid = 1 (đã thanh toán)
+        long pendingOrders = billRepository.countByStatusAndPaid(1,1); // Đếm đơn chờ xử lý + đã thanh toán // Status = 1 (chờ xử lý), Paid = 1 (đã thanh toán)
         // Tổng doanh thu
-        BigDecimal totalRevenue = billRepository.getTotalRevenue();
+        LocalDateTime fromDate = LocalDateTime.of(2020, 1, 1, 0, 0); // Hoặc ngày đầu năm 2020
+        LocalDateTime toDate = LocalDateTime.now(); // Tổng doanh thu hóa đơn hoàn thành
+
+        System.out.println("Revenue từ " + fromDate + " đến " + toDate);
+        BigDecimal totalRevenue = billRepository.getSimpleRevenueSumWithStatus(fromDate, toDate, 4);
         // Tổng sản phẩm
         long totalProducts = productRepository.countTotalProducts();
 
