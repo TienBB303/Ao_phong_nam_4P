@@ -60,7 +60,7 @@ public class CartService {
         return  cartRepository.findAllCartDetailByCartId(idCart);
     }
 
-    public void addProductToCart(Integer cartId,Integer productDetailId) throws Exception{
+    public void addProductToCart(Integer cartId, Integer productDetailId) throws Exception{
         Cart cart = cartRepository.findByIdCart(cartId);
         ProductDetail  productDetail = productDetailRepository.findProductDetailById(productDetailId);
         CartDetail itemExisted = cartDetailRepositoty.findByCartAndProductDetailId(cartId,productDetailId);
@@ -113,7 +113,7 @@ public class CartService {
     public Integer countAllItemInCartByCartId(Integer idCart){
         return cartDetailRepositoty.countAllItemInCartByCartId(idCart);
     }
-    
+
     public BigDecimal plusAllItemInCartByCartId(Integer idCart){
         Cart cart = cartRepository.findByIdCart(idCart);
         List<CartDetail> listCartDetails = cartRepository.findAllCartDetailByCartId(cart.getId());
@@ -321,28 +321,81 @@ public class CartService {
         }
     }
 
-    public void addCustomerToCart(Integer cartId, Integer customerId) throws Exception {
+// <<<<<<< TienBB
+//     public void addCustomerToCart(Integer cartId, Integer customerId) throws Exception {
+//         Cart cart = cartRepository.findByIdCart(cartId);
+//         if (cart == null) {
+//             throw new Exception("Không tìm thấy giỏ hàng");
+//         }
+
+//         Customer customer = customerService.findById(customerId);
+//         if (customer == null) {
+//             throw new Exception("Không tìm thấy khách hàng");
+//         }
+
+//         cart.setAccount(customer.getAccount());
+//         cartRepository.save(cart);
+//     }
+
+//     public void removeCustomerFromCart(Integer cartId) throws Exception {
+//         Cart cart = cartRepository.findByIdCart(cartId);
+//         if (cart == null) {
+//             throw new Exception("Không tìm thấy giỏ hàng");
+//         }
+
+//         cart.setAccount(null);
+// =======
+    // ban hang online ne ca nhom :D
+
+    public void addProductOnlineToCart(Integer cartId, Integer productDetailId, Integer quantity) throws Exception {
         Cart cart = cartRepository.findByIdCart(cartId);
-        if (cart == null) {
-            throw new Exception("Không tìm thấy giỏ hàng");
+        ProductDetail productDetail = productDetailRepository.findProductDetailById(productDetailId);
+        CartDetail itemExisted = cartDetailRepositoty.findByCartAndProductDetailId(cartId, productDetailId);
+
+        if (productDetail.getQuantity() < quantity) {
+            throw new Exception("Sản phẩm " + productDetail.getProduct().getName() +
+                    " (" + productDetail.getColor().getName() + "-" + productDetail.getSize().getCode() + ")" +
+                    " không đủ hàng (tồn kho: " + productDetail.getQuantity() + ")");
         }
 
-        Customer customer = customerService.findById(customerId);
-        if (customer == null) {
-            throw new Exception("Không tìm thấy khách hàng");
+        if (itemExisted != null) {
+            int newQuantity = itemExisted.getQuantity() + quantity;
+
+            itemExisted.setQuantity(newQuantity);
+            itemExisted.setTotal_price(productDetail.getPrice().multiply(BigDecimal.valueOf(newQuantity)));
+
+            productDetail.setQuantity(productDetail.getQuantity() - quantity);
+
+            productDetailRepository.save(productDetail);
+            cartDetailRepositoty.save(itemExisted);
+        } else {
+            CartDetail cartDetail = new CartDetail();
+            cartDetail.setCart(cart);
+            cartDetail.setProductDetail(productDetail);
+            cartDetail.setQuantity(quantity);
+            cartDetail.setPrice(productDetail.getPrice());
+            cartDetail.setTotal_price(productDetail.getPrice().multiply(BigDecimal.valueOf(quantity)));
+
+            productDetail.setQuantity(productDetail.getQuantity() - quantity);
+
+            productDetailRepository.save(productDetail);
+            cartDetailRepositoty.save(cartDetail);
         }
 
-        cart.setAccount(customer.getAccount());
-        cartRepository.save(cart);
-    }
+        List<CartDetail> listCartDetails = cartRepository.findAllCartDetailByCartId(cartId);
+        BigDecimal totalPrice = listCartDetails.stream()
+                .map(CartDetail::getTotal_price)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        Integer totalQuantity = listCartDetails.stream()
+                .mapToInt(CartDetail::getQuantity)
+                .sum();
 
-    public void removeCustomerFromCart(Integer cartId) throws Exception {
-        Cart cart = cartRepository.findByIdCart(cartId);
-        if (cart == null) {
-            throw new Exception("Không tìm thấy giỏ hàng");
-        }
+        cart.setTotal_price_cart(totalPrice);
+        cart.setTotal_quantity(totalQuantity);
 
-        cart.setAccount(null);
+        recalculateCartTotalWithDiscount(cart);
+
+        cart.setUpdated_at(new Date());
         cartRepository.save(cart);
     }
 

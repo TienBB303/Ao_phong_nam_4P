@@ -1,10 +1,12 @@
 package com.example.datn.entities;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "shipping_address")
 public class ShippingAddress {
@@ -51,4 +53,16 @@ public class ShippingAddress {
     @ManyToOne
     @JoinColumn(name = "customer_id")
     private Customer customer;
+
+    @Override
+    public String toString() {
+        return "ShippingAddress{" +
+                "id=" + id +
+                ", addressDetail='" + addressDetail + '\'' +
+                ", provinceName='" + provinceName + '\'' +
+                ", districtName='" + districtName + '\'' +
+                ", wardName='" + wardName + '\'' +
+                ", customerId=" + (customer != null ? customer.getId() : null) +
+                '}';
+    }
 }

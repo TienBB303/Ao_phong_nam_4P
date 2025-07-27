@@ -79,5 +79,115 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
             @Param("brandId") Integer brandId,
             @Param("materialId") Integer materialId,
             Pageable pageable);
+// ==================== THỐNG KÊ SẢN PHẨM ====================
+
+    // Đếm tổng số sản phẩm
+    @Query("SELECT COUNT(p) FROM Product p")
+    Long countTotalProducts();
+
+    // Đếm sản phẩm đang hoạt động
+    @Query("SELECT COUNT(p) FROM Product p WHERE p.status = true")
+    Long countActiveProducts();
+
+    // Đếm số danh mục
+    @Query("SELECT COUNT(DISTINCT p.category.id) FROM Product p WHERE p.category.status = true")
+    Long countActiveCategories();
+
+    // Đếm số thương hiệu
+    @Query("SELECT COUNT(DISTINCT p.brand.id) FROM Product p WHERE p.brand.status = true")
+    Long countActiveBrands();
+
+    // Sản phẩm bán chạy nhất theo số lượng
+    @Query("SELECT p.id, p.code, p.name, p.category.name, p.brand.name, " +
+            "COALESCE(SUM(bd.quantity), 0) as totalSold, " +
+            "COALESCE(SUM(bd.total_price), 0) as totalRevenue " +
+            "FROM Product p " +
+            "LEFT JOIN ProductDetail pd ON pd.product.id = p.id " +
+            "LEFT JOIN BillDetails bd ON bd.productDetail.id = pd.id " +
+            "LEFT JOIN Bill b ON bd.bill.id = b.id " +
+            "WHERE (b.paymentStatus = true OR b.paymentStatus IS NULL) " +
+            "AND p.status = true " +
+            "GROUP BY p.id, p.code, p.name, p.category.name, p.brand.name " +
+            "ORDER BY COALESCE(SUM(bd.quantity), 0) DESC")
+    List<Object[]> getTopSellingProductsByQuantity();
+
+    // Sản phẩm theo doanh thu
+    @Query("SELECT p.id, p.code, p.name, p.category.name, p.brand.name, " +
+            "COALESCE(SUM(bd.quantity), 0) as totalSold, " +
+            "COALESCE(SUM(bd.total_price), 0) as totalRevenue " +
+            "FROM Product p " +
+            "LEFT JOIN ProductDetail pd ON pd.product.id = p.id " +
+            "LEFT JOIN BillDetails bd ON bd.productDetail.id = pd.id " +
+            "LEFT JOIN Bill b ON bd.bill.id = b.id " +
+            "WHERE (b.paymentStatus = true OR b.paymentStatus IS NULL) " +
+            "AND p.status = true " +
+            "GROUP BY p.id, p.code, p.name, p.category.name, p.brand.name " +
+            "ORDER BY COALESCE(SUM(bd.total_price), 0) DESC")
+    List<Object[]> getTopSellingProductsByRevenue();
+
+    // Thống kê tồn kho
+    @Query("SELECT p.id, p.code, p.name, p.category.name, p.brand.name, " +
+            "COALESCE(SUM(pd.quantity), 0) as totalStock, " +
+            "COUNT(pd.id) as totalVariants " +
+            "FROM Product p " +
+            "LEFT JOIN ProductDetail pd ON pd.product.id = p.id " +
+            "WHERE p.status = true " +
+            "GROUP BY p.id, p.code, p.name, p.category.name, p.brand.name " +
+            "ORDER BY COALESCE(SUM(pd.quantity), 0) ASC")
+    List<Object[]> getProductsStockStats();
+
+    // Sản phẩm sắp hết hàng (< 10)
+    @Query("SELECT p.id, p.code, p.name, p.category.name, p.brand.name, " +
+            "COALESCE(SUM(pd.quantity), 0) as totalStock, " +
+            "COUNT(pd.id) as totalVariants " +
+            "FROM Product p " +
+            "LEFT JOIN ProductDetail pd ON pd.product.id = p.id " +
+            "WHERE p.status = true " +
+            "GROUP BY p.id, p.code, p.name, p.category.name, p.brand.name " +
+            "HAVING COALESCE(SUM(pd.quantity), 0) < 10 " +
+            "ORDER BY COALESCE(SUM(pd.quantity), 0) ASC")
+    List<Object[]> getLowStockProducts();
+
+    // Sản phẩm hết hàng
+    @Query("SELECT p.id, p.code, p.name, p.category.name, p.brand.name, " +
+            "COALESCE(SUM(pd.quantity), 0) as totalStock, " +
+            "COUNT(pd.id) as totalVariants " +
+            "FROM Product p " +
+            "LEFT JOIN ProductDetail pd ON pd.product.id = p.id " +
+            "WHERE p.status = true " +
+            "GROUP BY p.id, p.code, p.name, p.category.name, p.brand.name " +
+            "HAVING COALESCE(SUM(pd.quantity), 0) = 0 " +
+            "ORDER BY p.name ASC")
+    List<Object[]> getOutOfStockProducts();
+
+    // Thống kê theo danh mục
+    @Query("SELECT c.name, COUNT(p.id) as productCount, " +
+            "COALESCE(SUM(bd.quantity), 0) as totalSold, " +
+            "COALESCE(SUM(bd.total_price), 0) as totalRevenue, " +
+            "COALESCE(SUM(pd.quantity), 0) as totalStock " +
+            "FROM Category c " +
+            "LEFT JOIN Product p ON p.category.id = c.id AND p.status = true " +
+            "LEFT JOIN ProductDetail pd ON pd.product.id = p.id " +
+            "LEFT JOIN BillDetails bd ON bd.productDetail.id = pd.id " +
+            "LEFT JOIN Bill b ON bd.bill.id = b.id AND b.paymentStatus = true " +
+            "WHERE c.status = true " +
+            "GROUP BY c.id, c.name " +
+            "ORDER BY COALESCE(SUM(bd.total_price), 0) DESC")
+    List<Object[]> getCategoryStats();
+
+    // Thống kê theo thương hiệu
+    @Query("SELECT br.name, COUNT(p.id) as productCount, " +
+            "COALESCE(SUM(bd.quantity), 0) as totalSold, " +
+            "COALESCE(SUM(bd.total_price), 0) as totalRevenue, " +
+            "COALESCE(SUM(pd.quantity), 0) as totalStock " +
+            "FROM Brand br " +
+            "LEFT JOIN Product p ON p.brand.id = br.id AND p.status = true " +
+            "LEFT JOIN ProductDetail pd ON pd.product.id = p.id " +
+            "LEFT JOIN BillDetails bd ON bd.productDetail.id = pd.id " +
+            "LEFT JOIN Bill b ON bd.bill.id = b.id AND b.paymentStatus = true " +
+            "WHERE br.status = true " +
+            "GROUP BY br.id, br.name " +
+            "ORDER BY COALESCE(SUM(bd.total_price), 0) DESC")
+    List<Object[]> getBrandStats();
 
 }

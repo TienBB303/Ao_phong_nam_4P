@@ -57,6 +57,10 @@ public class BillService {
 
     @Autowired
     CustomerRepository customerRepository;
+
+    @Autowired
+    com.example.datn.repositories.PaymentMethodRepository paymentMethodRepository;
+
 //
 //    @Autowired
 //    CustomerService customerService;
@@ -505,7 +509,6 @@ public class BillService {
 
         billRepository.save(cart);
     }
-
     public Bill updateStatus(String statusString, Integer id) {
         Bill bill = billRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn có id: " + id));
@@ -570,5 +573,18 @@ public class BillService {
     }
     public Bill findByIdWithDiscount(Integer id) {
         return billRepository.findWithDiscountById(id);
+    }
+
+    public void saveBillWithDetails(Bill bill, Cart cart) {
+        Bill savedBill = billRepository.save(bill);
+
+        for (CartDetail cd : cart.getCartDetails()) {
+            BillDetails detail = new BillDetails();
+            detail.setBill(savedBill);
+            detail.setProductDetail(cd.getProductDetail());
+            detail.setQuantity(cd.getQuantity());
+            detail.setPrice(cd.getProductDetail().getPrice());
+            billDetailRepository.save(detail);
+        }
     }
 }

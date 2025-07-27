@@ -257,7 +257,6 @@ public class SellingInlineController {
         }
     }
 
-
     @PostMapping("/remove-discount")
     @ResponseBody
     public ResponseEntity<?> removeDiscount(@RequestParam("idCart") Integer idCart){

@@ -19,14 +19,14 @@ public class Main {
         SpringApplication.run(Main.class, args);
     }
 
+
     @Bean
     public CommandLineRunner testMailConfiguration(@Autowired JavaMailSender mailSender) {
         return args -> {
             logger.info("=== KIỂM TRA CẤU HÌNH MAIL ===");
             logger.info("Mail sender class: {}", mailSender.getClass().getSimpleName());
 
-            if (mailSender instanceof JavaMailSenderImpl) {
-                JavaMailSenderImpl impl = (JavaMailSenderImpl) mailSender;
+            if (mailSender instanceof JavaMailSenderImpl impl) {
                 logger.info("Mail sender host: {}", impl.getHost());
                 logger.info("Mail sender port: {}", impl.getPort());
                 logger.info("Mail sender username: {}", impl.getUsername());
@@ -37,4 +37,5 @@ public class Main {
             logger.info("=== KẾT THÚC KIỂM TRA ===");
         };
     }
+
 }

@@ -10,6 +10,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -42,7 +44,17 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
             @Param("typeBill") Boolean typeBill,
             Pageable pageable
     );
-
+    // Thống kê doanh thu theo ngày
+    @Query("SELECT CAST(b.createdAt AS DATE) as date, " +
+            "COALESCE(SUM(b.total_checkout), 0) as totalRevenue, " +
+            "COUNT(b) as totalOrders " +
+            "FROM Bill b " +
+            "WHERE b.paymentStatus = true " +
+            "AND b.createdAt >= :startDate AND b.createdAt <= :endDate " +
+            "GROUP BY CAST(b.createdAt AS DATE) " +
+            "ORDER BY CAST(b.createdAt AS DATE)")
+    List<Object[]> getRevenueByDateRange(@Param("startDate") LocalDateTime startDate,
+                                         @Param("endDate") LocalDateTime endDate);
 
     // TIENBB
     @Query("select c from Bill c where c.id = :id")
@@ -56,4 +68,76 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
 
     @Query("select cd from Bill cd where cd.status = 9")
     List<Bill> getAllCartInline();
+    // Thống kê doanh thu theo tháng
+    @Query("SELECT YEAR(b.createdAt) as year, MONTH(b.createdAt) as month, " +
+            "COALESCE(SUM(b.total_checkout), 0) as totalRevenue, " +
+            "COUNT(b) as totalOrders " +
+            "FROM Bill b " +
+            "WHERE b.paymentStatus = true " +
+            "AND YEAR(b.createdAt) = :year " +
+            "GROUP BY YEAR(b.createdAt), MONTH(b.createdAt) " +
+            "ORDER BY YEAR(b.createdAt), MONTH(b.createdAt)")
+    List<Object[]> getRevenueByMonth(@Param("year") int year);
+
+    // Thống kê doanh thu theo năm
+    @Query("SELECT YEAR(b.createdAt) as year, " +
+            "COALESCE(SUM(b.total_checkout), 0) as totalRevenue, " +
+            "COUNT(b) as totalOrders " +
+            "FROM Bill b " +
+            "WHERE b.paymentStatus = true " +
+            "GROUP BY YEAR(b.createdAt) " +
+            "ORDER BY YEAR(b.createdAt)")
+    List<Object[]> getRevenueByYear();
+
+    // Tổng doanh thu và số đơn hàng theo khoảng thời gian
+    @Query("SELECT COALESCE(SUM(b.total_checkout), 0) as totalRevenue, " +
+            "COUNT(b) as totalOrders " +
+            "FROM Bill b " +
+            "WHERE b.paymentStatus = true " +
+            "AND b.createdAt >= :startDate AND b.createdAt <= :endDate")
+    Object[] getTotalRevenueAndOrdersByDateRange(@Param("startDate") LocalDateTime startDate,
+                                                 @Param("endDate") LocalDateTime endDate);
+
+    // Doanh thu hôm nay
+    @Query("SELECT COALESCE(SUM(b.total_checkout), 0) " +
+            "FROM Bill b " +
+            "WHERE b.paymentStatus = true " +
+            "AND b.createdAt >= :startOfDay AND b.createdAt <= :endOfDay")
+    BigDecimal getTodayRevenue(@Param("startOfDay") LocalDateTime startOfDay,
+                               @Param("endOfDay") LocalDateTime endOfDay);
+
+    // Số đơn hàng hôm nay
+    @Query("SELECT COUNT(b) " +
+            "FROM Bill b " +
+            "WHERE b.paymentStatus = true " +
+            "AND b.createdAt >= :startOfDay AND b.createdAt <= :endOfDay")
+    Long getTodayOrderCount(@Param("startOfDay") LocalDateTime startOfDay,
+                            @Param("endOfDay") LocalDateTime endOfDay);
+
+    // Top sản phẩm bán chạy
+    @Query("SELECT pd.product.name, SUM(bd.quantity) as totalSold, " +
+            "SUM(bd.total_price) as totalRevenue " +
+            "FROM BillDetails bd " +
+            "JOIN bd.bill b " +
+            "JOIN bd.productDetail pd " +
+            "WHERE b.paymentStatus = true " +
+            "AND b.createdAt >= :startDate AND b.createdAt <= :endDate " +
+            "GROUP BY pd.product.id, pd.product.name " +
+            "ORDER BY SUM(bd.quantity) DESC")
+    List<Object[]> getTopSellingProducts(@Param("startDate") LocalDateTime startDate,
+                                         @Param("endDate") LocalDateTime endDate);
+
+    @Query("SELECT SUM(b.total_checkout) " +
+            "FROM Bill b " +
+            "WHERE b.paymentStatus = true " +
+            "AND b.createdAt >= :startDate AND b.createdAt <= :endDate")
+    BigDecimal getSimpleRevenueSum(@Param("startDate") LocalDateTime startDate,
+                                   @Param("endDate") LocalDateTime endDate);
+
+    @Query("SELECT COUNT(b) " +
+            "FROM Bill b " +
+            "WHERE b.paymentStatus = true " +
+            "AND b.createdAt >= :startDate AND b.createdAt <= :endDate")
+    Long getSimpleOrderCount(@Param("startDate") LocalDateTime startDate,
+                             @Param("endDate") LocalDateTime endDate);
 }
