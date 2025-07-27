@@ -19,6 +19,10 @@ public class Bill {
 
     private String code;
 
+    private String address_shipping;
+
+    private String note;
+
     @Column(name = "discount_amount")
     private BigDecimal discountAmount;
 
@@ -28,14 +32,13 @@ public class Bill {
     @Column(name = "payment_status")
     private Boolean paymentStatus;
 
-    private Integer status;
+    private Integer status; // 9 là tại quầy
 
     @Column(name = "type_bill")
     private Boolean typeBill;
 
 
-    @Column(name = "delivery_type")
-    private Integer deliveryType;
+    private Boolean delivery_type;
 
     @Column(name = "shipping_fee")
     private BigDecimal shippingFee;
@@ -64,12 +67,11 @@ public class Bill {
     @JoinColumn(name = "payment_method_id")
     private PaymentMethod paymentMethod;
 
-
-//    private LocalDateTime created_at; //map vposw datetime trong db
-//    private LocalDateTime updated_at;
-
     private BigDecimal total_checkout; // thành tiền
 
+    private Integer total_quantity;    // tổng số lượng
+
+}
     @Override
     public String toString() {
         return "Bill{" +

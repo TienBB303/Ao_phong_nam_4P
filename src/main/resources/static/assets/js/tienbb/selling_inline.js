@@ -56,7 +56,7 @@ $('#productSearchName').on('input', function () {
                         data-price="${item.price}">
                             <div>
                                 <div class="fw-semibold">${item.displayName}</div>
-                                <div class="text-muted small">Barcode: ${item.barcode}</div>
+                                <div class="text-muted small">Barcode: ${item.barcodes}</div>
                                 <div class="text-muted small">Tồn kho: ${item.quantity}</div>
                             </div>
                             <div class="fw-bold text-success">${item.price.toLocaleString()} đ</div>
@@ -320,6 +320,7 @@ $('#discount_select').change(function () {
     });
 });
 
+// xoas ma giam gia trong gio
 $('#remove_discount').click(function () {
     const idCart = $(this).data('id');
 
@@ -358,167 +359,124 @@ $('#remove_discount').click(function () {
     }
 });
 
-// function toggleRemoveButton() {
-//     const selected = $('#discount_select').val();
-//     if (!selected) {
-//         $('#remove_discount').hide();
-//     } else {
-//         $('#remove_discount').show();
-//     }
-// }
-// Tìm kiếm khách hàng
-$('#customerSearchInput').on('input', function () {
-    const keyword = $(this).val();
-    if (keyword.length < 2) {
-        $('#customerSuggestionBox').hide();
+function toggleRemoveButton() {
+    const selected = $('#discount_select').val();
+    if (!selected) {
+        $('#remove_discount').hide();
+    } else {
+        $('#remove_discount').show();
+    }
+}
+
+$('#customer_search').on('input', function () {
+    const keyword = $(this).val().trim();
+
+    if (keyword.length === 0) {
+        // Trường input trống -> gọi API xóa khách khỏi giỏ hàng
+        $.ajax({
+            url: '/admin/sell-inline/remove-customer-from-cart',
+            method: 'POST',
+            data: {
+                cartId: idCartFromPage
+            },
+            success: function () {
+                console.log("Đã xóa khách khỏi cart");
+            }
+        });
+
+        $("#suggestionBox_Customer").hide();
         return;
     }
 
+    // Nếu có ký tự -> tìm kiếm khách hàng
     $.ajax({
-        url: '/admin/sell-inline/search-customer',
+        url: '/admin/sell-inline/search-customer-inline',
         method: 'GET',
         data: { keyword: keyword },
         success: function (data) {
             let html = '';
-            if (data.length > 0) {
-                data.forEach(function (customer) {
-                    html += '<div class="suggestion-item p-2 border-bottom cursor-pointer hover-bg-light" ' +
-                        'data-customer-id="' + customer.id + '" ' +
-                        'data-customer-name="' + customer.name + '" ' +
-                        'data-customer-phone="' + customer.phoneNumber + '" ' +
-                        'data-customer-email="' + (customer.email || 'Chưa có email') + '">' +
-                        '<div class="fw-bold">' + customer.name + '</div>' +
-                        '<small class="text-muted">SĐT: ' + customer.phoneNumber + ' | Email: ' + (customer.email || 'Chưa có email') + '</small>' +
-                        '</div>';
-                });
-            } else {
-                html = '<div class="p-2 text-muted">Không tìm thấy khách hàng nào</div>';
-            }
-            $('#customerSuggestionBox').html(html).show();
-        },
-        error: function (err) {
-            console.error('Lỗi tìm kiếm khách hàng:', err);
-            $('#customerSuggestionBox').hide();
+            data.forEach(customer => {
+                html += `
+                    <div class="p-2 suggestion-item border-bottom" 
+                         data-id="${customer.id}"
+                         data-name="${customer.name + " - "+ customer.phoneNumber}">
+                        <div class="fw-semibold">Họ tên: ${customer.name}</div>
+                        <div class="text-muted small">SĐT: ${customer.phoneNumber}</div>
+                        <div class="text-muted small">Email: ${customer.email}</div>
+                    </div>
+                `;
+            });
+            $('#suggestionBox_Customer').html(html).show();
         }
     });
 });
 
-// Chọn khách hàng từ danh sách gợi ý
-$(document).on('click', '.suggestion-item', function () {
-    const customerId = $(this).data('customer-id');
-    const customerName = $(this).data('customer-name');
-    const customerPhone = $(this).data('customer-phone');
-    const customerEmail = $(this).data('customer-email');
+$('#suggestionBox_Customer').on('click', '.suggestion-item', function () {
+    const customerId = $(this).data('id');
+    const customerName = $(this).data('name');
 
-    // Lưu thông tin khách hàng
-    $('#selectedCustomerId').val(customerId);
-    $('#customerSearchInput').val(customerName);
+    $('#customer_search').val(customerName);
+    $('#customerId').val(customerId); // lưu lại ID nếu cần submit form
+    $('#suggestionBox_Customer').hide();
 
-    // Hiển thị thông tin khách hàng đã chọn
-    $('#customerDisplayName').text(customerName);
-    $('#customerDisplayPhone').text(customerPhone);
-    $('#customerDisplayEmail').text(customerEmail);
-    $('#selectedCustomerInfo').show();
-
-    // Ẩn danh sách gợi ý
-    $('#customerSuggestionBox').hide();
-
-    // Gọi API để gắn khách hàng vào cart hiện tại (nếu có)
-    const currentCartId = idCartFromPage; // Biến global được set từ template
-    if (currentCartId) {
-        $.ajax({
-            url: '/admin/sell-inline/assign-customer',
-            method: 'POST',
-            data: {
-                cartId: currentCartId,
-                customerId: customerId
-            },
-            success: function (response) {
-                console.log('Gắn khách hàng thành công:', response);
-            },
-            error: function (err) {
-                console.error('Lỗi gắn khách hàng:', err);
-                Swal.fire({
-                    toast: true,
-                    icon: 'error',
-                    title: 'Lỗi gắn khách hàng: ' + err.responseText,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 2000,
-                    timerProgressBar: true
-                });
-            }
-        });
-    }
+    $.ajax({
+        url: '/admin/sell-inline/add-customer-to-cart',
+        method: 'POST',
+        data: {
+            idCart: idCartFromPage,
+            customerId: customerId
+        },
+        success: function () {
+            console.log("Đã gán khách vào cart");
+        }
+    });
 });
 
-// Xóa khách hàng đã chọn
-$('#clearCustomerBtn').on('click', function () {
-    const currentCartId = idCartFromPage;
+function submitDelivery(cartId) {
+    const isChecked = document.getElementById("toggleDeliveryInfoSwitch").checked;
 
-    if (currentCartId) {
-        $.ajax({
-            url: '/admin/sell-inline/clear-customer',
-            method: 'POST',
-            data: { cartId: currentCartId },
-            success: function (response) {
-                console.log('Xóa khách hàng thành công:', response);
-                // Clear UI
-                $('#selectedCustomerId').val('');
-                $('#customerSearchInput').val('');
-                $('#selectedCustomerInfo').hide();
-                $('#customerSuggestionBox').hide();
+    let nameD = null;
+    let phoneD = null;
+    let addressD = null;
 
-                Swal.fire({
-                    toast: true,
-                    icon: 'success',
-                    title: 'Đã hủy chọn khách hàng',
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 1500,
-                    timerProgressBar: true
-                });
-            },
-            error: function (err) {
-                console.error('Lỗi xóa khách hàng:', err);
-                $('#selectedCustomerId').val('');
-                $('#customerSearchInput').val('');
-                $('#selectedCustomerInfo').hide();
-                $('#customerSuggestionBox').hide();
-
-                Swal.fire({
-                    toast: true,
-                    icon: 'warning',
-                    title: 'Đã hủy chọn khách hàng (có thể có lỗi xóa khỏi session)',
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 2000,
-                    timerProgressBar: true
-                });
-            }
-        });
-    } else {
-        $('#selectedCustomerId').val('');
-        $('#customerSearchInput').val('');
-        $('#selectedCustomerInfo').hide();
-        $('#customerSuggestionBox').hide();
+    if (isChecked) {
+        nameD = document.getElementById("nameD").value;
+        phoneD = document.getElementById("phoneD").value;
+        addressD = document.getElementById("addressD").value;
     }
+
+    $.ajax({
+        url: '/admin/sell-inline/delivery',
+        method: 'POST',
+        data: {
+            cartId: cartId,
+            nameD: nameD,
+            phoneD: phoneD,
+            addressD: addressD
+        },
+        success: function () {
+            Swal.fire("Cập nhật giao hàng thành công", "", "success");
+        },
+        error: function (xhr) {
+            Swal.fire("Lỗi", xhr.responseText, "error");
+        }
+    });
+}
+
+// Giao hàng
+document.addEventListener("DOMContentLoaded", function () {
+    const toggle = document.getElementById("toggleDeliveryInfoSwitch");
+    const collapseEl = document.getElementById("deliveryInfo");
+    const bsCollapse = new bootstrap.Collapse(collapseEl, { toggle: false });
+
+    toggle.addEventListener("change", function () {
+        if (this.checked) {
+            bsCollapse.show();
+        } else {
+            bsCollapse.hide();
+            document.getElementById("nameD").value = "";
+            document.getElementById("phoneD").value = "";
+            document.getElementById("addressD").value = "";
+        }
+    });
 });
-
-// Ẩn danh sách gợi ý khi click ra ngoài
-$(document).on('click', function (e) {
-    if (!$(e.target).closest('#customerSearchInput, #customerSuggestionBox').length) {
-        $('#customerSuggestionBox').hide();
-    }
-});
-
-// CSS cho hover effect
-$('<style>').text(`
-    .suggestion-item:hover, .hover-bg-light:hover {
-        background-color: #f8f9fa !important;
-        cursor: pointer;
-    }
-    .cursor-pointer {
-        cursor: pointer;
-    }
-`).appendTo('head');

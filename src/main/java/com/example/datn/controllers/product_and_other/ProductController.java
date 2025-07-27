@@ -589,6 +589,7 @@ public class ProductController {
         form.setMaterialId(product.getMaterial().getId());
         form.setDescription(product.getDescription());
 
+        model.addAttribute("idProduct", product.getId());
         model.addAttribute("productForm", form);
         model.addAttribute("listProductDetail", listDetail);
 

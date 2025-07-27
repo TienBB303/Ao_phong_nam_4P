@@ -1,6 +1,9 @@
 package com.example.datn.repositories;
 
 import com.example.datn.entities.Bill;
+import com.example.datn.entities.BillDetails;
+import com.example.datn.entities.Selling.Cart;
+import com.example.datn.entities.Selling.CartDetail;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -55,7 +58,18 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
     List<Object[]> getRevenueByDateRange(@Param("startDate") LocalDateTime startDate,
                                          @Param("endDate") LocalDateTime endDate);
 
+    // TIENBB
+    @Query("select c from Bill c where c.id = :id")
+    Bill findByIdBill(Integer id);
 
+    @Query("select cd from BillDetails cd where cd.bill.id = :id")
+    List<BillDetails> findAllCartDetailByCartId(Integer id);
+
+    @Query("select cd.bill from BillDetails cd where cd.id =:id")
+    Bill findCartByCartDetailId(Integer id);
+
+    @Query("select cd from Bill cd where cd.status = 9")
+    List<Bill> getAllCartInline();
     // Thống kê doanh thu theo tháng
     @Query(value = """
     SELECT COALESCE(SUM(total_checkout), 0) 
