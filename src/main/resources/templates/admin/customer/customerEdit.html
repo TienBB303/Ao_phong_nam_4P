@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments/head :: head}">
-    <title>Quản lý khách hàng | 4PStore</title>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/admin-layout}">
+
+<head>
+    <title></title>
 </head>
 <body>
-<header th:replace="~{admin/fragments/header :: header}"></header>
-<div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
-
-<section>
+<div layout:fragment="content">
     <div class="pc-container">
         <div class="pc-content">
             <!--                <div class="page-header">-->
@@ -65,14 +65,13 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Ngày sinh:</label>
-                        <input type="date" name="birthday" th:value="${customerDto.birthday != null} ? ${#temporals.format(customerDto.birthday, 'yyyy-MM-dd')} : ''" class="form-control" required/>                        <div class="text-danger" th:if="${#fields.hasErrors('birthday')}" th:errors="*{birthday}"></div>
+                        <input type="date" name="birthday" th:value="${#temporals.format(customerDto.birthday, 'yyyy-MM-dd')}" class="form-control" required/>
                     </div>
                     <div class="mb-3">
                         <label for="email" class="form-label">Email</label>
                         <input type="email" id="email" th:field="*{email}" class="form-control" required>
                         <div class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
                     </div>
-
                     <div class="mb-3">
                         <label for="phoneNumber" class="form-label">Số điện thoại</label>
                         <input type="tel" id="phoneNumber" th:field="*{phoneNumber}" class="form-control" required>
@@ -334,5 +333,6 @@
             });
     });
 </script>
+</div>
 </body>
 </html>

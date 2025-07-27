@@ -22,7 +22,40 @@
             <span th:case="*" class="text-muted">Không rõ</span>
         </span>
     </span>
+
+            <!-- Các nút hành động, ẩn nếu đã hoàn thành hoặc huỷ -->
+            <div class="d-flex justify-content-end gap-2 mt-3" th:if="${bill.status != 4 and bill.status != 5}">
+                <!-- Nút hủy đơn: Trạng thái 1 hoặc 2 -->
+                <a th:if="${bill.status == 1 or bill.status == 2}"
+                   th:href="@{'/admin/bill/update-bill-status/' + ${bill.id} + '?trangThaiDonHang=5'}"
+                   class="btn btn-outline-danger"
+                   onclick="return confirm('Bạn có chắc muốn huỷ đơn hàng này không?');">
+                    ❌ Hủy đơn này
+                </a>
+
+                <!-- Nút xác nhận: trạng thái 1 -->
+                <a th:if="${bill.status == 1}"
+                   th:href="@{'/admin/bill/update-bill-status/' + ${bill.id} + '?trangThaiDonHang=2'}"
+                   class="btn btn-outline-secondary">
+                    ✔️ Xác nhận, duyệt đơn
+                </a>
+
+                <!-- Nút xác nhận giao hàng: trạng thái 2 -->
+                <a th:if="${bill.status == 2}"
+                   th:href="@{'/admin/bill/update-bill-status/' + ${bill.id} + '?trangThaiDonHang=3'}"
+                   class="btn btn-outline-primary">
+                    🚚 Xác nhận giao hàng
+                </a>
+
+                <!-- Nút xác nhận hoàn thành: trạng thái 3 -->
+                <a th:if="${bill.status == 3}"
+                   th:href="@{'/admin/bill/update-bill-status/' + ${bill.id} + '?trangThaiDonHang=4'}"
+                   class="btn btn-outline-success">
+                    ✅ Đã giao thành công
+                </a>
+            </div>
         </div>
+
 
         <!-- Thông tin cửa hàng -->
         <div class="mb-4">
@@ -38,6 +71,7 @@
                 <h6 class="fw-bold">Khách hàng:</h6>
                 <p th:text="${bill.name}" class="mb-1"></p>
                 <p th:text="${bill.phoneNumber}" class="mb-1"></p>
+                <p th:text="${bill.address_shipping}" class="mb-1"></p>
                 <p class="mb-1">
                     <strong>Voucher:</strong>
                     <span th:text="${bill.discount != null ? bill.discount.code : 'Không sử dụng'}" class="text-muted"></span>
@@ -59,10 +93,7 @@
                     <span th:text="${#temporals.format(bill.createdAt, 'dd-MM-yyyy HH:mm')}"></span>
                 </p>
 
-                <div class="d-flex justify-content-end gap-2 mt-3">
-                    <a class="btn btn-outline-danger">❌ Hủy đơn này</a>
-                    <a class="btn btn-outline-secondary">✔️ Xác nhận, duyệt đơn</a>
-                </div>
+
             </div>
 
         <!-- Bảng chi tiết đơn hàng -->

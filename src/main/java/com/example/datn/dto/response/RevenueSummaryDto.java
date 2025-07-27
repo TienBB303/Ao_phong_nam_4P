@@ -18,6 +18,8 @@ public class RevenueSummaryDto {
     private Long totalOrdersToday;
     private Long totalOrdersThisMonth;
     private Long totalOrdersThisYear;
+    private Long totalOrders; // Tổng số đơn đặt hàng toàn hệ thống
+    private BigDecimal totalRevenue;
 
     private BigDecimal avgOrderValue;
     private BigDecimal growthPercentage;
@@ -25,4 +27,11 @@ public class RevenueSummaryDto {
     private List<RevenueStatsDto> dailyStats;
     private List<RevenueStatsDto> monthlyStats;
     private List<RevenueStatsDto> yearlyStats;
+
+    public Long getTotalOrders() {
+        return totalOrders;
+    }
+    public void setTotalOrders(Long totalOrders) {
+        this.totalOrders = totalOrders;
+    }
 }

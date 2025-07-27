@@ -73,12 +73,12 @@
                         <td th:text="${e.customer.birthDate}"></td>
                         <td th:text="${e.customer.gender == true ? 'Nam' : 'Nữ'}"></td>
                         <td>
-        <span th:if="${e.customer.addresses != null and !e.customer.addresses.isEmpty()}"
-              th:text="${e.customer.addresses[0].addressDetail
-                + (e.customer.addresses[0].wardName != null ? ', ' + e.customer.addresses[0].wardName : '')
-                + (e.customer.addresses[0].districtName != null ? ', ' + e.customer.addresses[0].districtName : '')
-                + (e.customer.addresses[0].provinceName != null ? ', ' + e.customer.addresses[0].provinceName : '')}">
-        </span>
+<!--        <span th:if="${e.customer.addresses != null and !e.customer.addresses.isEmpty()}"-->
+<!--              th:text="${e.customer.addresses[0].addressDetail-->
+<!--                + (e.customer.addresses[0].wardName != null ? ', ' + e.customer.addresses[0].wardName : '')-->
+<!--                + (e.customer.addresses[0].districtName != null ? ', ' + e.customer.addresses[0].districtName : '')-->
+<!--                + (e.customer.addresses[0].provinceName != null ? ', ' + e.customer.addresses[0].provinceName : '')}">-->
+<!--        </span>-->
                             <span th:if="${e.customer.addresses == null or e.customer.addresses.isEmpty()}" th:text="''"></span>
                         </td>
 
