@@ -40,5 +40,8 @@ public interface CustomerService {
 // Thêm địa chỉ cho khách hàng
     ShippingAddress createAddressForCustomer(Integer customerId, AddressDto addressDto);
 
+    // Đếm tổng số khách hàng (phục vụ phân trang)
+    long countAllCustomers();
     List<Customer> searchCustomerInline(String keyword);
+
 }

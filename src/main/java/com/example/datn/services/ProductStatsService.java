@@ -4,6 +4,7 @@ import com.example.datn.dto.response.ProductStatsSummaryDto;
 import com.example.datn.repositories.product_and_other.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.time.LocalDateTime; // Thêm import này
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -18,7 +19,7 @@ public class ProductStatsService {
     /**
      * Lấy tổng quan thống kê sản phẩm
      */
-    public ProductStatsSummaryDto getProductStatsSummary() {
+    public ProductStatsSummaryDto getProductStatsSummary(LocalDateTime startDate, LocalDateTime endDate) {
         ProductStatsSummaryDto summary = new ProductStatsSummaryDto();
 
         try {
@@ -58,16 +59,16 @@ public class ProductStatsService {
             System.out.println("DEBUG Total Stock: " + totalStock);
 
             // Đếm sản phẩm sắp hết hàng và hết hàng
-            List<Object[]> lowStockList = productRepository.getLowStockProducts();
-            List<Object[]> outOfStockList = productRepository.getOutOfStockProducts();
-            summary.setLowStockCount(lowStockList.size());
-            summary.setOutOfStockProducts(outOfStockList.size());
-
-            System.out.println("DEBUG Low stock count: " + lowStockList.size());
-            System.out.println("DEBUG Out of stock count: " + outOfStockList.size());
+//            List<Object[]> lowStockList = productRepository.getLowStockProducts();
+//            List<Object[]> outOfStockList = productRepository.getOutOfStockProducts();
+//            summary.setLowStockCount(lowStockList.size());
+//            summary.setOutOfStockProducts(outOfStockList.size());
+//
+//            System.out.println("DEBUG Low stock count: " + lowStockList.size());
+//            System.out.println("DEBUG Out of stock count: " + outOfStockList.size());
 
             // Thống kê bán hàng
-            List<Object[]> sellingStats = productRepository.getTopSellingProductsByRevenue();
+            List<Object[]> sellingStats = productRepository.getTopSellingProductsByRevenue(startDate, endDate); // Lấy doanh thu tổng quan
             BigDecimal totalRevenue = BigDecimal.ZERO;
             long totalUnitsSold = 0L;
 
@@ -108,21 +109,21 @@ public class ProductStatsService {
             }
 
             // Tìm danh mục và thương hiệu bán chạy nhất
-            List<Object[]> categoryStats = productRepository.getCategoryStats();
-            if (!categoryStats.isEmpty() && categoryStats.get(0)[0] != null) {
-                summary.setTopCategory(categoryStats.get(0)[0].toString());
+            List<Object[]> categoryStatsSummary = productRepository.getCategoryStats(null, null);
+            if (!categoryStatsSummary.isEmpty() && categoryStatsSummary.get(0)[0] != null) {
+                summary.setTopCategory(categoryStatsSummary.get(0)[0].toString());
             }
 
-            List<Object[]> brandStats = productRepository.getBrandStats();
-            if (!brandStats.isEmpty() && brandStats.get(0)[0] != null) {
-                summary.setTopBrand(brandStats.get(0)[0].toString());
-            }
+//            List<Object[]> brandStats = productRepository.getBrandStats();
+//            if (!brandStats.isEmpty() && brandStats.get(0)[0] != null) {
+//                summary.setTopBrand(brandStats.get(0)[0].toString());
+//            }
 
-            // Danh sách chi tiết
-            summary.setTopSellingProducts(getTopSellingProducts(10));
-            summary.setLowStockProducts(getLowStockProductsList(10));
-            summary.setCategoryStats(categoryStats);
-            summary.setBrandStats(brandStats);
+//            // Danh sách chi tiết
+//            summary.setTopSellingProducts(getTopSellingProducts(10));
+//            summary.setLowStockProducts(getLowStockProductsList(10));
+//            summary.setCategoryStats(categoryStats);
+//            summary.setBrandStats(brandStats);
 
         } catch (Exception e) {
             System.err.println("Error in getProductStatsSummary: " + e.getMessage());
@@ -148,8 +149,8 @@ public class ProductStatsService {
     /**
      * Lấy danh sách sản phẩm bán chạy
      */
-    public List<ProductStatsDto> getTopSellingProducts(int limit) {
-        List<Object[]> results = productRepository.getTopSellingProductsByQuantity();
+    public List<ProductStatsDto> getTopSellingProducts(int limit, LocalDateTime startDate, LocalDateTime endDate) {
+        List<Object[]> results = productRepository.getTopSellingProductsByQuantity(startDate, endDate); // Truyền startDate và endDate
         List<ProductStatsDto> stats = new ArrayList<>();
 
         int count = 0;
@@ -183,8 +184,8 @@ public class ProductStatsService {
     /**
      * Lấy danh sách sản phẩm bán chạy theo doanh thu
      */
-    public List<ProductStatsDto> getTopSellingProductsByRevenue(int limit) {
-        List<Object[]> results = productRepository.getTopSellingProductsByRevenue();
+    public List<ProductStatsDto> getTopSellingProductsByRevenue(int limit, LocalDateTime startDate, LocalDateTime endDate) {
+        List<Object[]> results = productRepository.getTopSellingProductsByRevenue(startDate, endDate); // Truyền startDate và endDate
         List<ProductStatsDto> stats = new ArrayList<>();
 
         int count = 0;
@@ -214,100 +215,101 @@ public class ProductStatsService {
         return stats;
     }
 
-    /**
-     * Lấy danh sách sản phẩm sắp hết hàng
-     */
-    public List<ProductStatsDto> getLowStockProductsList(int limit) {
-        List<Object[]> results = productRepository.getLowStockProducts();
-        List<ProductStatsDto> stats = new ArrayList<>();
-
-        int count = 0;
-        for (Object[] row : results) {
-            if (count >= limit) break;
-
-            ProductStatsDto dto = new ProductStatsDto();
-            dto.setProductId(safeConvertToInteger(row[0]));
-            dto.setProductCode(safeConvertToString(row[1]));
-            dto.setProductName(safeConvertToString(row[2]));
-            dto.setCategoryName(safeConvertToString(row[3]));
-            dto.setBrandName(safeConvertToString(row[4]));
-            dto.setTotalStock(safeConvertToLong(row[5]));
-            dto.setTotalVariants(safeConvertToLong(row[6]));
-
-            stats.add(dto);
-            count++;
-        }
-
-        return stats;
-    }
-
-    /**
-     * Lấy danh sách sản phẩm hết hàng
-     */
-    public List<ProductStatsDto> getOutOfStockProductsList(int limit) {
-        List<Object[]> results = productRepository.getOutOfStockProducts();
-        List<ProductStatsDto> stats = new ArrayList<>();
-
-        int count = 0;
-        for (Object[] row : results) {
-            if (count >= limit) break;
-
-            ProductStatsDto dto = new ProductStatsDto();
-            dto.setProductId(safeConvertToInteger(row[0]));
-            dto.setProductCode(safeConvertToString(row[1]));
-            dto.setProductName(safeConvertToString(row[2]));
-            dto.setCategoryName(safeConvertToString(row[3]));
-            dto.setBrandName(safeConvertToString(row[4]));
-            dto.setTotalStock(safeConvertToLong(row[5]));
-            dto.setTotalVariants(safeConvertToLong(row[6]));
-
-            stats.add(dto);
-            count++;
-        }
-
-        return stats;
-    }
-
-    /**
-     * Lấy thống kê tồn kho chi tiết
-     */
-    public List<ProductStatsDto> getStockStatsList(int limit) {
-        List<Object[]> results = productRepository.getProductsStockStats();
-        List<ProductStatsDto> stats = new ArrayList<>();
-
-        int count = 0;
-        for (Object[] row : results) {
-            if (count >= limit) break;
-
-            ProductStatsDto dto = new ProductStatsDto();
-            dto.setProductId(safeConvertToInteger(row[0]));
-            dto.setProductCode(safeConvertToString(row[1]));
-            dto.setProductName(safeConvertToString(row[2]));
-            dto.setCategoryName(safeConvertToString(row[3]));
-            dto.setBrandName(safeConvertToString(row[4]));
-            dto.setTotalStock(safeConvertToLong(row[5]));
-            dto.setTotalVariants(safeConvertToLong(row[6]));
-
-            stats.add(dto);
-            count++;
-        }
-
-        return stats;
-    }
-
+//    /**
+//     * Lấy danh sách sản phẩm sắp hết hàng
+//     */
+//    public List<ProductStatsDto> getLowStockProductsList(int limit) {
+//        List<Object[]> results = productRepository.getLowStockProducts();
+//        List<ProductStatsDto> stats = new ArrayList<>();
+//
+//        int count = 0;
+//        for (Object[] row : results) {
+//            if (count >= limit) break;
+//
+//            ProductStatsDto dto = new ProductStatsDto();
+//            dto.setProductId(safeConvertToInteger(row[0]));
+//            dto.setProductCode(safeConvertToString(row[1]));
+//            dto.setProductName(safeConvertToString(row[2]));
+//            dto.setCategoryName(safeConvertToString(row[3]));
+//            dto.setBrandName(safeConvertToString(row[4]));
+//            dto.setTotalStock(safeConvertToLong(row[5]));
+//            dto.setTotalVariants(safeConvertToLong(row[6]));
+//
+//            stats.add(dto);
+//            count++;
+//        }
+//
+//        return stats;
+//    }
+//
+//    /**
+//     * Lấy danh sách sản phẩm hết hàng
+//     */
+//    public List<ProductStatsDto> getOutOfStockProductsList(int limit) {
+//        List<Object[]> results = productRepository.getOutOfStockProducts();
+//        List<ProductStatsDto> stats = new ArrayList<>();
+//
+//        int count = 0;
+//        for (Object[] row : results) {
+//            if (count >= limit) break;
+//
+//            ProductStatsDto dto = new ProductStatsDto();
+//            dto.setProductId(safeConvertToInteger(row[0]));
+//            dto.setProductCode(safeConvertToString(row[1]));
+//            dto.setProductName(safeConvertToString(row[2]));
+//            dto.setCategoryName(safeConvertToString(row[3]));
+//            dto.setBrandName(safeConvertToString(row[4]));
+//            dto.setTotalStock(safeConvertToLong(row[5]));
+//            dto.setTotalVariants(safeConvertToLong(row[6]));
+//
+//            stats.add(dto);
+//            count++;
+//        }
+//
+//        return stats;
+//    }
+//
+//    /**
+//     * Lấy thống kê tồn kho chi tiết
+//     */
+//    public List<ProductStatsDto> getStockStatsList(int limit) {
+//        List<Object[]> results = productRepository.getProductsStockStats();
+//        List<ProductStatsDto> stats = new ArrayList<>();
+//
+//        int count = 0;
+//        for (Object[] row : results) {
+//            if (count >= limit) break;
+//
+//            ProductStatsDto dto = new ProductStatsDto();
+//            dto.setProductId(safeConvertToInteger(row[0]));
+//            dto.setProductCode(safeConvertToString(row[1]));
+//            dto.setProductName(safeConvertToString(row[2]));
+//            dto.setCategoryName(safeConvertToString(row[3]));
+//            dto.setBrandName(safeConvertToString(row[4]));
+//            dto.setTotalStock(safeConvertToLong(row[5]));
+//            dto.setTotalVariants(safeConvertToLong(row[6]));
+//
+//            stats.add(dto);
+//            count++;
+//        }
+//
+//        return stats;
+//    }
+//
     /**
      * Lấy thống kê theo danh mục
      */
-    public List<Object[]> getCategoryStats() {
-        return productRepository.getCategoryStats();
+    // ProductStatsService.java - Cần cập nhật
+    public List<Object[]> getCategoryStats(java.time.LocalDateTime startDate, java.time.LocalDateTime endDate) {
+        return productRepository.getCategoryStats(startDate, endDate);
     }
-
-    /**
-     * Lấy thống kê theo thương hiệu
-     */
-    public List<Object[]> getBrandStats() {
-        return productRepository.getBrandStats();
-    }
+//
+//    /**
+//     * Lấy thống kê theo thương hiệu
+//     */
+//    public List<Object[]> getBrandStats() {
+//        return productRepository.getBrandStats();
+//    }
 
     // ==================== HELPER METHODS ====================
 

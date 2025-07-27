@@ -3,11 +3,13 @@ import com.example.datn.dto.response.ProductStatsDto;
 import com.example.datn.dto.response.ProductStatsSummaryDto;
 import com.example.datn.services.ProductStatsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Controller
@@ -20,10 +22,13 @@ public class ProductStatsController {
      * Hiển thị trang thống kê sản phẩm
      */
     @GetMapping
-    public String productStatsPage(Model model) {
+    public String productStatsPage(
+        Model model,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate
+    ){
         try {
-            ProductStatsSummaryDto summary = productStatsService.getProductStatsSummary();
-
+            ProductStatsSummaryDto summary = productStatsService.getProductStatsSummary(startDate, endDate); // Sửa đổi dòng này
             // Debug logging
             System.out.println("DEBUG ProductStatsController:");
             System.out.println("Total Products: " + summary.getTotalProducts());
@@ -62,107 +67,117 @@ public class ProductStatsController {
      */
     @GetMapping("/api/summary")
     @ResponseBody
-    public ResponseEntity<ProductStatsSummaryDto> getProductStatsSummary() {
-        ProductStatsSummaryDto summary = productStatsService.getProductStatsSummary();
+    public ResponseEntity<ProductStatsSummaryDto> getSummaryStats( // Đổi tên phương thức cho rõ ràng hơn (từ getProductStatsSummary thành getSummaryStats nếu muốn)
+                                                                   @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+                                                                   @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate
+    ) {
+        ProductStatsSummaryDto summary = productStatsService.getProductStatsSummary(startDate, endDate); // Sửa đổi dòng này
         return ResponseEntity.ok(summary);
     }
 
-    /**
-     * Test endpoint để debug
-     */
-    @GetMapping("/api/test")
-    @ResponseBody
-    public ResponseEntity<String> testEndpoint() {
-        try {
-            ProductStatsSummaryDto summary = productStatsService.getProductStatsSummary();
-            return ResponseEntity.ok("Test OK - Total Products: " + summary.getTotalProducts() +
-                    ", Active: " + summary.getTotalActiveProducts() +
-                    ", Stock: " + summary.getTotalStock() +
-                    ", Revenue: " + summary.getTotalRevenue());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
-        }
-    }
+//    /**
+//     * Test endpoint để debug
+//     */
+//    @GetMapping("/api/test")
+//    @ResponseBody
+//    public ResponseEntity<String> testEndpoint() {
+//        try {
+//            ProductStatsSummaryDto summary = productStatsService.getProductStatsSummary();
+//            return ResponseEntity.ok("Test OK - Total Products: " + summary.getTotalProducts() +
+//                    ", Active: " + summary.getTotalActiveProducts() +
+//                    ", Stock: " + summary.getTotalStock() +
+//                    ", Revenue: " + summary.getTotalRevenue());
+//        } catch (Exception e) {
+//            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+//        }
+//    }
 
     /**
      * API: Lấy danh sách sản phẩm bán chạy theo số lượng
      */
+    // ProductStatsController.java - Cần cập nhật
     @GetMapping("/api/top-selling")
     @ResponseBody
     public ResponseEntity<List<ProductStatsDto>> getTopSellingProducts(
-            @RequestParam(defaultValue = "10") int limit) {
+            @RequestParam(defaultValue = "10") int limit,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
 
-        List<ProductStatsDto> products = productStatsService.getTopSellingProducts(limit);
+        // Truyền startDate, endDate xuống service
+        List<ProductStatsDto> products = productStatsService.getTopSellingProducts(limit, startDate, endDate);
         return ResponseEntity.ok(products);
     }
 
-    /**
-     * API: Lấy danh sách sản phẩm bán chạy theo doanh thu
-     */
-    @GetMapping("/api/top-revenue")
-    @ResponseBody
-    public ResponseEntity<List<ProductStatsDto>> getTopSellingProductsByRevenue(
-            @RequestParam(defaultValue = "10") int limit) {
+//    /**
+//     * API: Lấy danh sách sản phẩm bán chạy theo doanh thu
+//     */
+//    @GetMapping("/api/top-revenue")
+//    @ResponseBody
+//    public ResponseEntity<List<ProductStatsDto>> getTopSellingProductsByRevenue(
+//            @RequestParam(defaultValue = "10") int limit) {
+//
+//        List<ProductStatsDto> products = productStatsService.getTopSellingProductsByRevenue(limit);
+//        return ResponseEntity.ok(products);
+//    }
 
-        List<ProductStatsDto> products = productStatsService.getTopSellingProductsByRevenue(limit);
-        return ResponseEntity.ok(products);
-    }
+//    /**
+//     * API: Lấy danh sách sản phẩm sắp hết hàng
+//     */
+//    @GetMapping("/api/low-stock")
+//    @ResponseBody
+//    public ResponseEntity<List<ProductStatsDto>> getLowStockProducts(
+//            @RequestParam(defaultValue = "20") int limit) {
+//
+//        List<ProductStatsDto> products = productStatsService.getLowStockProductsList(limit);
+//        return ResponseEntity.ok(products);
+//    }
+//
+//    /**
+//     * API: Lấy danh sách sản phẩm hết hàng
+//     */
+//    @GetMapping("/api/out-of-stock")
+//    @ResponseBody
+//    public ResponseEntity<List<ProductStatsDto>> getOutOfStockProducts(
+//            @RequestParam(defaultValue = "20") int limit) {
+//
+//        List<ProductStatsDto> products = productStatsService.getOutOfStockProductsList(limit);
+//        return ResponseEntity.ok(products);
+//    }
 
-    /**
-     * API: Lấy danh sách sản phẩm sắp hết hàng
-     */
-    @GetMapping("/api/low-stock")
-    @ResponseBody
-    public ResponseEntity<List<ProductStatsDto>> getLowStockProducts(
-            @RequestParam(defaultValue = "20") int limit) {
-
-        List<ProductStatsDto> products = productStatsService.getLowStockProductsList(limit);
-        return ResponseEntity.ok(products);
-    }
-
-    /**
-     * API: Lấy danh sách sản phẩm hết hàng
-     */
-    @GetMapping("/api/out-of-stock")
-    @ResponseBody
-    public ResponseEntity<List<ProductStatsDto>> getOutOfStockProducts(
-            @RequestParam(defaultValue = "20") int limit) {
-
-        List<ProductStatsDto> products = productStatsService.getOutOfStockProductsList(limit);
-        return ResponseEntity.ok(products);
-    }
-
-    /**
-     * API: Lấy thống kê tồn kho
-     */
-    @GetMapping("/api/stock-stats")
-    @ResponseBody
-    public ResponseEntity<List<ProductStatsDto>> getStockStats(
-            @RequestParam(defaultValue = "50") int limit) {
-
-        List<ProductStatsDto> products = productStatsService.getStockStatsList(limit);
-        return ResponseEntity.ok(products);
-    }
+//    /**
+//     * API: Lấy thống kê tồn kho
+//     */
+//    @GetMapping("/api/stock-stats")
+//    @ResponseBody
+//    public ResponseEntity<List<ProductStatsDto>> getStockStats(
+//            @RequestParam(defaultValue = "50") int limit) {
+//
+//        List<ProductStatsDto> products = productStatsService.getStockStatsList(limit);
+//        return ResponseEntity.ok(products);
+//    }
 
     /**
      * API: Lấy thống kê theo danh mục
      */
+    // ProductStatsController.java - Cần cập nhật
     @GetMapping("/api/category-stats")
     @ResponseBody
-    public ResponseEntity<List<Object[]>> getCategoryStats() {
-        List<Object[]> stats = productStatsService.getCategoryStats();
+    public ResponseEntity<List<Object[]>> getCategoryStats(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime endDate) {
+        List<Object[]> stats = productStatsService.getCategoryStats(startDate, endDate); // Gọi phương thức Service đã cập nhật
         return ResponseEntity.ok(stats);
     }
 
-    /**
-     * API: Lấy thống kê theo thương hiệu
-     */
-    @GetMapping("/api/brand-stats")
-    @ResponseBody
-    public ResponseEntity<List<Object[]>> getBrandStats() {
-        List<Object[]> stats = productStatsService.getBrandStats();
-        return ResponseEntity.ok(stats);
-    }
+//    /**
+//     * API: Lấy thống kê theo thương hiệu
+//     */
+//    @GetMapping("/api/brand-stats")
+//    @ResponseBody
+//    public ResponseEntity<List<Object[]>> getBrandStats() {
+//        List<Object[]> stats = productStatsService.getBrandStats();
+//        return ResponseEntity.ok(stats);
+//    }
 
     /**
      * Validate limit parameter

@@ -2,484 +2,245 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{admin/admin-layout}">
-
 <head>
     <title>Thống Kê Doanh Thu</title>
 </head>
-
 <div layout:fragment="content">
-    <!-- Revenue Statistics Page -->
-    <div class="row">
-        <div class="col-12">
-            <!-- Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h4 class="card-title mb-0">Thống Kê Doanh Thu</h4>
-                    <p class="text-muted">Theo dõi và phân tích doanh thu theo thời gian</p>
-                </div>
-                <div>
-                    <button class="btn btn-outline-secondary me-2" onclick="refreshAllData()">
-                        <i class="fas fa-sync-alt"></i> Làm mới
-                    </button>
-                    <button class="btn btn-primary" onclick="exportReport()">
-                        <i class="fas fa-download"></i> Xuất Báo Cáo
-                    </button>
-                </div>
-            </div>
-
-            <!-- Summary Cards -->
-            <div class="row mb-4">
-                <div class="col-xl-3 col-md-6">
-                    <div class="card card-stats">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col">
-                                    <h5 class="card-title text-uppercase text-muted mb-0">Doanh Thu Hôm Nay</h5>
-                                    <span class="h2 font-weight-bold mb-0"
-                                          th:text="${#numbers.formatDecimal(revenueSummary.totalRevenueToday, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">0 VNĐ</span>
-                                </div>
-                                <div class="col-auto">
-                                    <div class="icon icon-shape bg-info text-white rounded-circle shadow">
-                                        <i class="fas fa-coins"></i>
-                                    </div>
+    <div class="container py-4">
+        <h3 class="mb-4">Thống Kê Doanh Thu</h3>
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6">
+                <div class="card card-stats">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col">
+                                <h5 class="card-title text-uppercase text-muted mb-0">Tổng Đơn Đặt Hàng</h5>
+                                <span class="h2 font-weight-bold mb-0" th:text="${revenueSummary.totalOrders}">0</span>
+                            </div>
+                            <div class="col-auto">
+                                <div class="icon icon-shape bg-primary text-white rounded-circle shadow">
+                                    <i class="fas fa-list"></i>
                                 </div>
                             </div>
-                            <p class="mt-3 mb-0 text-sm">
-                                <span class="text-success mr-2" th:text="${revenueSummary.totalOrdersToday + ' đơn hàng'}">0 đơn hàng</span>
-                                <span class="text-nowrap">hôm nay</span>
-                            </p>
                         </div>
-                    </div>
-                </div>
-
-                <div class="col-xl-3 col-md-6">
-                    <div class="card card-stats">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col">
-                                    <h5 class="card-title text-uppercase text-muted mb-0">Doanh Thu Tháng Này</h5>
-                                    <span class="h2 font-weight-bold mb-0"
-                                          th:text="${#numbers.formatDecimal(revenueSummary.totalRevenueThisMonth, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">0 VNĐ</span>
-                                </div>
-                                <div class="col-auto">
-                                    <div class="icon icon-shape bg-success text-white rounded-circle shadow">
-                                        <i class="fas fa-chart-line"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <p class="mt-3 mb-0 text-sm">
-                            <span class="text-success mr-2"
-                                  th:text="${revenueSummary.growthPercentage != null ? '+' + #numbers.formatDecimal(revenueSummary.growthPercentage, 1, 1) + '%' : '+0%'}">+0%</span>
-                                <span class="text-nowrap">so với tháng trước</span>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-xl-3 col-md-6">
-                    <div class="card card-stats">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col">
-                                    <h5 class="card-title text-uppercase text-muted mb-0">Đơn Hàng Tháng Này</h5>
-                                    <span class="h2 font-weight-bold mb-0" th:text="${revenueSummary.totalOrdersThisMonth}">0</span>
-                                </div>
-                                <div class="col-auto">
-                                    <div class="icon icon-shape bg-warning text-white rounded-circle shadow">
-                                        <i class="fas fa-shopping-cart"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <p class="mt-3 mb-0 text-sm">
-                            <span class="text-success mr-2"
-                                  th:text="${#numbers.formatDecimal(revenueSummary.avgOrderValue, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">0 VNĐ</span>
-                                <span class="text-nowrap">giá trị TB/đơn</span>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-xl-3 col-md-6">
-                    <div class="card card-stats">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col">
-                                    <h5 class="card-title text-uppercase text-muted mb-0">Doanh Thu Năm Này</h5>
-                                    <span class="h2 font-weight-bold mb-0"
-                                          th:text="${#numbers.formatDecimal(revenueSummary.totalRevenueThisYear, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">0 VNĐ</span>
-                                </div>
-                                <div class="col-auto">
-                                    <div class="icon icon-shape bg-danger text-white rounded-circle shadow">
-                                        <i class="fas fa-calendar-alt"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <p class="mt-3 mb-0 text-sm">
-                                <span class="text-success mr-2" th:text="${revenueSummary.totalOrdersThisYear + ' đơn hàng'}">0 đơn hàng</span>
-                                <span class="text-nowrap">năm nay</span>
-                            </p>
-                        </div>
+                        <p class="mt-3 mb-0 text-sm">
+                            <span class="text-success mr-2" th:text="${revenueSummary.totalOrders + ' đơn hàng'}">0 đơn hàng</span>
+                            <span class="text-nowrap">toàn hệ thống</span>
+                        </p>
                     </div>
                 </div>
             </div>
-
-            <!-- Charts Row -->
-            <div class="row mb-4">
-                <!-- Daily Revenue Chart -->
-                <div class="col-lg-8">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <h5 class="card-title mb-0">Doanh Thu Theo Ngày</h5>
-                                <div class="btn-group" role="group">
-                                    <button type="button" class="btn btn-sm btn-outline-primary active" onclick="loadDailyChart(7)">7 ngày</button>
-                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="loadDailyChart(30)">30 ngày</button>
-                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="loadDailyChart(90)">90 ngày</button>
+            <div class="col-xl-3 col-md-6">
+                <div class="card card-stats">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col">
+                                <h5 class="card-title text-uppercase text-muted mb-0">Doanh Thu Hôm Nay</h5>
+                                <span class="h2 font-weight-bold mb-0"
+                                      th:text="${#numbers.formatDecimal(revenueSummary.totalRevenueToday, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">0 VNĐ</span>
+                            </div>
+                            <div class="col-auto">
+                                <div class="icon icon-shape bg-info text-white rounded-circle shadow">
+                                    <i class="fas fa-coins"></i>
                                 </div>
                             </div>
                         </div>
-                        <div class="card-body">
-                            <div class="chart-container">
-                                <canvas id="dailyRevenueChart"></canvas>
-                                <div id="dailyChartLoading" class="text-center" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                                    <div class="spinner-border text-primary" role="status">
-                                        <span class="sr-only">Đang tải...</span>
-                                    </div>
-                                    <p class="mt-2">Đang tải dữ liệu...</p>
-                                </div>
-                            </div>
-                        </div>
+                        <p class="mt-3 mb-0 text-sm">
+                            <span class="text-success mr-2" th:text="${revenueSummary.totalOrdersToday + ' đơn hàng'}">0 đơn hàng</span>
+                            <span class="text-nowrap">hôm nay</span>
+                        </p>
                     </div>
                 </div>
-
-                <!-- Monthly Revenue Chart -->
-                <div class="col-lg-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">Doanh Thu Theo Tháng</h5>
-                            <select class="form-select form-select-sm mt-2" id="yearSelect" onchange="loadMonthlyChart()">
-                                <option th:value="${currentYear}" th:text="${currentYear}" selected></option>
-                                <option th:value="${currentYear - 1}" th:text="${currentYear - 1}"></option>
-                                <option th:value="${currentYear - 2}" th:text="${currentYear - 2}"></option>
-                            </select>
-                        </div>
-                        <div class="card-body">
-                            <div class="chart-container" style="height: 300px;">
-                                <canvas id="monthlyRevenueChart"></canvas>
-                                <div id="monthlyChartLoading" class="text-center" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                                    <div class="spinner-border text-success" role="status">
-                                        <span class="sr-only">Đang tải...</span>
-                                    </div>
-                                    <p class="mt-2">Đang tải dữ liệu...</p>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card card-stats">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col">
+                                <h5 class="card-title text-uppercase text-muted mb-0">Doanh Thu Tháng Này</h5>
+                                <span class="h2 font-weight-bold mb-0"
+                                      th:text="${#numbers.formatDecimal(revenueSummary.totalRevenueThisMonth, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">0 VNĐ</span>
+                            </div>
+                            <div class="col-auto">
+                                <div class="icon icon-shape bg-success text-white rounded-circle shadow">
+                                    <i class="fas fa-chart-line"></i>
                                 </div>
+                            </div>
+                        </div>
+                        <p class="mt-3 mb-0 text-sm">
+                        <span class="text-success mr-2"
+                              th:text="${revenueSummary.growthPercentage != null ? '+' + #numbers.formatDecimal(revenueSummary.growthPercentage, 1, 1) + '%' : '+0%'}">+0%</span>
+                            <span class="text-nowrap">so với tháng trước</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card card-stats">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col">
+                                <h5 class="card-title text-uppercase text-muted mb-0">Doanh Thu Năm Này</h5>
+                                <span class="h2 font-weight-bold mb-0"
+                                      th:text="${#numbers.formatDecimal(revenueSummary.totalRevenueThisYear, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">0 VNĐ</span>
+                            </div>
+                            <div class="col-auto">
+                                <div class="icon icon-shape bg-danger text-white rounded-circle shadow">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="mt-3 mb-0 text-sm">
+                            <span class="text-success mr-2" th:text="${revenueSummary.totalOrdersThisYear + ' đơn hàng'}">0 đơn hàng</span>
+                            <span class="text-nowrap">năm nay</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-4">
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">Biểu đồ doanh thu theo ngày</div>
+                    <div class="card-body">
+                        <div class="btn-group mb-2" role="group">
+                            <button type="button" class="btn btn-sm btn-outline-primary active" onclick="loadDailyChart(7)">7 ngày</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="loadDailyChart(30)">30 ngày</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="loadDailyChart(90)">90 ngày</button>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="dailyRevenueChart"></canvas>
+                            <div id="dailyChartLoading" class="text-center" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="sr-only">Đang tải...</span>
+                                </div>
+                                <p class="mt-2">Đang tải dữ liệu...</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Detailed Tables Row -->
-            <div class="row">
-                <!-- Revenue Table -->
-                <div class="col-lg-8">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <h5 class="card-title mb-0">Chi Tiết Doanh Thu</h5>
-                                <div class="d-flex gap-2">
-                                    <input type="date" class="form-control form-control-sm" id="startDate" style="width: 150px;">
-                                    <input type="date" class="form-control form-control-sm" id="endDate" style="width: 150px;">
-                                    <button class="btn btn-sm btn-primary" onclick="filterRevenueTable()">Lọc</button>
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">Biểu đồ doanh thu theo tháng</div>
+                    <div class="card-body">
+                        <select class="form-select form-select-sm mb-2" id="yearSelect" onchange="loadMonthlyChart()">
+                            <option th:value="${currentYear}" th:text="${currentYear}" selected></option>
+                            <option th:value="${currentYear - 1}" th:text="${currentYear - 1}"></option>
+                            <option th:value="${currentYear - 2}" th:text="${currentYear - 2}"></option>
+                        </select>
+                        <div class="chart-container" style="height: 300px;">
+                            <canvas id="monthlyRevenueChart"></canvas>
+                            <div id="monthlyChartLoading" class="text-center" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                                <div class="spinner-border text-success" role="status">
+                                    <span class="sr-only">Đang tải...</span>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-flush" id="revenueTable">
-                                    <thead class="thead-light">
-                                    <tr>
-                                        <th>Ngày</th>
-                                        <th>Doanh Thu</th>
-                                        <th>Số Đơn Hàng</th>
-                                        <th>TB/Đơn</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody id="revenueTableBody">
-                                    <tr id="tableLoading">
-                                        <td colspan="4" class="text-center">
-                                            <div class="spinner-border spinner-border-sm text-primary" role="status">
-                                                <span class="sr-only">Đang tải...</span>
-                                            </div>
-                                            <span class="ml-2">Đang tải dữ liệu...</span>
-                                        </td>
-                                    </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Top Products -->
-                <div class="col-lg-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">Sản Phẩm Bán Chạy</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="list-group list-group-flush" id="topProductsList">
-                                <div id="productsLoading" class="text-center p-4">
-                                    <div class="spinner-border spinner-border-sm text-success" role="status">
-                                        <span class="sr-only">Đang tải...</span>
-                                    </div>
-                                    <p class="mt-2 mb-0">Đang tải sản phẩm...</p>
-                                </div>
+                                <p class="mt-2">Đang tải dữ liệu...</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div> <!-- End col-12 -->
-    </div> <!-- End row -->
+        </div>
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">Biểu đồ doanh thu theo khoảng thời gian</div>
+                    <div class="card-body">
+                        <div class="d-flex gap-2 mb-2">
+                            <input type="date" class="form-control form-control-sm" id="startDate" style="width: 150px;">
+                            <input type="date" class="form-control form-control-sm" id="endDate" style="width: 150px;">
+                            <button class="btn btn-sm btn-primary" onclick="loadRangeChart()">Áp dụng</button>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="rangeRevenueChart"></canvas>
+                            <div id="rangeChartLoading" class="text-center" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                                <div class="spinner-border text-info" role="status">
+                                    <span class="sr-only">Đang tải...</span>
+                                </div>
+                                <p class="mt-2">Đang tải dữ liệu...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-
 <script layout:fragment="script">
-    let dailyChart, monthlyChart;
-
-    // Wait for Chart.js to be loaded
+    let dailyChart, monthlyChart, rangeChart;
     function waitForChart() {
         return new Promise((resolve, reject) => {
-            if (typeof Chart !== 'undefined') {
-                resolve();
-                return;
-            }
-
+            if (typeof Chart !== 'undefined') { resolve(); return; }
             let attempts = 0;
-            const maxAttempts = 50; // 5 seconds max
-
+            const maxAttempts = 50;
             const checkChart = setInterval(() => {
                 attempts++;
-                if (typeof Chart !== 'undefined') {
-                    clearInterval(checkChart);
-                    resolve();
-                } else if (attempts >= maxAttempts) {
-                    clearInterval(checkChart);
-                    reject(new Error('Chart.js failed to load'));
-                }
+                if (typeof Chart !== 'undefined') { clearInterval(checkChart); resolve(); }
+                else if (attempts >= maxAttempts) { clearInterval(checkChart); reject(new Error('Chart.js failed to load')); }
             }, 100);
         });
     }
-
-    // Initialize page
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('Revenue page loaded');
-
-        // Wait for Chart.js to be available
-        waitForChart()
-            .then(() => {
-                console.log('Chart.js is ready, initializing components');
-                try {
-                    initializeDatePickers();
-
-                    // Small delay to ensure DOM is fully ready
-                    setTimeout(() => {
-                        loadDailyChart(30);
-                        loadMonthlyChart();
-                        loadRevenueTable();
-                        loadTopProducts();
-                    }, 100);
-                } catch (error) {
-                    console.error('Error initializing page:', error);
-                }
-            })
-            .catch(error => {
-                console.error('Chart.js loading error:', error);
-                alert('Không thể tải thư viện biểu đồ. Vui lòng kiểm tra kết nối internet và refresh trang.');
-            });
+        waitForChart().then(() => {
+            initializeDatePickers();
+            setTimeout(() => {
+                loadDailyChart(30);
+                loadMonthlyChart();
+                loadRangeChart();
+            }, 100);
+        });
     });
-
     function initializeDatePickers() {
         const today = new Date();
         const thirtyDaysAgo = new Date(today);
         thirtyDaysAgo.setDate(today.getDate() - 30);
-
         document.getElementById('startDate').value = thirtyDaysAgo.toISOString().split('T')[0];
         document.getElementById('endDate').value = today.toISOString().split('T')[0];
     }
-
     function loadDailyChart(days) {
-        console.log('Loading daily chart for', days, 'days');
-
-        // Check if Chart.js is loaded
-        if (typeof Chart === 'undefined') {
-            console.error('Chart.js is not loaded');
-            return;
-        }
-
         const endDate = new Date();
         const startDate = new Date();
         startDate.setDate(endDate.getDate() - days);
-
         const startDateStr = startDate.toISOString().split('T')[0];
         const endDateStr = endDate.toISOString().split('T')[0];
-
-        console.log('Fetching data from:', `/admin/revenue/api/daily?startDate=${startDateStr}&endDate=${endDateStr}`);
-
         fetch(`/admin/revenue/api/daily?startDate=${startDateStr}&endDate=${endDateStr}`)
-            .then(response => {
-                console.log('Daily chart response status:', response.status);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
-                console.log('Daily chart data:', data);
-
-                // Hide loading indicator
                 const loadingEl = document.getElementById('dailyChartLoading');
-                if (loadingEl) {
-                    loadingEl.style.display = 'none';
-                }
-
-                if (dailyChart) {
-                    dailyChart.destroy();
-                }
-
+                if (loadingEl) loadingEl.style.display = 'none';
+                if (dailyChart) dailyChart.destroy();
                 const ctx = document.getElementById('dailyRevenueChart');
-                if (!ctx) {
-                    console.error('Canvas element not found');
-                    return;
-                }
-
+                if (!ctx) return;
                 dailyChart = new Chart(ctx, {
-                    type: 'line',
+                    type: 'bar',
                     data: {
                         labels: data.map(item => formatDate(item.date)),
                         datasets: [{
                             label: 'Doanh Thu (VNĐ)',
                             data: data.map(item => item.totalRevenue),
+                            backgroundColor: 'rgba(0, 123, 255, 0.8)',
                             borderColor: '#007bff',
-                            backgroundColor: 'rgba(0, 123, 255, 0.1)',
-                            borderWidth: 3,
-                            pointBackgroundColor: '#007bff',
-                            pointBorderColor: '#fff',
-                            pointBorderWidth: 2,
-                            pointRadius: 6,
-                            tension: 0.4,
-                            fill: true
+                            borderWidth: 2,
+                            borderRadius: 8,
+                            borderSkipped: false,
                         }]
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        interaction: {
-                            intersect: false,
-                            mode: 'index'
-                        },
-                        plugins: {
-                            legend: {
-                                display: false
-                            },
-                            tooltip: {
-                                backgroundColor: 'rgba(0,0,0,0.8)',
-                                titleColor: '#fff',
-                                bodyColor: '#fff',
-                                borderColor: '#007bff',
-                                borderWidth: 1,
-                                cornerRadius: 8,
-                                displayColors: false
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                grid: {
-                                    color: 'rgba(0,0,0,0.05)',
-                                    borderColor: 'rgba(0,0,0,0.1)'
-                                },
-                                ticks: {
-                                    callback: function(value) {
-                                        return formatCurrency(value);
-                                    },
-                                    color: '#6c757d',
-                                    font: {
-                                        size: 12
-                                    }
-                                }
-                            },
-                            x: {
-                                grid: {
-                                    display: false
-                                },
-                                ticks: {
-                                    color: '#6c757d',
-                                    font: {
-                                        size: 12
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
                 });
-            })
-            .catch(error => {
-                console.error('Error loading daily chart:', error);
-
-                // Show error in loading area
-                const loadingEl = document.getElementById('dailyChartLoading');
-                if (loadingEl) {
-                    loadingEl.innerHTML = `
-                        <div class="text-danger">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <p class="mt-2">Lỗi tải dữ liệu biểu đồ</p>
-                            <button class="btn btn-sm btn-outline-primary" onclick="loadDailyChart(30)">Thử lại</button>
-                        </div>
-                    `;
-                }
             });
     }
-
     function loadMonthlyChart() {
-        console.log('Loading monthly chart');
-
-        // Check if Chart.js is loaded
-        if (typeof Chart === 'undefined') {
-            console.error('Chart.js is not loaded');
-            return;
-        }
-
         const yearSelect = document.getElementById('yearSelect');
         const year = yearSelect ? yearSelect.value : new Date().getFullYear();
-
-        console.log('Fetching monthly data for year:', year);
-
         fetch(`/admin/revenue/api/monthly?year=${year}`)
-            .then(response => {
-                console.log('Monthly chart response status:', response.status);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
-                console.log('Monthly chart data:', data);
-
-                // Hide loading indicator
                 const loadingEl = document.getElementById('monthlyChartLoading');
-                if (loadingEl) {
-                    loadingEl.style.display = 'none';
-                }
-
-                if (monthlyChart) {
-                    monthlyChart.destroy();
-                }
-
+                if (loadingEl) loadingEl.style.display = 'none';
+                if (monthlyChart) monthlyChart.destroy();
                 const ctx = document.getElementById('monthlyRevenueChart');
-                if (!ctx) {
-                    console.error('Monthly chart canvas element not found');
-                    return;
-                }
+                if (!ctx) return;
                 monthlyChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
@@ -494,406 +255,49 @@
                             borderSkipped: false,
                         }]
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: false
-                            },
-                            tooltip: {
-                                backgroundColor: 'rgba(0,0,0,0.8)',
-                                titleColor: '#fff',
-                                bodyColor: '#fff',
-                                borderColor: '#28a745',
-                                borderWidth: 1,
-                                cornerRadius: 8,
-                                displayColors: false
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                grid: {
-                                    color: 'rgba(0,0,0,0.05)',
-                                    borderColor: 'rgba(0,0,0,0.1)'
-                                },
-                                ticks: {
-                                    callback: function(value) {
-                                        return formatCurrency(value);
-                                    },
-                                    color: '#6c757d',
-                                    font: {
-                                        size: 12
-                                    }
-                                }
-                            },
-                            x: {
-                                grid: {
-                                    display: false
-                                },
-                                ticks: {
-                                    color: '#6c757d',
-                                    font: {
-                                        size: 12
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
                 });
-            })
-            .catch(error => {
-                console.error('Error loading monthly chart:', error);
-
-                // Show error in loading area
-                const loadingEl = document.getElementById('monthlyChartLoading');
-                if (loadingEl) {
-                    loadingEl.innerHTML = `
-                        <div class="text-danger">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <p class="mt-2">Lỗi tải dữ liệu biểu đồ</p>
-                            <button class="btn btn-sm btn-outline-success" onclick="loadMonthlyChart()">Thử lại</button>
-                        </div>
-                    `;
-                }
             });
     }
-
-    function loadRevenueTable() {
-        console.log('Loading revenue table');
-
-        const startDateInput = document.getElementById('startDate');
-        const endDateInput = document.getElementById('endDate');
-
-        if (!startDateInput || !endDateInput) {
-            console.error('Date input elements not found');
-            return;
-        }
-
-        const startDate = startDateInput.value;
-        const endDate = endDateInput.value;
-
-        console.log('Loading table data for:', startDate, 'to', endDate);
-
+    function loadRangeChart() {
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
         fetch(`/admin/revenue/api/daily?startDate=${startDate}&endDate=${endDate}`)
-            .then(response => {
-                console.log('Table response status:', response.status);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
-                console.log('Table data:', data);
-                const tbody = document.querySelector('#revenueTable tbody');
-                if (!tbody) {
-                    console.error('Table tbody not found');
-                    return;
-                }
-
-                // Hide loading indicator
-                const loadingRow = document.getElementById('tableLoading');
-                if (loadingRow) {
-                    loadingRow.style.display = 'none';
-                }
-
-                tbody.innerHTML = '';
-
-                if (!data || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" class="text-center">Không có dữ liệu</td></tr>';
-                    return;
-                }
-
-                data.forEach(item => {
-                    const avgOrder = item.totalOrders > 0 ? item.totalRevenue / item.totalOrders : 0;
-                    const row = `
-                        <tr>
-                            <td>${formatDate(item.date)}</td>
-                            <td>${formatCurrency(item.totalRevenue)}</td>
-                            <td>${item.totalOrders}</td>
-                            <td>${formatCurrency(avgOrder)}</td>
-                        </tr>
-                    `;
-                    tbody.innerHTML += row;
+                const loadingEl = document.getElementById('rangeChartLoading');
+                if (loadingEl) loadingEl.style.display = 'none';
+                if (rangeChart) rangeChart.destroy();
+                const ctx = document.getElementById('rangeRevenueChart');
+                if (!ctx) return;
+                rangeChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.map(item => formatDate(item.date)),
+                        datasets: [{
+                            label: 'Doanh Thu (VNĐ)',
+                            data: data.map(item => item.totalRevenue),
+                            backgroundColor: 'rgba(23, 162, 184, 0.8)',
+                            borderColor: 'rgba(23, 162, 184, 1)',
+                            borderWidth: 2,
+                            borderRadius: 8,
+                            borderSkipped: false,
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
                 });
-            })
-            .catch(error => {
-                console.error('Error loading revenue table:', error);
-                const tbody = document.querySelector('#revenueTable tbody');
-                if (tbody) {
-                    tbody.innerHTML = '<tr><td colspan="4" class="text-center text-danger">Lỗi tải dữ liệu</td></tr>';
-                }
             });
     }
-
-    function loadTopProducts() {
-        console.log('Loading top products');
-
-        const startDateInput = document.getElementById('startDate');
-        const endDateInput = document.getElementById('endDate');
-
-        if (!startDateInput || !endDateInput) {
-            console.error('Date input elements not found for top products');
-            return;
-        }
-
-        const startDate = startDateInput.value;
-        const endDate = endDateInput.value;
-
-        console.log('Loading top products for:', startDate, 'to', endDate);
-
-        fetch(`/admin/revenue/api/top-products?startDate=${startDate}&endDate=${endDate}&limit=5`)
-            .then(response => {
-                console.log('Top products response status:', response.status);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Top products data:', data);
-                const list = document.getElementById('topProductsList');
-                if (!list) {
-                    console.error('Top products list element not found');
-                    return;
-                }
-
-                // Hide loading indicator
-                const loadingEl = document.getElementById('productsLoading');
-                if (loadingEl) {
-                    loadingEl.style.display = 'none';
-                }
-
-                list.innerHTML = '';
-
-                if (!data || data.length === 0) {
-                    list.innerHTML = '<div class="text-center text-muted p-3">Không có dữ liệu sản phẩm</div>';
-                    return;
-                }
-
-                data.forEach((item, index) => {
-                    const listItem = `
-                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="mb-1">${item[0] || 'N/A'}</h6>
-                                <small class="text-muted">Đã bán: ${item[1] || 0} sản phẩm</small>
-                            </div>
-                            <span class="badge badge-primary badge-pill">${formatCurrency(item[2] || 0)}</span>
-                        </div>
-                    `;
-                    list.innerHTML += listItem;
-                });
-            })
-            .catch(error => {
-                console.error('Error loading top products:', error);
-                const list = document.getElementById('topProductsList');
-                if (list) {
-                    list.innerHTML = '<div class="text-center text-danger p-3">Lỗi tải danh sách sản phẩm</div>';
-                }
-            });
-    }
-
-    function filterRevenueTable() {
-        loadRevenueTable();
-        loadTopProducts();
-    }
-
-    function refreshAllData() {
-        console.log('Refreshing all data...');
-
-        // Show loading indicators
-        const dailyLoading = document.getElementById('dailyChartLoading');
-        const monthlyLoading = document.getElementById('monthlyChartLoading');
-        const tableLoading = document.getElementById('tableLoading');
-        const productsLoading = document.getElementById('productsLoading');
-
-        if (dailyLoading) {
-            dailyLoading.style.display = 'block';
-            dailyLoading.innerHTML = `
-                <div class="spinner-border text-primary" role="status">
-                    <span class="sr-only">Đang tải...</span>
-                </div>
-                <p class="mt-2">Đang tải dữ liệu...</p>
-            `;
-        }
-
-        if (monthlyLoading) {
-            monthlyLoading.style.display = 'block';
-            monthlyLoading.innerHTML = `
-                <div class="spinner-border text-success" role="status">
-                    <span class="sr-only">Đang tải...</span>
-                </div>
-                <p class="mt-2">Đang tải dữ liệu...</p>
-            `;
-        }
-
-        if (tableLoading) tableLoading.style.display = 'table-row';
-        if (productsLoading) productsLoading.style.display = 'block';
-
-        // Reload all data
-        try {
-            loadDailyChart(30);
-            loadMonthlyChart();
-            loadRevenueTable();
-            loadTopProducts();
-        } catch (error) {
-            console.error('Error refreshing data:', error);
-        }
-    }
-
-    function exportReport() {
-        // Implement export functionality
-        alert('Chức năng xuất báo cáo đang được phát triển');
-    }
-
-    // Utility functions
     function formatCurrency(amount) {
         return new Intl.NumberFormat('vi-VN').format(amount) + ' VND';
     }
-
     function formatDate(dateString) {
         const date = new Date(dateString);
-        return date.toLocaleDateString('vi-VN', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
+        return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
     }
 </script>
-
 <style layout:fragment="style">
-    /* Revenue Stats Page Specific Styles */
-    .revenue-stats {
-        background-color: #f8f9fa;
-        min-height: 100vh;
-    }
-
-    .card-stats {
-        transition: transform 0.2s ease;
-        border: none;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .card-stats:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
-    }
-
-    .icon {
-        width: 48px;
-        height: 48px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-    }
-
-    .bg-info { background: linear-gradient(135deg, #17a2b8, #20c997) !important; }
-    .bg-success { background: linear-gradient(135deg, #28a745, #20c997) !important; }
-    .bg-warning { background: linear-gradient(135deg, #ffc107, #fd7e14) !important; }
-    .bg-danger { background: linear-gradient(135deg, #dc3545, #fd7e14) !important; }
-
-    /* Chart Containers */
-    .chart-container {
-        position: relative;
-        height: 350px;
-        width: 100%;
-        padding: 10px;
-    }
-
-    .chart-container canvas {
-        max-height: 100% !important;
-        width: 100% !important;
-    }
-
-    /* Tables */
-    .table-responsive {
-        max-height: 400px;
-        overflow-y: auto;
-        border-radius: 8px;
-        border: 1px solid #dee2e6;
-    }
-
-    .table thead th {
-        background-color: #f8f9fa;
-        border-bottom: 2px solid #dee2e6;
-        font-weight: 600;
-        position: sticky;
-        top: 0;
-        z-index: 10;
-    }
-
-    /* Lists */
-    .list-group-flush .list-group-item {
-        border-left: 0;
-        border-right: 0;
-        border-radius: 0;
-        padding: 0.75rem 1rem;
-    }
-
-    .list-group-item:hover {
-        background-color: #f8f9fa;
-    }
-
-    /* Buttons */
-    .btn-group .btn {
-        border-radius: 6px;
-        margin-right: 4px;
-        font-size: 0.875rem;
-    }
-
-    .btn-group .btn.active {
-        background-color: #007bff;
-        border-color: #007bff;
-        color: white;
-        box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
-    }
-
-    /* Cards */
-    .card {
-        border: none;
-        border-radius: 12px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-        margin-bottom: 1.5rem;
-    }
-
-    .card-header {
-        background-color: #fff;
-        border-bottom: 1px solid #eef2f7;
-        border-radius: 12px 12px 0 0 !important;
-        padding: 1rem 1.5rem;
-    }
-
-    .card-body {
-        padding: 1.5rem;
-    }
-
-    /* Page Header */
-    .page-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 2rem 0;
-        margin-bottom: 2rem;
-        border-radius: 12px;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
-        .chart-container {
-            height: 250px;
-        }
-
-        .card-stats {
-            margin-bottom: 1rem;
-        }
-
-        .btn-group .btn {
-            font-size: 0.75rem;
-            padding: 0.375rem 0.75rem;
-        }
-    }
+    .chart-container { position: relative; height: 350px; width: 100%; padding: 10px; }
+    .chart-container canvas { max-height: 100% !important; width: 100% !important; }
 </style>
-
 </html>
