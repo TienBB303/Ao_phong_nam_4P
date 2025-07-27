@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments/head :: head}">
-    <title>Quản lý khách hàng | 4PStore</title>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/admin-layout}">
+
+<head>
+    <title></title>
 </head>
 <body>
-<header th:replace="~{admin/fragments/header :: header}"></header>
-<div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
-
-<section>
+<div layout:fragment="content">
     <div class="pc-container">
         <div class="pc-content">
             <!--                <div class="page-header">-->
@@ -334,5 +334,6 @@
             });
     });
 </script>
+</div>
 </body>
 </html>
