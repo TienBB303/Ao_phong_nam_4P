@@ -115,45 +115,6 @@
             <!--            </div>-->
         </div>
         <script>
-            const form = document.querySelector("form");
-            const quantityInput = document.getElementById("quantity");
-            const quantityHidden = document.getElementById("quantityHidden");
-
-            form.addEventListener("submit", function (e) {
-                const colorId = colorSelect.value;
-                const sizeId = sizeSelect.value;
-
-                if (!colorId || !sizeId) {
-                    e.preventDefault();
-                    alert("Vui lòng chọn màu và size!");
-                    return;
-                }
-
-                quantityHidden.value = quantityInput.value;
-                document.getElementById("colorIdInput").value = colorId;
-                document.getElementById("sizeIdInput").value = sizeId;
-
-                // Gọi API để lấy productDetailId theo color + size
-                fetch(`/api/product-detail/id?productId=${productId}&colorId=${colorId}&sizeId=${sizeId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (!data.id) {
-                            alert("Không tìm thấy sản phẩm với màu và size đã chọn!");
-                            e.preventDefault();
-                            return;
-                        }
-                        document.getElementById("productDetailId").value = data.id;
-                        form.submit(); // Gửi form sau khi set đầy đủ
-                    })
-                    .catch(error => {
-                        alert("Lỗi khi lấy thông tin sản phẩm.");
-                        console.error(error);
-                        e.preventDefault();
-                    });
-
-                // Ngăn form gửi ngay lập tức (đợi fetch xong mới submit)
-                e.preventDefault();
-            });
             const colorSelect = document.getElementById("colorSelect");
             const sizeSelect = document.getElementById("sizeSelect");
             const priceDisplay = document.getElementById("priceDisplay");
@@ -191,6 +152,57 @@
 
             colorSelect.addEventListener("change", fetchPriceAndQuantity);
             sizeSelect.addEventListener("change", fetchPriceAndQuantity);
+
+            let clickedButton = null;
+            document.querySelectorAll("button[name='action']").forEach(btn => {
+                btn.addEventListener("click", function () {
+                    clickedButton = btn;
+                });
+            });
+
+            const form = document.querySelector("form");
+            const quantityInput = document.getElementById("quantity");
+
+            form.addEventListener("submit", function (e) {
+                e.preventDefault();
+
+                const colorId = colorSelect.value;
+                const sizeId = sizeSelect.value;
+                const quantity = quantityInput.value;
+
+                if (!colorId || !sizeId) {
+                    alert("Vui lòng chọn đầy đủ màu và size!");
+                    return;
+                }
+
+                document.getElementById("colorIdInput").value = colorId;
+                document.getElementById("sizeIdInput").value = sizeId;
+                document.getElementById("quantityHidden").value = quantity;
+
+                const actionInput = document.createElement("input");
+                actionInput.type = "hidden";
+                actionInput.name = "action";
+                actionInput.value = clickedButton ? clickedButton.value : "addToCart";
+                form.appendChild(actionInput);
+
+                fetch(`/api/product-detail/id?productId=${productId}&colorId=${colorId}&sizeId=${sizeId}`)
+                    .then(res => {
+                        if (!res.ok) throw new Error("Không tìm thấy biến thể phù hợp");
+                        return res.json();
+                    })
+                    .then(data => {
+                        if (!data.id) {
+                            alert("Không tìm thấy biến thể phù hợp!");
+                            return;
+                        }
+                        document.getElementById("productDetailId").value = data.id;
+                        form.submit();
+                    })
+                    .catch(err => {
+                        alert("Lỗi khi lấy thông tin sản phẩm.");
+                        console.error(err);
+                    });
+            });
         </script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.js"></script>
     </main>

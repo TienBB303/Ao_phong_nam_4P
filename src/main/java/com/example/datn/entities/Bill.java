@@ -19,6 +19,10 @@ public class Bill {
 
     private String code;
 
+    private String address_shipping;
+
+    private String note;
+
     @Column(name = "discount_amount")
     private BigDecimal discountAmount;
 
