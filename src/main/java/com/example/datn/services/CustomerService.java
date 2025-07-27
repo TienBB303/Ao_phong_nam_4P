@@ -10,6 +10,8 @@ import com.example.datn.entities.ShippingAddress;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 public interface CustomerService {
     //check emai trùng
     boolean isEmailExists(String email);
@@ -38,4 +40,5 @@ public interface CustomerService {
 // Thêm địa chỉ cho khách hàng
     ShippingAddress createAddressForCustomer(Integer customerId, AddressDto addressDto);
 
+    List<Customer> searchCustomerInline(String keyword);
 }

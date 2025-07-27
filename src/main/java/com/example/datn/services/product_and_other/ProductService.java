@@ -171,6 +171,22 @@ public class ProductService {
         return productRepository.searchAllFields(name, categoryId, brandId, materialId, pageable);
     }
 
+//    public void addProductDetail(Integer productId, BigDecimal price, Integer quantity,
+//                                 Integer colorId, Integer sizeId) {
+//        Product product = productRepository.findById(productId).orElseThrow();
+//        Color color = colorRepository.findById(colorId).orElseThrow();
+//        Size size = sizeRepository.findById(sizeId).orElseThrow();
+//
+//        ProductDetail detail = new ProductDetail();
+//        detail.setProduct(product);
+//        detail.setColor(color);
+//        detail.setSize(size);
+//        detail.setPrice(price);
+//        detail.setQuantity(quantity);
+//
+//        productDetailRepository.save(detail);
+//    }
+
 
 }
 

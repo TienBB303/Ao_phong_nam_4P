@@ -17,6 +17,7 @@ import com.example.datn.repositories.product_and_other.ProductDetailRepository;
 import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.cglib.core.Local;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.data.domain.Page;
@@ -49,11 +50,13 @@ public class BillService {
     DiscountService discountService;
 
     @Autowired
-// <<<<<<< TienBB
+    CustomerService customerService;
+
+    @Autowired
     PaymentMethodService paymentMethodService;
-// =======
+
+    @Autowired
     CustomerRepository customerRepository;
-// >>>>>>> master
 //
 //    @Autowired
 //    CustomerService customerService;
@@ -91,6 +94,336 @@ public class BillService {
         return billRepository.findById(id).orElse(null);
     }
 
+//    ===============================================TIENBB=========================================================================================================
+    public Bill save(Bill bill) {
+        return billRepository.save(bill);
+    }
+
+    public Bill findCartById(Integer idCart){
+        return billRepository.findByIdBill(idCart);
+    }
+
+    public List<BillDetails> findAllCartDetailsByCartId(Integer idCart){
+        return  billRepository.findAllCartDetailByCartId(idCart);
+    }
+    public List<Bill> getAllCarts(){
+        return billRepository.findAll();
+    }
+
+    public List<Bill> getAllCartInline(){
+        return billRepository.getAllCartInline();
+    }
+
+    public BillDetails findCartDetailById(Integer idCartDetail){
+        return billDetailRepository.findCartDetailById(idCartDetail);
+    }
+
+    public Bill findCartByCartDetailId(Integer idCartDetail){
+        return billRepository.findCartByCartDetailId(idCartDetail);
+    }
+    // đếm tất cả sản phẩm trong cart
+    public Integer countItemInCartByCartId(Integer idCart){
+        return billDetailRepository.countItemInCartByCartId(idCart);
+    }
+    // cộng tổng tất cả sp ytrong cart
+    public Integer countAllItemInCartByCartId(Integer idCart){
+        return billDetailRepository.countAllItemInCartByCartId(idCart);
+    }
+    // cộng tổng tiền trong cart
+    public BigDecimal plusAllItemInCartByCartId(Integer idCart){
+        Bill cart = billRepository.findByIdBill(idCart);
+        List<BillDetails> listCartDetails = billRepository.findAllCartDetailByCartId(cart.getId());
+        BigDecimal totalPriceInCart = BigDecimal.valueOf(0);
+        for (BillDetails pd : listCartDetails){
+            totalPriceInCart = totalPriceInCart.add(pd.getTotal_price());
+        }
+        return totalPriceInCart;
+    }
+    // thêm sp vào giỏ
+    public void addProductToCart(Integer cartId,Integer productDetailId) throws Exception{
+        Bill cart = billRepository.findBillById(cartId);
+        ProductDetail  productDetail = productDetailRepository.findProductDetailById(productDetailId);
+        BillDetails itemExisted = billDetailRepository.findByCartAndProductDetailId(cartId,productDetailId);
+
+        if(productDetail.getQuantity() <= 0){
+            throw new Exception("Sản phẩm " +productDetail.getProduct().getName() + "(" + productDetail.getColor().getName() + "-" + productDetail.getSize().getCode() + ")" + " đã hết hàng");
+        }
+        if (itemExisted != null){
+            if(productDetail.getQuantity() < 1){
+                throw new Exception("Sản phẩm " +productDetail.getProduct().getName() + "(" + productDetail.getColor().getName() + "-" + productDetail.getSize().getCode() + ")" + " đã hết hàng");
+            }
+            itemExisted.setQuantity(itemExisted.getQuantity() + 1);
+            itemExisted.setTotal_price(productDetail.getPrice().multiply(BigDecimal.valueOf(itemExisted.getQuantity())));
+            productDetail.setQuantity(productDetail.getQuantity() - 1);
+            productDetailRepository.save(productDetail);
+            billDetailRepository.save(itemExisted);
+        }else{
+            if(productDetail.getQuantity() < 1){
+                throw new Exception("Sản phẩm " +productDetail.getProduct().getName() + "(" + productDetail.getColor().getName() + "-" + productDetail.getSize().getCode() + ")" + " đã hết hàng");
+            }
+            BillDetails cartDetail = new BillDetails();
+            cartDetail.setBill(cart);
+            cartDetail.setProductDetail(productDetail);
+            cartDetail.setQuantity(1);
+            cartDetail.setPrice(productDetail.getPrice());
+            cartDetail.setTotal_price(productDetail.getPrice());
+
+            productDetail.setQuantity(productDetail.getQuantity() - 1);
+            productDetailRepository.save(productDetail);
+            billDetailRepository.save(cartDetail);
+        }
+
+        List<BillDetails> listCartDetails = billRepository.findAllCartDetailByCartId(cartId);
+        BigDecimal totalPrice = listCartDetails.stream().map(BillDetails::getTotal_price).reduce(BigDecimal.ZERO, BigDecimal::add);
+        Integer totalQuantity = listCartDetails.stream().mapToInt(BillDetails::getQuantity).sum();
+
+        cart.setTotalAmount(totalPrice);
+        cart.setTotal_quantity(totalQuantity);
+
+        recalculateCartTotalWithDiscount(cart);
+
+        cart.setUpdatedAt(LocalDateTime.now());
+        billRepository.save(cart);
+    }
+    // tăng số lượng trong giỏ
+    public void updateQuantityInCart(Integer idCartDetail,Integer newQuantity) throws Exception{
+        BillDetails cartDetail = billDetailRepository.findById(idCartDetail).orElseThrow(() -> new Exception("Không tìm thấy giỏ hàng"));
+
+        ProductDetail productDetail = cartDetail.getProductDetail();
+        if(newQuantity == null){
+            throw new Exception("Số lượng không để trống");
+        }
+        if(newQuantity < 1){
+            throw new Exception("Số lượng không được nhỏ hơn 1");
+        }
+        Integer oldQuantity = cartDetail.getQuantity();
+        Integer currentQuantity = productDetail.getQuantity();
+
+        Integer change = newQuantity - oldQuantity; // lay so moi - so luong xu, khong dung tru luon so luong moi, sẽ bị sai
+        if(change > 0 && change > currentQuantity){
+            throw new Exception("Số lượng tồn kho không đủ cho " + "sản phẩm " + productDetail.getProduct().getName() + "(" + productDetail.getColor().getName() + "-" + productDetail.getSize().getCode() + ")");
+        }
+        productDetail.setQuantity(productDetail.getQuantity() - change);
+        productDetailRepository.save(productDetail);
+
+        cartDetail.setQuantity(newQuantity);
+        cartDetail.setTotal_price(productDetail.getPrice().multiply(BigDecimal.valueOf(newQuantity)));
+        billDetailRepository.save(cartDetail);
+
+        Bill cart = cartDetail.getBill();
+        List<BillDetails> listCartDetails = billRepository.findAllCartDetailByCartId(cart.getId());
+        BigDecimal totalPrice = listCartDetails.stream().map(BillDetails::getTotal_price).reduce(BigDecimal.ZERO, BigDecimal::add);
+        Integer totalQuantity = listCartDetails.stream().mapToInt(BillDetails::getQuantity).sum();
+
+        cart.setTotalAmount(totalPrice);
+        cart.setTotal_quantity(totalQuantity);
+
+        recalculateCartTotalWithDiscount(cart);
+
+        cart.setUpdatedAt(LocalDateTime.now());
+        billRepository.save(cart);
+    }
+
+    public void deleteItemFromCart(Integer idCartDetail)  throws Exception{
+        BillDetails cartDetail = billDetailRepository.findById(idCartDetail).orElseThrow(() -> new Exception("Không tìm thấy sản phẩm trong giỏ"));
+        if(cartDetail == null){
+            throw new Exception("Không tìm thấy sản phẩm trong giỏ");
+        }
+
+        ProductDetail productDetail = cartDetail.getProductDetail();
+        productDetail.setQuantity(productDetail.getQuantity() + cartDetail.getQuantity()); // cập nhaarth lại sl
+        productDetailRepository.save(productDetail);
+
+        Bill cart = cartDetail.getBill();
+        billDetailRepository.delete(cartDetail);
+
+        List<BillDetails> listCartDetails = billRepository.findAllCartDetailByCartId(cart.getId());
+        BigDecimal totalPrice = listCartDetails.stream().map(BillDetails::getPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
+        Integer totalQuantity = listCartDetails.stream().mapToInt(BillDetails::getQuantity).sum();
+
+        cart.setTotalAmount(totalPrice);
+        cart.setTotal_quantity(totalQuantity);
+
+        recalculateCartTotalWithDiscount(cart);
+
+        cart.setUpdatedAt(LocalDateTime.now());
+        billRepository.save(cart);
+    }
+
+    //xóa giỏ
+    public void deleteCart(Integer cartId) throws Exception{
+        Bill cart =  billRepository.findByIdBill(cartId);
+        if(cart == null){
+            throw new Exception("Không tồn tại giỏ hàng");
+        }
+
+        List<BillDetails> listCartDetails = billRepository.findAllCartDetailByCartId(cartId);
+        for(BillDetails cartDetail : listCartDetails){
+            ProductDetail productDetail = cartDetail.getProductDetail();
+            productDetail.setQuantity(productDetail.getQuantity() + cartDetail.getQuantity()); //hoàn lại số lượng cho productDetail
+            productDetailRepository.save(productDetail);
+        }
+
+        Discount discountInCart = cart.getDiscount();
+        if(discountInCart != null){
+            discountInCart.setUsageLimit(discountInCart.getUsageLimit() + 1);
+            discountService.saveDiscount_Cart(discountInCart);
+        }
+
+        billDetailRepository.deleteAll(listCartDetails); // xóa tất cả item trong cart
+
+        billRepository.delete(cart);
+    }
+
+    //áp dụng mã giảm
+    public void applyDiscountToCart(Integer cartId, Integer discountId) throws  Exception{
+        Bill cart = billRepository.findByIdBill(cartId);
+        Discount discount = discountService.findDiscountById(discountId);
+
+        if (cart == null || discount == null || discount.getUsageLimit() <= 0) {
+            throw new Exception("Không thể áp dụng mã giảm giá");
+        }
+
+        Discount currentDiscount = cart.getDiscount();
+        if (currentDiscount != null) {
+            currentDiscount.setUsageLimit(currentDiscount.getUsageLimit() + 1); // hoàn lại lượt
+            discountService.saveDiscount_Cart(currentDiscount); // lưu lại mã cũ
+        }
+
+        BigDecimal totalPriceCart = cart.getTotalAmount();
+        if (totalPriceCart == null){
+            totalPriceCart = BigDecimal.ZERO;
+        }
+
+        BigDecimal discountValue = discount.getDiscountValue();
+        if (discountValue == null) {
+            discountValue = BigDecimal.ZERO;
+        }
+
+        BigDecimal totalDiscount;
+
+        if (discount.getDiscountType().equals("amount")) {
+            totalDiscount = discountValue;
+
+            // Giảm không vượt quá maxDiscount nếu có
+            BigDecimal maxDiscount = discount.getMaxDiscount();
+            if (maxDiscount != null && totalDiscount.compareTo(maxDiscount) > 0) {
+                totalDiscount = maxDiscount;
+            }
+        } else if (discount.getDiscountType().equals("percent")) {
+            totalDiscount = totalPriceCart.multiply(discountValue).divide(BigDecimal.valueOf(100));
+
+            // Giảm không vượt quá maxDiscount nếu có
+            BigDecimal maxDiscount = discount.getMaxDiscount();
+            if (maxDiscount != null && totalDiscount.compareTo(maxDiscount) > 0) {
+                totalDiscount = maxDiscount;
+            }
+        } else {
+            throw new Exception("Loại mã giảm giá không hợp lệ");
+        }
+
+        // Đảm bảo không giảm quá tổng tiền -> tổng discount không âm
+        if (totalDiscount.compareTo(totalPriceCart) > 0) {
+            totalDiscount = totalPriceCart;
+        }
+
+        cart.setDiscountAmount(totalDiscount);
+        cart.setTotal_checkout(totalPriceCart.subtract(totalDiscount));
+
+        cart.setDiscount(discount);
+        billRepository.save(cart);
+
+        discount.setUsageLimit(discount.getUsageLimit() - 1);
+        discountService.saveDiscount_Cart(discount);
+    }
+
+    //xóa mã giảm khỏi giỏ
+    public void removeDiscountFromCart(Integer cartId) throws Exception {
+        Bill cart = billRepository.findByIdBill(cartId);
+        Discount discount = cart.getDiscount();
+
+        if (cart == null || discount == null) {
+            return;
+        }
+
+        // Tăng lại số lượng mã đã dùng
+        discount.setUsageLimit(discount.getUsageLimit() + 1);
+        discountService.saveDiscount_Cart(discount);
+
+        // Xoá discount khỏi cart
+        cart.setDiscount(null);
+        cart.setDiscountAmount(BigDecimal.ZERO);
+        cart.setTotal_checkout(cart.getTotalAmount());
+        cart.setUpdatedAt(LocalDateTime.now());
+        billRepository.save(cart);
+    }
+
+    //tính toán lại tiền nếu thêm mã  giảm
+    public void recalculateCartTotalWithDiscount(Bill cart) {
+        BigDecimal totalPrice = cart.getTotalAmount();
+        Discount discount = cart.getDiscount();
+
+        if (discount != null && discount.getUsageLimit() > 0) {
+            BigDecimal discountValue = discount.getDiscountValue() != null ? discount.getDiscountValue() : BigDecimal.ZERO;
+
+            if ("percent".equalsIgnoreCase(discount.getDiscountType())) {
+                BigDecimal discountAmount = totalPrice.multiply(discountValue).divide(BigDecimal.valueOf(100));
+                BigDecimal maxDiscount = discount.getMaxDiscount() != null ? discount.getMaxDiscount() : BigDecimal.ZERO;
+
+                if (discountAmount.compareTo(maxDiscount) > 0) {
+                    discountAmount = maxDiscount;
+                }
+                cart.setDiscountAmount(discountAmount);
+
+            } else { // amount
+                cart.setDiscountAmount(discountValue);
+            }
+
+            // Trường hợp tổng tiền bị giảm hết
+            if (cart.getDiscountAmount().compareTo(totalPrice) >= 0) {
+                cart.setTotal_checkout(BigDecimal.ZERO);
+            } else {
+                cart.setTotal_checkout(totalPrice.subtract(cart.getDiscountAmount()));
+            }
+
+        } else {
+            cart.setDiscountAmount(BigDecimal.ZERO);
+            cart.setTotal_checkout(totalPrice);
+        }
+    }
+
+    public void addCustomerToCart(Integer cartId, Integer customerId) throws Exception {
+        Bill cart = billRepository.findByIdBill(cartId);
+        if (cart == null) {
+            throw new Exception("Không tìm thấy giỏ hàng");
+        }
+
+        Customer customer = customerService.findById(customerId);
+        if (customer == null) {
+            throw new Exception("Không tìm thấy khách hàng");
+        }
+
+        cart.setCustomer(customer);
+        cart.setName(customer.getName());
+        cart.setPhoneNumber(customer.getPhoneNumber());
+        cart.setEmail(customer.getAccount().getEmail());
+
+        billRepository.save(cart);
+    }
+
+    public void removeCustomerFromCart(Integer cartId) throws Exception {
+        Bill cart = billRepository.findByIdBill(cartId);
+        if (cart == null) {
+            throw new Exception("Không tìm thấy giỏ hàng");
+        }
+
+        cart.setCustomer(null);
+        cart.setName("");
+        cart.setPhoneNumber("");
+        cart.setEmail("");
+        billRepository.save(cart);
+    }
+
     public String findLastCodeBill(){
         return billRepository.findMaxCodeBill();
     }
@@ -110,13 +443,7 @@ public class BillService {
         return String.format("HD%03d",nextCode);
     }
 
-
-    public void checkDiscountBelongToCart(){
-
-
-    }
-
-    public void checkDiscountBelongToCart(Cart cart) throws Exception {
+    public void checkDiscountBelongToCart(Bill cart) throws Exception {
         Discount discount = cart.getDiscount();
         if (discount == null) return;
 
@@ -126,94 +453,57 @@ public class BillService {
         }
     }
 
-// <<<<<<< TienBB
-//     public void checkOut(Integer cartId, String paymentMethodStr) throws Exception{
-// =======
-    public void checkOut(Integer cartId, String paymentMethodStr, Integer customerId) throws Exception{
-// >>>>>>> master
-        Cart cart = cartRepository.findByIdCart(cartId);
-        if(cart == null || cart.getStatus() == false){
+
+    public void checkOut(Integer cartId, String paymentMethodStr) throws Exception{
+        Bill cart = billRepository.findByIdBill(cartId);
+        if(cart == null || cart.getStatus() != 9){
             throw new Exception("Giỏ hàng không tồn tại hoặc đã được thanh toán");
         }
 
         checkDiscountBelongToCart(cart); // kierm tra discout còn hoạt động không
 
-        List<CartDetail> listCartDetails = cartRepository.findAllCartDetailByCartId(cartId);
+        List<BillDetails> listCartDetails = billRepository.findAllCartDetailByCartId(cartId);
         if(listCartDetails == null || listCartDetails.isEmpty()){
             throw new Exception("Không có sản phẩm trong giỏ hàng");
         }
-        BigDecimal totalAmount = listCartDetails.stream()
-                .map(CartDetail::getTotal_price)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        Bill bill = new Bill();
-        bill.setCode(taoMaTuDongBill());
-        bill.setDiscountAmount(cart.getTotal_discount());
-        bill.setTotalAmount(totalAmount);
-        bill.setPaymentStatus(true);
-        bill.setStatus(4);
-        bill.setTypeBill(false); // bán tại quầy
-        bill.setDeliveryType(0); // 0 = không giao hàng
-        bill.setShippingFee(BigDecimal.ZERO);
-// <<<<<<< TienBB
-//         bill.setName("tien");
-//         bill.setPhoneNumber("0365142537");
-//         bill.setEmail("tien@gmail.com");
-
+        cart.setPaymentStatus(true);
+        cart.setStatus(4);
+        cart.setTypeBill(false); // bán tại quầy
+        cart.setDelivery_type(false); // 0 = không giao hàng
+        cart.setShippingFee(BigDecimal.ZERO);
         PaymentMethod paymentMethod = paymentMethodService.findByPaymentMethodName(paymentMethodStr);
-        bill.setPaymentMethod(paymentMethod);
-// =======
-        // Sử dụng thông tin khách hàng nếu có, nếu không thì dùng thông tin mặc định
-        if (customerId != null) {
-            try {
-                Customer customer = customerRepository.findById(customerId).orElse(null);
-                if (customer != null && customer.getIsActive()) {
-                    bill.setCustomer(customer);
-                    bill.setName(customer.getName());
-                    bill.setPhoneNumber(customer.getPhoneNumber());
-                    bill.setEmail(customer.getAccount() != null ? customer.getAccount().getEmail() : "");
-                } else {
-                    // Thông tin mặc định nếu khách hàng không hợp lệ
-                    bill.setName("Khách lẻ");
-                    bill.setPhoneNumber("");
-                    bill.setEmail("");
-                    bill.setCustomer(null);
-                }
-            } catch (Exception e) {
-                // Thông tin mặc định nếu có lỗi
-                bill.setName("Khách lẻ");
-                bill.setPhoneNumber("");
-                bill.setEmail("");
-                bill.setCustomer(null);
-            }
+        cart.setPaymentMethod(paymentMethod);
+        cart.setUpdatedAt(LocalDateTime.now());
+
+
+        billRepository.save(cart);
+        System.out.println("Thong tin bill :" + cart);
+    }
+
+    //giao hàng
+    public void delivery(Integer cartId, String nameD, String phoneD, String addressD) throws Exception {
+        Bill cart = billRepository.findByIdBill(cartId);
+        if(cart == null || cart.getStatus() != 9){
+            throw new Exception("Giỏ hàng không tồn tại hoặc đã được thanh toán");
+        }
+
+        if (nameD == null || phoneD == null || addressD == null) {
+            // Không chọn giao hàng, reset lại thông tin nếu có
+            cart.setName("Khách lẻ");
+            cart.setPhoneNumber("");
+            cart.setEmail("");
+//            cart.set
+            cart.setDelivery_type(false);
         } else {
-            // Thông tin mặc định cho khách lẻ
-            bill.setName("Khách lẻ");
-            bill.setPhoneNumber("");
-            bill.setEmail("");
-            bill.setCustomer(null);
-        }
-// >>>>>>> master
-
-        bill.setDiscount(cart.getDiscount());
-        bill.setTotal_checkout(totalAmount.subtract(cart.getTotal_discount()));
-        bill.setCreatedAt(LocalDateTime.now());
-
-
-        billRepository.save(bill);
-        System.out.println("Thong tin bill :" + bill);
-        for (CartDetail cartDetail : listCartDetails){
-            BillDetails billDetails = new BillDetails();
-            billDetails.setPrice(cartDetail.getPrice());
-            billDetails.setQuantity(cartDetail.getQuantity());
-            billDetails.setBill(bill);
-            billDetails.setProductDetail(cartDetail.getProductDetail());
-            billDetailRepository.save(billDetails);
+            // Có chọn giao hàng
+            cart.setName(nameD);
+            cart.setPhoneNumber(phoneD);
+            cart.setEmail(addressD); // dùng field email làm địa chỉ
+            cart.setDelivery_type(true);
         }
 
-        cart.setStatus(false); // không hiển thị lên list nữa
-        cart.setUpdated_at(new Date());
-        cartRepository.save(cart);
+        billRepository.save(cart);
     }
 
     public Bill updateStatus(String statusString, Integer id) {

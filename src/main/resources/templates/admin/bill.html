@@ -99,7 +99,7 @@
                             <td th:text="${bill.name}">Nguyễn Văn A</td>
                             <td th:text="${bill.phoneNumber}">0123456789</td>
                             <td th:text="${#temporals.format(bill.createdAt, 'dd-MM-yyyy HH:mm')}">---</td>
-                            <td th:text="${bill.totalAmount != null ? #numbers.formatDecimal(bill.totalAmount, 0, 'POINT', 0, 'COMMA') + '₫' : '0₫'}">0₫</td>
+                            <td th:text="${bill.totalAmount != null ? #numbers.formatDecimal(bill.total_checkout, 0, 'POINT', 0, 'COMMA') + '₫' : '0₫'}">0₫</td>
                             <td th:text="${bill.typeBill != null and bill.typeBill == true ? 'Online' : 'Tại quầy'}">Tại quầy</td>
                             <td th:text="${bill.paymentMethod.name}"></td>
                             <td>
