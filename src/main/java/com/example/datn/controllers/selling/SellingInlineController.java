@@ -80,7 +80,6 @@ public class SellingInlineController {
             bill.setDelivery_type(false);
             PaymentMethod tienMat = paymentMethodService.getAllPaymentMethods().get(0);
             bill.setPaymentMethod(tienMat);
-//            bill.setAccount(); tam thoi null cho den khi lam xong tai khoan
             billService.save(bill);
             return ResponseEntity.ok().body("Thêm giỏ hàng thành công");
         }catch (Exception e){
@@ -114,6 +113,12 @@ public class SellingInlineController {
         List<Discount> discountCanApply = listDiscountCanApply(totalPriceInCart);
         BigDecimal totalPriceDiscount = cart.getDiscountAmount();
         BigDecimal totalPriceCheckOut = cart.getTotal_checkout();
+        String nameShip = cart.getName();
+        String phoneShip = cart.getPhoneNumber();
+        String addressShip = cart.getAddress_shipping();
+        boolean isDelivery = cart.getDelivery_type() != null && cart.getDelivery_type();
+        BigDecimal feeShip = cart.getShippingFee();
+
 
         model.addAttribute("listCart",listAllCart);
         model.addAttribute("itemInCart",numberItemInCart);
@@ -122,7 +127,11 @@ public class SellingInlineController {
         model.addAttribute("discountCanApply",discountCanApply);
         model.addAttribute("totalPriceDiscount",totalPriceDiscount);
         model.addAttribute("totalPriceCheckOut",totalPriceCheckOut);
-
+        model.addAttribute("nameShip",nameShip);
+        model.addAttribute("phoneShip",phoneShip);
+        model.addAttribute("addressShip",addressShip);
+        model.addAttribute("isDelivery", isDelivery);
+        model.addAttribute("feeShip", feeShip);
 
         model.addAttribute("idCart", idCart);
         model.addAttribute("cart",cart);
@@ -294,11 +303,13 @@ public class SellingInlineController {
     @PostMapping("/delivery")
     @ResponseBody
     public ResponseEntity<?> delivery(@RequestParam("cartId") Integer cartId,
+                                      @RequestParam("isDelivery") boolean isDelivery,
                                       @RequestParam("nameD") String nameD,
                                       @RequestParam("phoneD")String phoneD,
-                                      @RequestParam("addressD")String addressD ) {
+                                      @RequestParam("addressD")String addressD,
+                                      @RequestParam(value = "feeD", required = false)BigDecimal feeD ) {
         try {
-            billService.delivery(cartId, nameD, phoneD, addressD);
+            billService.delivery(cartId, isDelivery, nameD, phoneD, addressD, feeD);
             return ResponseEntity.ok("");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

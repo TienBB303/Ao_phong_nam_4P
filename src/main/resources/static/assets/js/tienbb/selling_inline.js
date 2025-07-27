@@ -432,51 +432,60 @@ $('#suggestionBox_Customer').on('click', '.suggestion-item', function () {
     });
 });
 
-function submitDelivery(cartId) {
-    const isChecked = document.getElementById("toggleDeliveryInfoSwitch").checked;
-
-    let nameD = null;
-    let phoneD = null;
-    let addressD = null;
-
-    if (isChecked) {
-        nameD = document.getElementById("nameD").value;
-        phoneD = document.getElementById("phoneD").value;
-        addressD = document.getElementById("addressD").value;
-    }
-
-    $.ajax({
-        url: '/admin/sell-inline/delivery',
-        method: 'POST',
-        data: {
-            cartId: cartId,
-            nameD: nameD,
-            phoneD: phoneD,
-            addressD: addressD
-        },
-        success: function () {
-            Swal.fire("Cập nhật giao hàng thành công", "", "success");
-        },
-        error: function (xhr) {
-            Swal.fire("Lỗi", xhr.responseText, "error");
-        }
-    });
-}
-
-// Giao hàng
 document.addEventListener("DOMContentLoaded", function () {
-    const toggle = document.getElementById("toggleDeliveryInfoSwitch");
-    const collapseEl = document.getElementById("deliveryInfo");
-    const bsCollapse = new bootstrap.Collapse(collapseEl, { toggle: false });
+    const toggleSwitch = document.getElementById("toggleDeliveryInfoSwitch");
+    const collapseDiv = document.getElementById("deliveryInfo");
+    const inputFields = ["nameD", "phoneD", "addressD", "feeD"];
+    const cartId = idCartFromPage;
 
-    toggle.addEventListener("change", function () {
-        if (this.checked) {
+    toggleSwitch.addEventListener("change", function () {
+        const isDelivery = toggleSwitch.checked;
+        const bsCollapse = new bootstrap.Collapse(collapseDiv, {
+            toggle: false
+        });
+
+        if (isDelivery) {
             bsCollapse.show();
         } else {
             bsCollapse.hide();
-            document.getElementById("nameD").value = "";
-            document.getElementById("phoneD").value = "";
-            document.getElementById("addressD").value = "";
         }
+
+        sendDeliveryInfo(cartId, isDelivery);
     });
+
+    inputFields.forEach(id => {
+        const input = document.getElementById(id);
+        input.addEventListener("input", function () {
+            if (toggleSwitch.checked) {
+                sendDeliveryInfo(cartId, true);
+            }
+        });
+    });
+
+    function sendDeliveryInfo(cartId, isDelivery) {
+        const nameD = isDelivery ? document.getElementById("nameD").value : "";
+        const phoneD = isDelivery ? document.getElementById("phoneD").value : "";
+        const addressD = isDelivery ? document.getElementById("addressD").value : "";
+        const feeD = isDelivery ? document.getElementById("feeD").value : 0;
+
+        $.ajax({
+            url: "/admin/sell-inline/delivery",
+            type: "POST",
+            data: {
+                cartId: cartId,
+                isDelivery: isDelivery,
+                nameD: nameD,
+                phoneD: phoneD,
+                addressD: addressD,
+                feeD: feeD
+            },
+            success: function () {
+                console.log("Cập nhật giao hàng thành công");
+            },
+            error: function (xhr) {
+                console.error("Lỗi:", xhr.responseText);
+                Swal.fire("Lỗi", xhr.responseText, "error");
+            }
+        });
+    }
 });
