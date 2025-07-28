@@ -48,6 +48,14 @@ public class CartService {
         return cartRepository.findByIdCart(idCart);
     }
 
+    public BigDecimal calTotalCart(Cart cart){
+        BigDecimal total = new BigDecimal(0);
+        for(CartDetail cd : cart.getCartDetails()){
+            total = total.add( cd.getProductDetail().getPrice().multiply(new BigDecimal(cd.getQuantity())) );
+        }
+        return total;
+    }
+
     public CartDetail findCartDetailById(Integer idCartDetail){
         return cartDetailRepositoty.findCartDetailById(idCartDetail);
     }
@@ -364,9 +372,9 @@ public class CartService {
             itemExisted.setQuantity(newQuantity);
             itemExisted.setTotal_price(productDetail.getPrice().multiply(BigDecimal.valueOf(newQuantity)));
 
-            productDetail.setQuantity(productDetail.getQuantity() - quantity);
-
-            productDetailRepository.save(productDetail);
+//            productDetail.setQuantity(productDetail.getQuantity() - quantity);
+//
+//            productDetailRepository.save(productDetail);
             cartDetailRepositoty.save(itemExisted);
         } else {
             CartDetail cartDetail = new CartDetail();
@@ -376,9 +384,9 @@ public class CartService {
             cartDetail.setPrice(productDetail.getPrice());
             cartDetail.setTotal_price(productDetail.getPrice().multiply(BigDecimal.valueOf(quantity)));
 
-            productDetail.setQuantity(productDetail.getQuantity() - quantity);
-
-            productDetailRepository.save(productDetail);
+//            productDetail.setQuantity(productDetail.getQuantity() - quantity);
+//
+//            productDetailRepository.save(productDetail);
             cartDetailRepositoty.save(cartDetail);
         }
 

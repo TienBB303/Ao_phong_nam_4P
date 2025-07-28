@@ -69,6 +69,7 @@ public class Bill {
 
     private BigDecimal total_checkout; // thành tiền
 
+    @Transient
     private Integer total_quantity;    // tổng số lượng
 
 }
