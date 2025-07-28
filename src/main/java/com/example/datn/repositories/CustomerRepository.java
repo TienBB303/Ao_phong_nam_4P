@@ -24,6 +24,7 @@ public interface CustomerRepository extends JpaRepository<Customer,Integer> {
     // ma tu sinh
     Customer findTopByOrderByIdDesc();
 
+
     long countByIsActiveTrue();
 
 

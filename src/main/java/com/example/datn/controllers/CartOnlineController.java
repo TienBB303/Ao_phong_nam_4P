@@ -1,6 +1,9 @@
 package com.example.datn.controllers;
 
+import com.example.datn.dto.bill.BillInsert;
 import com.example.datn.entities.Selling.Cart;
+import com.example.datn.entities.Selling.CartDetail;
+import com.example.datn.repositories.cart.CartDetailRepositoty;
 import com.example.datn.repositories.cart.CartRepository;
 import com.example.datn.services.CartService;
 import jakarta.servlet.http.HttpSession;
@@ -26,16 +29,35 @@ public class CartOnlineController {
     @Autowired
     private CartRepository cartRepository;
 
+    @Autowired
+    private CartDetailRepositoty cartDetailRepositoty;
+
     @GetMapping
     public String showCart(Model model, HttpSession session) {
         Integer cartId = (Integer) session.getAttribute("cartId");
-
+        model.addAttribute("billInsert", new BillInsert());
         if (cartId != null) {
             Cart cart = cartService.findCartById(cartId);
             model.addAttribute("cart", cart);
+            model.addAttribute("totalCart", cartService.calTotalCart(cart));
         }
-
         return "user/cart";
+    }
+
+    @GetMapping("/delete-cart")
+    public String deleteCart(@RequestParam Integer productDetailId, HttpSession session){
+        Integer cartId = (Integer) session.getAttribute("cartId");
+        if (cartId != null) {
+            Cart cart = cartService.findCartById(cartId);
+            for(CartDetail cd : cart.getCartDetails()){
+                if(cd.getProductDetail().getId() == productDetailId){
+                    System.out.println("delete success: "+productDetailId);
+                    cartDetailRepositoty.deleteById(cd.getId());
+                    break;
+                }
+            }
+        }
+        return "redirect:/cart";
     }
 
     @PostMapping("/add")
@@ -74,6 +96,23 @@ public class CartOnlineController {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/product-detail/" + productDetailId;
         }
+    }
+
+    @GetMapping("/up-down")
+    public String upAndDownQuantity(@RequestParam Integer productDetailId, @RequestParam Integer quantity, HttpSession session){
+        Integer cartId = (Integer) session.getAttribute("cartId");
+        if (cartId != null) {
+            Cart cart = cartService.findCartById(cartId);
+            for(CartDetail cd : cart.getCartDetails()){
+                if(cd.getProductDetail().getId() == productDetailId){
+                    cd.setQuantity(cd.getQuantity() + quantity);
+                    if(cd.getQuantity() > 0 && cd.getQuantity() <= cd.getProductDetail().getQuantity()){
+                        cartDetailRepositoty.save(cd);
+                    }
+                }
+            }
+        }
+        return "redirect:/cart";
     }
 }
 
