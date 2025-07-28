@@ -25,6 +25,10 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
     @Query("SELECT b FROM Bill b LEFT JOIN FETCH b.discount WHERE b.id = :id")
     Bill findWithDiscountById(Integer id);
 
+    @Query("SELECT b.code FROM Bill b WHERE b.code LIKE 'HD___' ORDER BY b.code DESC")
+    List<String> findOfflineBillCodes();
+
+
     @Query("SELECT b FROM Bill b " +
             "WHERE (:code IS NULL OR b.code LIKE %:code%) " +
             "AND (:name IS NULL OR b.name LIKE %:name%) " +
