@@ -593,9 +593,7 @@ public class BillService {
     public Bill findByIdWithDiscount(Integer id) {
         return billRepository.findWithDiscountById(id);
     }
-<<<<<<< HEAD
-}
-=======
+
 
     public void saveBillWithDetails(Bill bill, Cart cart) {
         Bill savedBill = billRepository.save(bill);
@@ -610,4 +608,4 @@ public class BillService {
         }
     }
 }
->>>>>>> 7b6e5e10b753b5f90190d169719b1565f1ef92a7
+

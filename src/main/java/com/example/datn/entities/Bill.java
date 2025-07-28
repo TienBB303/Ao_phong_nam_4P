@@ -71,17 +71,17 @@ public class Bill {
 
     private Integer total_quantity;    // tổng số lượng
 
+
+    @Override
+    public String toString() {
+        return "Bill{" +
+                "id=" + id +
+                ", code='" + code + '\'' +
+                ", totalAmount=" + totalAmount +
+                ", status=" + status +
+                ", name='" + name + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", customerId=" + (customer != null ? customer.getId() : null) +
+                '}';
+    }
 }
-//    @Override
-//    public String toString() {
-//        return "Bill{" +
-//                "id=" + id +
-//                ", code='" + code + '\'' +
-//                ", totalAmount=" + totalAmount +
-//                ", status=" + status +
-//                ", name='" + name + '\'' +
-//                ", phoneNumber='" + phoneNumber + '\'' +
-//                ", customerId=" + (customer != null ? customer.getId() : null) +
-//                '}';
-//    }
-//}
