@@ -22,6 +22,11 @@
                     </div>
                 </form>
 
+                <!-- Trong file tracking-order.html -->
+                <div th:if="${message}" class="alert alert-success mt-3" th:text="${message}"></div>
+                <div th:if="${error}" class="alert alert-danger mt-3" th:text="${error}"></div>
+
+
                 <div th:if="${bill != null}">
                     <h5 class="mb-3">Thông tin hoá đơn</h5>
                     <p><strong>Mã hoá đơn:</strong> <span th:text="${bill.code}"></span></p>
@@ -36,6 +41,10 @@
                                    <span th:case="6">Không rõ</span>
                                  </span>
                     </p>
+                    <h6 class="fw-bold">Giao hàng:</h6>
+                    <p th:text="${bill.name}" class="mb-1"></p>
+                    <p th:text="${bill.phoneNumber}" class="mb-1"></p>
+                    <p th:text="${bill.address_shipping}" class="mb-1"></p>
                     <div class="table-responsive mt-4">
                         <table class="table table-bordered table-striped">
                             <thead class="table-light">
@@ -85,6 +94,17 @@
                     Không tìm thấy hoá đơn với mã "<span th:text="${searchCode}"></span>"
                 </div>
             </div>
+            <div class="d-flex justify-content-end gap-2 mt-3"
+                 th:if="${bill != null and (bill.status == 1 or bill.status == 2)}">
+                <a th:href="@{'/update-bill-status/' + ${bill.id} +
+                   '?trangThaiDonHang=5&fromClient=true&code=' + ${bill.code}}"
+                   class="btn btn-outline-danger"
+                   onclick="return confirm('Bạn có chắc muốn huỷ đơn hàng này không?');">
+                    ❌ Hủy đơn này
+                </a>
+            </div>
+
+        </div>
         </div>
     </div>
 </main>
