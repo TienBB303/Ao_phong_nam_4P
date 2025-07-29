@@ -315,4 +315,18 @@ public class SellingInlineController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @PostMapping("/add-customer")
+    @ResponseBody
+    public ResponseEntity<?> addCustomerInline(@RequestBody CustomerDto customerDto) {
+        try {
+            Customer customer = customerService.createCustomerInline(customerDto);
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", customer.getId());
+            response.put("name", customer.getName() + " - " + customer.getPhoneNumber());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

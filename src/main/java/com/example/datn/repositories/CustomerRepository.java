@@ -23,13 +23,15 @@ public interface CustomerRepository extends JpaRepository<Customer,Integer> {
     Page<Customer> findByIsActiveTrue(Pageable pageable);
     // ma tu sinh
     Customer findTopByOrderByIdDesc();
-<<<<<<< HEAD
     long countByIsActiveTrue();
-=======
 
+    //TienBB
     @Query("select c from Customer c where " +
             "lower(c.name) like lower(concat('%', :keyword, '%') ) " +
             "or lower(c.phoneNumber) like lower(concat('%', :keyword, '%') ) ")
     List<Customer> searchCustomerByKeywordInline(@Param("keyword") String keyword);
->>>>>>> 7b6e5e10b753b5f90190d169719b1565f1ef92a7
+
+    @Query("select c from Customer c where lower(c.name) like lower(concat('%%', :name, '%')) " +
+            "or c.phoneNumber like :phoneNumber ")
+    Customer searchCustomerExistNameOrPhoneInline(String name, String phoneNumber);
 }
