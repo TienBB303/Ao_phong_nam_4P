@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Trang Bán Áo Phông</title>
+
+
+    <!--CSS -->
+    <link rel="stylesheet" th:href="@{/assets/css/mdb.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/style-preset.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/uikit.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/plugins/landing.css}">
+
+    <!-- Font Awesome -->
+    <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+            rel="stylesheet"
+    />
+    <style>
+        .carousel-item img {
+            height: 450px;
+            object-fit: cover;
+        }
+    </style>
+
+</head>
+<body>
+<!-- Navbar -->
+<nav class="navbar fixed-top navbar-expand-lg navbar-light bg-white">
+    <!-- Container wrapper -->
+    <div class="container">
+        <!-- Toggle button -->
+        <button
+                class="navbar-toggler"
+                type="button"
+                data-mdb-toggle="collapse"
+                data-mdb-target="#navbarSupportedContent1"
+                aria-controls="navbarSupportedContent1"
+                aria-expanded="false"
+                aria-label="Toggle navigation"
+        >
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Collapsible wrapper -->
+        <div class="collapse navbar-collapse" id="navbarSupportedContent1">
+            <!-- Navbar brand -->
+            <a class="navbar-brand mt-2 mt-sm-0" href="https://mdbootstrap.com/">
+                <img
+                        src=""
+                        height="20"
+                        alt=""
+                        loading="lazy"
+                />
+            </a>
+            <!-- Left links -->
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item active">
+                    <a class="nav-link " th:href="@{/}">Home</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" th:href="@{/product}">Product</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="">About </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="">Contact</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="">Blog</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/tracking}">Tra cứu đơn hàng</a>
+                </li>
+            </ul>
+            <!-- Left links -->
+        </div>
+        <!-- Collapsible wrapper -->
+
+        <!-- Right elements -->
+        <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center gap-2">
+                <a href="#" class="text-dark text-decoration-none">Đăng nhập</a>
+                <span class="text-muted">/</span>
+                <a href="#" class="text-dark text-decoration-none">Đăng ký</a>
+            </div>
+
+            <a class="nav-link position-relative" href="/cart">
+                <i class="fas fa-shopping-cart fa-lg"></i>
+                <span class="badge bg-danger position-absolute top-0 start-100 translate-middle rounded-pill"></span>
+            </a>
+        </div>
+
+        <!-- Right elements -->
+
+    </div>
+    <!-- Container wrapper -->
+</nav>
+<!-- Navbar -->
+
+<!-- carousel -->
+<div id="carouselExampleCaptions" class="carousel slide carousel-fade mt-5" data-mdb-ride="carousel">
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <img src="https://mdbootstrap.com/img/Photos/Horizontal/E-commerce/8-col/img%282%29.jpg" class="d-block w-100" />
+            <div class="mask" style="background-color: rgba(0,0,0,0.4)"></div>
+            <div class="carousel-caption d-none d-sm-block mb-5">
+                <h1 class="text-white fw-bold">Chào mừng đến với 4PStore</h1>
+                <p class="text-light">Mua sắm những mẫu áo thời thượng nhất</p>
+            </div>
+        </div>
+        <!-- Các slide khác nếu có -->
+    </div>
+</div>
+<!-- End Carousel -->
+
+<!-- Categories + Search -->
+<!--<nav class="navbar navbar-expand-lg navbar-dark mt-4 mb-5 shadow-sm p-3 rounded" style="background-color: #455A64">-->
+<!--    <div class="container-fluid">-->
+<!--        <a class="navbar-brand fw-bold" href="#">Danh mục:</a>-->
+<!--        <div class="collapse navbar-collapse">-->
+<!--            <ul class="navbar-nav me-auto mb-2 mb-lg-0 fw-semibold">-->
+<!--                <li class="nav-item"><a class="nav-link text-white" href="#">Tất cả</a></li>-->
+<!--                <li class="nav-item"><a class="nav-link text-white" href="#">Áo phông</a></li>-->
+<!--                <li class="nav-item"><a class="nav-link text-white" href="#">Thể thao</a></li>-->
+<!--                <li class="nav-item"><a class="nav-link text-white" href="#">Áo khoác</a></li>-->
+<!--            </ul>-->
+<!--            <form class="d-flex" role="search">-->
+<!--                <input class="form-control rounded-0" type="search" placeholder="Tìm kiếm" aria-label="Search">-->
+<!--            </form>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</nav>-->
+
+<section class="container my-4">
+    <form method="get" class="row g-3">
+        <div class="col-md-3">
+            <input class="form-control" name="name" placeholder="Tên sản phẩm"
+                   th:value="${name}">
+        </div>
+        <div class="col-md-2">
+            <select class="form-select" name="brandId">
+                <option value="">-- Hãng --</option>
+                <option th:each="b : ${listBrand}" th:value="${b.id}"
+                        th:text="${b.name}" th:selected="${brandId == b.id}"></option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select class="form-select" name="categoryId">
+                <option value="">-- Danh mục --</option>
+                <option th:each="c : ${listCategory}" th:value="${c.id}"
+                        th:text="${c.name}" th:selected="${categoryId == c.id}"></option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select class="form-select" name="materialId">
+                <option value="">-- Chất liệu --</option>
+                <option th:each="m : ${listMaterial}" th:value="${m.id}"
+                        th:text="${m.name}" th:selected="${materialId == m.id}"></option>
+            </select>
+        </div>
+        <div class="col-md-2 d-flex align-items-center gap-2">
+            <button class="btn btn-sm btn-primary w-50" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+            <a th:href="@{/}" class="btn btn-sm btn-outline-secondary w-50">
+                <i class="fas fa-eraser"></i>
+            </a>
+        </div>
+
+    </form>
+</section>
+
+<!-- Danh sách sản phẩm -->
+
+<section class="container mb-5">
+    <div class="row">
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4" th:each="product : ${listProduct}">
+            <a th:href="@{'/product-detail/' + ${product.code}}" class="text-decoration-none text-dark">
+                <div class="card h-100 shadow-sm border-0 hover-shadow" style="transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                    <!-- Ảnh sản phẩm -->
+                    <div class="position-relative">
+                        <img src="/images/default-product.jpg" class="img-fluid"
+                             style="height: 220px; object-fit: cover;" alt="Ảnh sản phẩm"/>
+
+                        <!-- Hiển thị nhãn HẾT HÀNG -->
+                        <span class="badge bg-danger position-absolute top-0 start-0 m-2"
+                              th:if="${totalQuantity[product.id] == 0 or totalQuantity[product.id] == null}">
+                    Hết hàng
+                </span>
+                    </div>
+                    <div class="card-body text-center">
+                        <h6 class="card-title fw-bold mb-2" th:text="${product.name}">Tên sản phẩm</h6>
+                        <p class="text-danger fw-bold" th:text="${priceRanges[product.id]}">100.000 - 150.000đ</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</section>
+
+<nav th:if="${listProduct.totalPages > 0}">
+    <ul class="pagination justify-content-center mt-4">
+
+        <!-- Previous -->
+        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+            <a class="page-link"
+               th:href="@{/(page=${currentPage - 1},
+                            name=${name},
+                            brandId=${brandId},
+                            categoryId=${categoryId},
+                            materialId=${materialId})}">«</a>
+        </li>
+
+        <!-- Pages -->
+        <li class="page-item"
+            th:each="pageNum : ${#numbers.sequence(0, listProduct.totalPages - 1)}"
+            th:classappend="${pageNum == currentPage} ? 'active'">
+            <a class="page-link"
+               th:href="@{/(page=${pageNum},
+                            name=${name},
+                            brandId=${brandId},
+                            categoryId=${categoryId},
+                            materialId=${materialId})}"
+               th:text="${pageNum + 1}">1</a>
+        </li>
+
+        <!-- Next -->
+        <li class="page-item" th:classappend="${currentPage + 1 == listProduct.totalPages} ? 'disabled'">
+            <a class="page-link"
+               th:href="@{/(page=${currentPage + 1},
+                            name=${name},
+                            brandId=${brandId},
+                            categoryId=${categoryId},
+                            materialId=${materialId})}">»</a>
+        </li>
+    </ul>
+</nav>
+</div>
+</main>
+<!--Main layout-->
+
+<footer class="text-center text-white mt-4" style="background-color: #607D8B">
+
+
+    <hr class="text-dark">
+
+    <div class="container">
+        <!-- Section: Social media -->
+        <section class="mb-3">
+
+            <!-- Facebook -->
+            <a
+                    class="btn-link btn-floating btn-lg text-white"
+                    href="#!"
+                    role="button"
+                    data-mdb-ripple-color="dark"
+            ><i class="fab fa-facebook-f"></i
+            ></a>
+
+            <!-- Twitter -->
+            <a
+                    class="btn-link btn-floating btn-lg text-white"
+                    href="#!"
+                    role="button"
+                    data-mdb-ripple-color="dark"
+            ><i class="fab fa-twitter"></i
+            ></a>
+
+            <!-- Google -->
+            <a
+                    class="btn-link btn-floating btn-lg text-white"
+                    href="#!"
+                    role="button"
+                    data-mdb-ripple-color="dark"
+            ><i class="fab fa-google"></i
+            ></a>
+
+            <!-- Instagram -->
+            <a
+                    class="btn-link btn-floating btn-lg text-white"
+                    href="#!"
+                    role="button"
+                    data-mdb-ripple-color="dark"
+            ><i class="fab fa-instagram"></i
+            ></a>
+
+            <!-- YouTube -->
+            <a
+                    class="btn-link btn-floating btn-lg text-white"
+                    href="#!"
+                    role="button"
+                    data-mdb-ripple-color="dark"
+            ><i class="fab fa-youtube"></i
+            ></a>
+            <!-- Github -->
+            <a
+                    class="btn-link btn-floating btn-lg text-white"
+                    href="#!"
+                    role="button"
+                    data-mdb-ripple-color="dark"
+            ><i class="fab fa-github"></i
+            ></a>
+        </section>
+        <!-- Section: Social media -->
+    </div>
+    <!-- Grid container -->
+
+    <!-- Copyright -->
+    <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2); text-color: #E0E0E0">
+        © 2025 Copyright:
+        <a class="text-white" href="">4PStore</a>
+    </div>
+    <!-- Copyright -->
+</footer>
+<!--  JS -->
+<script th:src="@{/assets/js/mdb.es.min.js}"></script>
+<script th:src="@{/assets/js/mdb.umd.min.js}"></script>
+
+<!-- Các plugin JS -->
+<script th:src="@{/assets/js/plugins/component.js}"></script>
+<script th:src="@{/assets/js/plugins/pcoded.js}"></script>
+<script th:src="@{/assets/js/plugins/layout-tab.js}"></script>
+<script th:src="@{/assets/js/plugins/layout-horizontal.js}"></script>
+<script th:src="@{/assets/js/plugins/layout-compact.js}"></script>
+
+</body>
+</html>

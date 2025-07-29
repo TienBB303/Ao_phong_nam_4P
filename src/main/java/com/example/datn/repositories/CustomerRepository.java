@@ -23,9 +23,9 @@ public interface CustomerRepository extends JpaRepository<Customer,Integer> {
     Page<Customer> findByIsActiveTrue(Pageable pageable);
     // ma tu sinh
     Customer findTopByOrderByIdDesc();
+
     long countByIsActiveTrue();
 
-    //TienBB
     @Query("select c from Customer c where " +
             "lower(c.name) like lower(concat('%', :keyword, '%') ) " +
             "or lower(c.phoneNumber) like lower(concat('%', :keyword, '%') ) ")

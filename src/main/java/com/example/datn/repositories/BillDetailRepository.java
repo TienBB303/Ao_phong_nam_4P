@@ -1,5 +1,6 @@
 package com.example.datn.repositories;
 
+import com.example.datn.entities.Bill;
 import com.example.datn.entities.BillDetails;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -9,6 +10,7 @@ import java.util.List;
 public interface BillDetailRepository extends JpaRepository<BillDetails,Integer> {
 
     List<BillDetails> findByBillId(Integer billId);
+    List<BillDetails> findByBill(Bill bill);
 
     // TIEnBB
     @Query("select cd from BillDetails cd where cd.id = :id")
