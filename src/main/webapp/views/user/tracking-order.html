@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{user/layout-user.html}">
+
+<head>
+    <title>Tra cứu đơn hàng</title>
+</head>
+
+<body>
+<main layout:fragment="content">
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <h3 class="text-center mb-4">Tra cứu đơn hàng</h3>
+
+                <form th:action="@{/tracking}" method="get" class="mb-4">
+                    <div class="input-group">
+                        <input type="text" name="code" class="form-control" placeholder="Nhập mã hoá đơn (VD: HD1234567890)" required>
+                        <button type="submit" class="btn btn-primary">Tra cứu</button>
+                    </div>
+                </form>
+
+                <!-- Trong file tracking-order.html -->
+                <div th:if="${message}" class="alert alert-success mt-3" th:text="${message}"></div>
+                <div th:if="${error}" class="alert alert-danger mt-3" th:text="${error}"></div>
+
+
+                <div th:if="${bill != null}">
+                    <h5 class="mb-3">Thông tin hoá đơn</h5>
+                    <p><strong>Mã hoá đơn:</strong> <span th:text="${bill.code}"></span></p>
+                    <p><strong>Ngày đặt:</strong> <span th:text="${#temporals.format(bill.createdAt, 'dd-MM-yyyy HH:mm')}"></span></p>
+                    <p><strong>Trạng thái:</strong>
+                        <span th:switch="${bill.status}">
+                                   <span th:case="1">Chờ xác nhận</span>
+                                   <span th:case="2">Đã xác nhận</span>
+                                   <span th:case="3">Đang giao</span>
+                                   <span th:case="4">Hoàn thành</span>
+                                   <span th:case="5">Đã huỷ</span>
+                                   <span th:case="6">Không rõ</span>
+                                 </span>
+                    </p>
+                    <h6 class="fw-bold">Giao hàng:</h6>
+                    <p th:text="${bill.name}" class="mb-1"></p>
+                    <p th:text="${bill.phoneNumber}" class="mb-1"></p>
+                    <p th:text="${bill.address_shipping}" class="mb-1"></p>
+                    <div class="table-responsive mt-4">
+                        <table class="table table-bordered table-striped">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Sản phẩm</th>
+                                <th>Màu sắc</th>
+                                <th>Kích cỡ</th>
+                                <th>Giá tiền</th>
+                                <th>Số lượng</th>
+                                <th>Thành tiền</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="detail : ${billDetails}">
+                                <td th:text="${detail.productDetail?.product?.name}">Áo thun</td>
+                                <td th:text="${detail.productDetail?.color?.name}">Đỏ</td>
+                                <td th:text="${detail.productDetail?.size?.name}">L</td>
+                                <td th:text="${detail.price != null ? #numbers.formatDecimal(detail.price, 0, 'POINT', 0, 'COMMA') + '₫' : '0₫'}"></td>
+                                <td th:text="${detail.quantity}"></td>
+                                <td th:text="${detail.price != null && detail.quantity != null ? #numbers.formatDecimal(detail.price * detail.quantity, 0, 'POINT', 0, 'COMMA') + '₫' : '0₫'}"></td>
+                            </tr>
+                            </tbody>
+                            <tfoot>
+                            <tr>
+                                <td colspan="5" class="text-end fw-bold">Tổng tiền hàng:</td>
+                                <td th:text="${#numbers.formatDecimal(total, 0, 'POINT', 0, 'COMMA') + '₫'}">0₫</td>
+                            </tr>
+                            <tr>
+                                <td colspan="5" class="text-end fw-bold">Giảm giá (voucher):</td>
+                                <td th:text="${bill.discountAmount != null ? #numbers.formatDecimal(bill.discountAmount, 0, 'POINT', 0, 'COMMA') + '₫' : '0₫'}">0₫</td>
+                            </tr>
+                            <tr>
+                                <td colspan="5" class="text-end fw-bold">Phí giao hàng:</td>
+                                <td th:text="${bill.shippingFee != null ? #numbers.formatDecimal(bill.shippingFee, 0, 'POINT', 0, 'COMMA') + '₫' : '0₫'}">0₫</td>
+                            </tr>
+                            <tr>
+                                <td colspan="5" class="text-end fw-bold text-success">Tổng thanh toán:</td>
+                                <td th:text="${#numbers.formatDecimal(bill.total_checkout, 0, 'POINT', 0, 'COMMA') + '₫'}"
+                                    class="text-success fw-bold">0₫</td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                <div th:if="${notFound}" class="alert alert-warning mt-4">
+                    Không tìm thấy hoá đơn với mã "<span th:text="${searchCode}"></span>"
+                </div>
+            </div>
+            <div class="d-flex justify-content-end gap-2 mt-3"
+                 th:if="${bill != null and (bill.status == 1 or bill.status == 2)}">
+                <a th:href="@{'/update-bill-status/' + ${bill.id} +
+                   '?trangThaiDonHang=5&fromClient=true&code=' + ${bill.code}}"
+                   class="btn btn-outline-danger"
+                   onclick="return confirm('Bạn có chắc muốn huỷ đơn hàng này không?');">
+                    ❌ Hủy đơn này
+                </a>
+            </div>
+
+        </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

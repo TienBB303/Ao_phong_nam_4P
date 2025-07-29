@@ -97,8 +97,25 @@ public class BillService {
     public Bill findById(Integer id) {
         return billRepository.findById(id).orElse(null);
     }
+    public Bill findByCodeAndTypeBill(String code, Boolean typeBill) {
 
-//    ===============================================TIENBB=========================================================================================================
+        Bill bill = billRepository.findByCodeWithAllDetailsAndTypeBill(code, typeBill);
+
+
+        if (bill != null && bill.getBillDetails() != null) {
+            for (BillDetails detail : bill.getBillDetails()) {
+                if (detail.getProductDetail() != null) {
+                    detail.getProductDetail().getProduct().getName();
+                    detail.getProductDetail().getColor().getName();
+                    detail.getProductDetail().getSize().getName();
+                }
+            }
+        }
+        return bill;
+    }
+
+
+    //    ===============================================TIENBB=========================================================================================================
     public Bill save(Bill bill) {
         return billRepository.save(bill);
     }
@@ -408,10 +425,6 @@ public class BillService {
         }
 
         cart.setCustomer(customer);
-        cart.setName(customer.getName());
-        cart.setPhoneNumber(customer.getPhoneNumber());
-        cart.setEmail(customer.getAccount().getEmail());
-
         billRepository.save(cart);
     }
 
@@ -422,9 +435,6 @@ public class BillService {
         }
 
         cart.setCustomer(null);
-        cart.setName("");
-        cart.setPhoneNumber("");
-        cart.setEmail("");
         billRepository.save(cart);
     }
 
@@ -432,20 +442,42 @@ public class BillService {
         return billRepository.findMaxCodeBill();
     }
 
-    public String taoMaTuDongBill(){
-        String lastCode = findLastCodeBill();
-        int nextCode = 1;
+//    public String taoMaTuDongBill(){
+//        String lastCode = findLastCodeBill();
+//        int nextCode = 1;
+//
+//        if(lastCode != null && !lastCode.trim().isEmpty()){
+//            try{
+//                String numberPart = lastCode.substring(2); // lay so phia sau Hoa don
+//                nextCode = Integer.parseInt(numberPart) + 1; // cong them 1
+//            }catch (NumberFormatException e){
+//                //                hihi
+//            }
+//        }
+//        return String.format("HD%03d",nextCode);
+//    }
 
-        if(lastCode != null && !lastCode.trim().isEmpty()){
+    public String taoMaTuDongBill(){
+        List<String> codes = billRepository.findOfflineBillCodes();
+        int max = 0;
+
+        for(String code : codes){
             try{
-                String numberPart = lastCode.substring(2); // lay so phia sau Hoa don
-                nextCode = Integer.parseInt(numberPart) + 1; // cong them 1
-            }catch (NumberFormatException e){
-                //                hihi
+                String numberPart = code.substring(2); // lấy phần sau 'HD'
+                if(numberPart.matches("\\d{3}")){ // chỉ nhận đúng HDxxx
+                    int number = Integer.parseInt(numberPart);
+                    if(number > max){
+                        max = number;
+                    }
+                }
+            } catch(Exception e){
+                // skip mã sai định dạng
             }
         }
-        return String.format("HD%03d",nextCode);
+
+        return String.format("HD%03d", max + 1);
     }
+
 
     public void checkDiscountBelongToCart(Bill cart) throws Exception {
         Discount discount = cart.getDiscount();
@@ -474,41 +506,67 @@ public class BillService {
         cart.setPaymentStatus(true);
         cart.setStatus(4);
         cart.setTypeBill(false); // bán tại quầy
-        cart.setDelivery_type(false); // 0 = không giao hàng
         cart.setShippingFee(BigDecimal.ZERO);
         PaymentMethod paymentMethod = paymentMethodService.findByPaymentMethodName(paymentMethodStr);
         cart.setPaymentMethod(paymentMethod);
         cart.setUpdatedAt(LocalDateTime.now());
 
+        if (cart.getDelivery_type() == false){
+            if( cart.getCustomer() == null ){
+                cart.setName("Khách lẻ");
+            }else {
+                cart.setName(cart.getCustomer().getName());
+                cart.setPhoneNumber( cart.getCustomer().getPhoneNumber());
+            }
+        }
+
+        if (cart.getDelivery_type() == true){
+            if(cart.getName() == null || cart.getName().trim().isEmpty() ||  cart.getName().trim().equals("")){
+                throw new Exception("Giao hàng không được để trống tên khách hàng");
+            } else if (cart.getPhoneNumber() == null || cart.getPhoneNumber().isEmpty() ||  cart.getPhoneNumber().trim().equals("")){
+                throw new Exception("Giao hàng không được để trống số điện thoại");
+            } else if (cart.getAddress_shipping() == null || cart.getAddress_shipping().isEmpty() ||  cart.getAddress_shipping().trim().equals("")){
+                throw new Exception("Giao hàng không được để trống địa chỉ khách hàng");
+            }
+        }
 
         billRepository.save(cart);
         System.out.println("Thong tin bill :" + cart);
     }
 
     //giao hàng
-    public void delivery(Integer cartId, String nameD, String phoneD, String addressD) throws Exception {
+    private boolean isBlank(String str) {
+        if (str == null || str.isEmpty() ||  str.trim().equals("")) {
+            return true;
+        }else  {
+            return false;
+        }
+    }
+    public void delivery(Integer cartId, boolean isDelivery, String nameD, String phoneD, String addressD, BigDecimal feeD) throws Exception {
         Bill cart = billRepository.findByIdBill(cartId);
         if(cart == null || cart.getStatus() != 9){
             throw new Exception("Giỏ hàng không tồn tại hoặc đã được thanh toán");
         }
 
-        if (nameD == null || phoneD == null || addressD == null) {
-            // Không chọn giao hàng, reset lại thông tin nếu có
-            cart.setName("Khách lẻ");
-            cart.setPhoneNumber("");
-            cart.setEmail("");
-//            cart.set
-            cart.setDelivery_type(false);
-        } else {
-            // Có chọn giao hàng
+        cart.setDelivery_type(isDelivery);
+
+        if (cart.getDelivery_type() == true) {
             cart.setName(nameD);
             cart.setPhoneNumber(phoneD);
-            cart.setEmail(addressD); // dùng field email làm địa chỉ
-            cart.setDelivery_type(true);
+            cart.setEmail("");
+            cart.setAddress_shipping(addressD);
+            cart.setShippingFee(feeD);
+        } else {
+            cart.setName("");
+            cart.setPhoneNumber("");
+            cart.setEmail("");
+            cart.setAddress_shipping("");
+            cart.setShippingFee(BigDecimal.ZERO);
         }
 
         billRepository.save(cart);
     }
+
     public Bill updateStatus(String statusString, Integer id) {
         Bill bill = billRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn có id: " + id));
@@ -574,9 +632,7 @@ public class BillService {
     public Bill findByIdWithDiscount(Integer id) {
         return billRepository.findWithDiscountById(id);
     }
-<<<<<<< HEAD
-}
-=======
+
 
     public void saveBillWithDetails(Bill bill, Cart cart) {
         Bill savedBill = billRepository.save(bill);
@@ -591,4 +647,4 @@ public class BillService {
         }
     }
 }
->>>>>>> 7b6e5e10b753b5f90190d169719b1565f1ef92a7
+
