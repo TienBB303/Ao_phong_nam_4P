@@ -97,8 +97,25 @@ public class BillService {
     public Bill findById(Integer id) {
         return billRepository.findById(id).orElse(null);
     }
+    public Bill findByCodeAndTypeBill(String code, Boolean typeBill) {
 
-//    ===============================================TIENBB=========================================================================================================
+        Bill bill = billRepository.findByCodeWithAllDetailsAndTypeBill(code, typeBill);
+
+
+        if (bill != null && bill.getBillDetails() != null) {
+            for (BillDetails detail : bill.getBillDetails()) {
+                if (detail.getProductDetail() != null) {
+                    detail.getProductDetail().getProduct().getName();
+                    detail.getProductDetail().getColor().getName();
+                    detail.getProductDetail().getSize().getName();
+                }
+            }
+        }
+        return bill;
+    }
+
+
+    //    ===============================================TIENBB=========================================================================================================
     public Bill save(Bill bill) {
         return billRepository.save(bill);
     }

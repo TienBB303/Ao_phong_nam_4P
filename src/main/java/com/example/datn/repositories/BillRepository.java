@@ -28,6 +28,21 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
     @Query("SELECT b.code FROM Bill b WHERE b.code LIKE 'HD___' ORDER BY b.code DESC")
     List<String> findOfflineBillCodes();
 
+    @Query("SELECT b FROM Bill b WHERE b.code = :code")
+    Bill findByCode(@Param("code") String code);
+
+    @Query("SELECT b FROM Bill b " +
+            "LEFT JOIN FETCH b.billDetails bd " +
+            "LEFT JOIN FETCH bd.productDetail pd " +
+            "LEFT JOIN FETCH pd.product p " +
+            "LEFT JOIN FETCH pd.color c " +
+            "LEFT JOIN FETCH pd.size s " +
+            "WHERE b.code = :code AND b.typeBill = :targetTypeBill")
+    Bill findByCodeWithAllDetailsAndTypeBill(@Param("code") String code, @Param("targetTypeBill") Boolean targetTypeBill);
+
+
+
+
 
     @Query("SELECT b FROM Bill b " +
             "WHERE (:code IS NULL OR b.code LIKE %:code%) " +
