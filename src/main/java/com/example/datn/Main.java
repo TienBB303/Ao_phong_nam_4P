@@ -13,30 +13,9 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 @SpringBootApplication
 public class Main {
 
-    private static final Logger logger = LoggerFactory.getLogger(Main.class);
-
     public static void main(String[] args) {
         SpringApplication.run(Main.class, args);
     }
 
-    @Bean
-    public CommandLineRunner testMailConfiguration(@Autowired JavaMailSender mailSender) {
-        return args -> {
-            logger.info("=== KIỂM TRA CẤU HÌNH MAIL ===");
-            logger.info("Mail sender class: {}", mailSender.getClass().getSimpleName());
-
-            if (mailSender instanceof JavaMailSenderImpl) {
-                JavaMailSenderImpl impl = (JavaMailSenderImpl) mailSender;
-                logger.info("Mail sender host: {}", impl.getHost());
-                logger.info("Mail sender port: {}", impl.getPort());
-                logger.info("Mail sender username: {}", impl.getUsername());
-                logger.info("Mail sender password: {}", impl.getPassword() != null ? "***SET***" : "NULL");
-            } else {
-                logger.warn("mailSender không phải là JavaMailSenderImpl, không thể kiểm tra cấu hình chi tiết.");
-            }
-            logger.info("=== KẾT THÚC KIỂM TRA ===");
-
-        };
-    }
 }
 
