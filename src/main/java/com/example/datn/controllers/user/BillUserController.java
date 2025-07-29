@@ -104,7 +104,7 @@ public class BillUserController {
                 billDetails.setTotal_price(cd.getProductDetail().getPrice().multiply(new BigDecimal(cd.getQuantity())));
                 billDetails.setQuantity(cd.getQuantity());
                 billDetailRepository.save(billDetails);
-                cd.getProductDetail().setQuantity(cd.getProductDetail().getQuantity() - cd.getQuantity());
+//                cd.getProductDetail().setQuantity(cd.getProductDetail().getQuantity() - cd.getQuantity());
                 productDetailRepository.save(cd.getProductDetail());
             }
             String content = mailServices.buildOrderConfirmationEmailTemplate(bill.getCode(),bill.getCreatedAt().toString(), bill.getTotal_checkout().doubleValue(),
