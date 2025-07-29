@@ -97,8 +97,25 @@ public class BillService {
     public Bill findById(Integer id) {
         return billRepository.findById(id).orElse(null);
     }
+    public Bill findByCodeAndTypeBill(String code, Boolean typeBill) {
 
-//    ===============================================TIENBB=========================================================================================================
+        Bill bill = billRepository.findByCodeWithAllDetailsAndTypeBill(code, typeBill);
+
+
+        if (bill != null && bill.getBillDetails() != null) {
+            for (BillDetails detail : bill.getBillDetails()) {
+                if (detail.getProductDetail() != null) {
+                    detail.getProductDetail().getProduct().getName();
+                    detail.getProductDetail().getColor().getName();
+                    detail.getProductDetail().getSize().getName();
+                }
+            }
+        }
+        return bill;
+    }
+
+
+    //    ===============================================TIENBB=========================================================================================================
     public Bill save(Bill bill) {
         return billRepository.save(bill);
     }
@@ -425,20 +442,42 @@ public class BillService {
         return billRepository.findMaxCodeBill();
     }
 
-    public String taoMaTuDongBill(){
-        String lastCode = findLastCodeBill();
-        int nextCode = 1;
+//    public String taoMaTuDongBill(){
+//        String lastCode = findLastCodeBill();
+//        int nextCode = 1;
+//
+//        if(lastCode != null && !lastCode.trim().isEmpty()){
+//            try{
+//                String numberPart = lastCode.substring(2); // lay so phia sau Hoa don
+//                nextCode = Integer.parseInt(numberPart) + 1; // cong them 1
+//            }catch (NumberFormatException e){
+//                //                hihi
+//            }
+//        }
+//        return String.format("HD%03d",nextCode);
+//    }
 
-        if(lastCode != null && !lastCode.trim().isEmpty()){
+    public String taoMaTuDongBill(){
+        List<String> codes = billRepository.findOfflineBillCodes();
+        int max = 0;
+
+        for(String code : codes){
             try{
-                String numberPart = lastCode.substring(2); // lay so phia sau Hoa don
-                nextCode = Integer.parseInt(numberPart) + 1; // cong them 1
-            }catch (NumberFormatException e){
-                //                hihi
+                String numberPart = code.substring(2); // lấy phần sau 'HD'
+                if(numberPart.matches("\\d{3}")){ // chỉ nhận đúng HDxxx
+                    int number = Integer.parseInt(numberPart);
+                    if(number > max){
+                        max = number;
+                    }
+                }
+            } catch(Exception e){
+                // skip mã sai định dạng
             }
         }
-        return String.format("HD%03d",nextCode);
+
+        return String.format("HD%03d", max + 1);
     }
+
 
     public void checkDiscountBelongToCart(Bill cart) throws Exception {
         Discount discount = cart.getDiscount();
