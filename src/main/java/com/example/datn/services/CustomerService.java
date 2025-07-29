@@ -44,4 +44,5 @@ public interface CustomerService {
     long countAllCustomers();
     List<Customer> searchCustomerInline(String keyword);
 
+    Customer createCustomerInline(com.example.datn.dto.selling_inline.CustomerDto dto) throws Exception;
 }

@@ -23,7 +23,7 @@ public class CustomerDto {
         this.code = customer.getCode();
         this.name = customer.getName();
         this.phoneNumber = customer.getPhoneNumber();
-        this.email = customer.getAccount().getEmail();
+        this.email = customer.getAccount() != null ? customer.getAccount().getEmail() : null;
         this.displayName = customer.getName() + " (" + customer.getPhoneNumber() + ")";
     }
 
