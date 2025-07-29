@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -66,12 +67,16 @@ public class Bill {
     @ManyToOne
     @JoinColumn(name = "payment_method_id")
     private PaymentMethod paymentMethod;
+    @OneToMany(mappedBy = "bill", fetch = FetchType.LAZY)
+    private List<BillDetails> billDetails;
+
 
     private BigDecimal total_checkout; // thành tiền
 
+    @Transient
     private Integer total_quantity;    // tổng số lượng
 
-}
+
     @Override
     public String toString() {
         return "Bill{" +
