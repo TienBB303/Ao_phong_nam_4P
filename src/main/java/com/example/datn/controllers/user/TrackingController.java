@@ -72,12 +72,20 @@ public class TrackingController {
                 return "redirect:/tracking?code=" + code;
             }
 
-            Bill bill = billService.updateStatus(trangThaiDonHang, billId);
+            Bill bill = billService.getOne(billId);
+            if (bill.getStatus() != 1 && bill.getStatus() != 2) {
+                redirectAttributes.addFlashAttribute("error",
+                        "Huỷ đơn hàng thất bại.");
+                return "redirect:/tracking?code=" + code;
+            }
+
+            // Cập nhật trạng thái
+            billService.updateStatus(trangThaiDonHang, billId);
             redirectAttributes.addFlashAttribute("message",
-                    "Hóa đơn " + bill.getCode() + " Huỷ đơn hàng thành công!");
+                    "Bạn đã huỷ đơn hàng " + bill.getCode() + " thành công!");
         } catch (Exception e) {
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("error", "Đã xảy ra lỗi khi cập nhật trạng thái.");
+            redirectAttributes.addFlashAttribute("error", "Đã xảy ra lỗi khi huỷ đơn hàng.");
         }
 
         return "redirect:/tracking?code=" + code;
