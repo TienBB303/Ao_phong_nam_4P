@@ -29,4 +29,6 @@ public class BillInsert {
 
     private BigDecimal discountValue;
 
+    private Integer discountId;
+
 }
