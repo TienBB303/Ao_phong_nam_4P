@@ -19,7 +19,7 @@ public class DiscountService {
     @Autowired
     private DiscountRepository discountRepository;
 
-    public Page<Discount> getFilteredDiscounts(String code,String codeName, LocalDate start, LocalDate end, String type, Integer status, int page, int size) {
+    public Page<Discount> getFilteredDiscounts(String code, String codeName, LocalDate start, LocalDate end, String type, Integer status, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         LocalDateTime startDateTime = (start != null) ? start.atStartOfDay() : null;
         LocalDateTime endDateTime = (end != null) ? end.atTime(23, 59, 59) : null;
@@ -106,7 +106,6 @@ public class DiscountService {
     }
 
 
-
     public Optional<Discount> getDiscountById(int id) {
         return discountRepository.findById(id);
     }
@@ -149,12 +148,16 @@ public class DiscountService {
     }
 
     //TienBB
-    public Discount saveDiscount_Cart(Discount discount){
+    public Discount saveDiscount_Cart(Discount discount) {
         return discountRepository.save(discount);
     }
 
     //TienBB
     public Discount findDiscountByCartId(Integer cartId) {
         return discountRepository.findDiscountByCartId(cartId);
+    }
+
+    public Optional<Discount> findByCode(String code) {
+        return discountRepository.findByCode(code);
     }
 }
