@@ -5,38 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Trang thanh toán</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" integrity="sha512-5A8nwdMOWrSz20fDsjczgUidUBR8liPYU+WymTZP1lmY9G6Oc7HlZv156XqnsgNUzTyMefFTcsFH/tnJE/+xBg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css"
+          integrity="sha512-5A8nwdMOWrSz20fDsjczgUidUBR8liPYU+WymTZP1lmY9G6Oc7HlZv156XqnsgNUzTyMefFTcsFH/tnJE/+xBg=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
     <style>
         .form-control, .form-select {
             border-radius: 0;
         }
+
         .payment-method {
             border: 1px solid #ccc;
             padding: 15px;
             cursor: pointer;
             margin-bottom: 10px;
         }
+
         .payment-method.active {
             border: 2px solid #000;
             background-color: #f9f9f9;
         }
+
         .order-summary {
             border-left: 1px solid #dee2e6;
         }
+
         .btn-dark {
             border-radius: 0;
         }
     </style>
     <script src="js/address.js"></script>
     <script>
-        window.onload = function() {
+        window.onload = function () {
             loadAddress();
         }
-        function checkForm(){
+
+        function checkForm() {
             var phone = document.getElementById("phoneck").value;
-            var regex = /^0\d{9}$/ ;
-            if(regex.test(phone) == false){
+            var regex = /^0\d{9}$/;
+            if (regex.test(phone) == false) {
                 alert("Số điện thoại phải là 10 số")
                 return false;
             }
@@ -50,26 +57,34 @@
     <div class="row">
         <!-- Form thông tin giao hàng -->
         <div class="col-md-7">
-            <form onsubmit="return checkForm()" th:action="@{/bill/createNotLogin}" method="post" th:object="${billInsert}">
+            <form onsubmit="return checkForm()" th:action="@{/bill/createNotLogin}" method="post"
+                  th:object="${billInsert}">
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <input type="text" th:field="*{fullName}" class="form-control" placeholder="Họ và tên" name="fullName" required/>
+                        <input type="text" th:field="*{fullName}" class="form-control" placeholder="Họ và tên"
+                               name="fullName" required/>
                     </div>
                     <div class="col-md-6">
-                        <input type="text" id="phoneck" th:field="*{phone}" class="form-control" placeholder="Số điện thoại" name="phone" required/>
+                        <input type="text" id="phoneck" th:field="*{phone}" class="form-control"
+                               placeholder="Số điện thoại" name="phone" required/>
                     </div>
                 </div>
                 <div class="mb-3">
-                    <input type="email" th:field="*{email}" class="form-control" placeholder="Địa chỉ Email" name="email" required/>
+                    <input type="email" th:field="*{email}" class="form-control" placeholder="Địa chỉ Email"
+                           name="email" required/>
                 </div>
                 <div class="row">
                     <div class="col-sm-4">
                         <label class="">Chọn tỉnh</label>
-                        <select th:field="*{province}" name="tinh" onchange="loadHuyen(this.options[this.selectedIndex].getAttribute('name-add'));" class="form-control" id="tinh"></select>
+                        <select th:field="*{province}" name="tinh"
+                                onchange="loadHuyen(this.options[this.selectedIndex].getAttribute('name-add'));"
+                                class="form-control" id="tinh"></select>
                     </div>
                     <div class="col-sm-4">
                         <label class="">Chọn huyện</label>
-                        <select th:field="*{district}" name="huyen"  onchange="loadXa(this.options[this.selectedIndex].getAttribute('name-add'));" class="form-control" id="huyen"></select>
+                        <select th:field="*{district}" name="huyen"
+                                onchange="loadXa(this.options[this.selectedIndex].getAttribute('name-add'));"
+                                class="form-control" id="huyen"></select>
                     </div>
                     <div class="col-sm-4 mb-4">
                         <label class="">Chọn xã</label>
@@ -77,12 +92,14 @@
                     </div>
                     <div class="col-sm-12">
                         <div class="mb-4">
-                            <input required th:field="*{street}" name="tenduong" class="form-control" id="addchitiet" placeholder="tên đường, số nhà của bạn">
+                            <input required th:field="*{street}" name="tenduong" class="form-control" id="addchitiet"
+                                   placeholder="tên đường, số nhà của bạn">
                         </div>
                     </div>
                 </div>
                 <div class="mb-4">
-                    <textarea th:field="*{note}" class="form-control" name="note" placeholder="Ghi chú thêm (Ví dụ: Giao hàng giờ hành chính)" rows="3"></textarea>
+                    <textarea th:field="*{note}" class="form-control" name="note"
+                              placeholder="Ghi chú thêm (Ví dụ: Giao hàng giờ hành chính)" rows="3"></textarea>
                 </div>
 
                 <h5 class="mb-3">Phương thức thanh toán</h5>
@@ -95,6 +112,9 @@
                     <label class="form-check-label" for="bank">Thanh toán chuyển khoản</label>
                 </div>
 
+                <input type="hidden" name="discountCode" id="discountCodeInput"/>
+                <input type="hidden" name="discountValue" id="discountValueInput"/>
+
                 <button type="submit" class="btn btn-dark w-100 mt-4">ĐẶT HÀNG NGAY</button>
             </form>
         </div>
@@ -103,31 +123,37 @@
         <div class="col-md-5 order-summary ps-md-5 mt-5 mt-md-0">
             <div th:each="item : ${cart.cartDetails}" class="d-flex mb-3">
                 <div>
-                    <p class="mb-1" th:text="${item.productDetail.product.name} + ' - ' + ${item.productDetail.color.name} + ' - ' + ${item.productDetail.size.name}"></p>
-                    <span class="fw-bold text-danger" th:text="${#numbers.formatInteger(item.productDetail.price, 0, 'POINT')} + 'đ'"></span>
-                    <a th:href="@{/cart/delete-cart(productDetailId=${item.productDetail.id})}" onclick="return window.confirm('Xác nhận xóa')"><i class="fa fa-trash"></i></a>
+                    <p class="mb-1"
+                       th:text="${item.productDetail.product.name} + ' - ' + ${item.productDetail.color.name} + ' - ' + ${item.productDetail.size.name}"></p>
+                    <span class="fw-bold text-danger"
+                          th:text="${#numbers.formatInteger(item.productDetail.price, 0, 'POINT')} + 'đ'"></span>
+                    <a th:href="@{/cart/delete-cart(productDetailId=${item.productDetail.id})}"
+                       onclick="return window.confirm('Xác nhận xóa')"><i class="fa fa-trash"></i></a>
                     <div class="mt-2">
-                        <a th:href="@{/cart/up-down(productDetailId=${item.productDetail.id},quantity=${-1})}" class="btn btn-sm btn-outline-secondary">-</a>
+                        <a th:href="@{/cart/up-down(productDetailId=${item.productDetail.id},quantity=${-1})}"
+                           class="btn btn-sm btn-outline-secondary">-</a>
                         <span class="mx-2" th:text="${item.quantity}">1</span>
-                        <a th:href="@{/cart/up-down(productDetailId=${item.productDetail.id},quantity=${1})}" class="btn btn-sm btn-outline-secondary">+</a>
+                        <a th:href="@{/cart/up-down(productDetailId=${item.productDetail.id},quantity=${1})}"
+                           class="btn btn-sm btn-outline-secondary">+</a>
                     </div>
                 </div>
             </div>
 
             <div class="input-group mb-3">
-                <input type="text" class="form-control" placeholder="Nhập mã giảm giá"/>
-                <button class="btn btn-dark">ÁP DỤNG</button>
+                <input type="text" class="form-control" id="discount-code" placeholder="Nhập mã giảm giá"/>
+                <button class="btn btn-dark" onclick="applyDiscount()">ÁP DỤNG</button>
             </div>
 
             <ul class="list-group list-group-flush mb-3">
                 <li class="list-group-item d-flex justify-content-between">
-                    Tổng tiền hàng: <span id="tongtienhang" th:text="${#numbers.formatInteger(totalCart, 0, 'POINT')} + 'đ'">0đ</span>
+                    Tổng tiền hàng: <span id="tongtienhang"
+                                          th:text="${#numbers.formatInteger(totalCart, 0, 'POINT')} + 'đ'">0đ</span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between">
-                    Giảm giá: <span>- 0đ</span>
+                    Giảm giá: <span id="giamgia">- 0đ</span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between">
-                    Tạm tính: <span th:text="${#numbers.formatInteger(totalCart, 0, 'POINT')} + 'đ'">0đ</span>
+                    Tạm tính: <span id="tamtinh">0đ</span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between">
                     Chiết khấu: <span>- 0đ</span>
@@ -136,7 +162,8 @@
                     Phí ship: <span id="phiship">0đ</span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between fw-bold fs-5 text-danger">
-                    Cần thanh toán: <span id="phaithanhtoan" th:text="${#numbers.formatInteger(cart.total_price_checkout, 0, 'POINT')} + 'đ'">0đ</span>
+                    Cần thanh toán: <span id="phaithanhtoan"
+                                          th:text="${#numbers.formatInteger(cart.total_price_checkout, 0, 'POINT')} + 'đ'">0đ</span>
                 </li>
             </ul>
         </div>
@@ -144,6 +171,57 @@
 </div>
 
 <script>
+    let discountValue = 0;
+
+    function parseCurrency(str) {
+        const match = str.match(/-?\d+/g);
+        if (!match) return 0;
+        return parseInt(match.join(''));
+    }
+
+    function formatCurrency(num) {
+        return num.toLocaleString('vi-VN') + 'đ';
+    }
+
+    function updateSummary() {
+        const tongTien = parseCurrency(document.getElementById("tongtienhang").textContent);
+        const phiShip = parseCurrency(document.getElementById("phiship").textContent);
+
+        const tamTinh = tongTien - discountValue;
+        const thanhToan = tamTinh + phiShip;
+
+        document.getElementById("giamgia").textContent = '- ' + formatCurrency(discountValue);
+        document.getElementById("tamtinh").textContent = formatCurrency(tamTinh);
+        document.getElementById("phaithanhtoan").textContent = formatCurrency(thanhToan);
+    }
+
+    function applyDiscount() {
+        const code = document.getElementById("discount-code").value.trim();
+        if (!code) return alert("Vui lòng nhập mã giảm giá");
+
+        fetch(`/api/discount/apply?code=${code}`)
+            .then(res => {
+                if (!res.ok) throw res;
+                return res.json();
+            })
+            .then(data => {
+                discountValue = data.discountAmount || 0;
+                document.getElementById("discountCodeInput").value = code;
+                document.getElementById("discountValueInput").value = discountValue;
+                alert(data.message);
+                updateSummary();
+            })
+            .catch(async err => {
+                const errMsg = await err.json();
+                alert(errMsg.message || "Lỗi khi áp mã");
+                discountValue = 0;
+                document.getElementById("discountCodeInput").value = "";
+                document.getElementById("discountValueInput").value = "0";
+                updateSummary();
+            });
+    }
+
+    document.addEventListener("DOMContentLoaded", updateSummary);
     document.addEventListener("DOMContentLoaded", function () {
         const provinceSelect = document.getElementById("select-province");
         const districtSelect = document.getElementById("select-district");
