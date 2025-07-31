@@ -37,16 +37,24 @@ public class DiscountRestController {
         if (discount.getStartDatetime() == null || discount.getEndDatetime() == null ||
                 discount.getStartDatetime().isAfter(LocalDateTime.now()) ||
                 discount.getEndDatetime().isBefore(LocalDateTime.now())) {
-
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Collections.singletonMap("message", "Mã giảm giá đã hết hạn hoặc chưa đến thời gian áp dụng."));
         }
 
+        if (discount.getUsageLimit() == null || discount.getUsageLimit() <= 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Collections.singletonMap("message", "Mã giảm giá đã hết lượt sử dụng."));
+        }
+
+        discount.setUsageLimit(discount.getUsageLimit() - 1);
+        discountRepository.save(discount);
 
         Map<String, Object> result = new HashMap<>();
+        result.put("discountId", discount.getId());
         result.put("discountAmount", discount.getDiscountValue());
         result.put("message", "Áp dụng mã giảm giá thành công");
 
         return ResponseEntity.ok(result);
     }
+
 }

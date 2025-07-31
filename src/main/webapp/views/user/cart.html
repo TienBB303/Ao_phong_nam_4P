@@ -114,6 +114,7 @@
 
                 <input type="hidden" name="discountCode" id="discountCodeInput"/>
                 <input type="hidden" name="discountValue" id="discountValueInput"/>
+                <input type="hidden" name="discountId" id="discountIdInput"/>
 
                 <button type="submit" class="btn btn-dark w-100 mt-4">ĐẶT HÀNG NGAY</button>
             </form>
@@ -206,17 +207,22 @@
             })
             .then(data => {
                 discountValue = data.discountAmount || 0;
+
                 document.getElementById("discountCodeInput").value = code;
                 document.getElementById("discountValueInput").value = discountValue;
+                document.getElementById("discountIdInput").value = data.discountId || ""; // ✅ Gán ID
+
                 alert(data.message);
                 updateSummary();
             })
             .catch(async err => {
                 const errMsg = await err.json();
                 alert(errMsg.message || "Lỗi khi áp mã");
+
                 discountValue = 0;
                 document.getElementById("discountCodeInput").value = "";
                 document.getElementById("discountValueInput").value = "0";
+                document.getElementById("discountIdInput").value = "";
                 updateSummary();
             });
     }

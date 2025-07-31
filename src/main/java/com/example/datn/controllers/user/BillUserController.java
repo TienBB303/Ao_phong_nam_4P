@@ -4,10 +4,13 @@ import com.example.datn.dto.bill.BillInsert;
 import com.example.datn.entities.Bill;
 import com.example.datn.entities.BillDetails;
 import com.example.datn.entities.Customer;
+import com.example.datn.entities.Discount;
 import com.example.datn.entities.Selling.Cart;
 import com.example.datn.entities.Selling.CartDetail;
+import com.example.datn.entities.product_and_other.ProductDetail;
 import com.example.datn.repositories.BillDetailRepository;
 import com.example.datn.repositories.BillRepository;
+import com.example.datn.repositories.DiscountRepository;
 import com.example.datn.repositories.PaymentMethodRepository;
 import com.example.datn.repositories.cart.CartDetailRepositoty;
 import com.example.datn.repositories.cart.CartRepository;
@@ -45,13 +48,16 @@ public class BillUserController {
     private CartRepository cartRepository;
 
     @Autowired
+    private DiscountRepository discountRepository;
+
+    @Autowired
     private MailServices mailServices;
 
     @Autowired
     private PaymentMethodRepository paymentMethodRepository;
 
     @GetMapping("/thanhcong")
-    public String viewSuccess(){
+    public String viewSuccess() {
         return "user/thankyou";
     }
 
@@ -65,7 +71,8 @@ public class BillUserController {
 
             for (CartDetail cd : cart.getCartDetails()) {
                 if (cd.getQuantity() > cd.getProductDetail().getQuantity()) {
-                    redirectAttributes.addFlashAttribute("error", "Số lượng sản phẩm " + cd.getProductDetail().getProduct().getName() + " chỉ còn " + cd.getProductDetail().getQuantity());
+                    redirectAttributes.addFlashAttribute("error",
+                            "Số lượng sản phẩm " + cd.getProductDetail().getProduct().getName() + " chỉ còn " + cd.getProductDetail().getQuantity());
                     return "redirect:/cart";
                 }
                 totalQuantity += cd.getQuantity();
@@ -79,13 +86,15 @@ public class BillUserController {
             }
 
             BigDecimal totalCheckout = total.subtract(discountAmount);
-            BigDecimal shippingFee = billInsert.getProvince().equals("Hà Nội") ? new BigDecimal(30000) : new BigDecimal(40000);
+            BigDecimal shippingFee = "Hà Nội".equalsIgnoreCase(billInsert.getProvince())
+                    ? new BigDecimal(30000)
+                    : new BigDecimal(40000);
+
             totalCheckout = totalCheckout.add(shippingFee);
 
-            // Tạo hóa đơn
             Bill bill = new Bill();
             bill.setCode("HD" + System.currentTimeMillis());
-            bill.setCustomer(null);
+            bill.setCustomer(null); // null cho guest shopping
             bill.setTotalAmount(total);
             bill.setDiscountAmount(discountAmount);
             bill.setTotal_checkout(totalCheckout);
@@ -101,11 +110,17 @@ public class BillUserController {
                             billInsert.getDistrict() + ", " +
                             billInsert.getProvince());
             bill.setNote(billInsert.getNote());
-            bill.setTypeBill(true); // Hóa đơn tại website
-            bill.setStatus(1); // Trạng thái đơn hàng mới
+            bill.setTypeBill(true);
+            bill.setStatus(1);
             bill.setPaymentMethod(paymentMethodRepository.findById(1).orElse(null));
-            bill.setDiscount(null);
 
+            // ✅ Gán discount nếu có discountId
+            if (billInsert.getDiscountId() != null) {
+                Discount discount = discountRepository.findById(billInsert.getDiscountId()).orElse(null);
+                bill.setDiscount(discount);
+            } else {
+                bill.setDiscount(null);
+            }
             billRepository.save(bill);
 
             for (CartDetail cd : cart.getCartDetails()) {
@@ -116,7 +131,10 @@ public class BillUserController {
                 billDetails.setTotal_price(cd.getProductDetail().getPrice().multiply(new BigDecimal(cd.getQuantity())));
                 billDetails.setQuantity(cd.getQuantity());
                 billDetailRepository.save(billDetails);
-                productDetailRepository.save(cd.getProductDetail());
+
+                ProductDetail productDetail = cd.getProductDetail();
+                productDetail.setQuantity(productDetail.getQuantity() - cd.getQuantity());
+                productDetailRepository.save(productDetail);
             }
 
             String content = mailServices.buildOrderConfirmationEmailTemplate(
@@ -126,10 +144,10 @@ public class BillUserController {
                     bill.getAddress_shipping(),
                     bill.getNote(),
                     bill.getName(),
-                    "thaitvph40872@fpt.edu.vn");
+                    "thaitvph40872@fpt.edu.vn"
+            );
             mailServices.sendEmail(billInsert.getEmail(), "Đặt hàng thành công", content, false, true);
         }
-
         return "redirect:/thanhcong";
     }
 }
