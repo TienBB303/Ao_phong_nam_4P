@@ -94,6 +94,25 @@ public class BillService {
         return billRepository.filterBills(code, name, phoneNumber, startDate, endDate, status, typeBill, pageable);
     }
 
+    public Bill findByCodeAndTypeBill(String code, Boolean typeBill) {
+
+        Bill bill = billRepository.findByCodeWithAllDetailsAndTypeBill(code, typeBill);
+
+        if (bill != null && bill.getBillDetails() != null) {
+            for (BillDetails detail : bill.getBillDetails()) {
+                if (detail.getProductDetail() != null) {
+                    detail.getProductDetail().getProduct().getName();
+                    detail.getProductDetail().getColor().getName();
+                    detail.getProductDetail().getSize().getName();
+                }
+            }
+        }
+        return bill;
+    }
+    public Bill getOne(Integer id) {
+        return billRepository.findById(id).orElse(null);
+    }
+
     public Bill findById(Integer id) {
         return billRepository.findById(id).orElse(null);
     }
