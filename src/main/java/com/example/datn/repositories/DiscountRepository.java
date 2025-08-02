@@ -41,6 +41,7 @@ public interface DiscountRepository extends JpaRepository<Discount,Integer> {
     boolean existsByCode(String code);
     @Query("SELECT MAX(CAST(SUBSTRING(d.code, 3) AS int)) FROM Discount d WHERE d.code LIKE 'DC%'")
     Integer findMaxCodeNumber();
+
     Optional<Discount> findByCode(String code);
 
     //TienBB

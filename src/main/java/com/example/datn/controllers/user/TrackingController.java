@@ -20,38 +20,40 @@ public class TrackingController {
     @Autowired
     BillService billService;
 
-    @GetMapping("/tracking")
-    public String trackingBill(@RequestParam(name = "code", required = false) String code, Model model) {
-        if (code != null && !code.isBlank()) {
-            Boolean targetTypeBill = true;
+//    @GetMapping("/tracking")
+//    public String trackingBill(@RequestParam(name = "code", required = false) String code, Model model) {
+//        if (code != null && !code.isBlank()) {
+//            Boolean targetTypeBill = true;
+//
+//            Bill bill = billService.findByCodeAndTypeBill(code.trim(), targetTypeBill);
+//            if (bill != null) {
+//                model.addAttribute("bill", bill);
+//
+//
+//                List<BillDetails> billDetailsList = bill.getBillDetails();
+//
+//                BigDecimal total = BigDecimal.ZERO;
+//                if (billDetailsList != null) {
+//                    for (BillDetails detail : billDetailsList) {
+//                        if (detail.getPrice() != null && detail.getQuantity() != null) {
+//                            total = total.add(detail.getPrice().multiply(new BigDecimal(detail.getQuantity())));
+//                        }
+//                    }
+//                }
+//
+//                model.addAttribute("billDetails", billDetailsList);
+//                model.addAttribute("total", total);
+//
+//            } else {
+//                model.addAttribute("notFound", true);
+//                model.addAttribute("searchCode", code);
+//                model.addAttribute("bill", null);
+//            }
+//        }
+//        return "user/tracking-order";
+//    }
 
-            Bill bill = billService.findByCodeAndTypeBill(code.trim(), targetTypeBill);
-            if (bill != null) {
-                model.addAttribute("bill", bill);
 
-
-                List<BillDetails> billDetailsList = bill.getBillDetails();
-
-                BigDecimal total = BigDecimal.ZERO;
-                if (billDetailsList != null) {
-                    for (BillDetails detail : billDetailsList) {
-                        if (detail.getPrice() != null && detail.getQuantity() != null) {
-                            total = total.add(detail.getPrice().multiply(new BigDecimal(detail.getQuantity())));
-                        }
-                    }
-                }
-
-                model.addAttribute("billDetails", billDetailsList);
-                model.addAttribute("total", total);
-
-            } else {
-                model.addAttribute("notFound", true);
-                model.addAttribute("searchCode", code);
-                model.addAttribute("bill", null);
-            }
-        }
-        return "user/tracking-order";
-    }
     @GetMapping("/update-bill-status/{billId}")
     public String updateBillStatus(@PathVariable Integer billId,
                                    @RequestParam("trangThaiDonHang") String trangThaiDonHang,
@@ -70,12 +72,20 @@ public class TrackingController {
                 return "redirect:/tracking?code=" + code;
             }
 
-            Bill bill = billService.updateStatus(trangThaiDonHang, billId);
+            Bill bill = billService.getOne(billId);
+            if (bill.getStatus() != 1 && bill.getStatus() != 2) {
+                redirectAttributes.addFlashAttribute("error",
+                        "Huỷ đơn hàng thất bại.");
+                return "redirect:/tracking?code=" + code;
+            }
+
+            // Cập nhật trạng thái
+            billService.updateStatus(trangThaiDonHang, billId);
             redirectAttributes.addFlashAttribute("message",
-                    "Hóa đơn " + bill.getCode() + " Huỷ đơn hàng thành công!");
+                    "Bạn đã huỷ đơn hàng " + bill.getCode() + " thành công!");
         } catch (Exception e) {
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("error", "Đã xảy ra lỗi khi cập nhật trạng thái.");
+            redirectAttributes.addFlashAttribute("error", "Đã xảy ra lỗi khi huỷ đơn hàng.");
         }
 
         return "redirect:/tracking?code=" + code;

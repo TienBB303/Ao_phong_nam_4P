@@ -111,7 +111,7 @@
                                     </div>
                                     <div class="col-md-1">
                                         <div class="input-group">
-                                            <span class="input-group-text bg-white" id="addCustomer">
+                                            <span class="input-group-text bg-white" id="addCustomer" data-bs-toggle="modal" data-bs-target="#addCustomerModal">
                                                 <i class="bi bi-person"></i>
                                             </span>
                                         </div>
@@ -311,7 +311,32 @@
         </div>
     </div>
 </section>
-
+<div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Thêm khách hàng mới</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addCustomerForm">
+                    <div class="mb-3">
+                        <label for="customer_name">Họ và tên</label>
+                        <input type="text" id="customer_name" class="form-control" name="nameCustomer">
+                    </div>
+                    <div class="mb-3">
+                        <label for="customer_phone">Số điện thoại</label>
+                        <input type="text" id="customer_phone" class="form-control" name="phoneCustomer">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="submit" class="btn btn-primary">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
 <footer th:replace="~{admin/fragments/footer :: footer}"></footer>
 <script th:inline="javascript">
     const idCartFromPage = /*[[${idCart}]]*/ null; // gắn idCart cho frompage để dùng js ngoài

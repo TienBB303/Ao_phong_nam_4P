@@ -1,22 +1,20 @@
 package com.example.datn.services;
 
-import com.example.datn.entities.Bill;
-import com.example.datn.entities.BillDetails;
-import com.example.datn.entities.Customer;
 import com.example.datn.entities.Discount;
 import com.example.datn.entities.Selling.Cart;
 import com.example.datn.entities.Selling.CartDetail;
 import com.example.datn.entities.product_and_other.ProductDetail;
+import com.example.datn.repositories.DiscountRepository;
 import com.example.datn.repositories.cart.CartDetailRepositoty;
 import com.example.datn.repositories.cart.CartRepository;
 import com.example.datn.repositories.product_and_other.ProductDetailRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CartService {
@@ -35,6 +33,9 @@ public class CartService {
 
     @Autowired
     private DiscountService  discountService;
+
+    @Autowired
+    private DiscountRepository discountRepository;
 
     public List<Cart> getAllCarts(){
         return cartRepository.findAll();
@@ -214,7 +215,7 @@ public class CartService {
         cartRepository.delete(cart);
     }
 
-    public void applyDiscountToCart(Integer cartId, Integer discountId) throws  Exception{
+    public Cart applyDiscountToCart(Integer cartId, Integer discountId) throws  Exception{
         Cart cart = cartRepository.findByIdCart(cartId);
         Discount discount = discountService.findDiscountById(discountId);
 
@@ -273,6 +274,7 @@ public class CartService {
 
         discount.setUsageLimit(discount.getUsageLimit() - 1);
         discountService.saveDiscount_Cart(discount);
+        return cart;
     }
 
     public void removeDiscountFromCart(Integer cartId) throws Exception {
@@ -283,7 +285,6 @@ public class CartService {
             return;
         }
 
-        // Tăng lại số lượng mã đã dùng
         discount.setUsageLimit(discount.getUsageLimit() + 1);
         discountService.saveDiscount_Cart(discount);
 
@@ -407,5 +408,20 @@ public class CartService {
         cartRepository.save(cart);
     }
 
+    public Integer findDiscountIdByCode(String code) {
+        Optional<Discount> optionalDiscount = discountService.findByCode(code.trim());
+
+        if (optionalDiscount.isEmpty()) {
+            return null;
+        }
+
+        Discount discount = optionalDiscount.get();
+
+        if (discount.getUsageLimit() != null && discount.getUsageLimit() <= 0) {
+            return null;
+        }
+
+        return discount.getId();
+    }
 
 }

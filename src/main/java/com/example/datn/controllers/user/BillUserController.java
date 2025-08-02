@@ -4,10 +4,13 @@ import com.example.datn.dto.bill.BillInsert;
 import com.example.datn.entities.Bill;
 import com.example.datn.entities.BillDetails;
 import com.example.datn.entities.Customer;
+import com.example.datn.entities.Discount;
 import com.example.datn.entities.Selling.Cart;
 import com.example.datn.entities.Selling.CartDetail;
+import com.example.datn.entities.product_and_other.ProductDetail;
 import com.example.datn.repositories.BillDetailRepository;
 import com.example.datn.repositories.BillRepository;
+import com.example.datn.repositories.DiscountRepository;
 import com.example.datn.repositories.PaymentMethodRepository;
 import com.example.datn.repositories.cart.CartDetailRepositoty;
 import com.example.datn.repositories.cart.CartRepository;
@@ -45,58 +48,82 @@ public class BillUserController {
     private CartRepository cartRepository;
 
     @Autowired
+    private DiscountRepository discountRepository;
+
+    @Autowired
     private MailServices mailServices;
 
     @Autowired
     private PaymentMethodRepository paymentMethodRepository;
 
     @GetMapping("/thanhcong")
-    public String viewSuccess(){
+    public String viewSuccess() {
         return "user/thankyou";
     }
 
     @PostMapping("/bill/createNotLogin")
-    public String createNotLogin(HttpSession session, BillInsert billInsert, RedirectAttributes redirectAttributes){
+    public String createNotLogin(HttpSession session, BillInsert billInsert, RedirectAttributes redirectAttributes) {
         Integer cartId = (Integer) session.getAttribute("cartId");
+
         if (cartId != null) {
             Cart cart = cartService.findCartById(cartId);
-            Integer totalQuantity = 0;
-            for(CartDetail cd : cart.getCartDetails()){
-                if(cd.getQuantity() > cd.getProductDetail().getQuantity()){
-                    redirectAttributes.addFlashAttribute("error","Số lượng sản phẩm "+cd.getProductDetail().getProduct().getName()+" chỉ còn "+cd.getProductDetail().getQuantity());
+            int totalQuantity = 0;
+
+            for (CartDetail cd : cart.getCartDetails()) {
+                if (cd.getQuantity() > cd.getProductDetail().getQuantity()) {
+                    redirectAttributes.addFlashAttribute("error",
+                            "Số lượng sản phẩm " + cd.getProductDetail().getProduct().getName() + " chỉ còn " + cd.getProductDetail().getQuantity());
                     return "redirect:/cart";
                 }
                 totalQuantity += cd.getQuantity();
             }
 
             BigDecimal total = cartService.calTotalCart(cart);
+            BigDecimal discountAmount = billInsert.getDiscountValue() != null ? billInsert.getDiscountValue() : BigDecimal.ZERO;
+
+            if (discountAmount.compareTo(total) > 0) {
+                discountAmount = total;
+            }
+
+            BigDecimal totalCheckout = total.subtract(discountAmount);
+            BigDecimal shippingFee = "Hà Nội".equalsIgnoreCase(billInsert.getProvince())
+                    ? new BigDecimal(30000)
+                    : new BigDecimal(40000);
+
+            totalCheckout = totalCheckout.add(shippingFee);
+
             Bill bill = new Bill();
+            bill.setCode("HD" + System.currentTimeMillis());
+            bill.setCustomer(null); // null cho guest shopping
             bill.setTotalAmount(total);
-            BigDecimal totalCheckout = new BigDecimal(total.doubleValue());
-            BigDecimal shipFee = new BigDecimal(0);
-            if(billInsert.getProvince().equals("Hà Nội")){
-                totalCheckout = totalCheckout.add(new BigDecimal(30000));
-                shipFee = shipFee.add(new BigDecimal(30000));
-            }
-            else{
-                totalCheckout = totalCheckout.add(new BigDecimal(40000));
-                shipFee = shipFee.add(new BigDecimal(40000));
-            }
-//            bill.setTotal_quantity(totalQuantity);
+            bill.setDiscountAmount(discountAmount);
             bill.setTotal_checkout(totalCheckout);
+            bill.setShippingFee(shippingFee);
             bill.setName(billInsert.getFullName());
-            bill.setShippingFee(shipFee);
             bill.setPhoneNumber(billInsert.getPhone());
             bill.setEmail(billInsert.getEmail());
             bill.setCreatedAt(LocalDateTime.now());
-            bill.setAddress_shipping(billInsert.getStreet()+", "+billInsert.getWard()+", "+billInsert.getDistrict()+", "+billInsert.getProvince());
+            bill.setUpdatedAt(null);
+            bill.setAddress_shipping(
+                    billInsert.getStreet() + ", " +
+                            billInsert.getWard() + ", " +
+                            billInsert.getDistrict() + ", " +
+                            billInsert.getProvince());
             bill.setNote(billInsert.getNote());
-            bill.setPaymentMethod(paymentMethodRepository.findById(1).orElse(null));
             bill.setTypeBill(true);
             bill.setStatus(1);
-            bill.setCode("HD"+System.currentTimeMillis());
+            bill.setPaymentMethod(paymentMethodRepository.findById(1).orElse(null));
+
+            // ✅ Gán discount nếu có discountId
+            if (billInsert.getDiscountId() != null) {
+                Discount discount = discountRepository.findById(billInsert.getDiscountId()).orElse(null);
+                bill.setDiscount(discount);
+            } else {
+                bill.setDiscount(null);
+            }
             billRepository.save(bill);
-            for(CartDetail cd : cart.getCartDetails()){
+
+            for (CartDetail cd : cart.getCartDetails()) {
                 BillDetails billDetails = new BillDetails();
                 billDetails.setBill(bill);
                 billDetails.setProductDetail(cd.getProductDetail());
@@ -104,15 +131,23 @@ public class BillUserController {
                 billDetails.setTotal_price(cd.getProductDetail().getPrice().multiply(new BigDecimal(cd.getQuantity())));
                 billDetails.setQuantity(cd.getQuantity());
                 billDetailRepository.save(billDetails);
-//                cd.getProductDetail().setQuantity(cd.getProductDetail().getQuantity() - cd.getQuantity());
-                productDetailRepository.save(cd.getProductDetail());
+
+                ProductDetail productDetail = cd.getProductDetail();
+                productDetail.setQuantity(productDetail.getQuantity() - cd.getQuantity());
+                productDetailRepository.save(productDetail);
             }
-            String content = mailServices.buildOrderConfirmationEmailTemplate(bill.getCode(),bill.getCreatedAt().toString(), bill.getTotal_checkout().doubleValue(),
-                    bill.getAddress_shipping(), bill.getNote(), bill.getName(), "thaitvph40872@fpt.edu.vn");
-            mailServices.sendEmail(billInsert.getEmail(),"Đặt hàng thành công", content,false, true);
+
+            String content = mailServices.buildOrderConfirmationEmailTemplate(
+                    bill.getCode(),
+                    bill.getCreatedAt().toString(),
+                    bill.getTotal_checkout().doubleValue(),
+                    bill.getAddress_shipping(),
+                    bill.getNote(),
+                    bill.getName(),
+                    "thaitvph40872@fpt.edu.vn"
+            );
+            mailServices.sendEmail(billInsert.getEmail(), "Đặt hàng thành công", content, false, true);
         }
         return "redirect:/thanhcong";
     }
-
-
 }

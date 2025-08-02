@@ -368,70 +368,6 @@ function toggleRemoveButton() {
     }
 }
 
-$('#customer_search').on('input', function () {
-    const keyword = $(this).val().trim();
-
-    if (keyword.length === 0) {
-        // Trường input trống -> gọi API xóa khách khỏi giỏ hàng
-        $.ajax({
-            url: '/admin/sell-inline/remove-customer-from-cart',
-            method: 'POST',
-            data: {
-                cartId: idCartFromPage
-            },
-            success: function () {
-                console.log("Đã xóa khách khỏi cart");
-            }
-        });
-
-        $("#suggestionBox_Customer").hide();
-        return;
-    }
-
-    // Nếu có ký tự -> tìm kiếm khách hàng
-    $.ajax({
-        url: '/admin/sell-inline/search-customer-inline',
-        method: 'GET',
-        data: { keyword: keyword },
-        success: function (data) {
-            let html = '';
-            data.forEach(customer => {
-                html += `
-                    <div class="p-2 suggestion-item border-bottom" 
-                         data-id="${customer.id}"
-                         data-name="${customer.name + " - "+ customer.phoneNumber}">
-                        <div class="fw-semibold">Họ tên: ${customer.name}</div>
-                        <div class="text-muted small">SĐT: ${customer.phoneNumber}</div>
-                        <div class="text-muted small">Email: ${customer.email}</div>
-                    </div>
-                `;
-            });
-            $('#suggestionBox_Customer').html(html).show();
-        }
-    });
-});
-
-$('#suggestionBox_Customer').on('click', '.suggestion-item', function () {
-    const customerId = $(this).data('id');
-    const customerName = $(this).data('name');
-
-    $('#customer_search').val(customerName);
-    $('#customerId').val(customerId); // lưu lại ID nếu cần submit form
-    $('#suggestionBox_Customer').hide();
-
-    $.ajax({
-        url: '/admin/sell-inline/add-customer-to-cart',
-        method: 'POST',
-        data: {
-            idCart: idCartFromPage,
-            customerId: customerId
-        },
-        success: function () {
-            console.log("Đã gán khách vào cart");
-        }
-    });
-});
-
 document.addEventListener("DOMContentLoaded", function () {
     const toggleSwitch = document.getElementById("toggleDeliveryInfoSwitch");
     const collapseDiv = document.getElementById("deliveryInfo");
@@ -489,3 +425,150 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
+
+//Tìm kh
+$('#customer_search').on('input', function () {
+    const keyword = $(this).val().trim();
+
+    if (keyword.length === 0) {
+        // Trường input trống -> gọi API xóa khách khỏi giỏ hàng
+        $.ajax({
+            url: '/admin/sell-inline/remove-customer-from-cart',
+            method: 'POST',
+            data: {
+                cartId: idCartFromPage
+            },
+            success: function () {
+                console.log("Đã xóa khách khỏi cart");
+            }
+        });
+
+        $("#suggestionBox_Customer").hide();
+        return;
+    }
+
+    // Nếu có ký tự -> tìm kiếm khách hàng
+    $.ajax({
+        url: '/admin/sell-inline/search-customer-inline',
+        method: 'GET',
+        data: { keyword: keyword },
+        success: function (data) {
+            let html = '';
+            data.forEach(customer => {
+                html += `
+                    <div class="p-2 suggestion-item border-bottom" 
+                         data-id="${customer.id}"
+                         data-name="${customer.name + " - "+ customer.phoneNumber}">
+                        <div class="fw-semibold">Họ tên: ${customer.name}</div>
+                        <div class="text-muted small">SĐT: ${customer.phoneNumber}</div>
+<!--                        <div class="text-muted small">Email: ${customer.email}</div> bỏ email --> 
+                    </div>
+                `;
+            });
+            $('#suggestionBox_Customer').html(html).show();
+        }
+    });
+});
+// gắn khách hàng vào cart
+$('#suggestionBox_Customer').on('click', '.suggestion-item', function () {
+    const customerId = $(this).data('id');
+    const customerName = $(this).data('name');
+
+    $('#customer_search').val(customerName);
+    $('#customerId').val(customerId); // lưu lại ID nếu cần submit form
+    $('#suggestionBox_Customer').hide();
+
+    $.ajax({
+        url: '/admin/sell-inline/add-customer-to-cart',
+        method: 'POST',
+        data: {
+            idCart: idCartFromPage,
+            customerId: customerId
+        },
+        success: function () {
+            console.log("Đã gán khách vào cart");
+        }
+    });
+});
+//Thêm khách hàng
+$(document).ready(function () {
+    // Gắn sự kiện submit cho nút "Lưu"
+    $('#addCustomerModal .btn-primary').click(function () {
+        const name = $('#customer_name').val().trim();
+        const phone = $('#customer_phone').val().trim();
+
+        if (name === '' || phone === '') {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Thiếu thông tin',
+                text: 'Vui lòng nhập đầy đủ tên và số điện thoại!'
+            });
+            return;
+        }
+
+        $.ajax({
+            url: '/admin/sell-inline/add-customer',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                name: name,
+                phoneNumber: phone
+            }),
+            success: function (response) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Đã thêm khách hàng!',
+                    toast: true,
+                    position: 'top-end',
+                    timer: 1000,
+                    showConfirmButton: false
+                });
+
+                const modalEl = document.getElementById('addCustomerModal');
+                const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                modalInstance.hide();
+
+                // Remove backdrop nếu còn sót
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open');
+
+                // Reset form
+                $('#addCustomerForm')[0].reset();
+
+                // Ẩn modal
+                $('#addCustomerModal').modal('hide');
+                $.ajax({
+                    url: '/admin/sell-inline/add-customer-to-cart',
+                    method: 'POST',
+                    data: {
+                        idCart: idCartFromPage,
+                        customerId: response.id
+                    },
+                    success: function () {
+                        console.log("Khách mới đã được gắn vào cart");
+
+                        // Gán tên khách vào input hiển thị
+                        $('#customer_search').val(response.name);
+                        $('#customerId').val(response.id);
+
+                        setTimeout(function () {
+                            location.reload();
+                        }, 1000);
+                    }
+                });
+            },
+            error: function (xhr) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: xhr.responseText || 'Đã có lỗi xảy ra',
+                    toast: true,
+                    position: 'top-end',
+                    timer: 1000,
+                    showConfirmButton: false
+                });
+            }
+        });
+    });
+});
+

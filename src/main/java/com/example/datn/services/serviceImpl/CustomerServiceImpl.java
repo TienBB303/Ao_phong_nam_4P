@@ -261,4 +261,37 @@ public class CustomerServiceImpl implements CustomerService {
     public List<Customer> searchCustomerInline(String keyword) {
         return customerRepository.searchCustomerByKeywordInline(keyword);
     }
+
+    public Boolean khachHangTonTaiInline(String name, String phoneNumber){
+        Customer customer = customerRepository.searchCustomerExistNameOrPhoneInline(name, phoneNumber);
+        if(customer != null){
+            return true;
+        } else {
+            return false;
+        }
+    }
+    @Override
+    public Customer createCustomerInline(com.example.datn.dto.selling_inline.CustomerDto customerDto) throws Exception{
+        Customer customer = new Customer();
+        if(khachHangTonTaiInline(customerDto.getName(), customerDto.getPhoneNumber())){
+            throw new Exception("Khách hàng đã tồn tại!");
+        }
+        if (customerDto.getPhoneNumber().isEmpty() || customerDto.getPhoneNumber().trim().equals("")){
+            throw new Exception("Không được để trống số điện thoại khách hàng!");
+        }
+        if (customerDto.getName().isEmpty() ||customerDto.getName().trim().equals("")){
+            throw new Exception("Không được để trống tên khách hàng!");
+        }
+        String phone = customerDto.getPhoneNumber().replaceAll("\\s+", "");
+        if (!phone.trim().matches("^\\d{9,11}$")) {
+            throw new Exception("Số điện thoại phải có từ 9 đến 11 chữ số!");
+        }
+        customer.setCode(generateCustomerCode());
+        customer.setName(customerDto.getName().trim());
+        customer.setPhoneNumber(phone.trim());
+        customer.setIsActive(true);
+        return customerRepository.save(customer);
+    }
+
+
 }
