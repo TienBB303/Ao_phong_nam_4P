@@ -20,38 +20,38 @@ public class TrackingController {
     @Autowired
     BillService billService;
 
-//    @GetMapping("/tracking")
-//    public String trackingBill(@RequestParam(name = "code", required = false) String code, Model model) {
-//        if (code != null && !code.isBlank()) {
-//            Boolean targetTypeBill = true;
-//
-//            Bill bill = billService.findByCodeAndTypeBill(code.trim(), targetTypeBill);
-//            if (bill != null) {
-//                model.addAttribute("bill", bill);
-//
-//
-//                List<BillDetails> billDetailsList = bill.getBillDetails();
-//
-//                BigDecimal total = BigDecimal.ZERO;
-//                if (billDetailsList != null) {
-//                    for (BillDetails detail : billDetailsList) {
-//                        if (detail.getPrice() != null && detail.getQuantity() != null) {
-//                            total = total.add(detail.getPrice().multiply(new BigDecimal(detail.getQuantity())));
-//                        }
-//                    }
-//                }
-//
-//                model.addAttribute("billDetails", billDetailsList);
-//                model.addAttribute("total", total);
-//
-//            } else {
-//                model.addAttribute("notFound", true);
-//                model.addAttribute("searchCode", code);
-//                model.addAttribute("bill", null);
-//            }
-//        }
-//        return "user/tracking-order";
-//    }
+    @GetMapping("/tracking")
+    public String trackingBill(@RequestParam(name = "code", required = false) String code, Model model) {
+        if (code != null && !code.isBlank()) {
+            Boolean targetTypeBill = true;
+
+            Bill bill = billService.findByCodeAndTypeBill(code.trim(), targetTypeBill);
+            if (bill != null) {
+                model.addAttribute("bill", bill);
+
+
+                List<BillDetails> billDetailsList = bill.getBillDetails();
+
+                BigDecimal total = BigDecimal.ZERO;
+                if (billDetailsList != null) {
+                    for (BillDetails detail : billDetailsList) {
+                        if (detail.getPrice() != null && detail.getQuantity() != null) {
+                            total = total.add(detail.getPrice().multiply(new BigDecimal(detail.getQuantity())));
+                        }
+                    }
+                }
+
+                model.addAttribute("billDetails", billDetailsList);
+                model.addAttribute("total", total);
+
+            } else {
+                model.addAttribute("notFound", true);
+                model.addAttribute("searchCode", code);
+                model.addAttribute("bill", null);
+            }
+        }
+        return "user/tracking-order";
+    }
 
 
     @GetMapping("/update-bill-status/{billId}")
@@ -75,7 +75,7 @@ public class TrackingController {
             Bill bill = billService.getOne(billId);
             if (bill.getStatus() != 1 && bill.getStatus() != 2) {
                 redirectAttributes.addFlashAttribute("error",
-                        "Huỷ đơn hàng thất bại.");
+                        "Huỷ đơn hàng thất bại");
                 return "redirect:/tracking?code=" + code;
             }
 
