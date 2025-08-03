@@ -92,18 +92,24 @@
 
         function handleDiscountTypeChange() {
             const percentRadio = document.querySelector('input[name="discountType"][value="percent"]');
+            const discountInput = document.getElementById('discountValue');
             const maxDiscountInput = document.getElementById('maxDiscount');
+            const maxDiscountGroup = maxDiscountInput.closest('.form-group'); // 👉 THÊM DÒNG NÀY
 
             if (percentRadio.checked) {
-                // Nếu là phần trăm, yêu cầu nhập số tiền tối đa
-                maxDiscountInput.disabled = false;
+                discountInput.setAttribute('min', '1');
+                discountInput.setAttribute('max', '100');
             } else {
-                // Nếu là giảm theo tiền, thì disable và reset giá trị
-                maxDiscountInput.disabled = true;
-                maxDiscountInput.value = '';
-                clearError(maxDiscountInput); // xoá lỗi nếu có
+                discountInput.removeAttribute('min');
+                discountInput.removeAttribute('max');
+            }
+
+            maxDiscountInput.disabled = false;
+            if (maxDiscountGroup) {
+                maxDiscountGroup.style.display = 'block';
             }
         }
+
 
 
         function showError(input, message) {
