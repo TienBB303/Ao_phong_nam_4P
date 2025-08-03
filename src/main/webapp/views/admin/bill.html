@@ -37,6 +37,8 @@
                                     <option value="3" th:selected="${status == 3}">Đang giao</option>
                                     <option value="4" th:selected="${status == 4}">Hoàn thành</option>
                                     <option value="5" th:selected="${status == 5}">Đã huỷ</option>
+                                    <option value="6" th:selected="${status == 6}">Giao hàng thất bại</option>
+
                                 </select>
                             </div>
                             <div class="col">
@@ -93,7 +95,7 @@
                                    <span th:case="3">Đang giao</span>
                                    <span th:case="4">Hoàn thành</span>
                                    <span th:case="5">Đã huỷ</span>
-                                   <span th:case="6">Không rõ</span>
+                                   <span th:case="6">Giao hàng thất bại</span>
                                  </span>
                             </td>
                             <td>
@@ -120,6 +122,6 @@
 
 </div>
 
-<header th:replace="~{admin/fragments/footer :: footer}"></header>
+<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
 </body>
 </html>

@@ -5,6 +5,8 @@
 
 <head>
     <title></title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
 </head>
 <body>
 <div layout:fragment="content">
@@ -19,40 +21,56 @@
             <span th:case="3" class="text-info">Đang giao</span>
             <span th:case="4" class="text-success">Hoàn thành</span>
             <span th:case="5" class="text-danger">Đã huỷ</span>
-            <span th:case="*" class="text-muted">Không rõ</span>
+            <span th:case="6" class="text-danger">Giao hàng thất bại</span>
+            <span th:case="*" class="text-muted">Không xác định</span>
         </span>
     </span>
 
             <!-- Các nút hành động, ẩn nếu đã hoàn thành hoặc huỷ -->
             <div class="d-flex justify-content-end gap-2 mt-3" th:if="${bill.status != 4 and bill.status != 5}">
                 <!-- Nút hủy đơn: Trạng thái 1 hoặc 2 -->
-                <a th:if="${bill.status == 1 or bill.status == 2}"
-                   th:href="@{'/admin/bill/update-bill-status/' + ${bill.id} + '?trangThaiDonHang=5'}"
-                   class="btn btn-outline-danger"
-                   onclick="return confirm('Bạn có chắc muốn huỷ đơn hàng này không?');">
-                    ❌ Hủy đơn này
-                </a>
+                <button th:if="${bill.status == 1 or bill.status == 2 or bill.status == 6}"
+                        class="btn btn-outline-danger"
+                        data-bs-toggle="modal"
+                        data-bs-target="#noteModal"
+                        th:onclick="|prepareStatusUpdate(${bill.id}, 5, 'Huỷ đơn hàng')|">
+                    ❌ Huỷ đơn
+                </button>
 
                 <!-- Nút xác nhận: trạng thái 1 -->
-                <a th:if="${bill.status == 1}"
-                   th:href="@{'/admin/bill/update-bill-status/' + ${bill.id} + '?trangThaiDonHang=2'}"
-                   class="btn btn-outline-secondary">
+                <button th:if="${bill.status == 1}"
+                        class="btn btn-outline-secondary"
+                        data-bs-toggle="modal"
+                        data-bs-target="#noteModal"
+                        th:onclick="|prepareStatusUpdate(${bill.id}, 2, 'Xác nhận duyệt đơn')|">
                     ✔️ Xác nhận, duyệt đơn
-                </a>
+                </button>
 
                 <!-- Nút xác nhận giao hàng: trạng thái 2 -->
-                <a th:if="${bill.status == 2}"
-                   th:href="@{'/admin/bill/update-bill-status/' + ${bill.id} + '?trangThaiDonHang=3'}"
-                   class="btn btn-outline-primary">
+                <button th:if="${bill.status == 2}"
+                        class="btn btn-outline-primary"
+                        data-bs-toggle="modal"
+                        data-bs-target="#noteModal"
+                        th:onclick="|prepareStatusUpdate(${bill.id}, 3, 'Xác nhận giao hàng')|">
                     🚚 Xác nhận giao hàng
-                </a>
+                </button>
 
                 <!-- Nút xác nhận hoàn thành: trạng thái 3 -->
-                <a th:if="${bill.status == 3}"
-                   th:href="@{'/admin/bill/update-bill-status/' + ${bill.id} + '?trangThaiDonHang=4'}"
-                   class="btn btn-outline-success">
+                <button th:if="${bill.status == 3}"
+                        class="btn btn-outline-success"
+                        data-bs-toggle="modal"
+                        data-bs-target="#noteModal"
+                        th:onclick="|prepareStatusUpdate(${bill.id}, 4, 'Xác nhận hoàn thành')|">
                     ✅ Đã giao thành công
-                </a>
+                </button>
+                <button th:if="${bill != null and bill.status == 3}"
+                        class="btn btn-outline-danger"
+                        data-bs-toggle="modal"
+                        data-bs-target="#noteModal"
+                        th:onclick="|prepareStatusUpdate(${bill.id}, 6, 'Giao hàng thất bại')|">
+                    🚫 Giao hàng thất bại
+                </button>
+
             </div>
         </div>
 
@@ -64,6 +82,11 @@
             <p class="text-muted mb-1">Email: 4PStore@gmail.com</p>
             <p class="text-muted mb-0">SDT: 0398121210</p>
         </div>
+        <a th:href="@{/admin/bill/history/{id}(id=${bill.id})}"
+           class="btn btn-outline-secondary btn-sm"
+           title="Xem lịch sử trạng thái">
+            <i class="bi bi-clock-history"></i> Lịch sử
+        </a>
 <hr>
         <!-- Thông tin khách hàng & hóa đơn -->
         <div class="row mb-4">
@@ -155,6 +178,38 @@
         </div>
     </div>
         </div>
+    <div class="modal fade" id="noteModal" tabindex="-1" aria-labelledby="noteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form id="noteForm" method="get">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="noteModalLabel">Ghi chú cho trạng thái</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="trangThaiDonHang" id="statusInput">
+                        <div class="mb-3">
+                            <label for="noteInput" class="form-label">Ghi chú:</label>
+                            <textarea class="form-control" id="noteInput" name="note" rows="3" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Cập nhật</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function prepareStatusUpdate(billId, status, statusLabel) {
+            const form = document.getElementById("noteForm");
+            form.action = `/admin/bill/update-bill-status/${billId}`; // đảm bảo là POST
+            document.getElementById("statusInput").value = status;
+            document.getElementById("noteModalLabel").textContent = "Ghi chú cho trạng thái: " + statusLabel;
+            document.getElementById("noteInput").value = '';
+        }
+    </script>
 </div>
 
 <footer th:replace="~{admin/fragments/footer :: footer}"></footer>
