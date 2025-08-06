@@ -53,6 +53,7 @@ public class RevenueController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
 
         List<RevenueStatsDto> stats = revenueService.getRevenueByDateRange(startDate, endDate);
+        System.out.println("Returned stats size: " + stats.size());
         return ResponseEntity.ok(stats);
     }
 
@@ -65,6 +66,8 @@ public class RevenueController {
             @RequestParam(defaultValue = "2024") int year) {
 
         List<RevenueStatsDto> stats = revenueService.getRevenueByMonth(year);
+        System.out.println("API Called: /api/monthly?year=" + year);
+        System.out.println("Returned stats size: " + stats.size());
         return ResponseEntity.ok(stats);
     }
 
