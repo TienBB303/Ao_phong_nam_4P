@@ -107,12 +107,13 @@ public class SellingInlineController {
             model.addAttribute("customerName",customerName);
         }
 
-        Integer numberItemInCart = countItemInCart(idCart);
-        Integer allItemInCart = countAllItemInCart(idCart);
-        BigDecimal totalPriceInCart = totalPriceInCart(idCart);
-        List<Discount> discountCanApply = listDiscountCanApply(totalPriceInCart);
-        BigDecimal totalPriceDiscount = cart.getDiscountAmount();
-        BigDecimal totalPriceCheckOut = cart.getTotal_checkout();
+        Integer numberItemInCart = countItemInCart(idCart);                                     // số lượng các sản phẩm trong hóa đơn hiện tại
+        Integer allItemInCart = countAllItemInCart(idCart);                                     // tổng tất cả sản phẩm chi tiết trong hóa đơn
+        BigDecimal totalPriceInCart = totalPriceInCart(idCart);                                 // tổng tiền của tất cả sp trong hóa đơn
+        List<Discount> discountCanApply = listDiscountCanApply(totalPriceInCart);               // hiện các mã được áp dụng
+        BigDecimal totalPriceDiscount = cart.getDiscountAmount();                               // tổng tiền được giảm giá
+        BigDecimal totalPriceCheckOut = cart.getTotal_checkout();                               // tổng tiền của hóa đơn
+        // ship
         String nameShip = cart.getName();
         String phoneShip = cart.getPhoneNumber();
         String addressShip = cart.getAddress_shipping();
@@ -127,6 +128,7 @@ public class SellingInlineController {
         model.addAttribute("discountCanApply",discountCanApply);
         model.addAttribute("totalPriceDiscount",totalPriceDiscount);
         model.addAttribute("totalPriceCheckOut",totalPriceCheckOut);
+        // ship
         model.addAttribute("nameShip",nameShip);
         model.addAttribute("phoneShip",phoneShip);
         model.addAttribute("addressShip",addressShip);
@@ -282,8 +284,19 @@ public class SellingInlineController {
     public ResponseEntity<?> addCustomertoCart(@RequestParam("idCart") Integer idCart,
                                                @RequestParam("customerId") Integer customerId) {
         try {
-            billService.addCustomerToCart(idCart, customerId);
-            return ResponseEntity.ok("Thành công");
+            Customer customer = billService.addCustomerToCart(idCart, customerId);
+
+            String address = "";
+            if (customer.getAddresses() != null && !customer.getAddresses().isEmpty()) {
+                address = customer.getAddresses().get(0).getAddressDetail();
+            }
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("name", customer.getName());
+            response.put("phone", customer.getPhoneNumber());
+            response.put("address", address);
+
+            return ResponseEntity.ok(response);
         }catch (Exception e){
             throw new RuntimeException(e);
         }
@@ -305,16 +318,28 @@ public class SellingInlineController {
     public ResponseEntity<?> delivery(@RequestParam("cartId") Integer cartId,
                                       @RequestParam("isDelivery") boolean isDelivery,
                                       @RequestParam("nameD") String nameD,
-                                      @RequestParam("phoneD")String phoneD,
-                                      @RequestParam("addressD")String addressD,
-                                      @RequestParam(value = "feeD", required = false)BigDecimal feeD ) {
+                                      @RequestParam("phoneD") String phoneD,
+                                      @RequestParam("addressD") String addressD,
+                                      @RequestParam(value = "feeD", required = false) BigDecimal feeD) {
         try {
             billService.delivery(cartId, isDelivery, nameD, phoneD, addressD, feeD);
-            return ResponseEntity.ok("");
+
+            Bill bill = billService.findCartById(cartId);
+
+            BigDecimal totalCheckout = bill.getTotal_checkout();
+
+            return ResponseEntity.ok(Map.of(
+                    "totalCheckout", totalCheckout,
+                    "name", bill.getName(),
+                    "phone", bill.getPhoneNumber(),
+                    "address", bill.getAddress_shipping(),
+                    "fee", bill.getShippingFee()
+            ));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
 
     @PostMapping("/add-customer")
     @ResponseBody
@@ -329,4 +354,5 @@ public class SellingInlineController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
 }
