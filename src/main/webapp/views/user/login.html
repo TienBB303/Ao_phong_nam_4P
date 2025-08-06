@@ -1,0 +1,52 @@
+<!-- templates/user/login.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{user/layout-user.html}">
+<head>
+    <title>Đăng nhập</title>
+</head>
+<body>
+<main layout:fragment="content">
+    <div class="container mt-5 pt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-body p-5">
+                        <h3 class="text-center mb-4">Đăng nhập</h3>
+                        
+                        <!-- Hiển thị thông báo -->
+                        <div th:if="${success}" class="alert alert-success" role="alert">
+                            <span th:text="${success}"></span>
+                        </div>
+                        <div th:if="${error}" class="alert alert-danger" role="alert">
+                            <span th:text="${error}"></span>
+                        </div>
+                        
+                        <form th:action="@{/user/login}" method="post">
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                                <div class="form-text">Nhập email đã đăng ký</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Mật khẩu <span class="text-danger">*</span></label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                                <div class="form-text">Nhập mật khẩu từ email</div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100 mb-3">Đăng nhập</button>
+                            
+                            <div class="text-center">
+                                <p class="mb-0">Chưa có tài khoản? <a href="/user/signup" class="text-decoration-none">Đăng ký</a></p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html> 
