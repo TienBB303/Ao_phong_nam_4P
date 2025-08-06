@@ -81,7 +81,7 @@ public class EmailServiceImpl implements EmailService{
                 + "</div>"
 
                 + "<div style='text-align: center; margin: 30px 0;'>"
-                + "<a href='http://localhost:8080/login' style='background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-right: 10px;'>🔐 Đăng nhập ngay</a>"
+                + "<a href='http://localhost:8080/user/login' style='background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-right: 10px;'>🔐 Đăng nhập ngay</a>"
                 + (resetToken != null ?
                 "<a href='" + buildPasswordResetLink(resetToken) + "' style='background: #28a745; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;'>🔄 Đổi mật khẩu</a>"
                 : "<!-- Link đổi mật khẩu sẽ được bổ sung sau -->")
