@@ -1,106 +1,108 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{user/layout-user.html}">
 <head>
-    <meta charset="UTF-8">
     <title>Trang Bán Áo Phông</title>
 
 
-    <!--CSS -->
-    <link rel="stylesheet" th:href="@{/assets/css/mdb.min.css}">
-    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
-    <link rel="stylesheet" th:href="@{/assets/css/style-preset.css}">
-    <link rel="stylesheet" th:href="@{/assets/css/uikit.css}">
-    <link rel="stylesheet" th:href="@{/assets/css/plugins/landing.css}">
+<!--    &lt;!&ndash;CSS &ndash;&gt;-->
+<!--    <link rel="stylesheet" th:href="@{/assets/css/mdb.min.css}">-->
+<!--    <link rel="stylesheet" th:href="@{/assets/css/style.css}">-->
+<!--    <link rel="stylesheet" th:href="@{/assets/css/style-preset.css}">-->
+<!--    <link rel="stylesheet" th:href="@{/assets/css/uikit.css}">-->
+<!--    <link rel="stylesheet" th:href="@{/assets/css/plugins/landing.css}">-->
 
-    <!-- Font Awesome -->
-    <link
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-            rel="stylesheet"
-    />
-    <style>
-        .carousel-item img {
-            height: 450px;
-            object-fit: cover;
-        }
-    </style>
+<!--    &lt;!&ndash; Font Awesome &ndash;&gt;-->
+<!--    <link-->
+<!--            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"-->
+<!--            rel="stylesheet"-->
+<!--    />-->
+<!--    <style>-->
+<!--        .carousel-item img {-->
+<!--            height: 450px;-->
+<!--            object-fit: cover;-->
+<!--        }-->
+<!--    </style>-->
 
 </head>
 <body>
-<!-- Navbar -->
-<nav class="navbar fixed-top navbar-expand-lg navbar-light bg-white">
-    <!-- Container wrapper -->
-    <div class="container">
-        <!-- Toggle button -->
-        <button
-                class="navbar-toggler"
-                type="button"
-                data-mdb-toggle="collapse"
-                data-mdb-target="#navbarSupportedContent1"
-                aria-controls="navbarSupportedContent1"
-                aria-expanded="false"
-                aria-label="Toggle navigation"
-        >
-            <i class="fas fa-bars"></i>
-        </button>
+<!--&lt;!&ndash; Navbar &ndash;&gt;-->
+<!--<nav class="navbar fixed-top navbar-expand-lg navbar-light bg-white">-->
+<!--    &lt;!&ndash; Container wrapper &ndash;&gt;-->
+<!--    <div class="container">-->
+<!--        &lt;!&ndash; Toggle button &ndash;&gt;-->
+<!--        <button-->
+<!--                class="navbar-toggler"-->
+<!--                type="button"-->
+<!--                data-mdb-toggle="collapse"-->
+<!--                data-mdb-target="#navbarSupportedContent1"-->
+<!--                aria-controls="navbarSupportedContent1"-->
+<!--                aria-expanded="false"-->
+<!--                aria-label="Toggle navigation"-->
+<!--        >-->
+<!--            <i class="fas fa-bars"></i>-->
+<!--        </button>-->
 
-        <!-- Collapsible wrapper -->
-        <div class="collapse navbar-collapse" id="navbarSupportedContent1">
-            <!-- Navbar brand -->
-            <a class="navbar-brand mt-2 mt-sm-0" href="https://mdbootstrap.com/">
-                <img
-                        src=""
-                        height="20"
-                        alt=""
-                        loading="lazy"
-                />
-            </a>
-            <!-- Left links -->
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item active">
-                    <a class="nav-link " th:href="@{/}">Home</a>
-                </li>
-                <li class="nav-item active">
-                    <a class="nav-link" th:href="@{/product}">Product</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="">About </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="">Contact</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="">Blog</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/tracking}">Tra cứu đơn hàng</a>
-                </li>
-            </ul>
-            <!-- Left links -->
-        </div>
-        <!-- Collapsible wrapper -->
+<!--        &lt;!&ndash; Collapsible wrapper &ndash;&gt;-->
+<!--        <div class="collapse navbar-collapse" id="navbarSupportedContent1">-->
+<!--            &lt;!&ndash; Navbar brand &ndash;&gt;-->
+<!--            <a class="navbar-brand mt-2 mt-sm-0" href="https://mdbootstrap.com/">-->
+<!--                <img-->
+<!--                        src=""-->
+<!--                        height="20"-->
+<!--                        alt=""-->
+<!--                        loading="lazy"-->
+<!--                />-->
+<!--            </a>-->
+<!--            &lt;!&ndash; Left links &ndash;&gt;-->
+<!--            <ul class="navbar-nav me-auto mb-2 mb-lg-0">-->
+<!--                <li class="nav-item active">-->
+<!--                    <a class="nav-link " th:href="@{/}">Home</a>-->
+<!--                </li>-->
+<!--                <li class="nav-item active">-->
+<!--                    <a class="nav-link" th:href="@{/product}">Product</a>-->
+<!--                </li>-->
+<!--                <li class="nav-item">-->
+<!--                    <a class="nav-link" href="">About </a>-->
+<!--                </li>-->
+<!--                <li class="nav-item">-->
+<!--                    <a class="nav-link" href="">Contact</a>-->
+<!--                </li>-->
+<!--                <li class="nav-item">-->
+<!--                    <a class="nav-link" href="">Blog</a>-->
+<!--                </li>-->
+<!--                <li class="nav-item">-->
+<!--                    <a class="nav-link" th:href="@{/tracking}">Tra cứu đơn hàng</a>-->
+<!--                </li>-->
+<!--            </ul>-->
+<!--            &lt;!&ndash; Left links &ndash;&gt;-->
+<!--        </div>-->
+<!--        &lt;!&ndash; Collapsible wrapper &ndash;&gt;-->
 
-        <!-- Right elements -->
-        <div class="d-flex align-items-center gap-3">
-            <div class="d-flex align-items-center gap-2">
-                <a href="#" class="text-dark text-decoration-none">Đăng nhập</a>
-                <span class="text-muted">/</span>
-                <a href="#" class="text-dark text-decoration-none">Đăng ký</a>
-            </div>
+<!--        &lt;!&ndash; Right elements &ndash;&gt;-->
+<!--        <div class="d-flex align-items-center gap-3">-->
+<!--            <div class="d-flex align-items-center gap-2">-->
+<!--                <a href="#" class="text-dark text-decoration-none">Đăng nhập</a>-->
+<!--                <span class="text-muted">/</span>-->
+<!--                <a href="#" class="text-dark text-decoration-none">Đăng ký</a>-->
+<!--            </div>-->
 
-            <a class="nav-link position-relative" href="/cart">
-                <i class="fas fa-shopping-cart fa-lg"></i>
-                <span class="badge bg-danger position-absolute top-0 start-100 translate-middle rounded-pill"></span>
-            </a>
-        </div>
+<!--            <a class="nav-link position-relative" href="/cart">-->
+<!--                <i class="fas fa-shopping-cart fa-lg"></i>-->
+<!--                <span class="badge bg-danger position-absolute top-0 start-100 translate-middle rounded-pill"></span>-->
+<!--            </a>-->
+<!--        </div>-->
 
-        <!-- Right elements -->
+<!--        &lt;!&ndash; Right elements &ndash;&gt;-->
 
-    </div>
-    <!-- Container wrapper -->
-</nav>
+<!--    </div>-->
+<!--    &lt;!&ndash; Container wrapper &ndash;&gt;-->
+<!--</nav>-->
 <!-- Navbar -->
 
 <!-- carousel -->
+<main layout:fragment="content">
 <div id="carouselExampleCaptions" class="carousel slide carousel-fade mt-5" data-mdb-ride="carousel">
     <div class="carousel-inner">
         <div class="carousel-item active">
@@ -133,7 +135,7 @@
 <!--        </div>-->
 <!--    </div>-->
 <!--</nav>-->
-
+    <!-- Bộ lọc tìm kiếm -->
 <section class="container my-4">
     <form method="get" class="row g-3">
         <div class="col-md-3">
@@ -200,7 +202,7 @@
         </div>
     </div>
 </section>
-
+    <!-- Phân trang -->
 <nav th:if="${listProduct.totalPages > 0}">
     <ul class="pagination justify-content-center mt-4">
 
@@ -316,15 +318,15 @@
     <!-- Copyright -->
 </footer>
 <!--  JS -->
-<script th:src="@{/assets/js/mdb.es.min.js}"></script>
-<script th:src="@{/assets/js/mdb.umd.min.js}"></script>
+<!--<script th:src="@{/assets/js/mdb.es.min.js}"></script>-->
+<!--<script th:src="@{/assets/js/mdb.umd.min.js}"></script>-->
 
-<!-- Các plugin JS -->
-<script th:src="@{/assets/js/plugins/component.js}"></script>
-<script th:src="@{/assets/js/plugins/pcoded.js}"></script>
-<script th:src="@{/assets/js/plugins/layout-tab.js}"></script>
-<script th:src="@{/assets/js/plugins/layout-horizontal.js}"></script>
-<script th:src="@{/assets/js/plugins/layout-compact.js}"></script>
-
+<!--&lt;!&ndash; Các plugin JS &ndash;&gt;-->
+<!--<script th:src="@{/assets/js/plugins/component.js}"></script>-->
+<!--<script th:src="@{/assets/js/plugins/pcoded.js}"></script>-->
+<!--<script th:src="@{/assets/js/plugins/layout-tab.js}"></script>-->
+<!--<script th:src="@{/assets/js/plugins/layout-horizontal.js}"></script>-->
+<!--<script th:src="@{/assets/js/plugins/layout-compact.js}"></script>-->
+</main>
 </body>
 </html>
