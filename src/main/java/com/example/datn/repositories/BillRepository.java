@@ -40,10 +40,6 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
             "WHERE b.code = :code AND b.typeBill = :targetTypeBill")
     Bill findByCodeWithAllDetailsAndTypeBill(@Param("code") String code, @Param("targetTypeBill") Boolean targetTypeBill);
 
-
-
-
-
     @Query("SELECT b FROM Bill b " +
             "WHERE (:code IS NULL OR b.code LIKE %:code%) " +
             "AND (:name IS NULL OR b.name LIKE %:name%) " +

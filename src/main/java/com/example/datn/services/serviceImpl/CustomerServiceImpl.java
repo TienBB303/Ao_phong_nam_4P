@@ -183,19 +183,19 @@ public class CustomerServiceImpl implements CustomerService {
             address.setWardName(addressDto.getWardName());
             address.setReceiverName(addressDto.getReceiverName());
             address.setReceiverPhoneNumber(addressDto.getReceiverPhoneNumber());
-            
+
             // Xử lý checkbox isDefault
             Boolean isDefault = addressDto.getIsDefault();
             if (isDefault == null) {
                 isDefault = false;
             }
             address.setIsDefault(isDefault);
-            
+
             // Nếu chọn là mặc định, update các địa chỉ khác về không mặc định
             if (isDefault) {
                 shippingAddressRepository.updateAllDefaultFalseByCustomerId(existing.getId());
             }
-            
+
             // Debug log
             System.out.println("Updating address isDefault: " + isDefault);
 
@@ -247,16 +247,16 @@ public class CustomerServiceImpl implements CustomerService {
         String rawPassword = generateRandomPassword();
         String encodedPassword = passwordEncoder.encode(rawPassword);
         account.setPassword(encodedPassword);
-        
+
         // Set role cho khách hàng
         Role role = roleRepository.findByName("ROLE_CUSTOMER")
                 .orElseThrow(() -> new RuntimeException("Role ROLE_CUSTOMER không tồn tại!"));
         account.setRole(role);
-        
+
         // Set trạng thái ban đầu là false (chưa đổi mật khẩu)
         account.setStatus(false);
         account.setCreatedAt(java.time.LocalDateTime.now());
-        
+
         accountRepository.save(account);
 
         // Tạo địa chỉ nếu có
@@ -345,7 +345,7 @@ public class CustomerServiceImpl implements CustomerService {
     public void updatePassword(Integer accountId, String newPassword) {
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại"));
-        
+
         String encodedPassword = passwordEncoder.encode(newPassword);
         account.setPassword(encodedPassword);
         account.setUpdatedAt(java.time.LocalDateTime.now());
@@ -357,7 +357,7 @@ public class CustomerServiceImpl implements CustomerService {
     public void updateAccountStatus(Integer accountId, boolean status) {
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại"));
-        
+
         account.setStatus(status);
         account.setUpdatedAt(java.time.LocalDateTime.now());
         accountRepository.save(account);

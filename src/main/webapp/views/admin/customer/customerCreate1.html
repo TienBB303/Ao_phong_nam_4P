@@ -189,7 +189,7 @@
         var checkBox = document.getElementById("otherReceiver");
         var form = document.getElementById("receiverForm");
         form.style.display = checkBox.checked ? "block" : "none";
-        
+
         // Clear form fields when unchecking
         if (!checkBox.checked) {
             document.querySelector('[name="address.receiverName"]').value = '';

@@ -37,7 +37,7 @@ public interface CustomerService {
     // ✅ Xóa mềm khách hàng (set isActive = false)
     void softDeleteCustomer(Integer id);
 
-// Thêm địa chỉ cho khách hàng
+    // Thêm địa chỉ cho khách hàng
     ShippingAddress createAddressForCustomer(Integer customerId, AddressDto addressDto);
 
     // Đếm tổng số khách hàng (phục vụ phân trang)
@@ -45,7 +45,7 @@ public interface CustomerService {
     List<Customer> searchCustomerInline(String keyword);
 
     Customer createCustomerInline(com.example.datn.dto.selling_inline.CustomerDto dto) throws Exception;
-    
+
     // Các phương thức cho user authentication
     boolean existsByEmail(String email);
     com.example.datn.entities.Account authenticateUser(String email, String password);
