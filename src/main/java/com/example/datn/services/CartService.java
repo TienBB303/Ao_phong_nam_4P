@@ -1,5 +1,6 @@
 package com.example.datn.services;
 
+import com.example.datn.entities.Account;
 import com.example.datn.entities.Discount;
 import com.example.datn.entities.Selling.Cart;
 import com.example.datn.entities.Selling.CartDetail;
@@ -356,57 +357,63 @@ public class CartService {
 // =======
     // ban hang online ne ca nhom :D
 
-    public void addProductOnlineToCart(Integer cartId, Integer productDetailId, Integer quantity) throws Exception {
+    public void addProductOnlineToCart(Integer cartId, Integer productDetailId, Integer quantity, Account account) throws Exception {
+        // Lấy thông tin giỏ hàng
         Cart cart = cartRepository.findByIdCart(cartId);
+        if (cart == null) {
+            throw new Exception("Giỏ hàng không tồn tại");
+        }
+
         ProductDetail productDetail = productDetailRepository.findProductDetailById(productDetailId);
-        CartDetail itemExisted = cartDetailRepositoty.findByCartAndProductDetailId(cartId, productDetailId);
+        if (productDetail == null) {
+            throw new Exception("Sản phẩm không tồn tại");
+        }
 
         if (productDetail.getQuantity() < quantity) {
             throw new Exception("Sản phẩm " + productDetail.getProduct().getName() +
-                    " (" + productDetail.getColor().getName() + "-" + productDetail.getSize().getCode() + ")" +
+                    " (" + productDetail.getColor().getName() + " - " + productDetail.getSize().getCode() + ")" +
                     " không đủ hàng (tồn kho: " + productDetail.getQuantity() + ")");
         }
 
-        if (itemExisted != null) {
-            int newQuantity = itemExisted.getQuantity() + quantity;
+        CartDetail existingItem = cartDetailRepositoty.findByCartAndProductDetailId(cartId, productDetailId);
 
-            itemExisted.setQuantity(newQuantity);
-            itemExisted.setTotal_price(productDetail.getPrice().multiply(BigDecimal.valueOf(newQuantity)));
-
-//            productDetail.setQuantity(productDetail.getQuantity() - quantity);
-//
-//            productDetailRepository.save(productDetail);
-            cartDetailRepositoty.save(itemExisted);
+        if (existingItem != null) {
+            int newQuantity = existingItem.getQuantity() + quantity;
+            existingItem.setQuantity(newQuantity);
+            existingItem.setTotal_price(productDetail.getPrice().multiply(BigDecimal.valueOf(newQuantity)));
+            cartDetailRepositoty.save(existingItem);
         } else {
-            CartDetail cartDetail = new CartDetail();
-            cartDetail.setCart(cart);
-            cartDetail.setProductDetail(productDetail);
-            cartDetail.setQuantity(quantity);
-            cartDetail.setPrice(productDetail.getPrice());
-            cartDetail.setTotal_price(productDetail.getPrice().multiply(BigDecimal.valueOf(quantity)));
-
-//            productDetail.setQuantity(productDetail.getQuantity() - quantity);
-//
-//            productDetailRepository.save(productDetail);
-            cartDetailRepositoty.save(cartDetail);
+            CartDetail newItem = new CartDetail();
+            newItem.setCart(cart);
+            newItem.setProductDetail(productDetail);
+            newItem.setQuantity(quantity);
+            newItem.setPrice(productDetail.getPrice());
+            newItem.setTotal_price(productDetail.getPrice().multiply(BigDecimal.valueOf(quantity)));
+            cartDetailRepositoty.save(newItem);
         }
 
-        List<CartDetail> listCartDetails = cartRepository.findAllCartDetailByCartId(cartId);
-        BigDecimal totalPrice = listCartDetails.stream()
+        List<CartDetail> cartDetails = cartRepository.findAllCartDetailByCartId(cartId);
+        BigDecimal totalPrice = cartDetails.stream()
                 .map(CartDetail::getTotal_price)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        Integer totalQuantity = listCartDetails.stream()
+        int totalQuantity = cartDetails.stream()
                 .mapToInt(CartDetail::getQuantity)
                 .sum();
 
         cart.setTotal_price_cart(totalPrice);
         cart.setTotal_quantity(totalQuantity);
 
+        if (cart.getAccount() == null && account != null) {
+            cart.setAccount(account);
+        }
+
         recalculateCartTotalWithDiscount(cart);
 
         cart.setUpdated_at(new Date());
+
         cartRepository.save(cart);
     }
+
 
     public Integer findDiscountIdByCode(String code) {
         Optional<Discount> optionalDiscount = discountService.findByCode(code.trim());

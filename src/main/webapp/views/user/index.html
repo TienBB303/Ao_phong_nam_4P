@@ -5,14 +5,12 @@
     <title>Trang Bán Áo Phông</title>
 
 
-    <!--CSS -->
     <link rel="stylesheet" th:href="@{/assets/css/mdb.min.css}">
     <link rel="stylesheet" th:href="@{/assets/css/style.css}">
     <link rel="stylesheet" th:href="@{/assets/css/style-preset.css}">
     <link rel="stylesheet" th:href="@{/assets/css/uikit.css}">
     <link rel="stylesheet" th:href="@{/assets/css/plugins/landing.css}">
 
-    <!-- Font Awesome -->
     <link
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
             rel="stylesheet"
@@ -26,11 +24,8 @@
 
 </head>
 <body>
-<!-- Navbar -->
 <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-white">
-    <!-- Container wrapper -->
     <div class="container">
-        <!-- Toggle button -->
         <button
                 class="navbar-toggler"
                 type="button"
@@ -43,9 +38,7 @@
             <i class="fas fa-bars"></i>
         </button>
 
-        <!-- Collapsible wrapper -->
         <div class="collapse navbar-collapse" id="navbarSupportedContent1">
-            <!-- Navbar brand -->
             <a class="navbar-brand mt-2 mt-sm-0" href="https://mdbootstrap.com/">
                 <img
                         src=""
@@ -54,7 +47,6 @@
                         loading="lazy"
                 />
             </a>
-            <!-- Left links -->
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item active">
                     <a class="nav-link " th:href="@{/}">Home</a>
@@ -75,16 +67,17 @@
                     <a class="nav-link" th:href="@{/tracking}">Tra cứu đơn hàng</a>
                 </li>
             </ul>
-            <!-- Left links -->
         </div>
-        <!-- Collapsible wrapper -->
 
-        <!-- Right elements -->
         <div class="d-flex align-items-center gap-3">
-            <div class="d-flex align-items-center gap-2">
-                <a href="#" class="text-dark text-decoration-none">Đăng nhập</a>
-                <span class="text-muted">/</span>
-                <a href="#" class="text-dark text-decoration-none">Đăng ký</a>
+            <div th:if="${username != null}" class="d-flex align-items-center gap-2">
+                <span>Xin chào, <strong th:text="${username}">username</strong></span>
+                <a th:href="@{/logout}" onclick="return confirm('Bạn chắc chắn muốn đăng xuất?')" class="btn btn-sm btn-outline-danger">Đăng xuất</a>
+            </div>
+
+            <div th:if="${username == null}" class="d-flex align-items-center gap-2">
+                <a th:href="@{/login}" class="btn btn-sm btn-outline-primary">Đăng nhập</a>
+                <a th:href="@{/register}" class="btn btn-sm btn-outline-secondary">Đăng ký</a>
             </div>
 
             <a class="nav-link position-relative" href="/cart">
@@ -92,15 +85,9 @@
                 <span class="badge bg-danger position-absolute top-0 start-100 translate-middle rounded-pill"></span>
             </a>
         </div>
-
-        <!-- Right elements -->
-
     </div>
-    <!-- Container wrapper -->
 </nav>
-<!-- Navbar -->
 
-<!-- carousel -->
 <div id="carouselExampleCaptions" class="carousel slide carousel-fade mt-5" data-mdb-ride="carousel">
     <div class="carousel-inner">
         <div class="carousel-item active">
