@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{admin/admin-layout}">
-
-<head>
-    <title></title>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/head :: head}">
+    <title>Quản lý khách hàng | 4PStore</title>
 </head>
 <body>
-<div layout:fragment="content">
+<header th:replace="~{admin/fragments/header :: header}"></header>
+<div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
+
+<section>
     <div class="pc-container">
         <div class="pc-content">
             <!--                <div class="page-header">-->
@@ -65,13 +65,14 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Ngày sinh:</label>
-                        <input type="date" name="birthday" th:value="${#temporals.format(customerDto.birthday, 'yyyy-MM-dd')}" class="form-control" required/>
+                        <input type="date" name="birthday" th:value="${customerDto.birthday != null} ? ${#temporals.format(customerDto.birthday, 'yyyy-MM-dd')} : ''" class="form-control" required/>                        <div class="text-danger" th:if="${#fields.hasErrors('birthday')}" th:errors="*{birthday}"></div>
                     </div>
                     <div class="mb-3">
                         <label for="email" class="form-label">Email</label>
                         <input type="email" id="email" th:field="*{email}" class="form-control" required>
                         <div class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
                     </div>
+
                     <div class="mb-3">
                         <label for="phoneNumber" class="form-label">Số điện thoại</label>
                         <input type="tel" id="phoneNumber" th:field="*{phoneNumber}" class="form-control" required>
@@ -117,7 +118,7 @@
                         </div>
                     </div>
                     <div class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" id="isDefault" th:field="*{address.isDefault}">
+                        <input class="form-check-input" type="checkbox" id="isDefault" th:field="*{address.isDefault}" th:checked="${customerDto.address.isDefault == true}">
                         <label class="form-check-label" for="isDefault">
                             Đặt làm địa chỉ mặc định
                         </label>
@@ -226,6 +227,12 @@
         var checkBox = document.getElementById("otherReceiver");
         var form = document.getElementById("receiverForm");
         form.style.display = checkBox.checked ? "block" : "none";
+        
+        // Clear form fields when unchecking
+        if (!checkBox.checked) {
+            document.querySelector('[name="address.receiverName"]').value = '';
+            document.querySelector('[name="address.receiverPhoneNumber"]').value = '';
+        }
     }
     $('#province').on('change', function() {
         $('#provinceName').val($("#province option:selected").text());
@@ -240,6 +247,12 @@
     // Bổ sung đoạn này
     $('form').on('submit', function() {
         $('#wardName').val($("#ward option:selected").text());
+        
+        // Đảm bảo checkbox isDefault được submit đúng
+        var isDefaultCheckbox = document.getElementById("isDefault");
+        if (isDefaultCheckbox) {
+            console.log('Submitting isDefault value:', isDefaultCheckbox.checked);
+        }
     });
     document.addEventListener("DOMContentLoaded", function () {
         const form = document.querySelector('form');
@@ -289,12 +302,26 @@
         var receiverPhone = document.querySelector('[name="address.receiverPhoneNumber"]').value;
         var checkBox = document.getElementById("otherReceiver");
         var receiverForm = document.getElementById("receiverForm");
+        
+        // Kiểm tra và hiển thị form người nhận nếu có dữ liệu
         if ((receiverName && receiverName.trim() !== "") || (receiverPhone && receiverPhone.trim() !== "")) {
             checkBox.checked = true;
             receiverForm.style.display = "block";
         } else {
             checkBox.checked = false;
             receiverForm.style.display = "none";
+        }
+        
+        // Đảm bảo checkbox isDefault hiển thị đúng trạng thái
+        var isDefaultCheckbox = document.getElementById("isDefault");
+        if (isDefaultCheckbox) {
+            var isDefaultValue = /*[[${customerDto.address.isDefault}]]*/ false;
+            isDefaultCheckbox.checked = isDefaultValue === true;
+            
+            // Thêm event listener để debug
+            isDefaultCheckbox.addEventListener('change', function() {
+                console.log('isDefault checkbox changed to:', this.checked);
+            });
         }
     });
     provinceSelect.addEventListener('change', () => {
@@ -333,6 +360,5 @@
             });
     });
 </script>
-</div>
 </body>
 </html>

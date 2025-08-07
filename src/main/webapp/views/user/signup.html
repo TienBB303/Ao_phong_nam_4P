@@ -1,0 +1,58 @@
+<!-- templates/user/signup.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{user/layout-user.html}">
+<head>
+    <title>Đăng ký tài khoản</title>
+</head>
+<body>
+<main layout:fragment="content">
+    <div class="container mt-5 pt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-body p-5">
+                        <h3 class="text-center mb-4">Đăng ký tài khoản</h3>
+                        
+                        <!-- Hiển thị thông báo -->
+                        <div th:if="${success}" class="alert alert-success" role="alert">
+                            <span th:text="${success}"></span>
+                        </div>
+                        <div th:if="${error}" class="alert alert-danger" role="alert">
+                            <span th:text="${error}"></span>
+                        </div>
+                        
+                        <form th:action="@{/user/signup}" method="post" th:object="${customerDto}">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="name" name="name" th:field="*{name}" required>
+                                <div class="form-text">Vui lòng nhập họ và tên đầy đủ</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" id="email" name="email" th:field="*{email}" required>
+                                <div class="form-text">Mật khẩu sẽ được gửi đến email này</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="phoneNumber" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                                <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" th:field="*{phoneNumber}" required>
+                                <div class="form-text">Vui lòng nhập số điện thoại hợp lệ</div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100 mb-3">Đăng ký</button>
+                            
+                            <div class="text-center">
+                                <p class="mb-0">Đã có tài khoản? <a href="/user/login" class="text-decoration-none">Đăng nhập</a></p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

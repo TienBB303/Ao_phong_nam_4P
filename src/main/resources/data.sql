@@ -1,0 +1,14 @@
+-- Insert ROLE_CUSTOMER if it doesn't exist
+INSERT INTO role (name) 
+SELECT 'ROLE_CUSTOMER' 
+WHERE NOT EXISTS (SELECT 1 FROM role WHERE name = 'ROLE_CUSTOMER');
+
+-- Insert ROLE_EMPLOYEE if it doesn't exist
+INSERT INTO role (name) 
+SELECT 'ROLE_EMPLOYEE' 
+WHERE NOT EXISTS (SELECT 1 FROM role WHERE name = 'ROLE_EMPLOYEE');
+
+-- Insert ROLE_ADMIN if it doesn't exist
+INSERT INTO role (name) 
+SELECT 'ROLE_ADMIN' 
+WHERE NOT EXISTS (SELECT 1 FROM role WHERE name = 'ROLE_ADMIN'); 

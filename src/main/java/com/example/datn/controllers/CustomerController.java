@@ -175,6 +175,10 @@ public class CustomerController {
             addressDto.setReceiverName(address.getReceiverName() != null ? address.getReceiverName() : "");
             addressDto.setReceiverPhoneNumber(address.getReceiverPhoneNumber() != null ? address.getReceiverPhoneNumber() : "");
             addressDto.setIsDefault(address.getIsDefault() != null ? address.getIsDefault() : false);
+            
+            // Debug log để kiểm tra giá trị
+            System.out.println("Address isDefault: " + address.getIsDefault());
+            System.out.println("AddressDto isDefault: " + addressDto.getIsDefault());
             dto.setAddress(addressDto);
         }
         return dto;

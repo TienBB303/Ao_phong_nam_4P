@@ -1,0 +1,32 @@
+<!-- templates/user/blog.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{user/layout-user.html}">
+<head>
+    <title>Blog</title>
+</head>
+<body>
+<main layout:fragment="content">
+    <div class="container mt-5 pt-5">
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="fas fa-blog me-2"></i>Blog</h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="text-center py-5">
+                            <i class="fas fa-newspaper fa-3x text-primary mb-3"></i>
+                            <h3 class="text-primary">Blog</h3>
+                            <p class="lead">Cập nhật tin tức và xu hướng thời trang</p>
+                            <p class="text-muted">Chúng tôi sẽ cập nhật các bài viết về thời trang sớm nhất.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html> 

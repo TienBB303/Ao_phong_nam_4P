@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -209,7 +210,7 @@ public class BillService {
         cart.setTotalAmount(totalPrice);
         cart.setTotal_quantity(totalQuantity);
 
-        recalculateCartTotalWithDiscount(cart);
+        recalculateCart(cart);
 
         cart.setUpdatedAt(LocalDateTime.now());
         billRepository.save(cart);
@@ -248,7 +249,7 @@ public class BillService {
         cart.setTotalAmount(totalPrice);
         cart.setTotal_quantity(totalQuantity);
 
-        recalculateCartTotalWithDiscount(cart);
+        recalculateCart(cart);
 
         cart.setUpdatedAt(LocalDateTime.now());
         billRepository.save(cart);
@@ -274,7 +275,7 @@ public class BillService {
         cart.setTotalAmount(totalPrice);
         cart.setTotal_quantity(totalQuantity);
 
-        recalculateCartTotalWithDiscount(cart);
+        recalculateCart(cart);
 
         cart.setUpdatedAt(LocalDateTime.now());
         billRepository.save(cart);
@@ -320,51 +321,59 @@ public class BillService {
             discountService.saveDiscount_Cart(currentDiscount); // lưu lại mã cũ
         }
 
-        BigDecimal totalPriceCart = cart.getTotalAmount();
-        if (totalPriceCart == null) {
-            totalPriceCart = BigDecimal.ZERO;
-        }
-
-        BigDecimal discountValue = discount.getDiscountValue();
-        if (discountValue == null) {
-            discountValue = BigDecimal.ZERO;
-        }
-
-        BigDecimal totalDiscount;
-
-        if (discount.getDiscountType().equals("amount")) {
-            totalDiscount = discountValue;
-
-            // Giảm không vượt quá maxDiscount nếu có
-            BigDecimal maxDiscount = discount.getMaxDiscount();
-            if (maxDiscount != null && totalDiscount.compareTo(maxDiscount) > 0) {
-                totalDiscount = maxDiscount;
-            }
-        } else if (discount.getDiscountType().equals("percent")) {
-            totalDiscount = totalPriceCart.multiply(discountValue).divide(BigDecimal.valueOf(100));
-
-            // Giảm không vượt quá maxDiscount nếu có
-            BigDecimal maxDiscount = discount.getMaxDiscount();
-            if (maxDiscount != null && totalDiscount.compareTo(maxDiscount) > 0) {
-                totalDiscount = maxDiscount;
-            }
-        } else {
-            throw new Exception("Loại mã giảm giá không hợp lệ");
-        }
-
-        // Đảm bảo không giảm quá tổng tiền -> tổng discount không âm
-        if (totalDiscount.compareTo(totalPriceCart) > 0) {
-            totalDiscount = totalPriceCart;
-        }
-
-        cart.setDiscountAmount(totalDiscount);
-        cart.setTotal_checkout(totalPriceCart.subtract(totalDiscount));
-
+//        BigDecimal totalPriceCart = cart.getTotalAmount();
+//        if (totalPriceCart == null) {
+//            totalPriceCart = BigDecimal.ZERO;
+//        }
+//
+//        BigDecimal discountValue = discount.getDiscountValue();
+//        if (discountValue == null) {
+//            discountValue = BigDecimal.ZERO;
+//        }
+//
+//        BigDecimal totalDiscount;
+//
+//        if (discount.getDiscountType().equals("amount")) {
+//            totalDiscount = discountValue;
+//
+//            // Giảm không vượt quá maxDiscount nếu có
+//            BigDecimal maxDiscount = discount.getMaxDiscount();
+//            if (maxDiscount != null && totalDiscount.compareTo(maxDiscount) > 0) {
+//                totalDiscount = maxDiscount;
+//            }
+//        } else if (discount.getDiscountType().equals("percent")) {
+//            totalDiscount = totalPriceCart.multiply(discountValue).divide(BigDecimal.valueOf(100));
+//
+//            // Giảm không vượt quá maxDiscount nếu có
+//            BigDecimal maxDiscount = discount.getMaxDiscount();
+//            if (maxDiscount != null && totalDiscount.compareTo(maxDiscount) > 0) {
+//                totalDiscount = maxDiscount;
+//            }
+//        } else {
+//            throw new Exception("Loại mã giảm giá không hợp lệ");
+//        }
+//
+//        // Đảm bảo không giảm quá tổng tiền -> tổng discount không âm
+//        if (totalDiscount.compareTo(totalPriceCart) > 0) {
+//            totalDiscount = totalPriceCart;
+//        }
+//
+//        cart.setDiscountAmount(totalDiscount);
+//        cart.setTotal_checkout(totalPriceCart.subtract(totalDiscount));
+//
+//        cart.setDiscount(discount);
+//        billRepository.save(cart);
+//
+//        discount.setUsageLimit(discount.getUsageLimit() - 1);
+//        discountService.saveDiscount_Cart(discount);
         cart.setDiscount(discount);
-        billRepository.save(cart);
-
-        discount.setUsageLimit(discount.getUsageLimit() - 1);
+        discount.setUsageLimit(discount.getUsageLimit() - 1);               // giảm số lượng của mã giảm
         discountService.saveDiscount_Cart(discount);
+
+        recalculateCart(cart);                                              // gọi hàm tính toán lại tiền
+
+        cart.setUpdatedAt(LocalDateTime.now());                             // cập nhật giờ
+        billRepository.save(cart);
     }
 
     //xóa mã giảm khỏi giỏ
@@ -383,46 +392,61 @@ public class BillService {
         // Xoá discount khỏi cart
         cart.setDiscount(null);
         cart.setDiscountAmount(BigDecimal.ZERO);
-        cart.setTotal_checkout(cart.getTotalAmount());
+        recalculateCart(cart);
         cart.setUpdatedAt(LocalDateTime.now());
         billRepository.save(cart);
     }
 
     //tính toán lại tiền nếu thêm mã  giảm
     public void recalculateCartTotalWithDiscount(Bill cart) {
-        BigDecimal totalPrice = cart.getTotalAmount();
+        BigDecimal totalAmount = cart.getTotalAmount(); // Tổng tiền hàng chưa giảm
         Discount discount = cart.getDiscount();
 
+        BigDecimal discountAmount = BigDecimal.ZERO;
         if (discount != null && discount.getUsageLimit() > 0) {
             BigDecimal discountValue = discount.getDiscountValue() != null ? discount.getDiscountValue() : BigDecimal.ZERO;
 
             if ("percent".equalsIgnoreCase(discount.getDiscountType())) {
-                BigDecimal discountAmount = totalPrice.multiply(discountValue).divide(BigDecimal.valueOf(100));
+                BigDecimal calculated = totalAmount.multiply(discountValue).divide(BigDecimal.valueOf(100));
                 BigDecimal maxDiscount = discount.getMaxDiscount() != null ? discount.getMaxDiscount() : BigDecimal.ZERO;
-
-                if (discountAmount.compareTo(maxDiscount) > 0) {
-                    discountAmount = maxDiscount;
-                }
-                cart.setDiscountAmount(discountAmount);
-
-            } else { // amount
-                cart.setDiscountAmount(discountValue);
+                discountAmount = calculated.min(maxDiscount);
+            } else { // kiểu amount
+                discountAmount = discountValue;
             }
-
-            // Trường hợp tổng tiền bị giảm hết
-            if (cart.getDiscountAmount().compareTo(totalPrice) >= 0) {
-                cart.setTotal_checkout(BigDecimal.ZERO);
-            } else {
-                cart.setTotal_checkout(totalPrice.subtract(cart.getDiscountAmount()));
-            }
-
-        } else {
-            cart.setDiscountAmount(BigDecimal.ZERO);
-            cart.setTotal_checkout(totalPrice);
         }
+
+        cart.setDiscountAmount(discountAmount);
+
+        // Tính lại total_checkout = tiền hàng - giảm giá
+        BigDecimal checkout = totalAmount.subtract(discountAmount);
+        if (checkout.compareTo(BigDecimal.ZERO) < 0) {
+            checkout = BigDecimal.ZERO;                                         // giá tiền tổng nhỏ hơn được giảm -> tiền = 0
+        }
+
+        cart.setTotal_checkout(checkout);
     }
 
-    public void addCustomerToCart(Integer cartId, Integer customerId) throws Exception {
+    public void recalculateCart(Bill cart) throws Exception {
+        // Bước 1: Tính lại tổng tiền sau giảm giá
+        recalculateCartTotalWithDiscount(cart); // cập nhật discountAmount + total_checkout (chưa có ship)
+
+        BigDecimal shippingFee = cart.getShippingFee();
+        BigDecimal finalTotal = cart.getTotal_checkout(); // Lúc này là subtotal
+
+        // Bước 2: Nếu có phí ship thì cộng vào
+        if (shippingFee != null) {
+            if (shippingFee.compareTo(BigDecimal.ZERO) < 0) {
+                throw new Exception("Tiền ship không được âm");
+            }
+            finalTotal = finalTotal.add(shippingFee);
+        }
+
+        // Bước 3: Cập nhật lại tổng tiền thực sự
+        cart.setTotal_checkout(finalTotal);
+        billRepository.save(cart);
+    }
+
+    public Customer  addCustomerToCart(Integer cartId, Integer customerId) throws Exception {
         Bill cart = billRepository.findByIdBill(cartId);
         if (cart == null) {
             throw new Exception("Không tìm thấy giỏ hàng");
@@ -434,7 +458,17 @@ public class BillService {
         }
 
         cart.setCustomer(customer);
+//        if (customer.getName() != null && !customer.getName().trim().isEmpty()) {
+            cart.setName(customer.getName());
+//        }
+//        if (customer.getPhoneNumber() != null && !customer.getPhoneNumber().trim().isEmpty()) {
+            cart.setPhoneNumber(customer.getPhoneNumber());
+//        }
+//        if (customer.getAddresses() != null && !customer.getAddresses().isEmpty()) {
+            cart.setAddress_shipping(customer.getAddresses().get(0).toString());
+//        }
         billRepository.save(cart);
+        return customer;
     }
 
     public void removeCustomerFromCart(Integer cartId) throws Exception {
@@ -490,7 +524,7 @@ public class BillService {
             throw new Exception("Giỏ hàng không tồn tại hoặc đã được thanh toán");
         }
 
-        checkDiscountBelongToCart(cart); // kierm tra discout còn hoạt động không
+        checkDiscountBelongToCart(cart); // kiểm tra discout còn hoạt động không
 
         List<BillDetails> listCartDetails = billRepository.findAllCartDetailByCartId(cartId);
         if (listCartDetails == null || listCartDetails.isEmpty()) {
@@ -521,6 +555,8 @@ public class BillService {
                 throw new Exception("Giao hàng không được để trống số điện thoại");
             } else if (cart.getAddress_shipping() == null || cart.getAddress_shipping().isEmpty() || cart.getAddress_shipping().trim().equals("")) {
                 throw new Exception("Giao hàng không được để trống địa chỉ khách hàng");
+            } else if (cart.getShippingFee().compareTo(BigDecimal.ZERO) < 0) {
+                throw new Exception("Tiền ship không được âm");
             }
         }
 
@@ -529,14 +565,6 @@ public class BillService {
     }
 
     //giao hàng
-    private boolean isBlank(String str) {
-        if (str == null || str.isEmpty() || str.trim().equals("")) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     public void delivery(Integer cartId, boolean isDelivery, String nameD, String phoneD, String addressD, BigDecimal feeD) throws Exception {
         Bill cart = billRepository.findByIdBill(cartId);
         if (cart == null || cart.getStatus() != 9) {
@@ -546,6 +574,20 @@ public class BillService {
         cart.setDelivery_type(isDelivery);
 
         if (cart.getDelivery_type() == true) {
+//            Customer customer = cart.getCustomer();
+//            if (nameD == null || nameD.trim().isEmpty()) {
+//                nameD = (customer != null) ? customer.getName() : "";
+//            }
+//            if (phoneD == null || phoneD.trim().isEmpty()) {
+//                phoneD = (customer != null) ? customer.getPhoneNumber() : "";
+//            }
+//            if (addressD == null || addressD.trim().isEmpty()) {
+//                if (customer != null && customer.getAddresses() != null && !customer.getAddresses().isEmpty()) {
+//                    addressD = customer.getAddresses().get(0).getAddressDetail();
+//                } else {
+//                    addressD = "";
+//                }
+//            }
             cart.setName(nameD);
             cart.setPhoneNumber(phoneD);
             cart.setEmail("");
@@ -558,10 +600,11 @@ public class BillService {
             cart.setAddress_shipping("");
             cart.setShippingFee(BigDecimal.ZERO);
         }
-
+        recalculateCart(cart);
         billRepository.save(cart);
     }
 
+//    ================================Khanh==============================================================================
     public Bill updateStatus(String statusString, Integer id) {
         Bill bill = billRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn có id: " + id));

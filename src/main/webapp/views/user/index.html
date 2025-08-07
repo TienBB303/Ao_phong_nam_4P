@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{user/layout-user.html}">
 <head>
-    <meta charset="UTF-8">
-    <title>Trang Bán Áo Phông</title>
-
-
+    <title>4PStore</title>
     <link rel="stylesheet" th:href="@{/assets/css/mdb.min.css}">
     <link rel="stylesheet" th:href="@{/assets/css/style.css}">
     <link rel="stylesheet" th:href="@{/assets/css/style-preset.css}">
@@ -87,7 +86,7 @@
         </div>
     </div>
 </nav>
-
+<main layout:fragment="content">
 <div id="carouselExampleCaptions" class="carousel slide carousel-fade mt-5" data-mdb-ride="carousel">
     <div class="carousel-inner">
         <div class="carousel-item active">
@@ -120,7 +119,7 @@
 <!--        </div>-->
 <!--    </div>-->
 <!--</nav>-->
-
+    <!-- Bộ lọc tìm kiếm -->
 <section class="container my-4">
     <form method="get" class="row g-3">
         <div class="col-md-3">
@@ -187,7 +186,7 @@
         </div>
     </div>
 </section>
-
+    <!-- Phân trang -->
 <nav th:if="${listProduct.totalPages > 0}">
     <ul class="pagination justify-content-center mt-4">
 
@@ -302,16 +301,6 @@
     </div>
     <!-- Copyright -->
 </footer>
-<!--  JS -->
-<script th:src="@{/assets/js/mdb.es.min.js}"></script>
-<script th:src="@{/assets/js/mdb.umd.min.js}"></script>
-
-<!-- Các plugin JS -->
-<script th:src="@{/assets/js/plugins/component.js}"></script>
-<script th:src="@{/assets/js/plugins/pcoded.js}"></script>
-<script th:src="@{/assets/js/plugins/layout-tab.js}"></script>
-<script th:src="@{/assets/js/plugins/layout-horizontal.js}"></script>
-<script th:src="@{/assets/js/plugins/layout-compact.js}"></script>
-
+</main>
 </body>
 </html>

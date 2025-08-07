@@ -45,4 +45,11 @@ public interface CustomerService {
     List<Customer> searchCustomerInline(String keyword);
 
     Customer createCustomerInline(com.example.datn.dto.selling_inline.CustomerDto dto) throws Exception;
+    
+    // Các phương thức cho user authentication
+    boolean existsByEmail(String email);
+    com.example.datn.entities.Account authenticateUser(String email, String password);
+    boolean verifyPassword(String rawPassword, String encodedPassword);
+    void updatePassword(Integer accountId, String newPassword);
+    void updateAccountStatus(Integer accountId, boolean status);
 }

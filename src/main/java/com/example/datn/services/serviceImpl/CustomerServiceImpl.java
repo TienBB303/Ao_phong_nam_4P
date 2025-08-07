@@ -4,10 +4,12 @@ import com.example.datn.dto.AddressDto;
 import com.example.datn.dto.customer.CustomerDto;
 import com.example.datn.entities.Account;
 import com.example.datn.entities.Customer;
+import com.example.datn.entities.Role;
 import com.example.datn.entities.ShippingAddress;
 import com.example.datn.repositories.AccountRepository;
-import com.example.datn.repositories.ShippingAddressRepository;
 import com.example.datn.repositories.CustomerRepository;
+import com.example.datn.repositories.RoleRepository;
+import com.example.datn.repositories.ShippingAddressRepository;
 import com.example.datn.services.CustomerService;
 import com.example.datn.services.EmailService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -32,6 +35,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired private ShippingAddressRepository shippingAddressRepository;
     @Autowired private EmailService emailService;
     @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired private RoleRepository roleRepository;
 
     // Tạo mã khách hàng tự động
     private String generateCustomerCode() {
@@ -169,10 +173,6 @@ public class CustomerServiceImpl implements CustomerService {
                 address = new ShippingAddress();
                 address.setCustomer(existing);
             }
-            // Nếu chọn là mặc định, update các địa chỉ khác về không mặc định
-            if (Boolean.TRUE.equals(addressDto.getIsDefault())) {
-                shippingAddressRepository.updateAllDefaultFalseByCustomerId(existing.getId());
-            }
             // Cập nhật các trường địa chỉ
             address.setAddressDetail(addressDto.getAddressDetail());
             address.setProvinceId(addressDto.getProvinceId());
@@ -183,7 +183,21 @@ public class CustomerServiceImpl implements CustomerService {
             address.setWardName(addressDto.getWardName());
             address.setReceiverName(addressDto.getReceiverName());
             address.setReceiverPhoneNumber(addressDto.getReceiverPhoneNumber());
-            address.setIsDefault(addressDto.getIsDefault() != null ? addressDto.getIsDefault() : false);
+            
+            // Xử lý checkbox isDefault
+            Boolean isDefault = addressDto.getIsDefault();
+            if (isDefault == null) {
+                isDefault = false;
+            }
+            address.setIsDefault(isDefault);
+            
+            // Nếu chọn là mặc định, update các địa chỉ khác về không mặc định
+            if (isDefault) {
+                shippingAddressRepository.updateAllDefaultFalseByCustomerId(existing.getId());
+            }
+            
+            // Debug log
+            System.out.println("Updating address isDefault: " + isDefault);
 
             shippingAddressRepository.save(address);
         }
@@ -233,6 +247,16 @@ public class CustomerServiceImpl implements CustomerService {
         String rawPassword = generateRandomPassword();
         String encodedPassword = passwordEncoder.encode(rawPassword);
         account.setPassword(encodedPassword);
+        
+        // Set role cho khách hàng
+        Role role = roleRepository.findByName("ROLE_CUSTOMER")
+                .orElseThrow(() -> new RuntimeException("Role ROLE_CUSTOMER không tồn tại!"));
+        account.setRole(role);
+        
+        // Set trạng thái ban đầu là false (chưa đổi mật khẩu)
+        account.setStatus(false);
+        account.setCreatedAt(java.time.LocalDateTime.now());
+        
         accountRepository.save(account);
 
         // Tạo địa chỉ nếu có
@@ -291,6 +315,52 @@ public class CustomerServiceImpl implements CustomerService {
         customer.setPhoneNumber(phone.trim());
         customer.setIsActive(true);
         return customerRepository.save(customer);
+    }
+
+    // Các phương thức cho user authentication
+    @Override
+    public boolean existsByEmail(String email) {
+        return accountRepository.existsByEmail(email);
+    }
+
+    @Override
+    public Account authenticateUser(String email, String password) {
+        Optional<Account> accountOpt = accountRepository.findByEmail(email);
+        if (accountOpt.isPresent()) {
+            Account account = accountOpt.get();
+            if (passwordEncoder.matches(password, account.getPassword())) {
+                return account;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean verifyPassword(String rawPassword, String encodedPassword) {
+        return passwordEncoder.matches(rawPassword, encodedPassword);
+    }
+
+    @Override
+    @Transactional
+    public void updatePassword(Integer accountId, String newPassword) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại"));
+        
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        account.setPassword(encodedPassword);
+        account.setUpdatedAt(java.time.LocalDateTime.now());
+        accountRepository.save(account);
+    }
+
+    @Override
+    @Transactional
+    public void updateAccountStatus(Integer accountId, boolean status) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại"));
+        
+        account.setStatus(status);
+        account.setUpdatedAt(java.time.LocalDateTime.now());
+        accountRepository.save(account);
     }
 
 
