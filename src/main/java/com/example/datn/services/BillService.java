@@ -119,6 +119,7 @@ public class BillService {
         return billRepository.findById(id).orElse(null);
     }
 
+    //    ===============================================TIENBB=========================================================================================================
     public Bill save(Bill bill) {
         return billRepository.save(bill);
     }
@@ -602,6 +603,8 @@ public class BillService {
         recalculateCart(cart);
         billRepository.save(cart);
     }
+
+    //    ================================Khanh==============================================================================
     public Bill updateStatus(String statusString, Integer id) {
         Bill bill = billRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn có id: " + id));

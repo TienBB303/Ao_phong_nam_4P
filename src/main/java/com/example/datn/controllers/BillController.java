@@ -3,7 +3,10 @@ package com.example.datn.controllers;
 
 import com.example.datn.entities.Bill;
 import com.example.datn.entities.BillDetails;
+import com.example.datn.entities.BillHistory;
+import com.example.datn.repositories.BillHistoryRepository;
 import com.example.datn.repositories.BillRepository;
+import com.example.datn.services.BillHistoryService;
 import com.example.datn.services.BillService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -12,10 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
@@ -27,6 +27,10 @@ import java.util.List;
 public class BillController {
      @Autowired
     BillService billService;
+     @Autowired
+    BillHistoryService billHistoryService;
+     @Autowired
+    BillHistoryRepository billHistoryRepository;
     @GetMapping("/view")
     public String index(
             @RequestParam(required = false) String code,
@@ -67,21 +71,21 @@ public class BillController {
     public String updateBillStatus(Model model,
                                    @PathVariable Integer billId,
                                    @RequestParam("trangThaiDonHang") String trangThaiDonHang,
+                                   @RequestParam(value = "note", required = false) String note,
                                    RedirectAttributes redirectAttributes) {
         try {
-            int status;
-            try {
-                status = Integer.parseInt(trangThaiDonHang);
-                if (status < 1 || status > 5) {
-                    throw new NumberFormatException();
-                }
-            } catch (NumberFormatException e) {
-                redirectAttributes.addFlashAttribute("error",
-                        "Trạng thái đơn hàng không hợp lệ: " + trangThaiDonHang);
-                return "redirect:/admin/getbill-detail/" + billId;
+            int status = Integer.parseInt(trangThaiDonHang);
+
+            if (status < 1 || status > 6) {
+                redirectAttributes.addFlashAttribute("error", "Trạng thái đơn hàng không hợp lệ.");
+                return "redirect:/admin/bill/getbill-detail/" + billId;
             }
 
             Bill bill = billService.updateStatus(trangThaiDonHang, billId);
+
+
+            billHistoryService.saveHistory(bill, status, note);
+
             redirectAttributes.addFlashAttribute("message",
                     "Hóa đơn " + bill.getCode() + " cập nhật trạng thái thành công!");
         } catch (Exception e) {
@@ -90,8 +94,8 @@ public class BillController {
         }
 
         return "redirect:/admin/bill/getbill-detail/" + billId;
-
     }
+
     @GetMapping("/getbill-detail/{maHoaDon}")
     public String getBillDetail(Model model, @PathVariable("maHoaDon") Integer maHoaDon) {
         // Lấy hóa đơn theo ID
@@ -114,6 +118,21 @@ public class BillController {
         model.addAttribute("billDetails", billDetailsList);
         model.addAttribute("total", total);
         return "admin/billDetail";
+    }
+
+    @GetMapping("/history/{id}")
+    public String viewBillHistory(@PathVariable("id") Integer billId, Model model) {
+
+        Bill bill = billService.findById(billId);
+        model.addAttribute("bill", bill);
+
+
+        List<BillHistory> histories = billHistoryRepository.findByBillIdOrderByCreatedAtDesc(billId);
+
+        model.addAttribute("bill", bill);
+        model.addAttribute("billHistories", histories);;
+
+        return "admin/billHistory";
     }
 
 }

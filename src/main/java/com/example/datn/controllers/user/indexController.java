@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,13 +22,16 @@ import java.util.Map;
 @Controller
 @RequestMapping("")
 public class indexController {
-@Autowired
-ProductService productService;
-@Autowired
+    @Autowired
+    ProductService productService;
+
+    @Autowired
     CategoryRepository categoryRepository;
-@Autowired
+
+    @Autowired
     BrandRepository brandRepository;
-@Autowired
+
+    @Autowired
     MaterialRepository materialRepository;
 
     @GetMapping("")
@@ -38,7 +42,7 @@ ProductService productService;
                              @RequestParam(required = false) Integer categoryId,
                              @RequestParam(required = false) Integer brandId,
                              @RequestParam(required = false) Integer materialId,
-                             Model model) {
+                             Model model, Principal principal) {
 
         Page<Product> listProduct;
 
@@ -76,6 +80,10 @@ ProductService productService;
         model.addAttribute("listBrand", brandRepository.findAllActive());
         model.addAttribute("listCategory", categoryRepository.findAllActive());
         model.addAttribute("listMaterial", materialRepository.findAllActive());
+
+        if (principal != null) {
+            model.addAttribute("username", principal.getName());
+        }
 
         return "user/index";
 

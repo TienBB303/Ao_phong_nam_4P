@@ -368,11 +368,34 @@ function toggleRemoveButton() {
     }
 }
 
+// inputFields.forEach(id => {
+//     const input = document.getElementById(id);
+//     input.addEventListener("input", function () {
+//         if (toggleSwitch.checked) {
+//             sendDeliveryInfo(cartId, true);
+//         }
+//     });
+// });
+
 document.addEventListener("DOMContentLoaded", function () {
     const toggleSwitch = document.getElementById("toggleDeliveryInfoSwitch");
     const collapseDiv = document.getElementById("deliveryInfo");
     const inputFields = ["nameD", "phoneD", "addressD", "feeD"];
     const cartId = idCartFromPage;
+
+    function formatVND(value) {
+        if (!value) return "";
+        return Number(value).toLocaleString("vi-VN") + " đ";
+    }
+
+    function parseCurrency(value) {
+        return parseInt(value.replace(/[^\d]/g, ""), 10) || 0;
+    }
+
+    const feeInput = document.getElementById("feeD");
+    if (feeInput && feeInput.value) {
+        feeInput.value = formatVND(feeInput.value);
+    }
 
     toggleSwitch.addEventListener("change", function () {
         const isDelivery = toggleSwitch.checked;
@@ -391,18 +414,39 @@ document.addEventListener("DOMContentLoaded", function () {
 
     inputFields.forEach(id => {
         const input = document.getElementById(id);
-        input.addEventListener("input", function () {
-            if (toggleSwitch.checked) {
-                sendDeliveryInfo(cartId, true);
-            }
-        });
-    });
+        if (!input) return;
 
+        // Nếu là feeD thì cần xử lý riêng khi blur để format lại
+        if (id === "feeD") {
+            input.addEventListener("blur", function () {
+                const raw = parseCurrency(input.value);
+                input.value = formatVND(raw);
+                sendDeliveryInfo(cartId, toggleSwitch.checked);
+            });
+
+            input.addEventListener("focus", function () {
+                input.value = parseCurrency(input.value);
+            });
+
+            input.addEventListener("keydown", function (e) {
+                if (e.key === "Enter") {
+                    input.blur();
+                }
+            });
+        } else {
+            // Các input còn lại thì gửi khi thay đổi
+            input.addEventListener("input", function () {
+                if (toggleSwitch.checked) {
+                    sendDeliveryInfo(cartId, true);
+                }
+            });
+        }
+    });
     function sendDeliveryInfo(cartId, isDelivery) {
         const nameD = isDelivery ? document.getElementById("nameD").value : "";
         const phoneD = isDelivery ? document.getElementById("phoneD").value : "";
         const addressD = isDelivery ? document.getElementById("addressD").value : "";
-        const feeD = isDelivery ? document.getElementById("feeD").value : 0;
+        const feeD = isDelivery ? parseCurrency(document.getElementById("feeD").value) : 0;         // format String về
 
         $.ajax({
             url: "/admin/sell-inline/delivery",
@@ -415,12 +459,23 @@ document.addEventListener("DOMContentLoaded", function () {
                 addressD: addressD,
                 feeD: feeD
             },
-            success: function () {
-                console.log("Cập nhật giao hàng thành công");
+            success: function (res) {
+                // Cập nhật lại trường tổng thanh toán
+                const formattedTotal = new Intl.NumberFormat('vi-VN').format(res.totalCheckout) + ' ₫';
+                $('#total_price_checkout').val(formattedTotal);
+
             },
             error: function (xhr) {
                 console.error("Lỗi:", xhr.responseText);
-                Swal.fire("Lỗi", xhr.responseText, "error");
+
+                Swal.fire({
+                    icon: 'error',
+                    title: xhr.responseText || 'Có lỗi xảy ra khi cập nhật phí giao hàng',
+                    toast: true,
+                    position: 'top-end',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
             }
         });
     }
@@ -458,10 +513,11 @@ $('#customer_search').on('input', function () {
                 html += `
                     <div class="p-2 suggestion-item border-bottom" 
                          data-id="${customer.id}"
-                         data-name="${customer.name + " - "+ customer.phoneNumber}">
+                         data-name="${customer.name + " - "+ customer.phoneNumber}" 
+                         data-nameD="${customer.name}" 
+                         data-phoneD="${customer.phoneNumber}">
                         <div class="fw-semibold">Họ tên: ${customer.name}</div>
                         <div class="text-muted small">SĐT: ${customer.phoneNumber}</div>
-<!--                        <div class="text-muted small">Email: ${customer.email}</div> bỏ email --> 
                     </div>
                 `;
             });
@@ -485,8 +541,15 @@ $('#suggestionBox_Customer').on('click', '.suggestion-item', function () {
             idCart: idCartFromPage,
             customerId: customerId
         },
-        success: function () {
+        success: function (data) {
             console.log("Đã gán khách vào cart");
+
+            $('#nameD').val(data.name);
+            $('#phoneD').val(data.phone);
+            $('#addressD').val(data.address); // gán địa chỉ xuống input giao hàng
+        },
+        error: function () {
+            alert("Không thể thêm khách hàng vào giỏ hàng.");
         }
     });
 });
@@ -501,7 +564,11 @@ $(document).ready(function () {
             Swal.fire({
                 icon: 'warning',
                 title: 'Thiếu thông tin',
-                text: 'Vui lòng nhập đầy đủ tên và số điện thoại!'
+                text: 'Vui lòng nhập đầy đủ tên và số điện thoại!',
+                toast: true,
+                position: 'top-end',
+                timer: 1000,
+                showConfirmButton: false
             });
             return;
         }
