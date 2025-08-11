@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.chrono.ChronoLocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -159,5 +160,21 @@ public class DiscountService {
 
     public Optional<Discount> findByCode(String code) {
         return discountRepository.findByCode(code);
+    }
+
+    // ThaiTV tiếp nè ^^
+    public List<Discount> getValidDiscountForUser() {
+        return discountRepository.findValidDiscounts();
+    }
+
+    // ThaiTV nữa nè ^^ hẹ hẹ hẹ
+    public Discount validateDiscountCode(String code) throws Exception {
+        return discountRepository.findByCodeAndStatusIsTrue(code)
+                .filter(d -> {
+                    LocalDate now = LocalDate.now();
+                    return (d.getStartDatetime().isBefore(ChronoLocalDateTime.from(LocalDate.now())) || d.getStartDatetime().isEqual(ChronoLocalDateTime.from(now))) &&
+                            (d.getEndDatetime().isAfter(ChronoLocalDateTime.from(now)) || d.getEndDatetime().isEqual(ChronoLocalDateTime.from(now)));
+                })
+                .orElseThrow(() -> new Exception("Mã giảm giá không hợp lệ hoặc đã hết hạn"));
     }
 }

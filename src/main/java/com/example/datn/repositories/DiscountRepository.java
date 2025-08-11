@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -53,4 +54,11 @@ public interface DiscountRepository extends JpaRepository<Discount,Integer> {
     //TienBB
     @Query("select c.discount from Cart c where c.id = :id")
     Discount findDiscountByCartId(Integer id);
+
+    // ThaiTV hẹ hẹ hẹ
+    @Query("SELECT d FROM Discount d WHERE d.status = 1 AND d.startDatetime <= CURRENT_TIMESTAMP AND d.endDatetime >= CURRENT_TIMESTAMP AND d.usageLimit > 0")
+    List<Discount> findValidDiscounts();
+
+
+    Optional<Discount> findByCodeAndStatusIsTrue(String code);
 }

@@ -45,7 +45,7 @@ public class BillUserController {
     private CartService cartService;
 
     @Autowired
-    private CartRepository cartRepository;
+    private CartDetailRepositoty cartDetailRepositoty;
 
     @Autowired
     private DiscountRepository discountRepository;
@@ -56,13 +56,13 @@ public class BillUserController {
     @Autowired
     private PaymentMethodRepository paymentMethodRepository;
 
-    @GetMapping("/thanhcong")
+    @GetMapping("/thank-you")
     public String viewSuccess() {
         return "user/thankyou";
     }
 
     @PostMapping("/bill/createNotLogin")
-    public String createNotLogin(HttpSession session, BillInsert billInsert, RedirectAttributes redirectAttributes) {
+    public String createNotLogin(HttpSession session, BillInsert billInsert, RedirectAttributes redirectAttributes) throws Exception {
         Integer cartId = (Integer) session.getAttribute("cartId");
 
         if (cartId != null) {
@@ -147,7 +147,9 @@ public class BillUserController {
                     "thaitvph40872@fpt.edu.vn"
             );
             mailServices.sendEmail(billInsert.getEmail(), "Đặt hàng thành công", content, false, true);
+            cartDetailRepositoty.deleteAll(cart.getCartDetails());
+            session.removeAttribute("cartId");
         }
-        return "redirect:/thanhcong";
+        return "redirect:/thank-you";
     }
 }
