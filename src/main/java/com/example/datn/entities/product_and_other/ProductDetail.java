@@ -37,6 +37,8 @@ public class ProductDetail {
 
     private String barcode;
 
+    private Boolean status;
+
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;

@@ -21,7 +21,7 @@
                             <div class="carousel-inner h-100">
                                 <div th:each="image, iterStat : ${uniqueImages}"
                                      th:class="'carousel-item h-100' + (${iterStat.index == 0} ? ' active' : '')">
-                                    <img th:src="@{'/image-detail/' + ${image.path_file}}"
+                                    <img th:src="${image.path_file}"
                                          class="d-block mx-auto"
                                          alt="Ảnh sản phẩm"
                                          style="max-height: 450px; object-fit: contain;">
@@ -30,7 +30,6 @@
                                     <p class="text-center">Không có ảnh</p>
                                 </div>
                             </div>
-
 
                             <!-- Nút điều hướng -->
                             <button class="carousel-control-prev" type="button" data-mdb-target="#productImageCarousel" data-mdb-slide="prev">

@@ -97,7 +97,7 @@ $('#suggestionBox').on('click', '.suggestion-item', function () {
     $('#productSearchName').val('');
 });
 
-// tanwg so luong san pham trong gio
+// tăng so luong san pham trong gio
 $('#product-in-cart').on('change', '.update-quantity', function (){
     const $input = $(this);
     const cartDetailId = $input.data('id');
@@ -149,6 +149,39 @@ $('#product-in-cart').on('change', '.update-quantity', function (){
             $input.val(oldQuantity);
         }
     });
+});
+// nút - / +
+$('#product-in-cart').on('click', '.btn-qty-minus, .btn-qty-plus', function () {
+    const isPlus = $(this).hasClass('btn-qty-plus');
+    const id = $(this).data('id');
+
+    // Tìm đúng input cùng hàng
+    const $input = $(this)
+        .closest('.input-group')
+        .find('.update-quantity[data-id="' + id + '"]');
+
+    let val = parseInt($input.val(), 10) || 0;
+    val = isPlus ? val + 1 : val - 1;
+
+    // if (val < 1) {
+    //     Swal.fire({
+    //         toast: true,
+    //         icon: 'warning',
+    //         title: 'Số lượng phải lớn hơn 1',
+    //         position: 'top-end',
+    //         showConfirmButton: false,
+    //         timer: 700
+    //     });
+    //     return;
+    // }
+
+    // Gán lại và gọi change -> dùng lại hàm update-quantity sẵn có
+    $input.val(val).trigger('change');
+});
+
+// (tuỳ chọn) Enter để áp số lượng mới
+$('#product-in-cart').on('keydown', '.update-quantity', function (e) {
+    if (e.key === 'Enter') $(this).trigger('change');
 });
 
 //Delete Item in cart
@@ -368,15 +401,7 @@ function toggleRemoveButton() {
     }
 }
 
-// inputFields.forEach(id => {
-//     const input = document.getElementById(id);
-//     input.addEventListener("input", function () {
-//         if (toggleSwitch.checked) {
-//             sendDeliveryInfo(cartId, true);
-//         }
-//     });
-// });
-
+// Giao hàng
 document.addEventListener("DOMContentLoaded", function () {
     const toggleSwitch = document.getElementById("toggleDeliveryInfoSwitch");
     const collapseDiv = document.getElementById("deliveryInfo");
@@ -446,7 +471,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const nameD = isDelivery ? document.getElementById("nameD").value : "";
         const phoneD = isDelivery ? document.getElementById("phoneD").value : "";
         const addressD = isDelivery ? document.getElementById("addressD").value : "";
-        const feeD = isDelivery ? parseCurrency(document.getElementById("feeD").value) : 0;         // format String về
+        const feeD = isDelivery ? parseCurrency(document.getElementById("feeD").value) : 0;         // format String về dạng bigdecimal
 
         $.ajax({
             url: "/admin/sell-inline/delivery",
@@ -480,8 +505,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
-
-//Tìm kh
+//Tìm khách hàng
 $('#customer_search').on('input', function () {
     const keyword = $(this).val().trim();
 
@@ -638,4 +662,145 @@ $(document).ready(function () {
         });
     });
 });
+
+// hàm bật camera và quét thêm sản phẩm
+(function () {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else init();
+
+    function init() {
+        const cameraModal = document.getElementById('cameraModal');
+        const scannerBox  = document.getElementById('barcode-scanner');
+        const resultBox   = document.getElementById('barcode-result');
+
+        // Nếu chưa có modal/scanner thì thôi (nhưng KHÔNG kiểm tra các phần tử khác)
+        if (!cameraModal || !scannerBox || !resultBox) {
+            console.warn('POS scanner: thiếu modal hoặc scanner box');
+            return;
+        }
+
+        let quaggaOn = false;
+        let locking  = false;
+        let lastCode = null, lastTime = 0;
+
+        // Delegation: click vào span hoặc icon bên trong đều bắt được
+        document.addEventListener('click', function (e) {
+            const trigger = e.target.closest('#productSearchBarcode');
+            if (trigger) {
+                e.preventDefault();
+                openCamera();
+            }
+            if (e.target.closest('#closeCameraBtn')) {
+                e.preventDefault();
+                closeCamera();
+            }
+        });
+
+        // Hỗ trợ Enter/Space khi focus vào trigger
+        document.addEventListener('keydown', function (e) {
+            if (e.target.id === 'productSearchBarcode' && (e.key === 'Enter' || e.key === ' ')) {
+                e.preventDefault();
+                openCamera();
+            }
+        });
+
+        function openCamera() {
+            cameraModal.classList.remove('d-none');
+            document.body.style.overflow = 'hidden';
+            startQuagga();
+        }
+        function closeCamera() {
+            stopQuagga();
+            cameraModal.classList.add('d-none');
+            document.body.style.overflow = '';
+            resultBox.textContent = 'Đưa mã vạch vào khung hình';
+            locking = false;
+        }
+
+        function startQuagga() {
+            if (quaggaOn || !window.Quagga) {
+                if (!window.Quagga) console.warn('Quagga chưa nạp!');
+                return;
+            }
+            Quagga.init({
+                inputStream: {
+                    type: "LiveStream",
+                    target: scannerBox,
+                    constraints: { facingMode: "environment", width: {ideal: 640}, height: {ideal: 480} }
+                },
+                decoder: { readers: ["ean_reader","ean_8_reader","code_128_reader","code_39_reader"] },
+                locate: true,
+                numOfWorkers: navigator.hardwareConcurrency ? Math.min(4, navigator.hardwareConcurrency) : 2
+            }, (err) => {
+                if (err) {
+                    console.error(err);
+                    resultBox.textContent = 'Không mở được camera. Kiểm tra quyền.';
+                    return;
+                }
+                Quagga.start();
+                quaggaOn = true;
+                resultBox.textContent = 'Đưa mã vạch vào khung hình';
+            });
+
+            Quagga.offDetected(onDetected);
+            Quagga.onDetected(onDetected);
+        }
+
+        function stopQuagga() {
+            try { Quagga.offDetected(onDetected); } catch(e){}
+            if (quaggaOn) { Quagga.stop(); quaggaOn = false; }
+            const video = scannerBox.querySelector('video');
+            const tracks = video?.srcObject?.getTracks?.() || [];
+            tracks.forEach(t => t.stop());
+        }
+
+        function onDetected(data) {
+            const code = (data?.codeResult?.code || '').trim();
+            if (!code) return;
+
+            const now = Date.now();
+            if (code === lastCode && (now - lastTime) < 1200) return;
+            lastCode = code; lastTime = now;
+
+            if (locking) return;
+            locking = true;
+
+            resultBox.textContent = `Đang thêm: ${code} ...`;
+
+            // >>> Chỉ kiểm tra idCartFromPage TẠI ĐÂY <<<
+            const idCartFromPage = window.idCartFromPage;
+            if (!idCartFromPage && idCartFromPage !== 0) {
+                resultBox.textContent = 'Thiếu ID giỏ hàng';
+                setTimeout(() => { locking = false; }, 900);
+                return;
+            }
+
+            $.ajax({
+                url: '/admin/sell-inline/add-by-barcode',
+                method: 'POST',
+                data: { idCart: idCartFromPage, barcode: code },
+                // headers: { 'X-CSRF-TOKEN': $('meta[name="_csrf"]').attr('content') }
+            }).done(function () {
+                if (window.Swal) {
+                    Swal.fire({toast:true, icon:'success', title:`Đã thêm: ${code}`, position:'top-end', showConfirmButton:false, timer:700});
+                }
+                resultBox.textContent = `Đã thêm sản phẩm (${code})`;
+                setTimeout(() => { closeCamera(); location.reload(); }, 400);
+            }).fail(function (xhr) {
+                const msg = xhr?.responseText || 'Thêm thất bại';
+                if (window.Swal) {
+                    Swal.fire({toast:true, icon:'error', title: msg, position:'top-end', showConfirmButton:false, timer:1300});
+                }
+                resultBox.textContent = msg;
+                setTimeout(() => { locking = false; }, 900);
+            });
+        }
+
+        // Expose cho debug
+        window.__openPosCamera = openCamera;
+        window.__closePosCamera = closeCamera;
+    }
+})();
+
 

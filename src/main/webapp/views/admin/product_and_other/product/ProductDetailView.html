@@ -90,9 +90,9 @@
                             <th scope="col">Ảnh</th>
                             <th scope="col">Barcode</th>
                             <th scope="col">Màu</th>
-                            <th scope="col">Kích cỡ</th>
                             <th scope="col">Giá</th>
                             <th scope="col">Số lượng</th>
+                            <th scope="col">Trạng thái</th>
                             <th scope="col">Hành động</th>
                         </tr>
                         </thead>
@@ -103,7 +103,7 @@
                             </td>
                             <td>
                                 <img th:if="${!detail.images.isEmpty()}"
-                                     th:src="@{'/image-detail/' + ${detail.images.get(0).path_file}}"
+                                     th:src="${detail.images.get(0).path_file}"
                                      width="100" alt="Ảnh sản phẩm"/>
                                 <span th:if="${detail.images.isEmpty()}">Không có ảnh</span>
                             </td>
@@ -117,12 +117,18 @@
                                       th:style="'background-color:' + ${detail.color.code}">
                                 </span>
                             </td>
-                            <td th:text="${detail.size.name}">Size</td>
+<!--                            <td th:text="${detail.size.name}">Size</td>-->
                             <td th:text="${detail.price}" class="giaVND">Giá</td>
                             <td th:text="${detail.quantity}">Số lượng</td>
                             <td style="text-align: center">
-                                <a class="btn btn-outline-warning hienThiThongTinModal"
-                                    style="width: 70px" title="Sửa"
+                                <span th:if="${detail.status}" class="badge bg-success">Hoạt động</span>
+                                <span th:unless="${detail.status}" class="badge bg-danger">Không hoạt động</span>
+                            </td>
+                            <td style="text-align: center">
+                                <a class="btn btn-outline-info thayDoiTrangThai" style="width: 70px" title="đổi trạng thái sản phẩm" th:attr="data-id=${detail.id}">
+                                    <i class="bi bi-arrow-left-right"></i>
+                                </a>
+                                <a class="btn btn-outline-warning hienThiThongTinModal" style="width: 70px" title="Sửa"
                                     th:attr="data-id=${detail.id}"
                                     data-bs-toggle="modal" data-bs-target="#modalChinhSua">
                                     <i class="bi bi-pencil-square"></i>
@@ -198,9 +204,8 @@
                 <form id="updateProductDetail" method="post" action="/admin/product-detail/update">
                     <input type="hidden" id="product_detail_id" name="ProductDetailId">
                     <div class="mb-3">
-                        <label for="product_price_update" class="form-label">Giá</label><span class="text-danger">*</span>
-                        <input type="number" class="form-control giaVND" id="product_price_update" name="productPriceUpdate" placeholder="Nhập giá...">
-
+<!--                        <label for="product_price_update" class="form-label">Giá</label><span class="text-danger">*</span>-->
+                        <input type="hidden" class="form-control giaVND" id="product_price_update" name="productPriceUpdate" placeholder="Nhập giá...">
                     </div>
                     <div class="mb-3">
                         <label for="product_quantity_update" class="form-label">Số lượng</label>
@@ -265,6 +270,22 @@
                 $('#product_quantity_update').val(response.quantity);
             },
             error: function (xhr) {
+            }
+        });
+    });
+</script>
+<script>
+    $(document).on('click', '.thayDoiTrangThai', function () {
+        const id = $(this).data('id');
+        Swal.fire({
+            title: 'Bạn có chắc muốn đổi trạng thái?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Có',
+            cancelButtonText: 'Không'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `/admin/product-detail/change-status/${id}`;
             }
         });
     });
