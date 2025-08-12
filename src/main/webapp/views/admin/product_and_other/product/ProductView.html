@@ -149,10 +149,10 @@
                                 <span th:unless="${sp.status}" class="badge bg-danger">Không hoạt động</span>
                             </td>
                             <td style="text-align: center">
-                                <a class="btn btn-outline-warning hienThiThongTinModal" th:attr="data-id=${sp.id}" style="width: 70px" title="Sửa" data-bs-toggle="modal" data-bs-target="#modalChinhSua">
-<!--                                    <i class="bi bi-pencil-square"></i>-->
-                                    ✏️️
-                                </a>
+<!--                                <a class="btn btn-outline-warning hienThiThongTinModal" th:attr="data-id=${sp.id}" style="width: 70px" title="Sửa" data-bs-toggle="modal" data-bs-target="#modalChinhSua">-->
+<!--&lt;!&ndash;                                    <i class="bi bi-pencil-square"></i>&ndash;&gt;-->
+<!--                                    ✏️️-->
+<!--                                </a>-->
                                 <a class="btn btn-outline-info" th:href="@{'/admin/product/view-detail/' + ${sp.id}}" style="width: 70px" title="Xem">
 <!--                                    <i class="bi bi-eye"></i>-->
                                     ️ 👁️
@@ -212,64 +212,64 @@
             </div>
         </div>
     </div>
-</section>>
+</section>
 <!--Modal sửa-->
-    <div class="modal fade" id="modalChinhSua" tabindex="-1" aria-labelledby="modalChinhSuaLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalChinhSuaLabel">Chỉnh sửa thông tin sản phẩm</h5>
-                </div>
-                <div class="modal-body">
-                    <form id="updateProduct" method="post" th:action="@{/admin/product/update}">
-                        <input type="hidden" id="product_id" name="productId">
-                        <div class="mb-3">
-                            <label for="product_name_update" class="form-label">Tên sản phẩm</label><span class="text-danger">*</span>
-                            <input type="text" class="form-control" id="product_name_update" name="productName" placeholder="Nhập tên sản phẩm">
-                        </div>
-                        <div class="mb-3">
-                            <label for="product_category_update" class="form-label">Loại sản phẩm</label><span class="text-danger">*</span>
-                            <select class="form-select me-2" id="product_category_update" name="categoryId">
-                                <option th:each="cate : ${listCategory}"
-                                        th:value="${cate.id}"
-                                        th:text="${cate.name}"
-                                        th:if="${cate.status}">
-                                </option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="product_brand_update" class="form-label">Hãng</label><span class="text-danger">*</span>
-                            <select class="form-select me-2" id="product_brand_update" name="brandId">
-                                <option th:each="brand : ${listBrand}"
-                                        th:value="${brand.id}"
-                                        th:text="${brand.name}"
-                                        th:if="${brand.status}">
-                                </option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="product_material_update" class="form-label">Chất liệu</label><span class="text-danger">*</span>
-                            <select class="form-select me-2" id="product_material_update" name="materialId">
-                                <option th:each="mate : ${listMaterial}"
-                                        th:value="${mate.id}"
-                                        th:text="${mate.name}"
-                                        th:if="${mate.status}">
-                                </option>
-                            </select>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="submit" class="btn btn-outline-success">
-                                <i class="bi bi-check-lg"></i>
-                            </button>
-                            <button type="button" class="btn btn-outline-warning" data-bs-dismiss="modal">
-                                <i class="bi bi-x"></i>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+<!--    <div class="modal fade" id="modalChinhSua" tabindex="-1" aria-labelledby="modalChinhSuaLabel" aria-hidden="true">-->
+<!--        <div class="modal-dialog modal-lg">-->
+<!--            <div class="modal-content">-->
+<!--                <div class="modal-header">-->
+<!--                    <h5 class="modal-title" id="modalChinhSuaLabel">Chỉnh sửa thông tin sản phẩm</h5>-->
+<!--                </div>-->
+<!--                <div class="modal-body">-->
+<!--                    <form id="updateProduct" method="post" th:action="@{/admin/product/update}">-->
+<!--                        <input type="hidden" id="product_id" name="productId">-->
+<!--                        <div class="mb-3">-->
+<!--                            <label for="product_name_update" class="form-label">Tên sản phẩm</label><span class="text-danger">*</span>-->
+<!--                            <input type="text" class="form-control" id="product_name_update" name="productName" placeholder="Nhập tên sản phẩm">-->
+<!--                        </div>-->
+<!--                        <div class="mb-3">-->
+<!--                            <label for="product_category_update" class="form-label">Loại sản phẩm</label><span class="text-danger">*</span>-->
+<!--                            <select class="form-select me-2" id="product_category_update" name="categoryId">-->
+<!--                                <option th:each="cate : ${listCategory}"-->
+<!--                                        th:value="${cate.id}"-->
+<!--                                        th:text="${cate.name}"-->
+<!--                                        th:if="${cate.status}">-->
+<!--                                </option>-->
+<!--                            </select>-->
+<!--                        </div>-->
+<!--                        <div class="mb-3">-->
+<!--                            <label for="product_brand_update" class="form-label">Hãng</label><span class="text-danger">*</span>-->
+<!--                            <select class="form-select me-2" id="product_brand_update" name="brandId">-->
+<!--                                <option th:each="brand : ${listBrand}"-->
+<!--                                        th:value="${brand.id}"-->
+<!--                                        th:text="${brand.name}"-->
+<!--                                        th:if="${brand.status}">-->
+<!--                                </option>-->
+<!--                            </select>-->
+<!--                        </div>-->
+<!--                        <div class="mb-3">-->
+<!--                            <label for="product_material_update" class="form-label">Chất liệu</label><span class="text-danger">*</span>-->
+<!--                            <select class="form-select me-2" id="product_material_update" name="materialId">-->
+<!--                                <option th:each="mate : ${listMaterial}"-->
+<!--                                        th:value="${mate.id}"-->
+<!--                                        th:text="${mate.name}"-->
+<!--                                        th:if="${mate.status}">-->
+<!--                                </option>-->
+<!--                            </select>-->
+<!--                        </div>-->
+<!--                        <div class="modal-footer">-->
+<!--                            <button type="submit" class="btn btn-outline-success">-->
+<!--                                <i class="bi bi-check-lg"></i>-->
+<!--                            </button>-->
+<!--                            <button type="button" class="btn btn-outline-warning" data-bs-dismiss="modal">-->
+<!--                                <i class="bi bi-x"></i>-->
+<!--                            </button>-->
+<!--                        </div>-->
+<!--                    </form>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
 
     <!-- Script -->
     <script th:if="${alert != null}" th:inline="javascript">

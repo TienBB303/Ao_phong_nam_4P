@@ -38,14 +38,15 @@ public class CategoryService {
     public Category findById(Integer id){
         return categoryRepository.findByIdCategory(id);
     }
+
     public Category addCategory(Category category){
         return categoryRepository.save(category);
     }
 
 
-    public Category addCategoryObj(Category category){
-        return categoryRepository.save(category);
-    }
+//    public Category addCategoryObj(Category category){
+//        return categoryRepository.save(category);
+//    }
     public Category addCategory(String name, String description){
         Category category = new Category();
         category.setName(name);

@@ -17,6 +17,8 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, In
     @Query("SELECT pd FROM ProductDetail pd WHERE pd.id = :id")
     ProductDetail findProductDetailById(Integer id);
 
+    ProductDetail findProductDetailsByBarcode(String barcode);
+
     @Query("SELECT pd FROM ProductDetail pd " +
             "JOIN FETCH pd.product p " +
             "JOIN FETCH pd.color c " +

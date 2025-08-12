@@ -11,13 +11,9 @@
     <div class="pc-container">
         <div class="pc-content">
             <div class="page-header">
-                <div class="page-block">
-                    <div class="row align-items-center">s
-                        <div class="col-md-12">
-                            <div class="page-header-title">
-                                <h5 class="m-b-10">Thêm sản phẩm</h5>
-                            </div>
-                        </div>
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <h5 class="m-b-10">Thêm sản phẩm</h5>
                     </div>
                 </div>
             </div>
@@ -53,7 +49,7 @@
                                                             th:selected="${cate.id == productForm.categoryId}">
                                                     </option>
                                                 </select>
-                                                <span id="add_category" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalAddCategory">
+                                                <span id="add_category" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalAddCategory">
                                                     <i class="fas fa-plus"></i>
                                                 </span>
                                             </div>
@@ -74,7 +70,7 @@
                                                             th:selected="${brand.id == productForm.brandId}">
                                                     </option>
                                                 </select>
-                                                <span id="add_brand" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalAddBrand">
+                                                <span id="add_brand" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalAddBrand">
                                                     <i class="fas fa-plus"></i>
                                                 </span>
                                             </div>
@@ -92,7 +88,7 @@
                                                             th:selected="${mate.id == productForm.materialId}">
                                                     </option>
                                                 </select>
-                                                <span id="add_material" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalAddMaterial">
+                                                <span id="add_material" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalAddMaterial">
                                                     <i class="fas fa-plus"></i>
                                                 </span>
                                             </div>
@@ -104,7 +100,7 @@
                                     <div class="col-12">
                                         <div class="mb-3">
                                             <label for="product_brand" class="form-label">Mô tả</label>
-                                            <textarea class="form-control" id="product_description"  name="description" placeholder="Nhập mô tả" th:value="${productForm.description}"></textarea>
+                                            <textarea class="form-control" id="product_description"  name="description" placeholder="Nhập mô tả" th:field="*{description}"></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -131,9 +127,9 @@
             </div>
             <div class="modal-body">
                 <form id="addCategory" method="post" action="/admin/product/add-nhanh/category">
-                    <input type="hidden" name="productCode" id="hidden_product_code_cate">
-                    <input type="hidden" name="productName" id="hidden_product_name_cate">
-                    <input type="hidden" name="productDescription" id="hidden_product_description_cate">
+                    <input type="hidden" name="productCode"             id="hidden_product_code_cate">
+                    <input type="hidden" name="productName"             id="hidden_product_name_cate">
+                    <input type="hidden" name="productDescription"      id="hidden_product_description_cate">
                     <div class="mb-3">
                         <label for="category_name" class="form-label">Tên kiểu loại</label><span
                             class="text-danger">*</span>
@@ -167,6 +163,9 @@
             </div>
             <div class="modal-body">
                 <form id="addBrand" method="post" action="/admin/product/add-nhanh/brand">
+                    <input type="hidden" name="productCode"             id="hidden_product_code_brand">
+                    <input type="hidden" name="productName"             id="hidden_product_name_brand">
+                    <input type="hidden" name="productDescription"      id="hidden_product_description_brand">
                     <div class="mb-3">
                         <label for="brand_name" class="form-label">Tên hãng</label><span class="text-danger">*</span>
                         <input type="text" class="form-control" id="brand_name" name="brandName"
@@ -194,6 +193,9 @@
             </div>
             <div class="modal-body">
                 <form id="addMaterial" method="post" action="/admin/product/add-nhanh/material">
+                    <input type="hidden" name="productCode"             id="hidden_product_code_material">
+                    <input type="hidden" name="productName"             id="hidden_product_name_material">
+                    <input type="hidden" name="productDescription"      id="hidden_product_description_material">
                     <div class="mb-3">
                         <label for="material_name" class="form-label">Tên chất liệu</label><span
                             class="text-danger">*</span>
@@ -219,7 +221,7 @@
 <script th:if="${alert != null}" th:inline="javascript">
     Swal.fire({
         toast: true,
-        icon: [[${type}]],
+        icon: /*[[${type}]]*/ null,
         title: '[[${alert}]]', // Thông báo từ controller
         position: 'top-end',
         showConfirmButton: false,
@@ -233,6 +235,17 @@
         document.getElementById("hidden_product_code_cate").value = document.getElementById("product_code").value;
         document.getElementById("hidden_product_name_cate").value = document.getElementById("product_name").value;
         document.getElementById("hidden_product_description_cate").value = document.getElementById("product_description").value;
+    });
+    document.getElementById("add_brand").addEventListener("click", function () {
+        document.getElementById("hidden_product_code_brand").value = document.getElementById("product_code").value;
+        document.getElementById("hidden_product_name_brand").value = document.getElementById("product_name").value;
+        document.getElementById("hidden_product_description_brand").value = document.getElementById("product_description").value;
+    });
+
+    document.getElementById("add_material").addEventListener("click", function () {
+        document.getElementById("hidden_product_code_material").value = document.getElementById("product_code").value;
+        document.getElementById("hidden_product_name_material").value = document.getElementById("product_name").value;
+        document.getElementById("hidden_product_description_material").value = document.getElementById("product_description").value;
     });
 </script>
 </body>

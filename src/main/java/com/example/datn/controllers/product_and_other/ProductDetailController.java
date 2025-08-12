@@ -1,5 +1,6 @@
 package com.example.datn.controllers.product_and_other;
 
+import com.example.datn.entities.product_and_other.Material;
 import com.example.datn.entities.product_and_other.ProductDetail;
 import com.example.datn.services.product_and_other.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,29 +22,6 @@ public class ProductDetailController {
     public ProductDetail viewDetail(@PathVariable("id") Integer id) {
         return productService.detailProductDetail(id);
     }
-
-//    @PostMapping("/add")
-//    public String addProductDetail(@RequestParam("productId") Integer productId,
-//                                   @RequestParam("price") String priceStr,
-//                                   @RequestParam("quantity") String quantityStr,
-//                                   @RequestParam("colorId") Integer colorId,
-//                                   @RequestParam("sizeId") Integer sizeId,
-//                                   RedirectAttributes redirectAttributes) {
-//        try {
-//            BigDecimal price = new BigDecimal(priceStr);
-//            Integer quantity = Integer.parseInt(quantityStr);
-//
-//            productService.addProductDetail(productId, price, quantity, colorId, sizeId);
-//            redirectAttributes.addFlashAttribute("alert", "Thêm biến thể thành công");
-//            redirectAttributes.addFlashAttribute("type", "success");
-//
-//        } catch (Exception e) {
-//            redirectAttributes.addFlashAttribute("alert", "Thêm biến thể thất bại: " + e.getMessage());
-//            redirectAttributes.addFlashAttribute("type", "error");
-//        }
-//
-//        return "redirect:/admin/product/view-detail/" + productId;
-//    }
 
     @PostMapping("/update")
     public String updateProductDetail(
@@ -84,5 +62,17 @@ public class ProductDetailController {
 
         return "redirect:/admin/product/view-detail/" + productDetail.getProduct().getId();
     }
+
+    @GetMapping("/change-status/{id}")
+    public String changeStatus(
+            @PathVariable("id") Integer id, RedirectAttributes redirectAttributes){
+        ProductDetail productDetail = productService.changeStatus(id);
+
+        redirectAttributes.addFlashAttribute("alert", "Thay đổi trạng thái thành công!");
+        redirectAttributes.addFlashAttribute("type", "success");
+        return "redirect:/admin/product/view-detail/" + productDetail.getId();
+    }
+
+
 
 }
