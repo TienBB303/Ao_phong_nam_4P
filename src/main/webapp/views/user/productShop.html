@@ -63,8 +63,11 @@
                     <div class="card h-100 shadow-sm border-0 hover-shadow" style="transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
                         <!-- Ảnh sản phẩm -->
                         <div class="position-relative">
-                            <img src="/images/default-product.jpg" class="img-fluid"
-                                 style="height: 220px; object-fit: cover;" alt="Ảnh sản phẩm"/>
+                            <img th:if="${!product.images.isEmpty()}"
+                                 th:src="${product.images.get(0).path_file}"
+                                 class="img-fluid"
+                                 style="height: 220px; object-fit: cover;"
+                                 alt="Ảnh sản phẩm"/>
 
                             <!-- Hiển thị nhãn HẾT HÀNG -->
                             <span class="badge bg-danger position-absolute top-0 start-0 m-2"

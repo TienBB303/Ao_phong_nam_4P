@@ -1,9 +1,6 @@
 package com.example.datn.services.product_and_other;
 
-import com.example.datn.entities.product_and_other.Color;
-import com.example.datn.entities.product_and_other.Product;
-import com.example.datn.entities.product_and_other.ProductDetail;
-import com.example.datn.entities.product_and_other.Size;
+import com.example.datn.entities.product_and_other.*;
 import com.example.datn.repositories.product_and_other.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -187,6 +184,14 @@ public class ProductService {
 //        productDetailRepository.save(detail);
 //    }
 
-
+    public ProductDetail changeStatus(Integer id){
+        if (id == null){
+            System.out.println("Do not have product with id = " + id);
+            return null;
+        }
+        ProductDetail productDetail = productDetailRepository.findProductDetailById(id);
+        productDetail.setStatus(!productDetail.getStatus());
+        return productDetailRepository.save(productDetail);
+    }
 }
 

@@ -355,4 +355,14 @@ public class SellingInlineController {
         }
     }
 
+    @PostMapping("/add-by-barcode")
+    public ResponseEntity<?> addByBarcode(@RequestParam("idCart") Integer idCart, @RequestParam("barcode") String barcode) {
+        try {
+            billService.addProductDetailToCartByBarcode(idCart, barcode);
+            return ResponseEntity.ok("thành công");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 }
