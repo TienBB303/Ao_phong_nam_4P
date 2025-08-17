@@ -16,6 +16,7 @@
         <th>Thời gian</th>
         <th>Trạng thái</th>
         <th>Ghi chú</th>
+        <th>Người thao tác</th>
     </tr>
     </thead>
     <tbody>
@@ -33,6 +34,7 @@
             </span>
         </td>
         <td th:text="${history.note}"></td>
+        <td th:text="${history.account != null ? history.account.username : 'Hệ thống'}"></td>
     </tr>
     </tbody>
 </table>

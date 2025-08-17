@@ -8,6 +8,8 @@ import com.example.datn.repositories.BillHistoryRepository;
 import com.example.datn.repositories.BillRepository;
 import com.example.datn.services.BillHistoryService;
 import com.example.datn.services.BillService;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -134,6 +136,26 @@ public class BillController {
 
         return "admin/billHistory";
     }
+    @GetMapping("/export/{billId}")
+    public void exportInvoice(@PathVariable("billId") Integer billId,
+                              HttpServletResponse response) {
+        try {
+            response.setContentType("application/pdf");
+            response.setHeader("Content-Disposition", "attachment; filename=hoadon_" + billId + ".pdf");
+
+            Bill bill = billService.findById(billId);
+
+            billService.exportInvoiceToResponse(response, bill);
+
+        } catch (EntityNotFoundException e) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            e.printStackTrace();
+        }
+    }
 
 }
+
+
 
