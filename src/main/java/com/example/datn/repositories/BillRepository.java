@@ -27,7 +27,6 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
 
     @Query("SELECT b.code FROM Bill b WHERE b.code LIKE 'HD___' ORDER BY b.code DESC")
     List<String> findOfflineBillCodes();
-
     @Query("SELECT b FROM Bill b WHERE b.code = :code")
     Bill findByCode(@Param("code") String code);
 

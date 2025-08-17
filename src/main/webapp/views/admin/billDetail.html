@@ -166,8 +166,9 @@
             </table>
             <div class="d-print-none mt-4">
                 <div class="float-end">
-                    <a href=""
-                       class="btn btn-success me-1"><i class="fa fa-print"></i></a>
+                    <a th:href="@{'/admin/bill/export/' + ${bill.id}}" target="_blank" class="btn btn-primary">
+                        In hóa đơn
+                    </a>
                     <a th:href="@{'/admin/bill/view'}">
                         <button type="button" class="btn btn-secondary w-md" data-dismiss="modal">
                             Đóng
