@@ -9,6 +9,10 @@
 <body>
 <div layout:fragment="content">
         <h2 class="form-title">Thêm mã giảm giá</h2>
+    <div th:if="${error}" class="alert alert-warning alert-dismissible fade show" role="alert">
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 
         <form th:action="@{/admin/discount/create}" th:object="${discount}" method="post" novalidate>
             <div class="row">
