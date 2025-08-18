@@ -33,6 +33,7 @@ import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -660,10 +661,13 @@ public class BillService {
         document.add(shopInfo);
 
         // ✅ Thông tin hóa đơn
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+
         Paragraph billInfo = new Paragraph();
         billInfo.setFont(normalFont);
         billInfo.add("Mã hóa đơn: " + bill.getCode() + "\n");
-        billInfo.add("Ngày: " + bill.getCreatedAt().toLocalDate() + "\n\n");
+        billInfo.add("Ngày: " + bill.getCreatedAt().format(format) + "\n\n");
+        billInfo.add(new Paragraph("Tên khách hàng: " + bill.getName()+ "\n\n"));
         document.add(billInfo);
 
         // ✅ Bảng chi tiết sản phẩm
