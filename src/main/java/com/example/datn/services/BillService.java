@@ -14,24 +14,30 @@ import com.example.datn.repositories.BillRepository;
 import com.example.datn.repositories.CustomerRepository;
 import com.example.datn.repositories.cart.CartRepository;
 import com.example.datn.repositories.product_and_other.ProductDetailRepository;
-import javassist.NotFoundException;
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import org.springframework.cglib.core.Local;
-import org.springframework.http.ResponseEntity;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
 import org.springframework.stereotype.Service;
 
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class BillService {
@@ -111,6 +117,7 @@ public class BillService {
         }
         return bill;
     }
+
     public Bill getOne(Integer id) {
         return billRepository.findById(id).orElse(null);
     }
@@ -218,7 +225,7 @@ public class BillService {
 
     public void addProductDetailToCartByBarcode(Integer cartId, String barcode) throws Exception {
         ProductDetail productDetail = productDetailRepository.findProductDetailsByBarcode(barcode);
-        if(productDetail == null){
+        if (productDetail == null) {
             throw new Exception("Không tìm thấy sản phẩm với barcode: " + barcode);
         }
         addProductToCart(cartId, productDetail.getId());
@@ -408,7 +415,7 @@ public class BillService {
         billRepository.save(cart);
     }
 
-    public Customer  addCustomerToCart(Integer cartId, Integer customerId) throws Exception {
+    public Customer addCustomerToCart(Integer cartId, Integer customerId) throws Exception {
         Bill cart = billRepository.findByIdBill(cartId);
         if (cart == null) {
             throw new Exception("Không tìm thấy giỏ hàng");
@@ -441,20 +448,20 @@ public class BillService {
         return billRepository.findMaxCodeBill();
     }
 
-    public String taoMaTuDongBill(){
+    public String taoMaTuDongBill() {
         List<String> codes = billRepository.findOfflineBillCodes();
         int max = 0;
 
-        for(String code : codes){
-            try{
+        for (String code : codes) {
+            try {
                 String numberPart = code.substring(2); // lấy phần sau 'HD'
-                if(numberPart.matches("\\d{3}")){ // chỉ nhận đúng HDxxx
+                if (numberPart.matches("\\d{3}")) { // chỉ nhận đúng HDxxx
                     int number = Integer.parseInt(numberPart);
-                    if(number > max){
+                    if (number > max) {
                         max = number;
                     }
                 }
-            } catch(Exception e){
+            } catch (Exception e) {
 
             }
         }
@@ -488,9 +495,9 @@ public class BillService {
         }
 
         cart.setPaymentStatus(true);
-        if (cart.getDelivery_type() == true){
+        if (cart.getDelivery_type() == true) {
             cart.setStatus(1);                              // giao hàng
-        }else {
+        } else {
             cart.setStatus(4);                              // không giao hàng
         }
         cart.setTypeBill(false); // bán tại quầy
@@ -550,7 +557,7 @@ public class BillService {
         billRepository.save(cart);
     }
 
-//    ================================Khanh==============================================================================
+    //    ================================Khanh==============================================================================
     public Bill updateStatus(String statusString, Integer id) {
         Bill bill = billRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn có id: " + id));
@@ -632,4 +639,113 @@ public class BillService {
             billDetailRepository.save(detail);
         }
     }
+
+    public void exportInvoiceToResponse(HttpServletResponse response, Bill bill) throws IOException, DocumentException {
+        Document document = new Document(PageSize.A4, 36, 36, 36, 36);
+        PdfWriter.getInstance(document, response.getOutputStream());
+        document.open();
+
+        // Font
+        BaseFont bf = BaseFont.createFont("c:/windows/fonts/arial.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        Font titleFont = new Font(bf, 16, Font.BOLD);
+        Font headerFont = new Font(bf, 12, Font.BOLD);
+        Font normalFont = new Font(bf, 11, Font.NORMAL);
+
+        // ✅ Header
+        Paragraph shopName = new Paragraph("CỬA HÀNG ÁO PHÔNG Nam 4PStore", titleFont);
+        shopName.setAlignment(Element.ALIGN_CENTER);
+        document.add(shopName);
+
+        Paragraph shopInfo = new Paragraph("Địa chỉ: FPTPolytechnic - Trịnh Văn Bô\nSĐT: 0123 456 789 - Email: contact@4p.vn\n\n", normalFont);
+        shopInfo.setAlignment(Element.ALIGN_CENTER);
+        document.add(shopInfo);
+
+        // ✅ Thông tin hóa đơn
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+
+        Paragraph billInfo = new Paragraph();
+        billInfo.setFont(normalFont);
+        billInfo.add("Mã hóa đơn: " + bill.getCode() + "\n");
+        billInfo.add("Ngày: " + bill.getCreatedAt().format(format) + "\n\n");
+        billInfo.add(new Paragraph("Tên khách hàng: " + bill.getName()+ "\n\n"));
+        document.add(billInfo);
+
+        // ✅ Bảng chi tiết sản phẩm
+        PdfPTable table = new PdfPTable(5);
+        table.setWidthPercentage(100);
+        table.setWidths(new float[]{1, 4, 2, 3, 3});
+        table.addCell(new Phrase("STT", headerFont));
+        table.addCell(new Phrase("Sản phẩm", headerFont));
+        table.addCell(new Phrase("Số lượng", headerFont));
+        table.addCell(new Phrase("Đơn giá", headerFont));
+        table.addCell(new Phrase("Thành tiền", headerFont));
+
+        NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+        int index = 1;
+        for (BillDetails detail : bill.getBillDetails()) {
+            table.addCell(new Phrase(String.valueOf(index++), normalFont));
+            table.addCell(new Phrase(detail.getProductDetail().getProduct().getName(), normalFont));
+            table.addCell(new Phrase(String.valueOf(detail.getQuantity()), normalFont));
+            table.addCell(new Phrase(formatter.format(detail.getPrice()), normalFont));
+            BigDecimal totalLine = detail.getPrice().multiply(BigDecimal.valueOf(detail.getQuantity()));
+            table.addCell(new Phrase(formatter.format(totalLine), normalFont));
+        }
+        document.add(table);
+
+        document.add(new Paragraph("\n"));
+
+        // ✅ Tổng kết
+        PdfPTable summary = new PdfPTable(2);
+        summary.setWidthPercentage(50);
+        summary.setHorizontalAlignment(Element.ALIGN_RIGHT);
+
+        summary.addCell(new Phrase("Tổng tiền hàng", normalFont));
+        summary.addCell(new Phrase(formatCurrency(bill.getTotalAmount()), normalFont));
+
+        BigDecimal discountAmount = bill.getDiscountAmount() != null ? bill.getDiscountAmount() : BigDecimal.ZERO;
+
+        summary.addCell(new Phrase("Giảm giá", normalFont));
+        summary.addCell(new Phrase(formatCurrency(discountAmount), normalFont));
+
+
+        if (bill.getShippingFee() != null) {
+            summary.addCell(new Phrase("Phí vận chuyển", normalFont));
+            summary.addCell(new Phrase(formatter.format(bill.getShippingFee()), normalFont));
+        }
+
+        PdfPCell totalCell = new PdfPCell(new Phrase("TỔNG THANH TOÁN", headerFont));
+        totalCell.setColspan(1);
+        totalCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        summary.addCell(totalCell);
+
+        PdfPCell totalValue = new PdfPCell(new Phrase(formatCurrency(bill.getTotal_checkout()), headerFont));
+        totalValue.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        summary.addCell(totalValue);
+
+        document.add(summary);
+
+       // ✅ Footer
+        Paragraph footer = new Paragraph("\nXin cảm ơn quý khách!\n", normalFont);
+        footer.setAlignment(Element.ALIGN_CENTER);
+        document.add(footer);
+
+        document.close();
+
+    }
+    private String formatCurrency(Object value) {
+        if (value == null) {
+            return "0 ₫";
+        }
+        if (value instanceof Number) {
+            NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+            return formatter.format(value);
+        }
+        try {
+            return NumberFormat.getCurrencyInstance(new Locale("vi", "VN"))
+                    .format(new BigDecimal(value.toString()));
+        } catch (Exception e) {
+            return value.toString();
+        }
+    }
+
 }
