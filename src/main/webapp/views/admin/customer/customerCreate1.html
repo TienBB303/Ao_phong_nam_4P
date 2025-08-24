@@ -59,11 +59,12 @@
                         </div>
                         <div class="mb-3">
                             <label for="isActive" class="form-label">Trạng thái</label>
-                            <select id="isActive" th:field="*{isActive}" class="form-select">
-                                <option th:value="true">Hoạt động</option>
-                                <option th:value="false">Không hoạt động</option>
-                            </select>
+                            <!-- Hiển thị trạng thái dạng text, không cho chỉnh -->
+                            <input type="text" class="form-control" value="Hoạt động" readonly>
+                            <!-- Input hidden để gửi giá trị true về backend -->
+                            <input type="hidden" th:field="*{isActive}" value="true"/>
                         </div>
+
                         <hr/>
                         <h5 class="fw-semibold">ĐỊA CHỈ GIAO HÀNG</h5>
                         <div class="mb-3">
@@ -189,7 +190,7 @@
         var checkBox = document.getElementById("otherReceiver");
         var form = document.getElementById("receiverForm");
         form.style.display = checkBox.checked ? "block" : "none";
-        
+
         // Clear form fields when unchecking
         if (!checkBox.checked) {
             document.querySelector('[name="address.receiverName"]').value = '';
@@ -241,6 +242,10 @@
             }
             phoneInput.reportValidity();
             if (!isValid) {
+                e.preventDefault();
+            }
+            // --- Hiển thị alert xác nhận ---
+            if (!confirm("Bạn có chắc chắn muốn thêm khách hàng này không?")) {
                 e.preventDefault();
             }
         });

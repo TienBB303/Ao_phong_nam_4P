@@ -4,9 +4,6 @@
       layout:decorate="~{admin/admin-layout}">
 <head>
     <title>Thống Kê Doanh Thu</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 </head>
 <div layout:fragment="content">
     <div class="container py-4">
@@ -94,8 +91,7 @@
                             </div>
                         </div>
                         <p class="mt-3 mb-0 text-sm">
-                            <span class="text-success mr-2"
-                                  th:text="${revenueSummary.totalOrdersThisYear + ' đơn hàng'}">0 đơn hàng</span>
+                            <span class="text-success mr-2" th:text="${revenueSummary.totalOrdersThisYear + ' đơn hàng'}">0 đơn hàng</span>
                             <span class="text-nowrap">năm nay</span>
                         </p>
                     </div>
@@ -108,20 +104,13 @@
                     <div class="card-header">Biểu đồ doanh thu theo ngày</div>
                     <div class="card-body">
                         <div class="btn-group mb-2" role="group">
-                            <button type="button" class="btn btn-sm btn-outline-primary active"
-                                    onclick="loadDailyChart(7)">7 ngày
-                            </button>
-                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="loadDailyChart(30)">30
-                                ngày
-                            </button>
-                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="loadDailyChart(90)">90
-                                ngày
-                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary active" onclick="loadDailyChart(7)">7 ngày</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="loadDailyChart(30)">30 ngày</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="loadDailyChart(90)">90 ngày</button>
                         </div>
                         <div class="chart-container">
                             <canvas id="dailyRevenueChart"></canvas>
-                            <div id="dailyChartLoading" class="text-center"
-                                 style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                            <div id="dailyChartLoading" class="text-center" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
                                 <div class="spinner-border text-primary" role="status">
                                     <span class="sr-only">Đang tải...</span>
                                 </div>
@@ -142,8 +131,7 @@
                         </select>
                         <div class="chart-container" style="height: 300px;">
                             <canvas id="monthlyRevenueChart"></canvas>
-                            <div id="monthlyChartLoading" class="text-center"
-                                 style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                            <div id="monthlyChartLoading" class="text-center" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
                                 <div class="spinner-border text-success" role="status">
                                     <span class="sr-only">Đang tải...</span>
                                 </div>
@@ -160,15 +148,13 @@
                     <div class="card-header">Biểu đồ doanh thu theo khoảng thời gian</div>
                     <div class="card-body">
                         <div class="d-flex gap-2 mb-2">
-                            <input type="date" class="form-control form-control-sm" id="startDate"
-                                   style="width: 150px;">
+                            <input type="date" class="form-control form-control-sm" id="startDate" style="width: 150px;">
                             <input type="date" class="form-control form-control-sm" id="endDate" style="width: 150px;">
                             <button class="btn btn-sm btn-primary" onclick="loadRangeChart()">Áp dụng</button>
                         </div>
                         <div class="chart-container">
                             <canvas id="rangeRevenueChart"></canvas>
-                            <div id="rangeChartLoading" class="text-center"
-                                 style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                            <div id="rangeChartLoading" class="text-center" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
                                 <div class="spinner-border text-info" role="status">
                                     <span class="sr-only">Đang tải...</span>
                                 </div>
@@ -185,138 +171,26 @@
     let dailyChart, monthlyChart, rangeChart;
     function waitForChart() {
         return new Promise((resolve, reject) => {
-            if (typeof Chart !== 'undefined' && typeof ChartDataLabels !== 'undefined') {
-                Chart.register(ChartDataLabels);
-                resolve();
-                return;
-            }
+            if (typeof Chart !== 'undefined') { resolve(); return; }
             let attempts = 0;
             const maxAttempts = 50;
             const checkChart = setInterval(() => {
                 attempts++;
-                if (typeof Chart !== 'undefined' && typeof ChartDataLabels !== 'undefined') {
-                    Chart.register(ChartDataLabels);
-                    clearInterval(checkChart);
-                    resolve();
-                } else if (attempts >= maxAttempts) {
-                    clearInterval(checkChart);
-                    reject(new Error('Chart.js failed to load'));
-                }
+                if (typeof Chart !== 'undefined') { clearInterval(checkChart); resolve(); }
+                else if (attempts >= maxAttempts) { clearInterval(checkChart); reject(new Error('Chart.js failed to load')); }
             }, 100);
         });
     }
-
-    // Hàm format tiền tệ cho data labels (giữ nguyên format gốc)
-    function formatCurrencyForLabel(value) {
-        if (value === 0) return '0 VNĐ';
-
-        // Sử dụng format gốc giống như trong template Thymeleaf
-        return new Intl.NumberFormat('vi-VN').format(value) + ' VNĐ';
-    }
-
-    // Hàm format rút gọn cho số lớn (tùy chọn)
-    function formatCurrencyShort(value) {
-        if (value === 0) return '0';
-        if (value >= 1000000000) {
-            return new Intl.NumberFormat('vi-VN', {maximumFractionDigits: 1}).format(value / 1000000000) + 'B VNĐ';
-        } else if (value >= 1000000) {
-            return new Intl.NumberFormat('vi-VN', {maximumFractionDigits: 1}).format(value / 1000000) + 'M VNĐ';
-        } else if (value >= 1000) {
-            return new Intl.NumberFormat('vi-VN', {maximumFractionDigits: 1}).format(value / 1000) + 'K VNĐ';
-        }
-        return new Intl.NumberFormat('vi-VN').format(value) + ' VNĐ';
-    }
-
-    // Cấu hình chung cho data labels
-    const dataLabelsConfig = {
-        anchor: 'end',
-        align: 'top',
-        color: '#333',
-        font: {
-            weight: 'bold',
-            size: 9
-        },
-        formatter: function (value, context) {
-            // Sử dụng format rút gọn cho biểu đồ có nhiều dữ liệu
-            const dataLength = context.chart.data.labels.length;
-            if (dataLength > 15) {
-                return formatCurrencyShort(value);
-            }
-            // Sử dụng format đầy đủ cho ít dữ liệu
-            return formatCurrencyForLabel(value);
-        },
-        padding: {
-            top: 4
-        },
-        // // Chỉ hiển thị label cho giá trị > 0
-        // display: function (context) {
-        //     return context.parsed.y > 0;
-        // }
-        display: true
-    };
-    // Cấu hình chung cho các options của chart
-    function getChartOptions() {
-        return {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                datalabels: dataLabelsConfig,
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return 'Doanh Thu: ' + new Intl.NumberFormat('vi-VN').format(context.parsed.y) + ' VNĐ';
-                        }
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function(value, index, values) {
-                            if (value >= 1000000000) {
-                                return (value / 1000000000).toFixed(1) + 'B';
-                            } else if (value >= 1000000) {
-                                return (value / 1000000).toFixed(1) + 'M';
-                            } else if (value >= 1000) {
-                                return (value / 1000).toFixed(1) + 'K';
-                            }
-                            return new Intl.NumberFormat('vi-VN').format(value);
-                        }
-                    }
-                }
-            },
-            layout: {
-                padding: {
-                    top: 30
-                }
-            }
-        };
-    }
-    document.addEventListener('DOMContentLoaded', function () {
-        // Đảm bảo Chart.js đã được load
-        if (typeof Chart === 'undefined') {
-            console.error('Chart.js chưa được load!');
-            return;
-        }
-        // Đăng ký plugin
-        if (typeof ChartDataLabels !== 'undefined') {
-            Chart.register(ChartDataLabels);
-        } else {
-            console.warn('ChartDataLabels plugin không có sẵn');
-        }
-        initializeDatePickers();
-
-        // Load charts với delay ngắn hơn
-        setTimeout(() => {
-            console.log('Loading charts...');
-            loadDailyChart(30);
-            loadMonthlyChart();
-            loadRangeChart();
-        }, 500);
+    document.addEventListener('DOMContentLoaded', function() {
+        waitForChart().then(() => {
+            initializeDatePickers();
+            setTimeout(() => {
+                loadDailyChart(30);
+                loadMonthlyChart();
+                loadRangeChart();
+            }, 100);
+        });
     });
-
     function initializeDatePickers() {
         const today = new Date();
         const thirtyDaysAgo = new Date(today);
@@ -324,70 +198,49 @@
         document.getElementById('startDate').value = thirtyDaysAgo.toISOString().split('T')[0];
         document.getElementById('endDate').value = today.toISOString().split('T')[0];
     }
-
-    function loadDailyChart(days, event) {
+    function loadDailyChart(days) {
         const endDate = new Date();
         const startDate = new Date();
         startDate.setDate(endDate.getDate() - days);
-
         const startDateStr = startDate.toISOString().split('T')[0];
         const endDateStr = endDate.toISOString().split('T')[0];
-
-        document.querySelectorAll('.btn-group button').forEach(btn => btn.classList.remove('active'));
-        if (event) event.target.classList.add('active');
-
-        const loadingEl = document.getElementById('dailyChartLoading');
-        loadingEl.style.display = 'block';
-
         fetch(`/admin/revenue/api/daily?startDate=${startDateStr}&endDate=${endDateStr}`)
             .then(response => response.json())
             .then(data => {
-                loadingEl.style.display = 'none';
-                if (!data || data.length === 0) return;
+                const loadingEl = document.getElementById('dailyChartLoading');
+                if (loadingEl) loadingEl.style.display = 'none';
                 if (dailyChart) dailyChart.destroy();
-                dailyChart = new Chart(document.getElementById('dailyRevenueChart'), {
+                const ctx = document.getElementById('dailyRevenueChart');
+                if (!ctx) return;
+                dailyChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
                         labels: data.map(item => formatDate(item.date)),
-                        datasets: [{ label: 'Doanh Thu (VNĐ)', data: data.map(item => item.totalRevenue), backgroundColor: 'rgba(0,123,255,0.8)' }]
+                        datasets: [{
+                            label: 'Doanh Thu (VNĐ)',
+                            data: data.map(item => item.totalRevenue),
+                            backgroundColor: 'rgba(0, 123, 255, 0.8)',
+                            borderColor: '#007bff',
+                            borderWidth: 2,
+                            borderRadius: 8,
+                            borderSkipped: false,
+                        }]
                     },
-                    options: getChartOptions()
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
                 });
-            })
-            .catch(error => {
-                loadingEl.innerHTML = `<p class="text-danger">Lỗi khi tải dữ liệu!</p>`;
             });
     }
-
-
     function loadMonthlyChart() {
         const yearSelect = document.getElementById('yearSelect');
         const year = yearSelect ? yearSelect.value : new Date().getFullYear();
-
-        console.log(`Loading monthly chart for year: ${year}`);
-
         fetch(`/admin/revenue/api/monthly?year=${year}`)
-            .then(response => {
-                console.log('Monthly API response status:', response.status);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
-                console.log('Monthly chart data:', data);
-
                 const loadingEl = document.getElementById('monthlyChartLoading');
                 if (loadingEl) loadingEl.style.display = 'none';
-
                 if (monthlyChart) monthlyChart.destroy();
-
                 const ctx = document.getElementById('monthlyRevenueChart');
-                if (!ctx) {
-                    console.error('Canvas monthlyRevenueChart không tìm thấy!');
-                    return;
-                }
-
+                if (!ctx) return;
                 monthlyChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
@@ -399,60 +252,24 @@
                             borderColor: 'rgba(40, 167, 69, 1)',
                             borderWidth: 2,
                             borderRadius: 8,
-                            borderSkipped: false
+                            borderSkipped: false,
                         }]
                     },
-                    options: getChartOptions(),
-                    plugins: typeof ChartDataLabels !== 'undefined' ? [ChartDataLabels] : []
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
                 });
-                console.log('Monthly chart created successfully');
-            })
-            .catch(error => {
-                console.error('Error loading monthly chart:', error);
-                const loadingEl = document.getElementById('monthlyChartLoading');
-                if (loadingEl) {
-                    loadingEl.innerHTML = `
-                    <div class="alert alert-danger">
-                        <strong>Lỗi:</strong> ${error.message}
-                    </div>
-                `;
-                }
             });
     }
-
     function loadRangeChart() {
         const startDate = document.getElementById('startDate').value;
         const endDate = document.getElementById('endDate').value;
-
-        if (!startDate || !endDate) {
-            console.warn('Start date hoặc end date không có giá trị');
-            return;
-        }
-
-        console.log(`Loading range chart from ${startDate} to ${endDate}`);
-
         fetch(`/admin/revenue/api/daily?startDate=${startDate}&endDate=${endDate}`)
-            .then(response => {
-                console.log('Range API response status:', response.status);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
-                console.log('Range chart data:', data);
-
                 const loadingEl = document.getElementById('rangeChartLoading');
                 if (loadingEl) loadingEl.style.display = 'none';
-
                 if (rangeChart) rangeChart.destroy();
-
                 const ctx = document.getElementById('rangeRevenueChart');
-                if (!ctx) {
-                    console.error('Canvas rangeRevenueChart không tìm thấy!');
-                    return;
-                }
-
+                if (!ctx) return;
                 rangeChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
@@ -464,46 +281,23 @@
                             borderColor: 'rgba(23, 162, 184, 1)',
                             borderWidth: 2,
                             borderRadius: 8,
-                            borderSkipped: false
+                            borderSkipped: false,
                         }]
                     },
-                    options: getChartOptions(),
-                    plugins: typeof ChartDataLabels !== 'undefined' ? [ChartDataLabels] : []
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
                 });
-                console.log('Range chart created successfully');
-            })
-            .catch(error => {
-                console.error('Error loading range chart:', error);
-                const loadingEl = document.getElementById('rangeChartLoading');
-                if (loadingEl) {
-                    loadingEl.innerHTML = `
-                    <div class="alert alert-danger">
-                        <strong>Lỗi:</strong> ${error.message}
-                    </div>
-                `;
-                }
             });
     }
-
     function formatCurrency(amount) {
         return new Intl.NumberFormat('vi-VN').format(amount) + ' VND';
     }
-
     function formatDate(dateString) {
         const date = new Date(dateString);
-        return date.toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit', year: 'numeric'});
+        return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
     }
 </script>
 <style layout:fragment="style">
-    .chart-container {
-        position: relative;
-        height: 350px;
-        width: 100%;
-        padding: 10px;
-    }
-    .chart-container canvas {
-        max-height: 100% !important;
-        width: 100% !important;
-    }
+    .chart-container { position: relative; height: 350px; width: 100%; padding: 10px; }
+    .chart-container canvas { max-height: 100% !important; width: 100% !important; }
 </style>
 </html>

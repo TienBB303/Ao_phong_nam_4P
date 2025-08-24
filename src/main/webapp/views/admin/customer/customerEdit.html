@@ -227,7 +227,7 @@
         var checkBox = document.getElementById("otherReceiver");
         var form = document.getElementById("receiverForm");
         form.style.display = checkBox.checked ? "block" : "none";
-        
+
         // Clear form fields when unchecking
         if (!checkBox.checked) {
             document.querySelector('[name="address.receiverName"]').value = '';
@@ -247,7 +247,7 @@
     // Bổ sung đoạn này
     $('form').on('submit', function() {
         $('#wardName').val($("#ward option:selected").text());
-        
+
         // Đảm bảo checkbox isDefault được submit đúng
         var isDefaultCheckbox = document.getElementById("isDefault");
         if (isDefaultCheckbox) {
@@ -302,7 +302,7 @@
         var receiverPhone = document.querySelector('[name="address.receiverPhoneNumber"]').value;
         var checkBox = document.getElementById("otherReceiver");
         var receiverForm = document.getElementById("receiverForm");
-        
+
         // Kiểm tra và hiển thị form người nhận nếu có dữ liệu
         if ((receiverName && receiverName.trim() !== "") || (receiverPhone && receiverPhone.trim() !== "")) {
             checkBox.checked = true;
@@ -311,13 +311,13 @@
             checkBox.checked = false;
             receiverForm.style.display = "none";
         }
-        
+
         // Đảm bảo checkbox isDefault hiển thị đúng trạng thái
         var isDefaultCheckbox = document.getElementById("isDefault");
         if (isDefaultCheckbox) {
             var isDefaultValue = /*[[${customerDto.address.isDefault}]]*/ false;
             isDefaultCheckbox.checked = isDefaultValue === true;
-            
+
             // Thêm event listener để debug
             isDefaultCheckbox.addEventListener('change', function() {
                 console.log('isDefault checkbox changed to:', this.checked);

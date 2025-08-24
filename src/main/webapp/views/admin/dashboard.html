@@ -5,7 +5,7 @@
 </head>
 <div layout:fragment="content">
     <div class="container py-4">
-        <h4 class="mb-4">Xin chào</h4>
+        <h4 class="mb-4">4PStore xin chào</h4>
         <div class="row mb-4">
             <div class="col-md-3 mb-3">
                 <div class="card text-center p-3">
@@ -22,7 +22,7 @@
             <div class="col-md-3 mb-3">
                 <div class="card text-center p-3">
                     <div class="h6">Tổng doanh thu</div>
-                    <div class="h4" th:text="${totalRevenue}">0</div>
+                    <div class="h4" th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">0</div>
                 </div>
             </div>
             <div class="col-md-3 mb-3">
@@ -31,21 +31,22 @@
                     <div class="h4" th:text="${totalProducts}">0</div>
                 </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-md-6 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="h6 mb-2">Khách hàng</div>
-                        <canvas id="customerChart"
-                                th:data-count="${customerCount}"></canvas>
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="h6 mb-2">Doanh thu 7 ngày gần nhất</div>
+                            <canvas id="revenueChart"
+                                    th:data-labels="${dateLabels}"
+                                    th:data-values="${revenueValues}"></canvas>
+                        </div>
                     </div>
                 </div>
-            </div>
+        </div>
             <div class="col-md-6 mb-4">
                 <div class="card">
                     <div class="card-body">
-                        <div class="h6 mb-2">Đơn hàng</div>
+                        <div class="h6 mb-2">Đơn hàng theo trạng thái</div>
                         <canvas id="orderPieChart"
                                 th:data-labels="${orderStatusMap.keySet()}"
                                 th:data-values="${orderStatusMap.values()}"></canvas>
@@ -57,35 +58,86 @@
 </div>
 <script layout:fragment="script">
     document.addEventListener('DOMContentLoaded', function() {
-        // Biểu đồ khách hàng: chỉ 1 cột tổng số khách hàng
-        const cchart = document.getElementById('customerChart');
-        let ccount = cchart.getAttribute('data-count');
-        ccount = parseInt(ccount || '0');
-        new Chart(cchart.getContext('2d'), {
+        // Biểu đồ doanh thu 7 ngày gần nhất
+        const revenueChart = document.getElementById('revenueChart');
+        let dateLabels = revenueChart.getAttribute('data-labels');
+        let revenueValues = revenueChart.getAttribute('data-values');
+        console.log('Raw dateLabels:', dateLabels);
+        console.log('Raw revenueValues:', revenueValues);
+        try {
+            // Parse dữ liệu từ Thymeleaf - xử lý chuỗi từ ArrayList
+            if (dateLabels && dateLabels.startsWith('[') && dateLabels.endsWith(']')) {
+                dateLabels = dateLabels.slice(1, -1).split(',').map(s => s.trim().replace(/['"]/g, ''));
+            } else {
+                dateLabels = dateLabels ? dateLabels.split(',').map(s => s.trim()) : [];
+            }
+
+            if (revenueValues && revenueValues.startsWith('[') && revenueValues.endsWith(']')) {
+                revenueValues = revenueValues.slice(1, -1).split(',').map(s => parseFloat(s.trim()) || 0);
+            } else {
+                revenueValues = revenueValues ? revenueValues.split(',').map(s => parseFloat(s.trim()) || 0) : [];
+            }
+        } catch (e) {
+            console.error('Error parsing revenue data:', e);
+            dateLabels = [];
+            revenueValues = [];
+        }
+        console.log('Parsed dateLabels:', dateLabels);
+        console.log('Parsed revenueValues:', revenueValues);
+        new Chart(revenueChart.getContext('2d'), {
             type: 'bar',
             data: {
-                labels: ['Tổng khách hàng'],
+                labels: dateLabels,
                 datasets: [{
-                    label: 'Tổng khách hàng',
-                    data: [ccount],
+                    label: 'Doanh thu (VND)',
+                    data: revenueValues,
                     backgroundColor: 'rgba(0,200,150,0.7)',
                     borderColor: 'rgba(0,200,150,1)',
                     borderWidth: 2
                 }]
             },
-            options: {responsive:true, plugins:{legend:{display:false}}}
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return new Intl.NumberFormat('vi-VN').format(value) + ' đ';
+                            }
+                        }
+                    }
+                }
+            }
         });
         // Biểu đồ tròn đơn hàng (dữ liệu động)
         const pie = document.getElementById('orderPieChart');
         let labels = pie.getAttribute('data-labels');
         let values = pie.getAttribute('data-values');
         try {
-            labels = JSON.parse(labels.replace(/'/g, '"'));
-            values = JSON.parse(values.replace(/'/g, '"'));
+            if (labels && labels.startsWith('[') && labels.endsWith(']')) {
+                labels = labels.slice(1, -1).split(',').map(s => s.trim().replace(/['"]/g, ''));
+            } else {
+                labels = labels ? labels.split(',').map(s => s.trim()) : [];
+            }
+
+            if (values && values.startsWith('[') && values.endsWith(']')) {
+                values = values.slice(1, -1).split(',').map(s => parseInt(s.trim()) || 0);
+            } else {
+                values = values ? values.split(',').map(s => parseInt(s.trim()) || 0) : [];
+            }
         } catch (e) {
-            labels = labels ? labels.split(',') : [];
-            values = values ? values.split(',') : [];
+            console.error('Error parsing order status data:', e);
+            labels = [];
+            values = [];
         }
+        console.log('Parsed order labels:', labels);
+        console.log('Parsed order values:', values);
         new Chart(pie.getContext('2d'), {
             type: 'pie',
             data: {
@@ -94,16 +146,33 @@
                     label: 'Đơn hàng',
                     data: values,
                     backgroundColor: [
-                        'rgba(0,200,150,0.7)',
-                        'rgba(0,123,255,0.7)',
-                        'rgba(255,193,7,0.7)',
-                        'rgba(220,53,69,0.7)',
-                        'rgba(40,167,69,0.7)',
-                        'rgba(108,117,125,0.7)'
-                    ]
+                        'rgba(255,193,7,0.7)',   // Chờ xác nhận - vàng
+                        'rgba(0,123,255,0.7)',   // Đã xác nhận - xanh dương
+                        'rgba(108,117,125,0.7)', // Đang giao - xám
+                        'rgba(40,167,69,0.7)',   // Hoàn thành - xanh lá
+                        'rgba(220,53,69,0.7)',   // Đã hủy - đỏ
+                        'rgba(0,200,150,0.7)'    // Tại quầy - xanh mint
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
                 }]
             },
-            options: {responsive:true, plugins:{legend:{display:true}}}
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.parsed + ' đơn';
+                            }
+                        }
+                    }
+                }
+            }
         });
     });
 </script> 

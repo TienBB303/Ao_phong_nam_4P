@@ -427,6 +427,15 @@ public class BillService {
         }
 
         cart.setCustomer(customer);
+//        if (customer.getName() != null && !customer.getName().trim().isEmpty()) {
+        cart.setName(customer.getName());
+//        }
+//        if (customer.getPhoneNumber() != null && !customer.getPhoneNumber().trim().isEmpty()) {
+        cart.setPhoneNumber(customer.getPhoneNumber());
+//        }
+//        if (customer.getAddresses() != null && !customer.getAddresses().isEmpty()) {
+        cart.setAddress_shipping(customer.getAddresses().get(0).toString());
+//        }
         cart.setName(customer.getName());
         cart.setPhoneNumber(customer.getPhoneNumber());
 
@@ -749,3 +758,5 @@ public class BillService {
     }
 
 }
+
+

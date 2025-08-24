@@ -20,9 +20,7 @@ public class RevenueController {
     @Autowired
     private RevenueService revenueService;
 
-    /**
-     * Hiển thị trang thống kê doanh thu
-     */
+    /** Hiển thị trang thống kê doanh thu */
     @GetMapping
     public String revenueStatsPage(Model model) {
         RevenueSummaryDto summary = revenueService.getRevenueSummary();
@@ -33,57 +31,45 @@ public class RevenueController {
 
     // ==================== API ENDPOINTS ====================
 
-    /**
-     * API: Lấy tổng quan doanh thu
-     */
+    /** Tổng quan doanh thu */
     @GetMapping("/api/summary")
     @ResponseBody
     public ResponseEntity<RevenueSummaryDto> getRevenueSummary() {
-        RevenueSummaryDto summary = revenueService.getRevenueSummary();
-        return ResponseEntity.ok(summary);
+        return ResponseEntity.ok(revenueService.getRevenueSummary());
     }
 
-    /**
-     * API: Thống kê doanh thu theo khoảng ngày
-     */
+    /** Doanh thu theo ngày */
     @GetMapping("/api/daily")
     @ResponseBody
     public ResponseEntity<List<RevenueStatsDto>> getDailyRevenue(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
 
-        List<RevenueStatsDto> stats = revenueService.getRevenueByDateRange(startDate, endDate);
-        System.out.println("Returned stats size: " + stats.size());
-        return ResponseEntity.ok(stats);
+        if (!isValidDateRange(startDate, endDate)) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(revenueService.getRevenueByDateRange(startDate, endDate));
     }
 
-    /**
-     * API: Thống kê doanh thu theo tháng trong năm
-     */
+    /** Doanh thu theo tháng */
     @GetMapping("/api/monthly")
     @ResponseBody
     public ResponseEntity<List<RevenueStatsDto>> getMonthlyRevenue(
-            @RequestParam(defaultValue = "2024") int year) {
-
-        List<RevenueStatsDto> stats = revenueService.getRevenueByMonth(year);
-        System.out.println("API Called: /api/monthly?year=" + year);
-        System.out.println("Returned stats size: " + stats.size());
-        return ResponseEntity.ok(stats);
+            @RequestParam(required = false) Integer year) {
+        if (year == null) {
+            year = LocalDate.now().getYear();
+        }
+        return ResponseEntity.ok(revenueService.getRevenueByMonth(year));
     }
 
-    /**
-     * API: Thống kê doanh thu theo năm
-     */
+    /** Doanh thu theo năm */
     @GetMapping("/api/yearly")
     @ResponseBody
     public ResponseEntity<List<RevenueStatsDto>> getYearlyRevenue() {
-        List<RevenueStatsDto> stats = revenueService.getRevenueByYear();
-        return ResponseEntity.ok(stats);
+        return ResponseEntity.ok(revenueService.getRevenueByYear());
     }
 
-    /**
-     * API: Lấy thống kê hôm nay
-     */
+    /** Doanh thu hôm nay */
     @GetMapping("/api/today")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> getTodayStats() {
@@ -93,66 +79,74 @@ public class RevenueController {
         return ResponseEntity.ok(stats);
     }
 
-    /**
-     * API: Lấy sản phẩm bán chạy
-     */
-    @GetMapping("/api/top-products")
-    @ResponseBody
-    public ResponseEntity<List<Object[]>> getTopSellingProducts(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @RequestParam(defaultValue = "10") int limit) {
+//    /** Sản phẩm bán chạy */
+//    @GetMapping("/api/top-products")
+//    @ResponseBody
+//    public ResponseEntity<List<Map<String, Object>>> getTopSellingProducts(
+//            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+//            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+//            @RequestParam(defaultValue = "10") int limit) {
+//
+//        if (!isValidDateRange(startDate, endDate)) {
+//            return ResponseEntity.badRequest().build();
+//        }
+//
+//        List<Object[]> products = revenueService.getTopSellingProducts(startDate, endDate);
+//        if (products.size() > limit) {
+//            products = products.subList(0, limit);
+//        }
+//
+//        // Convert Object[] -> Map cho dễ đọc trên FE
+//        List<Map<String, Object>> response = products.stream().map(row -> {
+//            Map<String, Object> map = new HashMap<>();
+//            map.put("productName", row[0]);
+//            map.put("quantitySold", row[1]);
+//            map.put("totalRevenue", row[2]);
+//            return map;
+//        }).toList();
+//
+//        return ResponseEntity.ok(response);
+//    }
 
-        List<Object[]> products = revenueService.getTopSellingProducts(startDate, endDate);
-
-        // Giới hạn số lượng sản phẩm trả về
-        if (products.size() > limit) {
-            products = products.subList(0, limit);
-        }
-
-        return ResponseEntity.ok(products);
-    }
-
-    /**
-     * API: Thống kê doanh thu theo khoảng thời gian tùy chỉnh
-     */
+    /** Doanh thu theo khoảng tùy chọn */
     @GetMapping("/api/custom-range")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> getCustomRangeRevenue(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
 
-        Object[] result = revenueService.getRevenueByCustomDateRange(startDate, endDate);
+        if (!isValidDateRange(startDate, endDate)) {
+            return ResponseEntity.badRequest().build();
+        }
 
+        Object[] result = revenueService.getRevenueByCustomDateRange(startDate, endDate);
         Map<String, Object> response = new HashMap<>();
         response.put("totalRevenue", result[0]);
         response.put("totalOrders", result[1]);
         response.put("startDate", startDate);
         response.put("endDate", endDate);
-
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * API: Lấy thống kê chi tiết theo ngày trong tháng
-     */
+    /** Chi tiết tháng (mặc định tháng 1 nếu không truyền) */
     @GetMapping("/api/month-detail")
     @ResponseBody
     public ResponseEntity<List<RevenueStatsDto>> getMonthDetailRevenue(
-            @RequestParam(defaultValue = "2024") int year,
-            @RequestParam(defaultValue = "1") int month) {
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month) {
+
+        if (year == null) year = LocalDate.now().getYear();
+        if (month == null) month = LocalDate.now().getMonthValue();
 
         LocalDate startDate = LocalDate.of(year, month, 1);
         LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
 
-        List<RevenueStatsDto> stats = revenueService.getRevenueByDateRange(startDate, endDate);
-        return ResponseEntity.ok(stats);
+        return ResponseEntity.ok(revenueService.getRevenueByDateRange(startDate, endDate));
     }
 
-    /**
-     * Validate date range
-     */
+    /** Validate khoảng ngày */
     private boolean isValidDateRange(LocalDate startDate, LocalDate endDate) {
-        return startDate != null && endDate != null && !startDate.isAfter(endDate);
+        LocalDate today = LocalDate.now();
+        return startDate != null && endDate != null && !startDate.isAfter(endDate) && !endDate.isAfter(today);
     }
 }

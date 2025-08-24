@@ -183,27 +183,25 @@ public class CustomerServiceImpl implements CustomerService {
             address.setWardName(addressDto.getWardName());
             address.setReceiverName(addressDto.getReceiverName());
             address.setReceiverPhoneNumber(addressDto.getReceiverPhoneNumber());
-            
+
             // Xử lý checkbox isDefault
             Boolean isDefault = addressDto.getIsDefault();
             if (isDefault == null) {
                 isDefault = false;
             }
             address.setIsDefault(isDefault);
-            
+
             // Nếu chọn là mặc định, update các địa chỉ khác về không mặc định
             if (isDefault) {
                 shippingAddressRepository.updateAllDefaultFalseByCustomerId(existing.getId());
             }
-            
+
             // Debug log
             System.out.println("Updating address isDefault: " + isDefault);
-
             shippingAddressRepository.save(address);
         }
-
         return customerRepository.save(existing);
-    }
+        }
     private ShippingAddress buildShippingAddress(Customer customer, AddressDto dto) {
         ShippingAddress address = new ShippingAddress();
         address.setCustomer(customer);
@@ -247,16 +245,16 @@ public class CustomerServiceImpl implements CustomerService {
         String rawPassword = generateRandomPassword();
         String encodedPassword = passwordEncoder.encode(rawPassword);
         account.setPassword(encodedPassword);
-        
+
         // Set role cho khách hàng
         Role role = roleRepository.findByName("ROLE_CUSTOMER")
                 .orElseThrow(() -> new RuntimeException("Role ROLE_CUSTOMER không tồn tại!"));
         account.setRole(role);
-        
+
         // Set trạng thái ban đầu là false (chưa đổi mật khẩu)
         account.setStatus(false);
         account.setCreatedAt(java.time.LocalDateTime.now());
-        
+
         accountRepository.save(account);
 
         // Tạo địa chỉ nếu có
@@ -345,7 +343,7 @@ public class CustomerServiceImpl implements CustomerService {
     public void updatePassword(Integer accountId, String newPassword) {
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại"));
-        
+
         String encodedPassword = passwordEncoder.encode(newPassword);
         account.setPassword(encodedPassword);
         account.setUpdatedAt(java.time.LocalDateTime.now());
@@ -357,11 +355,62 @@ public class CustomerServiceImpl implements CustomerService {
     public void updateAccountStatus(Integer accountId, boolean status) {
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại"));
-        
+
         account.setStatus(status);
         account.setUpdatedAt(java.time.LocalDateTime.now());
         accountRepository.save(account);
     }
 
 
+    // Cập nhật thông tin cá nhân cho user
+    @Override
+    @Transactional
+    public void updateCustomerProfile(Integer customerId, CustomerDto dto) {
+        Customer existing = customerRepository.findById(customerId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng có id = " + customerId));
+        // Cập nhật thông tin cá nhân
+        existing.setName(dto.getName());
+        existing.setPhoneNumber(dto.getPhoneNumber());
+        existing.setBirthDate(dto.getBirthday());
+        existing.setGender(dto.getGender());
+        // Cập nhật địa chỉ mặc định
+        AddressDto addressDto = dto.getAddress();
+        if (addressDto != null) {
+            ShippingAddress address = null;
+            if (existing.getAddresses() != null && !existing.getAddresses().isEmpty()) {
+                address = existing.getAddresses().stream().filter(ShippingAddress::getIsDefault).findFirst().orElse(null);
+            }
+            if (address == null) {
+                address = new ShippingAddress();
+                address.setCustomer(existing);
+            }
+            address.setAddressDetail(addressDto.getAddressDetail());
+            address.setProvinceId(addressDto.getProvinceId());
+            address.setProvinceName(addressDto.getProvinceName());
+            address.setDistrictId(addressDto.getDistrictId());
+            address.setDistrictName(addressDto.getDistrictName());
+            address.setWardId(addressDto.getWardId());
+            address.setWardName(addressDto.getWardName());
+            address.setReceiverName(addressDto.getReceiverName());
+            address.setReceiverPhoneNumber(addressDto.getReceiverPhoneNumber());
+            Boolean isDefault = addressDto.getIsDefault();
+            if (isDefault == null) isDefault = true;
+            address.setIsDefault(isDefault);
+            if (isDefault) {
+                shippingAddressRepository.updateAllDefaultFalseByCustomerId(existing.getId());
+            }
+            shippingAddressRepository.save(address);
+        }
+        customerRepository.save(existing);
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public Customer findByIdWithAddresses(Integer id) {
+        // CÁCH 1: Sử dụng repository method với JOIN FETCH
+        return customerRepository.findByIdWithAddresses(id).orElse(null);
+    }
+    @Override
+    public Account findAccountById(Integer accountId) {
+        return accountRepository.findById(accountId).orElse(null);
+    }
 }

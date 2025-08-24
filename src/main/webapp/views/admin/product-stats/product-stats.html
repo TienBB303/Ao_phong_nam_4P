@@ -120,13 +120,17 @@
                     endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
                     break;
                 case 'thisWeek':
-                    let firstDayOfWeek = new Date(now.setDate(now.getDate() - (now.getDay() + 6) % 7)); // Monday as first day
-                    startDate = new Date(firstDayOfWeek.getFullYear(), firstDayOfWeek.getMonth(), firstDayOfWeek.getDate(), 0, 0, 0);
-                    endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59); // End of today
+                    // Tạo bản sao của "now" để không bị thay đổi khi tính toán
+                    let temp = new Date(now);
+                    let dayOfWeek = temp.getDay(); // Chủ nhật = 0, Thứ 2 = 1, ...
+                    let diffToMonday = (dayOfWeek + 6) % 7; // khoảng cách từ hôm nay về thứ 2
+                    temp.setDate(temp.getDate() - diffToMonday); // ra ngày thứ 2 đầu tuần
+                    startDate = new Date(temp.getFullYear(), temp.getMonth(), temp.getDate(), 0, 0, 0);
+                    endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59); // luôn là cuối ngày hôm nay
                     break;
                 case 'thisMonth':
                     startDate = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
-                    endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59); // Last day of month
+                    endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
                     break;
                 case 'thisYear':
                     startDate = new Date(now.getFullYear(), 0, 1, 0, 0, 0);
@@ -134,12 +138,9 @@
                     break;
                 case 'all':
                 default:
-                    // startDate và endDate là null cho "Tất cả thời gian"
                     break;
             }
 
-            // Định dạng lại sang ISO 8601 string cho LocalDateTime của Spring Boot
-            // LocalDateTime của Spring Boot có định dạng "yyyy-MM-dd'T'HH:mm:ss"
             return {
                 startDate: startDate ? startDate.toISOString().slice(0, 19) : null,
                 endDate: endDate ? endDate.toISOString().slice(0, 19) : null
