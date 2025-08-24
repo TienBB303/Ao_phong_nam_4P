@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer,Integer> {
@@ -34,4 +35,23 @@ public interface CustomerRepository extends JpaRepository<Customer,Integer> {
     @Query("select c from Customer c where lower(c.name) like lower(concat('%%', :name, '%')) " +
             "or c.phoneNumber like :phoneNumber ")
     Customer searchCustomerExistNameOrPhoneInline(String name, String phoneNumber);
+
+    // ✅ THÊM MỚI: Tìm Customer với addresses được load sẵn (khắc phục LazyInitializationException)
+    @Query("SELECT c FROM Customer c LEFT JOIN FETCH c.addresses WHERE c.id = :id")
+    Optional<Customer> findByIdWithAddresses(@Param("id") Integer id);
+
+    // ✅ THÊM MỚI: Tìm Customer với cả addresses và account được load sẵn
+    @Query("SELECT c FROM Customer c " +
+            "LEFT JOIN FETCH c.addresses " +
+            "LEFT JOIN FETCH c.account " +
+            "WHERE c.id = :id")
+    Optional<Customer> findByIdWithAddressesAndAccount(@Param("id") Integer id);
+
+    // ✅ THÊM MỚI: Tìm Customer theo account email với addresses
+    @Query("SELECT c FROM Customer c " +
+            "LEFT JOIN FETCH c.addresses " +
+            "JOIN FETCH c.account a " +
+            "WHERE a.email = :email")
+    Optional<Customer> findByAccountEmailWithAddresses(@Param("email") String email);
+
 }

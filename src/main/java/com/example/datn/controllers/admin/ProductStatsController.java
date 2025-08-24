@@ -23,9 +23,9 @@ public class ProductStatsController {
      */
     @GetMapping
     public String productStatsPage(
-        Model model,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate
+            Model model,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate
     ){
         try {
             ProductStatsSummaryDto summary = productStatsService.getProductStatsSummary(startDate, endDate); // Sửa đổi dòng này

@@ -9,6 +9,7 @@ import com.example.datn.entities.Customer;
 import com.example.datn.entities.ShippingAddress;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -31,6 +32,8 @@ public interface CustomerService {
     // ✅ Tìm khách hàng theo ID
     Customer findById(int id);
 
+    Customer findByIdWithAddresses(Integer id);
+
     // ✅ Cập nhật thông tin khách hàng
     Customer updateCustomer(CustomerDto dto);
 
@@ -52,4 +55,9 @@ public interface CustomerService {
     boolean verifyPassword(String rawPassword, String encodedPassword);
     void updatePassword(Integer accountId, String newPassword);
     void updateAccountStatus(Integer accountId, boolean status);
+    // Cập nhật thông tin cá nhân cho user
+    void updateCustomerProfile(Integer customerId, CustomerDto dto);
+
+    com.example.datn.entities.Account findAccountById(Integer accountId);
+
 }

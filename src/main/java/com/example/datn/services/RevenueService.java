@@ -17,252 +17,80 @@ import java.util.List;
 
 @Service
 public class RevenueService {
+    private final BillRepository billRepository;
+
     @Autowired
-    private BillRepository billRepository;
-    /**
-     * Lấy thống kê doanh thu theo khoảng ngày
-     */
-    public List<RevenueStatsDto> getRevenueByDateRange(LocalDate startDate, LocalDate endDate) {
-        LocalDateTime startDateTime = startDate.atStartOfDay();
-        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
-
-        List<Object[]> results = billRepository.getRevenueByDateRange(startDateTime, endDateTime);
-        List<RevenueStatsDto> stats = new ArrayList<>();
-
-        for (Object[] row : results) {
-            LocalDate date = null;
-            BigDecimal revenue = BigDecimal.ZERO;
-            Long orders = 0L;
-
-
-            if (row[0] != null) {
-                try {
-                    if (row[0] instanceof java.sql.Date) {
-                        date = ((java.sql.Date) row[0]).toLocalDate();
-                    } else if (row[0] instanceof java.time.LocalDate) {
-                        date = (LocalDate) row[0];
-                    } else {
-                        String dateStr = row[0].toString().trim();
-                        if (!dateStr.isEmpty() && !dateStr.equals("null")) {
-                            date = LocalDate.parse(dateStr);
-                        }
-                    }
-                } catch (Exception e) {
-                    date = LocalDate.now(); // fallback to today
-                }
-            }
-
-            // Safe casting for revenue
-            if (row[1] != null) {
-                try {
-                    String revenueStr = row[1].toString().trim();
-                    if (!revenueStr.isEmpty() && !revenueStr.equals("null")) {
-                        revenue = new BigDecimal(revenueStr);
-                    }
-                } catch (NumberFormatException e) {
-                    revenue = BigDecimal.ZERO;
-                }
-            }
-
-            // Safe casting for orders
-            if (row[2] != null) {
-                try {
-                    String ordersStr = row[2].toString().trim();
-                    if (!ordersStr.isEmpty() && !ordersStr.equals("null")) {
-                        orders = Long.valueOf(ordersStr);
-                    }
-                } catch (NumberFormatException e) {
-                    orders = 0L;
-                }
-            }
-
-            stats.add(new RevenueStatsDto(date, revenue, orders, "day"));
-        }
-
-        return stats;
+    public RevenueService(BillRepository billRepository) {
+        this.billRepository = billRepository;
     }
 
-    /**
-     * Lấy thống kê doanh thu theo tháng trong năm
-     */
-    public List<RevenueStatsDto> getRevenueByMonth(int year) {
-        List<Object[]> results = billRepository.getRevenueByMonth(year);
-        List<RevenueStatsDto> stats = new ArrayList<>();
-
-        for (Object[] row : results) {
-            Integer yearResult = 0;
-            Integer month = 0;
-            BigDecimal revenue = BigDecimal.ZERO;
-            Long orders = 0L;
-
-            // Safe casting
-            if (row[0] != null) {
-                try {
-                    yearResult = Integer.valueOf(row[0].toString().trim());
-                } catch (NumberFormatException e) {
-                    yearResult = 0;
-                }
-            }
-            if (row[1] != null) {
-                try {
-                    month = Integer.valueOf(row[1].toString().trim());
-                } catch (NumberFormatException e) {
-                    month = 0;
-                }
-            }
-            if (row[2] != null) {
-                try {
-                    String revenueStr = row[2].toString().trim();
-                    if (!revenueStr.isEmpty() && !revenueStr.equals("null")) {
-                        revenue = new BigDecimal(revenueStr);
-                    }
-                } catch (NumberFormatException e) {
-                    revenue = BigDecimal.ZERO;
-                }
-            }
-            if (row[3] != null) {
-                try {
-                    String ordersStr = row[3].toString().trim();
-                    if (!ordersStr.isEmpty() && !ordersStr.equals("null")) {
-                        orders = Long.valueOf(ordersStr);
-                    }
-                } catch (NumberFormatException e) {
-                    orders = 0L;
-                }
-            }
-
-            String period = String.format("%d-%02d", yearResult, month);
-            stats.add(new RevenueStatsDto(period, revenue, orders));
-        }
-
-        return stats;
-    }
-
-    /**
-     * Lấy thống kê doanh thu theo năm
-     */
-    public List<RevenueStatsDto> getRevenueByYear() {
-        List<Object[]> results = billRepository.getRevenueByYear();
-        List<RevenueStatsDto> stats = new ArrayList<>();
-
-        for (Object[] row : results) {
-            Integer year = 0;
-            BigDecimal revenue = BigDecimal.ZERO;
-            Long orders = 0L;
-
-            if (row[0] != null) {
-                try {
-                    year = Integer.valueOf(row[0].toString().trim());
-                } catch (NumberFormatException e) {
-                    year = 0;
-                }
-            }
-            if (row[1] != null) {
-                try {
-                    String revenueStr = row[1].toString().trim();
-                    if (!revenueStr.isEmpty() && !revenueStr.equals("null")) {
-                        revenue = new BigDecimal(revenueStr);
-                    }
-                } catch (NumberFormatException e) {
-                    revenue = BigDecimal.ZERO;
-                }
-            }
-            if (row[2] != null) {
-                try {
-                    String ordersStr = row[2].toString().trim();
-                    if (!ordersStr.isEmpty() && !ordersStr.equals("null")) {
-                        orders = Long.valueOf(ordersStr);
-                    }
-                } catch (NumberFormatException e) {
-                    orders = 0L;
-                }
-            }
-
-            stats.add(new RevenueStatsDto(year.toString(), revenue, orders));
-        }
-
-        return stats;
-    }
-
-    /**
-     * Lấy tổng quan doanh thu
-     */
+    // ===================== SUMMARY (TỔNG QUAN) =====================
     public RevenueSummaryDto getRevenueSummary() {
         RevenueSummaryDto summary = new RevenueSummaryDto();
 
-        // Thống kê hôm nay
         LocalDate today = LocalDate.now();
         LocalDateTime startOfToday = today.atStartOfDay();
         LocalDateTime endOfToday = today.atTime(LocalTime.MAX);
 
-        // Doanh thu hôm nay chỉ lấy bill hoàn thành
-        BigDecimal todayRevenue = billRepository.getSimpleRevenueSumWithStatus(startOfToday, endOfToday, 4);
-        Long todayOrders = billRepository.getSimpleOrderCountWithStatus(startOfToday, endOfToday, 4);
+        // === Hôm nay ===
+        BigDecimal todayRevenue = scaleValue(billRepository.getTodayRevenue(startOfToday, endOfToday));
+        Long todayOrders = defaultLong(billRepository.getTodayOrderCount(startOfToday, endOfToday));
+
         summary.setTotalRevenueToday(todayRevenue);
         summary.setTotalOrdersToday(todayOrders);
 
-        // Tổng số đơn đặt hàng toàn hệ thống (chỉ lấy bill hoàn thành)
-        summary.setTotalOrders(billRepository.countByStatusAndPaid(4,1));
+        // === Toàn hệ thống ===
+        BigDecimal totalRevenue = scaleValue(billRepository.getTotalRevenueCompleted());
+        Long totalCompletedOrders = defaultLong(billRepository.getTotalCompletedOrders());
 
-        // Tổng doanh thu toàn hệ thống (không lọc thời gian, chỉ bill hoàn thành)
-        summary.setTotalRevenue(billRepository.getTotalRevenueCompleted());
+        summary.setTotalRevenue(totalRevenue);
+        summary.setTotalOrders(totalCompletedOrders);
 
-        // Thống kê tháng này
+        // === Tháng này ===
         LocalDate startOfMonth = today.withDayOfMonth(1);
-        LocalDateTime startOfMonthDateTime = startOfMonth.atStartOfDay();
-        LocalDateTime endOfMonthDateTime = today.atTime(LocalTime.MAX);
-        BigDecimal monthRevenue = billRepository.getSimpleRevenueSumWithStatus(startOfMonthDateTime, endOfMonthDateTime, 4);
-        Long monthOrders = billRepository.getSimpleOrderCountWithStatus(startOfMonthDateTime, endOfMonthDateTime, 4);
-        if (monthRevenue == null) monthRevenue = BigDecimal.ZERO;
-        if (monthOrders == null) monthOrders = 0L;
+        LocalDateTime startOfMonthTime = startOfMonth.atStartOfDay();
+        LocalDateTime endOfMonthTime = today.atTime(LocalTime.MAX);
+
+        BigDecimal monthRevenue = scaleValue(billRepository.getCurrentMonthRevenue(startOfMonthTime, endOfMonthTime));
+        Object[] monthRange = billRepository.getRevenueAndOrdersByRange(startOfMonthTime, endOfMonthTime);
+        Long monthOrders = extractLong(monthRange, 1);
+
         summary.setTotalRevenueThisMonth(monthRevenue);
         summary.setTotalOrdersThisMonth(monthOrders);
 
-        // Thống kê năm này
-        LocalDate startOfYear = today.withDayOfYear(1);
-        LocalDateTime startOfYearDateTime = startOfYear.atStartOfDay();
-        LocalDateTime endOfYearDateTime = today.atTime(LocalTime.MAX);
-        // Tổng đơn hàng từ đầu năm (cho thống kê có lọc)
-        BigDecimal yearRevenue = billRepository.getSimpleRevenueSumWithStatus(startOfYearDateTime, endOfYearDateTime, 4);
-        Long yearOrders = billRepository.getSimpleOrderCountWithStatus(startOfYearDateTime, endOfYearDateTime, 4);
-        if (yearRevenue == null) yearRevenue = BigDecimal.ZERO;
-        if (yearOrders == null) yearOrders = 0L;
+        // === Năm này ===
+        BigDecimal yearRevenue = getCurrentYearRevenue();
         summary.setTotalRevenueThisYear(yearRevenue);
+        LocalDate startOfYear = today.withDayOfYear(1);
+        Object[] yearRange = billRepository.getRevenueAndOrdersByRange(startOfYear.atStartOfDay(), today.atTime(LocalTime.MAX));
+        Long yearOrders = extractLong(yearRange, 1);
         summary.setTotalOrdersThisYear(yearOrders);
 
-        // Tính giá trị đơn hàng trung bình
-        if (summary.getTotalOrdersThisMonth() > 0) {
-            summary.setAvgOrderValue(
-                    summary.getTotalRevenueThisMonth()
-                            .divide(BigDecimal.valueOf(summary.getTotalOrdersThisMonth()), 2, RoundingMode.HALF_UP)
-            );
+        // === Giá trị đơn trung bình (tháng) ===
+        if (monthOrders > 0) {
+            summary.setAvgOrderValue(monthRevenue.divide(BigDecimal.valueOf(monthOrders), 2, RoundingMode.HALF_UP));
         } else {
-            summary.setAvgOrderValue(BigDecimal.ZERO);
+            summary.setAvgOrderValue(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP));
         }
 
-        // Tính % tăng trưởng so với tháng trước
+        // === % tăng trưởng so với tháng trước ===
         LocalDate startOfLastMonth = startOfMonth.minusMonths(1);
         LocalDate endOfLastMonth = startOfMonth.minusDays(1);
 
-        BigDecimal lastMonthRevenue = billRepository.getSimpleRevenueSumWithStatus(
-                startOfLastMonth.atStartOfDay(),
-                endOfLastMonth.atTime(LocalTime.MAX),
-                4  // chỉ lấy đơn hoàn thành
+        Object[] lastMonthRange = billRepository.getRevenueAndOrdersByRange(
+                startOfLastMonth.atStartOfDay(), endOfLastMonth.atTime(LocalTime.MAX)
         );
-
-        if (lastMonthRevenue == null) lastMonthRevenue = BigDecimal.ZERO;
-
+        BigDecimal lastMonthRevenue = extractBigDecimal(lastMonthRange, 0);
+        BigDecimal growth = BigDecimal.ZERO;
         if (lastMonthRevenue.compareTo(BigDecimal.ZERO) > 0) {
-            BigDecimal growth = summary.getTotalRevenueThisMonth()
-                    .subtract(lastMonthRevenue)
+            growth = monthRevenue.subtract(lastMonthRevenue)
                     .divide(lastMonthRevenue, 4, RoundingMode.HALF_UP)
-                    .multiply(BigDecimal.valueOf(100));
-            summary.setGrowthPercentage(growth);
-        } else {
-            summary.setGrowthPercentage(BigDecimal.ZERO);
+                    .multiply(BigDecimal.valueOf(100))
+                    .setScale(2, RoundingMode.HALF_UP);
         }
+        summary.setGrowthPercentage(growth);
 
-        // Thêm thống kê chi tiết
+        // === Dữ liệu cho chart ===
         summary.setDailyStats(getRevenueByDateRange(today.minusDays(30), today));
         summary.setMonthlyStats(getRevenueByMonth(today.getYear()));
         summary.setYearlyStats(getRevenueByYear());
@@ -270,53 +98,118 @@ public class RevenueService {
         return summary;
     }
 
-    /**
-     * Lấy doanh thu hôm nay
-     */
+    /** Doanh thu năm hiện tại */
+    public BigDecimal getCurrentYearRevenue() {
+        return scaleValue(billRepository.getCurrentYearRevenue());
+    }
+
+    // ===================== DAILY / MONTHLY / YEARLY =====================
+    public List<RevenueStatsDto> getRevenueByDateRange(LocalDate startDate, LocalDate endDate) {
+        LocalDateTime start = startDate.atStartOfDay();
+        LocalDateTime end = endDate.atTime(LocalTime.MAX);
+
+        List<Object[]> rows = billRepository.getRevenueByDate(start, end);
+        List<RevenueStatsDto> out = new ArrayList<>();
+
+        for (Object[] r : rows) {
+            LocalDate date = (r[0] instanceof java.sql.Date)
+                    ? ((java.sql.Date) r[0]).toLocalDate()
+                    : LocalDate.parse(r[0].toString());
+            BigDecimal revenue = extractBigDecimal(r, 1);
+            Long orders = extractLong(r, 2);
+
+            out.add(new RevenueStatsDto(date, revenue, orders, "day"));
+        }
+        return out;
+    }
+
+    public List<RevenueStatsDto> getRevenueByMonth(int year) {
+        List<Object[]> rows = billRepository.getRevenueByMonth(year);
+        List<RevenueStatsDto> out = new ArrayList<>();
+
+        for (Object[] r : rows) {
+            int y = extractInt(r, 0, year);
+            int m = extractInt(r, 1, 0);
+            BigDecimal revenue = extractBigDecimal(r, 2);
+            Long orders = extractLong(r, 3);
+
+            String period = String.format("%d-%02d", y, m);
+            out.add(new RevenueStatsDto(period, revenue, orders));
+        }
+        return out;
+    }
+
+    public List<RevenueStatsDto> getRevenueByYear() {
+        List<Object[]> rows = billRepository.getRevenueByYear();
+        List<RevenueStatsDto> out = new ArrayList<>();
+
+        for (Object[] r : rows) {
+            String y = (r[0] == null) ? "" : r[0].toString();
+            BigDecimal revenue = extractBigDecimal(r, 1);
+            Long orders = extractLong(r, 2);
+
+            out.add(new RevenueStatsDto(y, revenue, orders));
+        }
+        return out;
+    }
+
+    // ===================== TODAY / TOP PRODUCTS / CUSTOM RANGE =====================
     public BigDecimal getTodayRevenue() {
         LocalDate today = LocalDate.now();
         LocalDateTime startOfToday = today.atStartOfDay();
         LocalDateTime endOfToday = today.atTime(LocalTime.MAX);
 
-        BigDecimal revenue = billRepository.getSimpleRevenueSumWithStatus(startOfToday, endOfToday, 4);
-        return revenue != null ? revenue : BigDecimal.ZERO;
+        return scaleValue(billRepository.getTodayRevenue(startOfToday, endOfToday));
     }
 
-    /**
-     * Lấy số đơn hàng hôm nay
-     */
     public Long getTodayOrderCount() {
         LocalDate today = LocalDate.now();
         LocalDateTime startOfToday = today.atStartOfDay();
         LocalDateTime endOfToday = today.atTime(LocalTime.MAX);
 
-        Long count = billRepository.getTodayOrderCount(startOfToday, endOfToday);
-        return count != null ? count : 0L;
+        return defaultLong(billRepository.getTodayOrderCount(startOfToday, endOfToday));
     }
 
-    /**
-     * Lấy thống kê sản phẩm bán chạy
-     */
-    public List<Object[]> getTopSellingProducts(LocalDate startDate, LocalDate endDate) {
-        LocalDateTime startDateTime = startDate.atStartOfDay();
-        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+//    public List<Object[]> getTopSellingProducts(LocalDate startDate, LocalDate endDate) {
+//        return billRepository.getTopSellingProducts(startDate.atStartOfDay(), endDate.atTime(LocalTime.MAX));
+//    }
 
-        return billRepository.getTopSellingProducts(startDateTime, endDateTime);
-    }
-
-    /**
-     * Lấy doanh thu theo khoảng thời gian tùy chỉnh
-     */
     public Object[] getRevenueByCustomDateRange(LocalDate startDate, LocalDate endDate) {
-        LocalDateTime startDateTime = startDate.atStartOfDay();
-        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
-
-        BigDecimal revenue = billRepository.getSimpleRevenueSum(startDateTime, endDateTime);
-        Long orders = billRepository.getSimpleOrderCount(startDateTime, endDateTime);
-
-        if (revenue == null) revenue = BigDecimal.ZERO;
-        if (orders == null) orders = 0L;
-
+        Object[] row = billRepository.getRevenueAndOrdersByRange(
+                startDate.atStartOfDay(), endDate.atTime(LocalTime.MAX)
+        );
+        BigDecimal revenue = extractBigDecimal(row, 0);
+        Long orders = extractLong(row, 1);
         return new Object[]{revenue, orders};
+    }
+
+    // ===================== UTIL METHODS =====================
+    private BigDecimal scaleValue(BigDecimal val) {
+        return (val == null ? BigDecimal.ZERO : val).setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private BigDecimal extractBigDecimal(Object[] arr, int index) {
+        if (arr != null && arr.length > index && arr[index] instanceof BigDecimal) {
+            return ((BigDecimal) arr[index]).setScale(2, RoundingMode.HALF_UP);
+        }
+        return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private Long extractLong(Object[] arr, int index) {
+        if (arr != null && arr.length > index && arr[index] instanceof Number) {
+            return ((Number) arr[index]).longValue();
+        }
+        return 0L;
+    }
+
+    private int extractInt(Object[] arr, int index, int defaultVal) {
+        if (arr != null && arr.length > index && arr[index] instanceof Number) {
+            return ((Number) arr[index]).intValue();
+        }
+        return defaultVal;
+    }
+
+    private Long defaultLong(Long val) {
+        return val == null ? 0L : val;
     }
 }

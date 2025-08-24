@@ -19,50 +19,100 @@ public class DashboardController {
     private BillRepository billRepository;
     @Autowired
     private ProductRepository productRepository;
-    @Autowired
-    private CustomerRepository customerRepository;
 
     @GetMapping
     public String dashboardGUI(Model model) {
-        // Tổng đơn hàng
-        long totalOrders = billRepository.countByStatusAndPaid(4,1); // Đếm hóa đơn hoàn thành + đã thanh toán // Status = 4 (hoàn thành), Paid = 1 (đã thanh toán)
-        long pendingOrders = billRepository.countByStatusAndPaid(1,1); // Đếm đơn chờ xử lý + đã thanh toán // Status = 1 (chờ xử lý), Paid = 1 (đã thanh toán)
-        // Tổng doanh thu
-        LocalDateTime fromDate = LocalDateTime.of(2020, 1, 1, 0, 0); // Hoặc ngày đầu năm 2020
-        LocalDateTime toDate = LocalDateTime.now(); // Tổng doanh thu hóa đơn hoàn thành
+        // ✅ 1. TỔNG ĐƠN ĐẶT HÀNG (sử dụng method có sẵn)
+        Long totalOrders = billRepository.getTotalCompletedOrders();
 
-        System.out.println("Revenue từ " + fromDate + " đến " + toDate);
-        BigDecimal totalRevenue = billRepository.getSimpleRevenueSumWithStatus(fromDate, toDate, 4);
-        // Tổng sản phẩm
-        long totalProducts = productRepository.countTotalProducts();
+        // ✅ 2. SỐ ĐƠN CHỜ XỬ LÝ (sử dụng method có sẵn)
+        Long pendingOrders = billRepository.getPendingOrders();
 
-        // Đơn hàng theo trạng thái cho biểu đồ tròn
-        List<Object[]> statusCounts = billRepository.countOrdersByStatus();
+        // ✅ 3. TỔNG DOANH THU (sử dụng method có sẵn - không tính phí ship)
+        BigDecimal totalRevenue = billRepository.getTotalRevenue();
+
+        // ✅ 4. SỐ SẢN PHẨM ĐÃ BÁN (sử dụng method có sẵn)
+        Long totalProducts = billRepository.getTotalProductsSold();
+
+        // ✅ 5. ĐƠN HÀNG THEO TRẠNG THÁI (sử dụng method có sẵn)
+        List<Object[]> statusCounts = billRepository.getOrderStatusCounts();
         Map<String, Long> orderStatusMap = new LinkedHashMap<>();
+
         for (Object[] row : statusCounts) {
-            Integer status = (Integer) row[0];
-            Long count = (Long) row[1];
-            String label;
-            switch (status) {
-                case 1: label = "Chờ xác nhận"; break;
-                case 2: label = "Đã xác nhận"; break;
-                case 3: label = "Đang giao"; break;
-                case 4: label = "Hoàn thành"; break;
-                case 5: label = "Đã hủy"; break;
-                default: label = "Không rõ"; break;
-            }
+            Integer status = ((Number) row[0]).intValue();
+            Long count = ((Number) row[1]).longValue();
+            String label = getStatusLabel(status);
             orderStatusMap.put(label, count);
         }
 
-        // Tổng số khách hàng
-        long customerCount = customerRepository.count();
-        model.addAttribute("customerCount", customerCount);
+        // ✅ 6. DOANH THU 7 NGÀY GẦN NHẤT (sử dụng method có sẵn)
+        LocalDateTime endDate = LocalDateTime.now();
+        LocalDateTime startDate = endDate.minusDays(7);
+        List<Object[]> revenueData = billRepository.getRevenueLast7Days(startDate, endDate);
 
-        model.addAttribute("totalOrders", totalOrders);
-        model.addAttribute("pendingOrders", pendingOrders);
-        model.addAttribute("totalRevenue", totalRevenue);
-        model.addAttribute("totalProducts", totalProducts);
+        List<String> dateLabels = new ArrayList<>();
+        List<BigDecimal> revenueValues = new ArrayList<>();
+
+        for (Object[] row : revenueData) {
+            // row[0] = date, row[1] = revenue
+            String date = row[0].toString();
+            BigDecimal revenue = (row[1] != null) ? new BigDecimal(row[1].toString()) : BigDecimal.ZERO;
+
+            dateLabels.add(formatDateForChart(date));
+            revenueValues.add(revenue);
+        }
+
+        // ✅ THÊM CÁC ATTRIBUTE VÀO MODEL
+        model.addAttribute("totalOrders", totalOrders != null ? totalOrders : 0L);
+        model.addAttribute("pendingOrders", pendingOrders != null ? pendingOrders : 0L);
+        model.addAttribute("totalRevenue", totalRevenue != null ? totalRevenue : BigDecimal.ZERO);
+        model.addAttribute("totalProducts", totalProducts != null ? totalProducts : 0L);
         model.addAttribute("orderStatusMap", orderStatusMap);
+        model.addAttribute("dateLabels", dateLabels);
+        model.addAttribute("revenueValues", revenueValues);
+
+        // Debug log
+        System.out.println("Dashboard Data:");
+        System.out.println("- Total Orders: " + totalOrders);
+        System.out.println("- Pending Orders: " + pendingOrders);
+        System.out.println("- Total Revenue: " + totalRevenue);
+        System.out.println("- Total Products Sold: " + totalProducts);
+        System.out.println("- Revenue Data Size: " + revenueData.size());
+
         return "admin/dashboard";
     }
+
+    /**
+     * Convert status number to readable label
+     */
+    private String getStatusLabel(Integer status) {
+        switch (status) {
+            case 1: return "Chờ xác nhận";
+            case 2: return "Đã xác nhận";
+            case 3: return "Đang giao";
+            case 4: return "Hoàn thành";
+            case 5: return "Đã hủy";
+            case 9: return "Tại quầy";
+            default: return "Không rõ";
+        }
+    }
+
+    /**
+     * Format date for chart display (DD/MM/YYYY)
+     */
+    private String formatDateForChart(String dateStr) {
+        try {
+            // Nếu dateStr là định dạng YYYY-MM-DD
+            if (dateStr.contains("-")) {
+                String[] parts = dateStr.split("-");
+                if (parts.length == 3) {
+                    return parts[2] + "/" + parts[1] + "/" + parts[0];
+                }
+            }
+            return dateStr;
+        } catch (Exception e) {
+            return dateStr;
+        }
+    }
+
 }

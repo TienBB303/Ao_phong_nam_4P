@@ -98,111 +98,85 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     @Query("SELECT COUNT(DISTINCT p.brand.id) FROM Product p WHERE p.brand.status = true")
     Long countActiveBrands();
     // Sản phẩm bán chạy nhất theo số lượng (Sử dụng cho bảng chính)
-    @Query("SELECT p.id, p.code, p.name, p.category.name, p.brand.name, " +
-            "COALESCE(SUM(bd.quantity), 0) as totalSold, " +
-            "COALESCE(SUM(bd.total_price), 0) as totalRevenue " +
-            "FROM Product p " +
-            "LEFT JOIN ProductDetail pd ON pd.product.id = p.id " +
-            "LEFT JOIN BillDetails bd ON bd.productDetail.id = pd.id " +
-            "LEFT JOIN Bill b ON bd.bill.id = b.id " +
-            "WHERE (b.paymentStatus = true OR b.paymentStatus IS NULL) " +
+    @Query("SELECT p.id, p.code, p.name, c.name, br.name, " +
+            "COALESCE(SUM(bd.quantity), 0) AS totalSold, " +
+            "COALESCE(SUM(bd.total_price), 0) AS grossRevenue " + // GrossRevenue
+            "FROM BillDetails bd " +
+            "JOIN bd.productDetail pd " +
+            "JOIN pd.product p " +
+            "JOIN p.category c " +
+            "JOIN p.brand br " +
+            "JOIN bd.bill b " +
+            "WHERE b.paymentStatus = true " +
+            "AND b.status = 4 " + // chỉ tính đơn hoàn thành
             "AND p.status = true " +
             "AND (:startDate IS NULL OR b.createdAt >= :startDate) " +
             "AND (:endDate IS NULL OR b.createdAt <= :endDate) " +
-            "GROUP BY p.id, p.code, p.name, p.category.name, p.brand.name " +
-            "ORDER BY COALESCE(SUM(bd.quantity), 0) DESC") // Sắp xếp theo số lượng bán
-    List<Object[]> getTopSellingProductsByQuantity(
-            @Param("startDate") LocalDateTime startDate,
-            @Param("endDate") LocalDateTime endDate);
+            "GROUP BY p.id, p.code, p.name, c.name, br.name " +
+            "ORDER BY totalSold DESC")
+    List<Object[]> getTopSellingProductsByQuantity(@Param("startDate") LocalDateTime startDate,
+                                                   @Param("endDate") LocalDateTime endDate);
 
 
-    // Sản phẩm theo doanh thu
-    @Query("SELECT p.id, p.code, p.name, p.category.name, p.brand.name, " +
-            "COALESCE(SUM(bd.quantity), 0) as totalSold, " +
-            "COALESCE(SUM(bd.total_price), 0) as totalRevenue " +
-            "FROM Product p " +
-            "LEFT JOIN ProductDetail pd ON pd.product.id = p.id " +
-            "LEFT JOIN BillDetails bd ON bd.productDetail.id = pd.id " +
-            "LEFT JOIN Bill b ON bd.bill.id = b.id " +
-            "WHERE (b.paymentStatus = true OR b.paymentStatus IS NULL) " +
+    // Sản phẩm bán chạy theo doanh thu (GrossRevenue)- tính theo giá gốc ( dùng cho màn Danh sách sản phẩm bán nhiều nhất)
+    //  (gross revenue = chưa trừ phí ship + discount)
+    @Query("SELECT p.id, p.code, p.name, c.name, br.name, " +
+            "COALESCE(SUM(bd.quantity), 0), " +
+            "COALESCE(SUM(bd.total_price), 0) " +
+            "FROM BillDetails bd " +
+            "JOIN bd.productDetail pd " +
+            "JOIN pd.product p " +
+            "JOIN p.category c " +
+            "JOIN p.brand br " +
+            "JOIN bd.bill b " +
+            "WHERE b.paymentStatus = true " +
             "AND p.status = true " +
             "AND (:startDate IS NULL OR b.createdAt >= :startDate) " +
             "AND (:endDate IS NULL OR b.createdAt <= :endDate) " +
-            "GROUP BY p.id, p.code, p.name, p.category.name, p.brand.name " +
-            "ORDER BY COALESCE(SUM(bd.total_price), 0) DESC")// Sắp xếp theo doanh thu
-    List<Object[]> getTopSellingProductsByRevenue(
-            @Param("startDate") LocalDateTime startDate,
-            @Param("endDate") LocalDateTime endDate);
+            "GROUP BY p.id, p.code, p.name, c.name, br.name " +
+            "ORDER BY SUM(bd.total_price) DESC")
+    List<Object[]> getTopSellingProductsByRevenue(@Param("startDate") LocalDateTime startDate,
+                                                  @Param("endDate") LocalDateTime endDate);
 
-    // Thống kê tồn kho
-    @Query("SELECT p.id, p.code, p.name, p.category.name, p.brand.name, " +
-            "COALESCE(SUM(pd.quantity), 0) as totalStock, " +
-            "COUNT(pd.id) as totalVariants " +
-            "FROM Product p " +
-            "LEFT JOIN ProductDetail pd ON pd.product.id = p.id " +
-            "WHERE p.status = true " +
-            "GROUP BY p.id, p.code, p.name, p.category.name, p.brand.name " +
-            "ORDER BY COALESCE(SUM(pd.quantity), 0) ASC")
-    List<Object[]> getProductsStockStats();
 
-    // Sản phẩm sắp hết hàng (< 10)
-    @Query("SELECT p.id, p.code, p.name, p.category.name, p.brand.name, " +
-            "COALESCE(SUM(pd.quantity), 0) as totalStock, " +
-            "COUNT(pd.id) as totalVariants " +
-            "FROM Product p " +
-            "LEFT JOIN ProductDetail pd ON pd.product.id = p.id " +
-            "WHERE p.status = true " +
-            "GROUP BY p.id, p.code, p.name, p.category.name, p.brand.name " +
-            "HAVING COALESCE(SUM(pd.quantity), 0) < 10 " +
-            "ORDER BY COALESCE(SUM(pd.quantity), 0) ASC")
-    List<Object[]> getLowStockProducts();
-
-    // Sản phẩm hết hàng
-    @Query("SELECT p.id, p.code, p.name, p.category.name, p.brand.name, " +
-            "COALESCE(SUM(pd.quantity), 0) as totalStock, " +
-            "COUNT(pd.id) as totalVariants " +
-            "FROM Product p " +
-            "LEFT JOIN ProductDetail pd ON pd.product.id = p.id " +
-            "WHERE p.status = true " +
-            "GROUP BY p.id, p.code, p.name, p.category.name, p.brand.name " +
-            "HAVING COALESCE(SUM(pd.quantity), 0) = 0 " +
-            "ORDER BY p.name ASC")
-    List<Object[]> getOutOfStockProducts();
-
-    // Thống kê theo danh mục
+    // Thống kê theo danh mục (tính theo giá gốc ( dùng cho màn Danh sách sản phẩm bán nhiều nhất)
     // ProductRepository.java - Cần cập nhật getCategoryStats để lọc theo thời gian
     @Query(value = """
-    SELECT c.name, COUNT(p.id) as productCount,
-    COALESCE(SUM(bd.quantity), 0) as totalSold,
-    COALESCE(SUM(bd.total_price), 0) as totalRevenue,
-    COALESCE(SUM(pd.quantity), 0) as totalStock
-    FROM Category c
-    LEFT JOIN Product p ON p.category.id = c.id AND p.status = true
-    LEFT JOIN ProductDetail pd ON pd.product.id = p.id
-    LEFT JOIN BillDetails bd ON bd.productDetail.id = pd.id
-    LEFT JOIN Bill b ON bd.bill.id = b.id AND b.paymentStatus = true
-    WHERE c.status = true
-      AND (:startDate IS NULL OR b.createdAt >= :startDate)
-      AND (:endDate IS NULL OR b.createdAt <= :endDate)
+    SELECT c.name, 
+           COUNT(p.id) AS productCount,
+           COALESCE(SUM(bd.quantity), 0) AS totalSold,
+           COALESCE(SUM(bd.total_price), 0) AS grossRevenue,  -- GrossRevenue
+           COALESCE(SUM(pd.quantity), 0) AS totalStock
+    FROM category c
+    LEFT JOIN product p ON p.category_id = c.id AND p.status = 1
+    LEFT JOIN product_detail pd ON pd.product_id = p.id
+    LEFT JOIN bill_detail bd ON bd.product_detail_id = pd.id
+    LEFT JOIN bill b ON bd.bill_id = b.id AND b.payment_status = 1 AND b.status = 4
+    WHERE c.status = 1
+      AND (:startDate IS NULL OR b.created_at >= :startDate)
+      AND (:endDate IS NULL OR b.created_at <= :endDate)
     GROUP BY c.id, c.name
-    ORDER BY COALESCE(SUM(bd.total_price), 0) DESC
+    ORDER BY grossRevenue DESC
 """, nativeQuery = true)
-    List<Object[]> getCategoryStats(@Param("startDate") java.time.LocalDateTime startDate,
-                                    @Param("endDate") java.time.LocalDateTime endDate);
-
-    // Thống kê theo thương hiệu
-    @Query("SELECT br.name, COUNT(p.id) as productCount, " +
-            "COALESCE(SUM(bd.quantity), 0) as totalSold, " +
-            "COALESCE(SUM(bd.total_price), 0) as totalRevenue, " +
-            "COALESCE(SUM(pd.quantity), 0) as totalStock " +
-            "FROM Brand br " +
-            "LEFT JOIN Product p ON p.brand.id = br.id AND p.status = true " +
-            "LEFT JOIN ProductDetail pd ON pd.product.id = p.id " +
-            "LEFT JOIN BillDetails bd ON bd.productDetail.id = pd.id " +
-            "LEFT JOIN Bill b ON bd.bill.id = b.id AND b.paymentStatus = true " +
-            "WHERE br.status = true " +
-            "GROUP BY br.id, br.name " +
-            "ORDER BY COALESCE(SUM(bd.total_price), 0) DESC")
+    List<Object[]> getCategoryStats(@Param("startDate") LocalDateTime startDate,
+                                    @Param("endDate") LocalDateTime endDate);
+    // Thống kê theo thương hiệu (tính theo giá gốc ( dùng cho màn Danh sách sản phẩm bán nhiều nhất)
+    @Query(value = """
+    SELECT br.name, 
+           COUNT(p.id) AS productCount,
+           COALESCE(SUM(bd.quantity), 0) AS totalSold,
+           COALESCE(SUM(bd.total_price), 0) AS grossRevenue,  -- GrossRevenue
+           COALESCE(SUM(pd.quantity), 0) AS totalStock
+    FROM brand br
+    LEFT JOIN product p ON p.brand_id = br.id AND p.status = 1
+    LEFT JOIN product_detail pd ON pd.product_id = p.id
+    LEFT JOIN bill_detail bd ON bd.product_detail_id = pd.id
+    LEFT JOIN bill b ON bd.bill_id = b.id AND b.payment_status = 1 AND b.status = 4
+    WHERE br.status = 1
+    GROUP BY br.id, br.name
+    ORDER BY grossRevenue DESC
+""", nativeQuery = true)
     List<Object[]> getBrandStats();
+
 
 }

@@ -198,12 +198,10 @@ public class CustomerServiceImpl implements CustomerService {
 
             // Debug log
             System.out.println("Updating address isDefault: " + isDefault);
-
             shippingAddressRepository.save(address);
         }
-
         return customerRepository.save(existing);
-    }
+        }
     private ShippingAddress buildShippingAddress(Customer customer, AddressDto dto) {
         ShippingAddress address = new ShippingAddress();
         address.setCustomer(customer);
@@ -364,4 +362,55 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
 
+    // Cập nhật thông tin cá nhân cho user
+    @Override
+    @Transactional
+    public void updateCustomerProfile(Integer customerId, CustomerDto dto) {
+        Customer existing = customerRepository.findById(customerId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng có id = " + customerId));
+        // Cập nhật thông tin cá nhân
+        existing.setName(dto.getName());
+        existing.setPhoneNumber(dto.getPhoneNumber());
+        existing.setBirthDate(dto.getBirthday());
+        existing.setGender(dto.getGender());
+        // Cập nhật địa chỉ mặc định
+        AddressDto addressDto = dto.getAddress();
+        if (addressDto != null) {
+            ShippingAddress address = null;
+            if (existing.getAddresses() != null && !existing.getAddresses().isEmpty()) {
+                address = existing.getAddresses().stream().filter(ShippingAddress::getIsDefault).findFirst().orElse(null);
+            }
+            if (address == null) {
+                address = new ShippingAddress();
+                address.setCustomer(existing);
+            }
+            address.setAddressDetail(addressDto.getAddressDetail());
+            address.setProvinceId(addressDto.getProvinceId());
+            address.setProvinceName(addressDto.getProvinceName());
+            address.setDistrictId(addressDto.getDistrictId());
+            address.setDistrictName(addressDto.getDistrictName());
+            address.setWardId(addressDto.getWardId());
+            address.setWardName(addressDto.getWardName());
+            address.setReceiverName(addressDto.getReceiverName());
+            address.setReceiverPhoneNumber(addressDto.getReceiverPhoneNumber());
+            Boolean isDefault = addressDto.getIsDefault();
+            if (isDefault == null) isDefault = true;
+            address.setIsDefault(isDefault);
+            if (isDefault) {
+                shippingAddressRepository.updateAllDefaultFalseByCustomerId(existing.getId());
+            }
+            shippingAddressRepository.save(address);
+        }
+        customerRepository.save(existing);
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public Customer findByIdWithAddresses(Integer id) {
+        // CÁCH 1: Sử dụng repository method với JOIN FETCH
+        return customerRepository.findByIdWithAddresses(id).orElse(null);
+    }
+    @Override
+    public Account findAccountById(Integer accountId) {
+        return accountRepository.findById(accountId).orElse(null);
+    }
 }

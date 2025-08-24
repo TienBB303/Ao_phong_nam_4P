@@ -1,5 +1,6 @@
 package com.example.datn.repositories;
 
+import com.example.datn.dto.response.RevenueStatsDto;
 import com.example.datn.entities.Bill;
 import com.example.datn.entities.BillDetails;
 import com.example.datn.entities.Selling.Cart;
@@ -21,7 +22,9 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
 
     @Query("select b from Bill b where b.id = :id")
     Bill findBillById(Integer id);
+
     Page<Bill> findAll(Pageable pageable);
+
     @Query("SELECT b FROM Bill b LEFT JOIN FETCH b.discount WHERE b.id = :id")
     Bill findWithDiscountById(Integer id);
 
@@ -59,20 +62,175 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
             @Param("typeBill") Boolean typeBill,
             Pageable pageable
     );
-    // Thống kê doanh thu theo ngày
-    @Query(value = """
-    SELECT CAST(b.created_at AS DATE) AS date, 
-           COALESCE(SUM(b.total_checkout), 0) AS totalRevenue, 
-           COUNT(*) AS totalOrders 
-    FROM bill b 
-    WHERE b.payment_status = 1 AND b.status = 4 
-      AND b.created_at BETWEEN :startDate AND :endDate 
-    GROUP BY CAST(b.created_at AS DATE) 
-    ORDER BY CAST(b.created_at AS DATE)
-    """, nativeQuery = true)
-    List<Object[]> getRevenueByDateRange(@Param("startDate") LocalDateTime startDate,
-                                         @Param("endDate") LocalDateTime endDate);
+    // ================== DASHBOARD ==================
 
+    // Tổng đơn hàng (chỉ tính hoàn thành)
+    @Query(value = "SELECT COUNT(*) FROM bill WHERE status = 4 AND payment_status = 1", nativeQuery = true)
+    Long getTotalCompletedOrders();
+
+    // Số đơn chờ xử lý
+    @Query(value = "SELECT COUNT(*) FROM bill WHERE status = 1 AND payment_status = 1", nativeQuery = true)
+    Long getPendingOrders();
+
+    // Tổng doanh thu (không tính phí ship)
+    @Query(value = """
+    SELECT ISNULL(SUM(b.total_amount - ISNULL(b.shipping_fee,0) - ISNULL(b.discount_amount,0)), 0)
+    FROM bill b
+    WHERE b.status = 4 AND b.payment_status = 1
+""", nativeQuery = true)
+    BigDecimal getTotalRevenue();
+
+    // Thêm method lấy tổng doanh thu đã hoàn thành
+    @Query(value = """
+    SELECT ISNULL(SUM(b.total_amount - ISNULL(b.shipping_fee,0) - ISNULL(b.discount_amount,0)), 0)
+    FROM bill b
+    WHERE b.status = 4 AND b.payment_status = 1
+""", nativeQuery = true)
+    BigDecimal getTotalRevenueCompleted();
+    // Method lấy doanh thu và số đơn theo khoảng thời gian
+    @Query(value = """
+        SELECT ISNULL(SUM(b.total_amount - ISNULL(b.shipping_fee,0) - ISNULL(b.discount_amount,0)), 0),
+               COUNT(*)
+        FROM bill b
+        WHERE b.status = 4 AND b.payment_status = 1
+          AND b.created_at BETWEEN :startDate AND :endDate
+    """, nativeQuery = true)
+    Object[] getRevenueAndOrdersByRange(@Param("startDate") LocalDateTime startDate,
+                                        @Param("endDate") LocalDateTime endDate);
+
+    // Số đơn hàng hôm nay
+    @Query(value = """
+        SELECT COUNT(*) FROM bill
+        WHERE status = 4 AND payment_status = 1
+          AND created_at BETWEEN :startOfDay AND :endOfDay
+    """, nativeQuery = true)
+    Long getTodayOrderCount(@Param("startOfDay") LocalDateTime startOfDay,
+                            @Param("endOfDay") LocalDateTime endOfDay);
+
+    // Doanh thu 7 ngày gần nhất
+    @Query(value = """
+    SELECT CAST(b.created_at AS DATE) AS date,
+           COALESCE(SUM(b.total_amount 
+                        - COALESCE(b.shipping_fee, 0) 
+                        - COALESCE(b.discount_amount, 0)), 0) AS totalRevenue
+    FROM bill b
+    WHERE b.status = 4 AND b.payment_status = 1
+      AND b.created_at BETWEEN :startDate AND :endDate
+    GROUP BY CAST(b.created_at AS DATE)
+    ORDER BY CAST(b.created_at AS DATE)
+""", nativeQuery = true)
+    List<Object[]> getRevenueLast7Days(@Param("startDate") LocalDateTime startDate,
+                                       @Param("endDate") LocalDateTime endDate);
+
+    // Đơn hàng theo trạng thái
+    @Query(value = "SELECT b.status, COUNT(*) FROM bill b GROUP BY b.status", nativeQuery = true)
+    List<Object[]> getOrderStatusCounts();
+
+    // Tổng sản phẩm đã bán (chỉ tính đơn hoàn thành + thanh toán thành công)- (tính theo giá gốc ( dùng cho màn Danh sách sản phẩm bán nhiều nhất)
+    @Query(value = """
+            SELECT COALESCE(SUM(bd.quantity), 0)
+            FROM bill_detail bd
+            JOIN bill b ON b.id = bd.bill_id
+            WHERE b.status = 4 AND b.payment_status = 1
+            """, nativeQuery = true)
+    Long getTotalProductsSold();
+
+    // Sản phẩm đã bán hôm nay
+    @Query(value = """
+            SELECT COALESCE(SUM(bd.quantity), 0)
+            FROM bill_detail bd
+            JOIN bill b ON b.id = bd.bill_id
+            WHERE b.status = 4 AND b.payment_status = 1
+              AND b.created_at BETWEEN :startOfDay AND :endOfDay
+            """, nativeQuery = true)
+    Long getTodayProductsSold(@Param("startOfDay") LocalDateTime startOfDay,
+                              @Param("endOfDay") LocalDateTime endOfDay);
+
+    // ================== REVENUE (stats.html) ==================
+
+    // Doanh thu hôm nay
+    @Query(value = """
+        SELECT ISNULL(SUM(b.total_amount - ISNULL(b.shipping_fee,0) - ISNULL(b.discount_amount,0)), 0)
+        FROM bill b
+        WHERE b.status = 4 AND b.payment_status = 1
+          AND b.created_at BETWEEN :startOfDay AND :endOfDay
+    """, nativeQuery = true)
+    BigDecimal getTodayRevenue(@Param("startOfDay") LocalDateTime startOfDay,
+                               @Param("endOfDay") LocalDateTime endOfDay);
+
+    // Doanh thu tháng hiện tại
+    @Query(value = """
+        SELECT ISNULL(SUM(b.total_amount - ISNULL(b.shipping_fee,0) - ISNULL(b.discount_amount,0)), 0)
+        FROM bill b
+        WHERE b.status = 4 AND b.payment_status = 1
+          AND b.created_at BETWEEN :startOfMonth AND :endOfMonth
+    """, nativeQuery = true)
+    BigDecimal getCurrentMonthRevenue(@Param("startOfMonth") LocalDateTime startOfMonth,
+                                      @Param("endOfMonth") LocalDateTime endOfMonth);
+    // Doanh thu năm hiện tại (SQL Server)
+    @Query(value = """
+        SELECT ISNULL(SUM(b.total_amount - ISNULL(b.shipping_fee,0) - ISNULL(b.discount_amount,0)), 0)
+        FROM bill b
+        WHERE b.status = 4 AND b.payment_status = 1
+          AND YEAR(b.created_at) = YEAR(GETDATE())
+    """, nativeQuery = true)
+    BigDecimal getCurrentYearRevenue();
+
+
+
+    // Doanh thu theo khoảng ngày
+    @Query(value = """
+        SELECT CAST(b.created_at AS DATE),
+               ISNULL(SUM(b.total_amount - ISNULL(b.shipping_fee,0) - ISNULL(b.discount_amount,0)), 0),
+               COUNT(*)
+        FROM bill b
+        WHERE b.status = 4 AND b.payment_status = 1
+          AND b.created_at BETWEEN :startDate AND :endDate
+        GROUP BY CAST(b.created_at AS DATE)
+        ORDER BY CAST(b.created_at AS DATE)
+    """, nativeQuery = true)
+    List<Object[]> getRevenueByDate(@Param("startDate") LocalDateTime startDate,
+                                    @Param("endDate") LocalDateTime endDate);
+
+    // Doanh thu theo tháng trong năm
+    @Query(value = """
+        SELECT YEAR(b.created_at), MONTH(b.created_at),
+               ISNULL(SUM(b.total_amount - ISNULL(b.shipping_fee,0) - ISNULL(b.discount_amount,0)), 0),
+               COUNT(*)
+        FROM bill b
+        WHERE b.status = 4 AND b.payment_status = 1
+          AND YEAR(b.created_at) = :year
+        GROUP BY YEAR(b.created_at), MONTH(b.created_at)
+        ORDER BY YEAR(b.created_at), MONTH(b.created_at)
+    """, nativeQuery = true)
+    List<Object[]> getRevenueByMonth(@Param("year") int year);
+
+    // Doanh thu theo năm
+    @Query(value = """
+        SELECT YEAR(b.created_at),
+               ISNULL(SUM(b.total_amount - ISNULL(b.shipping_fee,0) - ISNULL(b.discount_amount,0)), 0),
+               COUNT(*)
+        FROM bill b
+        WHERE b.status = 4 AND b.payment_status = 1
+        GROUP BY YEAR(b.created_at)
+        ORDER BY YEAR(b.created_at)
+    """, nativeQuery = true)
+    List<Object[]> getRevenueByYear();
+
+//    // Top sản phẩm bán chạy
+//    @Query(value = """
+//        SELECT p.name, SUM(bd.quantity), SUM(bd.total_price)
+//        FROM bill_detail bd
+//        JOIN bill b ON b.id = bd.bill_id
+//        JOIN product_detail pd ON pd.id = bd.product_detail_id
+//        JOIN product p ON p.id = pd.product_id
+//        WHERE b.status = 4 AND b.payment_status = 1
+//          AND b.created_at BETWEEN :startDate AND :endDate
+//        GROUP BY p.name
+//        ORDER BY SUM(bd.quantity) DESC
+//    """, nativeQuery = true)
+//    List<Object[]> getTopSellingProducts(@Param("startDate") LocalDateTime startDate,
+//                                         @Param("endDate") LocalDateTime endDate);
     // TIENBB
     @Query("select c from Bill c where c.id = :id")
     Bill findByIdBill(Integer id);
@@ -85,153 +243,4 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
 
     @Query("select cd from Bill cd where cd.status = 9")
     List<Bill> getAllCartInline();
-    // Thống kê doanh thu theo tháng
-    @Query(value = """
-    SELECT COALESCE(SUM(total_checkout), 0) 
-    FROM bill 
-    WHERE payment_status = 1 
-      AND status = :status 
-      AND created_at BETWEEN :startDate AND :endDate
-""", nativeQuery = true)
-    BigDecimal getSimpleRevenueSumWithStatus(@Param("startDate") LocalDateTime startDate,
-                                             @Param("endDate") LocalDateTime endDate,
-                                             @Param("status") int status);
-    // 4. Doanh thu tháng hiện tại
-    @Query(value = """
-    SELECT COALESCE(SUM(total_checkout), 0) 
-    FROM bill 
-    WHERE payment_status = 1 
-      AND status = 4 
-      AND created_at BETWEEN :startOfMonth AND :endOfMonth
-""", nativeQuery = true)
-    BigDecimal getCurrentMonthRevenue(@Param("startOfMonth") LocalDateTime startOfMonth,
-                                      @Param("endOfMonth") LocalDateTime endOfMonth);
-
-
-    @Query(value = """
-    SELECT COUNT(*) 
-    FROM bill 
-    WHERE payment_status = 1 
-      AND status = :status 
-      AND created_at BETWEEN :startDate AND :endDate
-""", nativeQuery = true)
-    Long getSimpleOrderCountWithStatus(@Param("startDate") LocalDateTime startDate,
-                                       @Param("endDate") LocalDateTime endDate,
-                                       @Param("status") int status);
-
-    @Query(value = """
-    SELECT YEAR(created_at), MONTH(created_at), 
-           COALESCE(SUM(total_checkout), 0), COUNT(*) 
-    FROM bill 
-    WHERE payment_status = 1 
-      AND status = 4 
-      AND YEAR(created_at) = :year 
-    GROUP BY YEAR(created_at), MONTH(created_at) 
-    ORDER BY YEAR(created_at), MONTH(created_at)
-""", nativeQuery = true)
-    List<Object[]> getRevenueByMonth(@Param("year") int year);
-
-    // Thống kê doanh thu theo năm
-    @Query(value = """
-    SELECT YEAR(created_at), 
-           COALESCE(SUM(total_checkout), 0), 
-           COUNT(*) 
-    FROM bill 
-    WHERE payment_status = 1 
-      AND status = 4 
-    GROUP BY YEAR(created_at) 
-    ORDER BY YEAR(created_at)
-""", nativeQuery = true)
-    List<Object[]> getRevenueByYear();
-
-    // Tổng doanh thu và số đơn hàng theo khoảng thời gian
-    @Query(value = """
-    SELECT COALESCE(SUM(total_checkout), 0), COUNT(*) 
-    FROM bill 
-    WHERE payment_status = 1 
-      AND status = 4 
-      AND created_at BETWEEN :startDate AND :endDate
-""", nativeQuery = true)
-    Object[] getTotalRevenueAndOrdersByDateRange(@Param("startDate") LocalDateTime startDate,
-                                                 @Param("endDate") LocalDateTime endDate);
-
-    // Doanh thu hôm nay
-    @Query(value = """
-    SELECT COALESCE(SUM(total_checkout), 0) 
-    FROM bill 
-    WHERE payment_status = 1 
-      AND status = 4 
-      AND created_at BETWEEN :startOfDay AND :endOfDay
-""", nativeQuery = true)
-    BigDecimal getTodayRevenue(@Param("startOfDay") LocalDateTime startOfDay,
-                               @Param("endOfDay") LocalDateTime endOfDay);
-
-    // Số đơn hàng hôm nay
-    @Query(value = """
-    SELECT COUNT(*) 
-    FROM bill 
-    WHERE payment_status = 1 
-      AND status = 4 
-      AND created_at BETWEEN :startOfDay AND :endOfDay
-""", nativeQuery = true)
-    Long getTodayOrderCount(@Param("startOfDay") LocalDateTime startOfDay,
-                            @Param("endOfDay") LocalDateTime endOfDay);
-
-    // Top sản phẩm bán chạy
-    @Query(value = """
-    SELECT p.name, SUM(bd.quantity), SUM(bd.total_price)
-    FROM bill_detail bd
-    JOIN bill b ON b.id = bd.bill_id
-    JOIN product_detail pd ON pd.id = bd.product_detail_id
-    JOIN product p ON p.id = pd.product_id
-    WHERE b.payment_status = 1 AND b.status = 4
-      AND b.created_at BETWEEN :startDate AND :endDate
-    GROUP BY p.name
-    ORDER BY SUM(bd.quantity) DESC
-""", nativeQuery = true)
-    List<Object[]> getTopSellingProducts(@Param("startDate") LocalDateTime startDate,
-                                         @Param("endDate") LocalDateTime endDate);
-
-
-    @Query(value = """
-    SELECT COALESCE(SUM(total_checkout), 0) 
-    FROM bill 
-    WHERE payment_status = 1 
-      AND status = 4 
-      AND created_at BETWEEN :startDate AND :endDate
-""", nativeQuery = true)
-    BigDecimal getSimpleRevenueSum(@Param("startDate") LocalDateTime startDate,
-                                   @Param("endDate") LocalDateTime endDate);
-
-    @Query(value = """
-    SELECT COUNT(*) 
-    FROM bill 
-    WHERE payment_status = 1 
-      AND status = 4 
-      AND created_at BETWEEN :startDate AND :endDate
-""", nativeQuery = true)
-    Long getSimpleOrderCount(@Param("startDate") LocalDateTime startDate,
-                             @Param("endDate") LocalDateTime endDate);
-
-
-    // Đếm số đơn theo status
-    @Query(value = "SELECT COUNT(*) FROM bill WHERE status = :status AND payment_status = :paid", nativeQuery = true)
-    Long countByStatusAndPaid(@Param("status") int status, @Param("paid") int paid);
-
-//    // Tổng doanh thu
-//    @Query("SELECT COALESCE(SUM(b.total_checkout), 0) FROM Bill b WHERE b.paymentStatus = true")
-//    java.math.BigDecimal getTotalRevenue();
-
-    // Thống kê số lượng đơn hàng theo trạng thái
-    @Query("SELECT b.status, COUNT(b) FROM Bill b GROUP BY b.status")
-    java.util.List<Object[]> countOrdersByStatus();
-
-    // Tổng doanh thu hóa đơn hoàn thành
-    @Query(value = """
-    SELECT COALESCE(SUM(total_checkout), 0) 
-    FROM bill 
-    WHERE payment_status = 1 
-      AND status = 4
-""", nativeQuery = true)
-    BigDecimal getTotalRevenueCompleted();
 }

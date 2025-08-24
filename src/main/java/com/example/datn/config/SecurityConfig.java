@@ -8,6 +8,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -44,7 +45,8 @@ public class SecurityConfig {
         http.csrf().disable()
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login", "/register").permitAll()
-                        .requestMatchers("/admin/**").authenticated()
+//                        .requestMatchers("/admin/**").authenticated()
+//                        .requestMatchers("/user/**").authenticated()
                         .anyRequest().permitAll()
                 )
                 .formLogin(form -> form
@@ -60,7 +62,22 @@ public class SecurityConfig {
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout=true")
                         .permitAll()
+                )
+                // SESSION MANAGEMENT CONFIG - FIX LOGOUT ISSUE
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // chỉ tạo khi cần
+                        .invalidSessionUrl("/login?expired")
+                )
+
+
+                // THÊM EXCEPTION HANDLING
+                .exceptionHandling(ex -> ex
+                        .accessDeniedPage("/login?access-denied")
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.sendRedirect("/login?session-expired");
+                        })
                 );
+
 
         return http.build();
     }
