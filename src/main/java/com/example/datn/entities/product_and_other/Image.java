@@ -31,5 +31,4 @@ public class Image {
     @ManyToOne
     @JoinColumn(name = "product_detail_id")
     private ProductDetail productDetail;
-
 }

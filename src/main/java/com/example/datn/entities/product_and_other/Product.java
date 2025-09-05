@@ -53,7 +53,6 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<ProductDetail> productDetails;
 
-
     @Transient
     public String getMainImagePath() {
         if (productDetails != null && !productDetails.isEmpty()) {
