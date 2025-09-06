@@ -1,83 +1,98 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{admin/admin-layout}">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{admin/fragments/head :: head}"></head>
+<body data-pc-preset="preset-1" data-pc-direction="ltr" data-pc-theme="light">
+<div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
+<header th:replace="~{admin/fragments/header :: header}"></header>
 
-<head>
-    <title></title>
-</head>
-<body>
-<div layout:fragment="content">
-<div class="card">
-    <h2>Chi tiết mã giảm giá</h2>
+<div class="pc-container">
+    <div class="pc-content">
+        <!-- breadcrumb -->
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <div class="page-header-title">
+                            <h5 class="m-b-10">Chi tiết mã giảm giá</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- content: bạn dán phần “cards, charts, tables …” ở đây -->
+        <div class="row">
+            <div class="card">
+                <div class="info">
+                    <span class="label">Mã:</span>
+                    <span class="value" th:text="${discount.code}">Mã giảm giá</span>
+                </div>
 
-    <div class="info">
-        <span class="label">Mã:</span>
-        <span class="value" th:text="${discount.code}">Mã giảm giá</span>
-    </div>
+                <div class="info">
+                    <span class="label">Tên mã:</span>
+                    <span class="value" th:text="${discount.codeName}">Tên mã</span>
+                </div>
 
-    <div class="info">
-        <span class="label">Tên mã:</span>
-        <span class="value" th:text="${discount.codeName}">Tên mã</span>
-    </div>
+                <div class="info">
+                    <span class="label">Loại:</span>
+                    <span class="value" th:text="${discount.discountType}">Loại</span>
+                </div>
 
-    <div class="info">
-        <span class="label">Loại:</span>
-        <span class="value" th:text="${discount.discountType}">Loại</span>
-    </div>
+                <div class="info">
+                    <span class="label">Giá trị:</span>
+                    <span class="value" th:text="${discount.discountValue}">Giá trị</span>
+                </div>
 
-    <div class="info">
-        <span class="label">Giá trị:</span>
-        <span class="value" th:text="${discount.discountValue}">Giá trị</span>
-    </div>
+                <div class="info">
+                    <span class="label">Ngày bắt đầu:</span>
+                    <span class="value" th:text="${#temporals.format(discount.startDatetime, 'dd/MM/yyyy HH:mm')}">Ngày bắt đầu</span>
+                </div>
 
-    <div class="info">
-        <span class="label">Ngày bắt đầu:</span>
-        <span class="value" th:text="${#temporals.format(discount.startDatetime, 'dd/MM/yyyy HH:mm')}">Ngày bắt đầu</span>
-    </div>
+                <div class="info">
+                    <span class="label">Ngày kết thúc:</span>
+                    <span class="value" th:text="${#temporals.format(discount.endDatetime, 'dd/MM/yyyy HH:mm')}">Ngày kết thúc</span>
+                </div>
 
-    <div class="info">
-        <span class="label">Ngày kết thúc:</span>
-        <span class="value" th:text="${#temporals.format(discount.endDatetime, 'dd/MM/yyyy HH:mm')}">Ngày kết thúc</span>
-    </div>
+                <div class="info">
+                    <span class="label">Đơn tối thiểu:</span>
+                    <span class="value" th:text="${discount.minPurchase}">Đơn tối thiểu</span>
+                </div>
 
-    <div class="info">
-        <span class="label">Đơn tối thiểu:</span>
-        <span class="value" th:text="${discount.minPurchase}">Đơn tối thiểu</span>
-    </div>
+                <div class="info">
+                    <span class="label">Giảm tối đa:</span>
+                    <span class="value" th:text="${discount.maxDiscount}">Giảm tối đa</span>
+                </div>
 
-    <div class="info">
-        <span class="label">Giảm tối đa:</span>
-        <span class="value" th:text="${discount.maxDiscount}">Giảm tối đa</span>
-    </div>
+                <div class="info">
+                    <span class="label">Số lượng giới hạn:</span>
+                    <span class="value" th:text="${discount.usageLimit}">Số lượng</span>
+                </div>
 
-    <div class="info">
-        <span class="label">Số lượng giới hạn:</span>
-        <span class="value" th:text="${discount.usageLimit}">Số lượng</span>
-    </div>
+                <div class="info">
+                    <span class="label">Mô tả:</span>
+                    <span class="value" th:text="${discount.description}">Mô tả</span>
+                </div>
 
-    <div class="info">
-        <span class="label">Mô tả:</span>
-        <span class="value" th:text="${discount.description}">Mô tả</span>
-    </div>
+                <div class="info">
+                    <span class="label">Trạng thái:</span>
+                    <span class="value" th:switch="${discount.status}">
+                        <span th:case="1">Đang diễn ra</span>
+                        <span th:case="2">Sắp diễn ra</span>
+                        <span th:case="3">Hết hạn</span>
+                        <span th:case="4">Đã đóng</span>
+                        <span th:case="*">Không xác định</span>
+                    </span>
+                </div>
 
-    <div class="info">
-        <span class="label">Trạng thái:</span>
-        <span class="value" th:switch="${discount.status}">
-            <span th:case="1">Đang diễn ra</span>
-            <span th:case="2">Sắp diễn ra</span>
-            <span th:case="3">Hết hạn</span>
-            <span th:case="4">Đã đóng</span>
-            <span th:case="*">Không xác định</span>
-        </span>
-    </div>
-
-    <div class="button-container">
-        <a th:href="@{/admin/discount/view}">
-            <button>⬅️ Quay lại danh sách</button>
-        </a>
+                <div class="button-container">
+                    <a th:href="@{/admin/discount/view}">
+                        <button>⬅️ Quay lại danh sách</button>
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-</div>
+
+<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
 </body>
 </html>

@@ -1,0 +1,52 @@
+/* ============================
+   CUSTOM OVERRIDE FOR 4PStore
+   ============================ */
+
+/* Sidebar links - bỏ gạch chân */
+.pc-navbar .pc-link {
+    text-decoration: none !important;
+}
+
+/* Hover sidebar link */
+.pc-navbar .pc-link:hover {
+    text-decoration: none !important;
+    background-color: #f8f9fa; /* nhẹ nhàng khi hover */
+}
+
+/* Active sidebar item */
+.pc-item.active > .pc-link {
+    background-color: #e9f2ff;
+    border-radius: 6px;
+    font-weight: 600;
+    color: #0d6efd; /* xanh bootstrap */
+}
+
+/* Active icon cũng đổi màu */
+.pc-item.active > .pc-link .pc-micon i {
+    color: #0d6efd;
+}
+
+/* Active text */
+.pc-item.active > .pc-link .pc-mtext {
+    color: #0d6efd;
+}
+
+/* Tăng padding cho dễ nhìn */
+.pc-navbar .pc-link {
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+}
+
+/* Giảm font-size caption (label) */
+.pc-caption label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #6c757d;
+}
+
+/* Header user dropdown chỉnh gọn hơn */
+.header-user-profile .dropdown-menu {
+    border-radius: 8px;
+    overflow: hidden;
+}

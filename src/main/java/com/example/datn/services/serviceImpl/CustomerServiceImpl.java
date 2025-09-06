@@ -284,8 +284,8 @@ public class CustomerServiceImpl implements CustomerService {
         return customerRepository.searchCustomerByKeywordInline(keyword);
     }
 
-    public Boolean khachHangTonTaiInline(String name, String phoneNumber){
-        Customer customer = customerRepository.searchCustomerExistNameOrPhoneInline(name, phoneNumber);
+    public Boolean khachHangTonTaiInline( String phoneNumber){
+        Customer customer = customerRepository.searchCustomerExistPhoneInline(phoneNumber);
         if(customer != null){
             return true;
         } else {
@@ -295,8 +295,8 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public Customer createCustomerInline(com.example.datn.dto.selling_inline.CustomerDto customerDto) throws Exception{
         Customer customer = new Customer();
-        if(khachHangTonTaiInline(customerDto.getName(), customerDto.getPhoneNumber())){
-            throw new Exception("Khách hàng đã tồn tại!");
+        if(khachHangTonTaiInline(customerDto.getPhoneNumber())){
+            throw new Exception("Khách hàng đã tồn tại bằng số điện thoại này!");
         }
         if (customerDto.getPhoneNumber().isEmpty() || customerDto.getPhoneNumber().trim().equals("")){
             throw new Exception("Không được để trống số điện thoại khách hàng!");

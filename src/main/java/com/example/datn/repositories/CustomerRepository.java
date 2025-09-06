@@ -32,6 +32,7 @@ public interface CustomerRepository extends JpaRepository<Customer,Integer> {
             "or lower(c.phoneNumber) like lower(concat('%', :keyword, '%') ) ")
     List<Customer> searchCustomerByKeywordInline(@Param("keyword") String keyword);
 
+
     @Query("select c from Customer c where lower(c.name) like lower(concat('%%', :name, '%')) " +
             "or c.phoneNumber like :phoneNumber ")
     Customer searchCustomerExistNameOrPhoneInline(String name, String phoneNumber);
@@ -53,5 +54,13 @@ public interface CustomerRepository extends JpaRepository<Customer,Integer> {
             "JOIN FETCH c.account a " +
             "WHERE a.email = :email")
     Optional<Customer> findByAccountEmailWithAddresses(@Param("email") String email);
+
+
+//    @Query("select c from Customer c where lower(c.name) like lower(concat('%%', :name, '%')) " +
+//            "or c.phoneNumber like :phoneNumber ")
+//    Customer searchCustomerExistNameOrPhoneInline(String name, String phoneNumber);
+
+    @Query("select c from Customer c where c.phoneNumber like :phoneNumber ")
+    Customer searchCustomerExistPhoneInline(String phoneNumber);
 
 }

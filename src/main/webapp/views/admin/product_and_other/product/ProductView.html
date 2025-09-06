@@ -1,179 +1,171 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments/head :: head}">
-    <title>Quản lý sản phẩm | 4PStore</title>
-</head>
-<body>
-<header th:replace="~{admin/fragments/header :: header}"></header>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{admin/fragments/head :: head}"></head>
+<body data-pc-preset="preset-1" data-pc-direction="ltr" data-pc-theme="light">
 <div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
-<section>
+<header th:replace="~{admin/fragments/header :: header}"></header>
 
-    <div class="pc-container">
-        <div class="pc-content">
-            <div class="page-header">
-                <div class="page-block">
-                    <div class="row align-items-center">
-                        <div class="col-md-12">
-                            <div class="page-header-title">
-                                <h5 class="m-b-10">Quản lý sản phẩm</h5>
-                            </div>
-                            <ul class="breadcrumb">
-                            </ul>
-
+<div class="pc-container">
+    <div class="pc-content">
+        <!-- breadcrumb -->
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <div class="page-header-title">
+                            <h5 class="m-b-10">Quản lý sản phẩm</h5>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="container">
-                <form class="bg-white border rounded shadow-sm p-4 mb-4" method="get">
-<!--                    <div class="row mb-3">-->
-<!--                        <div class="col-12">-->
-<!--                            <label for="searchInput" class="form-label fw-semibold text-dark">🔎 Tìm kiếm sản phẩm</label>-->
-<!--                        </div>-->
-<!--                    </div>-->
-                    <!-- Dòng nhập tên và trạng thái -->
-                    <div class="row g-3 align-items-end mb-3">
-                        <div class="col-md-8">
-                            <label for="searchInput" class="form-label">Tên sản phẩm</label>
-                            <div class="input-group shadow-sm">
-                                <input type="text" id="searchInput" name="productNameSearch"
-                                       class="form-control" placeholder="Nhập tên..."
-                                       th:value="${param.productNameSearch}">
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="category_search" class="form-label">Loại sản phẩm</label>
-                            <select id="category_search" name="productCategorySearch" class="form-select shadow-sm">
-                                <option value="" th:selected="${productCategorySearch == null}">Tất cả loại</option>
-                                <option th:each="cate : ${listCategory}"
-                                        th:value="${cate.id}"
-                                        th:text="${cate.name}"
-                                        th:if="${cate.status}"
-                                        th:selected="${cate.id == productCategorySearch}">
-                                </option>
-                            </select>
+        </div>
+        <!-- content: bạn dán phần “cards, charts, tables …” ở đây -->
+        <div class="row">
+            <!-- Form tìm kiếm-->
+            <form class="bg-white border rounded shadow-sm p-4 mb-4" method="get">
+                <!-- Dòng nhập tên và trạng thái -->
+                <div class="row g-3 align-items-end mb-3">
+                    <div class="col-md-8">
+                        <label for="searchInput" class="form-label">Tên sản phẩm</label>
+                        <div class="input-group shadow-sm">
+                            <input type="text" id="searchInput" name="productNameSearch"
+                                   class="form-control" placeholder="Nhập tên..."
+                                   th:value="${param.productNameSearch}">
                         </div>
                     </div>
-
-                    <!-- Dòng dropdown: Loại - Hãng - Chất liệu -->
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-4">
-                            <label for="brand_search" class="form-label">Hãng sản xuất</label>
-                            <select id="brand_search" name="productBrandSearch" class="form-select shadow-sm">
-                                <option value="" th:selected="${productBrandSearch == null}">Tất cả hãng</option>
-                                <option th:each="brand : ${listBrand}"
-                                        th:value="${brand.id}"
-                                        th:text="${brand.name}"
-                                        th:if="${brand.status}"
-                                        th:selected="${brand.id == productBrandSearch}">
-                                </option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="material_search" class="form-label">Chất liệu</label>
-                            <select id="material_search" name="productMaterialSearch" class="form-select shadow-sm">
-                                <option value="" th:selected="${productMaterialSearch == null}">Tất cả chất liệu</option>
-                                <option th:each="mate : ${listMaterial}"
-                                        th:value="${mate.id}"
-                                        th:text="${mate.name}"
-                                        th:if="${mate.status}"
-                                        th:selected="${mate.id == productMaterialSearch}">
-                                </option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label for="status_search" class="form-label">Loại sản phẩm</label>
-                            <select id="status_search" name="productStatusSearch" class="form-select shadow-sm">
-                                <option value="" th:selected="${productStatusSearch == null}">Tất cả trạng thái</option>
-                                <option value="true" th:selected="${productStatusSearch == true}">Hoạt động</option>
-                                <option value="false" th:selected="${productStatusSearch == false}">Không hoạt động</option>
-                            </select>
-                        </div>
-                        <div class="col-md-1 d-grid">
-                            <button type="submit" class="btn btn-primary mt-4" id="search_product_btn" title="Tìm kiếm">
-                                🔍
-                            </button>
-                        </div>
-                        <div class="col-md-1 d-grid">
-                            <button type="button" class="btn btn-secondary mt-4" id="clear_search" title="Xóa tìm kiếm">
-                                🧹
-                            </button>
-                        </div>
+                    <div class="col-md-4">
+                        <label for="category_search" class="form-label">Loại sản phẩm</label>
+                        <select id="category_search" name="productCategorySearch" class="form-select shadow-sm">
+                            <option value="" th:selected="${productCategorySearch == null}">Tất cả loại</option>
+                            <option th:each="cate : ${listCategory}"
+                                    th:value="${cate.id}"
+                                    th:text="${cate.name}"
+                                    th:if="${cate.status}"
+                                    th:selected="${cate.id == productCategorySearch}">
+                            </option>
+                        </select>
                     </div>
-
-
-                    <!-- Nút chức năng -->
-                    <div class="row mt-3">
-                        <div class="col-12 text-end">
-                            <a th:href="@{/admin/product/view-add}" class="btn btn-primary shadow-sm">
-                                ➕ Thêm sản phẩm
-                            </a>
-                            <a th:href="@{/admin/product/view-atribute}" class="btn btn-outline-secondary ms-2 shadow-sm">
-                                ⚙️ Thuộc tính
-                            </a>
-                        </div>
-                    </div>
-                </form>
-
-
-
-                <div th:if="${#lists.isEmpty(listProduct.content)}" class="d-flex flex-column justify-content-center align-items-center" style="height: 400px;">
-                    <img src="https://shop.nebulacare.in/Content/Images/nodata.jpg" style="max-height: 400px;">
                 </div>
-                <div th:if="${!#lists.isEmpty(listProduct.content)}" class="card-body">
-                    <table class="table table-striped table-bordered dataTable-table" id="table1">
-                        <thead>
-                        <tr>
-                            <th style="text-align: center">STT</th>
-                            <th style="text-align: center">Mã sản phẩm</th>
-                            <th style="text-align: center">Tên sản phẩm</th>
-                            <th style="text-align: center">Loại sản phẩm</th>
-                            <th style="text-align: center">Hãng</th>
-                            <th style="text-align: center">Chất liệu</th>
-                            <th style="text-align: center">Số lượng</th>
-                            <th style="text-align: center">Trạng thái</th>
-                            <th style="text-align: center">Hành động</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="sp, iter : ${listProduct.content}" th:data-id="${sp.id}">
-                            <td th:text="${listProduct.number * listProduct.size + iter.index + 1}"></td>
-                            <td th:text="${sp.code}"></td>
-                            <td th:text="${sp.name}"></td>
-                            <td th:text="${sp.category.name}"></td>
-                            <td th:text="${sp.brand.name}"></td>
-                            <td th:text="${sp.material.name}"></td>
-                            <td th:text="${totalQuantity[sp.id]}">0</td>
-                            <td style="text-align: center">
-                                <span th:if="${sp.status}" class="badge bg-success">Hoạt động</span>
-                                <span th:unless="${sp.status}" class="badge bg-danger">Không hoạt động</span>
-                            </td>
-                            <td style="text-align: center">
-<!--                                <a class="btn btn-outline-warning hienThiThongTinModal" th:attr="data-id=${sp.id}" style="width: 70px" title="Sửa" data-bs-toggle="modal" data-bs-target="#modalChinhSua">-->
-<!--&lt;!&ndash;                                    <i class="bi bi-pencil-square"></i>&ndash;&gt;-->
-<!--                                    ✏️️-->
-<!--                                </a>-->
-                                <a class="btn btn-outline-info" th:href="@{'/admin/product/view-detail/' + ${sp.id}}" style="width: 70px" title="Xem">
-<!--                                    <i class="bi bi-eye"></i>-->
-                                    ️ 👁️
-                                </a>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+
+                <!-- Dòng dropdown: Loại - Hãng - Chất liệu -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label for="brand_search" class="form-label">Hãng sản xuất</label>
+                        <select id="brand_search" name="productBrandSearch" class="form-select shadow-sm">
+                            <option value="" th:selected="${productBrandSearch == null}">Tất cả hãng</option>
+                            <option th:each="brand : ${listBrand}"
+                                    th:value="${brand.id}"
+                                    th:text="${brand.name}"
+                                    th:if="${brand.status}"
+                                    th:selected="${brand.id == productBrandSearch}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="material_search" class="form-label">Chất liệu</label>
+                        <select id="material_search" name="productMaterialSearch" class="form-select shadow-sm">
+                            <option value="" th:selected="${productMaterialSearch == null}">Tất cả chất liệu</option>
+                            <option th:each="mate : ${listMaterial}"
+                                    th:value="${mate.id}"
+                                    th:text="${mate.name}"
+                                    th:if="${mate.status}"
+                                    th:selected="${mate.id == productMaterialSearch}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="status_search" class="form-label">Loại sản phẩm</label>
+                        <select id="status_search" name="productStatusSearch" class="form-select shadow-sm">
+                            <option value="" th:selected="${productStatusSearch == null}">Tất cả trạng thái</option>
+                            <option value="true" th:selected="${productStatusSearch == true}">Hoạt động</option>
+                            <option value="false" th:selected="${productStatusSearch == false}">Không hoạt động</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1 d-grid">
+                        <button type="submit" class="btn btn-primary mt-4" id="search_product_btn" title="Tìm kiếm">
+                            🔍
+                        </button>
+                    </div>
+                    <div class="col-md-1 d-grid">
+                        <button type="button" class="btn btn-secondary mt-4" id="clear_search" title="Xóa tìm kiếm">
+                            🧹
+                        </button>
+                    </div>
                 </div>
-                <div class="dataTable-bottom">
+
+
+                <!-- Nút chức năng -->
+                <div class="row mt-3">
+                    <div class="col-12 text-end">
+                        <a th:href="@{/admin/product/view-add}" class="btn btn-primary shadow-sm">
+                            ➕ Thêm sản phẩm
+                        </a>
+                        <a th:href="@{/admin/product/view-atribute}" class="btn btn-outline-secondary ms-2 shadow-sm">
+                            ⚙️ Thuộc tính
+                        </a>
+                    </div>
+                </div>
+            </form>
+            <!-- Nếu không tìm thấy sản phẩm -> load ảnh null-->
+            <div th:if="${#lists.isEmpty(listProduct.content)}" class="d-flex flex-column justify-content-center align-items-center" style="height: 400px;">
+                <img src="https://shop.nebulacare.in/Content/Images/nodata.jpg" style="max-height: 400px;">
+            </div>
+            <!-- Nếu tìm thấy sản phẩm -> show table-->
+            <div th:if="${!#lists.isEmpty(listProduct.content)}" class="card-body">
+                <table class="table table-striped table-bordered dataTable-table" id="table1">
+                    <thead>
+                    <tr>
+                        <th style="text-align: center">STT</th>
+                        <th style="text-align: center">Mã sản phẩm</th>
+                        <th style="text-align: center">Tên sản phẩm</th>
+                        <th style="text-align: center">Loại sản phẩm</th>
+                        <th style="text-align: center">Hãng</th>
+                        <th style="text-align: center">Chất liệu</th>
+                        <th style="text-align: center">Số lượng</th>
+                        <th style="text-align: center">Trạng thái</th>
+                        <th style="text-align: center">Hành động</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="sp, iter : ${listProduct.content}" th:data-id="${sp.id}">
+                        <td th:text="${listProduct.number * listProduct.size + iter.index + 1}"></td>
+                        <td th:text="${sp.code}"></td>
+                        <td th:text="${sp.name}"></td>
+                        <td th:text="${sp.category.name}"></td>
+                        <td th:text="${sp.brand.name}"></td>
+                        <td th:text="${sp.material.name}"></td>
+                        <td th:text="${totalQuantity[sp.id]}">0</td>
+                        <td style="text-align: center">
+                            <span th:if="${sp.status}" class="badge bg-success">Hoạt động</span>
+                            <span th:unless="${sp.status}" class="badge bg-danger">Không hoạt động</span>
+                        </td>
+                        <td style="text-align: center">
+                            <!--                                <a class="btn btn-outline-warning hienThiThongTinModal" th:attr="data-id=${sp.id}" style="width: 70px" title="Sửa" data-bs-toggle="modal" data-bs-target="#modalChinhSua">-->
+                            <!--&lt;!&ndash;                                    <i class="bi bi-pencil-square"></i>&ndash;&gt;-->
+                            <!--                                    ✏️️-->
+                            <!--                                </a>-->
+                            <a class="btn btn-outline-info" th:href="@{'/admin/product/view-detail/' + ${sp.id}}" style="width: 70px" title="Xem">
+                                <!--                                    <i class="bi bi-eye"></i>-->
+                                ️ 👁️
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Phân trang -->
+            <div class="dataTable-bottom">
                 <nav th:if="${listProduct.totalPages > 0}">
                     <ul class="pagination d-flex justify-content-end">
                         <li class="page-item" th:classappend="${listProduct.first} ? 'disabled'">
                             <a class="page-link"
                                th:href="@{/admin/product/hien-thi(page=${listProduct.number > 0 ? listProduct.number - 1 : 0},
-                                size=${listProduct.size},
-                                productNameSearch=${productNameSearch},
-                                productStatusSearch=${productStatusSearch},
-                                roductCategorySearch=${productCategorySearch},
-                                productBrandSearch=${productBrandSearch},
-                                productMaterialSearch=${productMaterialSearch})}">
+                                    size=${listProduct.size},
+                                    productNameSearch=${productNameSearch},
+                                    productStatusSearch=${productStatusSearch},
+                                    roductCategorySearch=${productCategorySearch},
+                                    productBrandSearch=${productBrandSearch},
+                                    productMaterialSearch=${productMaterialSearch})}">
                                 Trước
                             </a>
                         </li>
@@ -182,133 +174,75 @@
                             th:each="i : ${#numbers.sequence(0, listProduct.totalPages - 1)}"
                             th:classappend="${i == listProduct.number} ? 'active'">
                             <a class="page-link"
-                                th:href="@{/admin/product/hien-thi(   page=${i},
-                                size=${listProduct.size},
-                                productNameSearch=${productNameSearch},
-                                productStatusSearch=${productStatusSearch},
-                                roductCategorySearch=${productCategorySearch},
-                                productBrandSearch=${productBrandSearch},
-                                productMaterialSearch=${productMaterialSearch}
-                               )}"
+                               th:href="@{/admin/product/hien-thi(   page=${i},
+                                    size=${listProduct.size},
+                                    productNameSearch=${productNameSearch},
+                                    productStatusSearch=${productStatusSearch},
+                                    roductCategorySearch=${productCategorySearch},
+                                    productBrandSearch=${productBrandSearch},
+                                    productMaterialSearch=${productMaterialSearch}
+                                   )}"
                                th:text="${i + 1}">1</a>
                         </li>
 
                         <li class="page-item" th:classappend="${listProduct.last} ? 'disabled'">
                             <a class="page-link"
                                th:href="@{/admin/product/hien-thi(   page=${listProduct.number + 1},
-                               size=${listProduct.size},
-                               productNameSearch=${productNameSearch},
-                               productStatusSearch=${productStatusSearch},
-                               roductCategorySearch=${productCategorySearch},
-                               productBrandSearch=${productBrandSearch},
-                               productMaterialSearch=${productMaterialSearch}
-                               )}">
+                                   size=${listProduct.size},
+                                   productNameSearch=${productNameSearch},
+                                   productStatusSearch=${productStatusSearch},
+                                   roductCategorySearch=${productCategorySearch},
+                                   productBrandSearch=${productBrandSearch},
+                                   productMaterialSearch=${productMaterialSearch}
+                                   )}">
                                 Sau
                             </a>
                         </li>
                     </ul>
                 </nav>
             </div>
-            </div>
         </div>
     </div>
-</section>
-<!--Modal sửa-->
-<!--    <div class="modal fade" id="modalChinhSua" tabindex="-1" aria-labelledby="modalChinhSuaLabel" aria-hidden="true">-->
-<!--        <div class="modal-dialog modal-lg">-->
-<!--            <div class="modal-content">-->
-<!--                <div class="modal-header">-->
-<!--                    <h5 class="modal-title" id="modalChinhSuaLabel">Chỉnh sửa thông tin sản phẩm</h5>-->
-<!--                </div>-->
-<!--                <div class="modal-body">-->
-<!--                    <form id="updateProduct" method="post" th:action="@{/admin/product/update}">-->
-<!--                        <input type="hidden" id="product_id" name="productId">-->
-<!--                        <div class="mb-3">-->
-<!--                            <label for="product_name_update" class="form-label">Tên sản phẩm</label><span class="text-danger">*</span>-->
-<!--                            <input type="text" class="form-control" id="product_name_update" name="productName" placeholder="Nhập tên sản phẩm">-->
-<!--                        </div>-->
-<!--                        <div class="mb-3">-->
-<!--                            <label for="product_category_update" class="form-label">Loại sản phẩm</label><span class="text-danger">*</span>-->
-<!--                            <select class="form-select me-2" id="product_category_update" name="categoryId">-->
-<!--                                <option th:each="cate : ${listCategory}"-->
-<!--                                        th:value="${cate.id}"-->
-<!--                                        th:text="${cate.name}"-->
-<!--                                        th:if="${cate.status}">-->
-<!--                                </option>-->
-<!--                            </select>-->
-<!--                        </div>-->
-<!--                        <div class="mb-3">-->
-<!--                            <label for="product_brand_update" class="form-label">Hãng</label><span class="text-danger">*</span>-->
-<!--                            <select class="form-select me-2" id="product_brand_update" name="brandId">-->
-<!--                                <option th:each="brand : ${listBrand}"-->
-<!--                                        th:value="${brand.id}"-->
-<!--                                        th:text="${brand.name}"-->
-<!--                                        th:if="${brand.status}">-->
-<!--                                </option>-->
-<!--                            </select>-->
-<!--                        </div>-->
-<!--                        <div class="mb-3">-->
-<!--                            <label for="product_material_update" class="form-label">Chất liệu</label><span class="text-danger">*</span>-->
-<!--                            <select class="form-select me-2" id="product_material_update" name="materialId">-->
-<!--                                <option th:each="mate : ${listMaterial}"-->
-<!--                                        th:value="${mate.id}"-->
-<!--                                        th:text="${mate.name}"-->
-<!--                                        th:if="${mate.status}">-->
-<!--                                </option>-->
-<!--                            </select>-->
-<!--                        </div>-->
-<!--                        <div class="modal-footer">-->
-<!--                            <button type="submit" class="btn btn-outline-success">-->
-<!--                                <i class="bi bi-check-lg"></i>-->
-<!--                            </button>-->
-<!--                            <button type="button" class="btn btn-outline-warning" data-bs-dismiss="modal">-->
-<!--                                <i class="bi bi-x"></i>-->
-<!--                            </button>-->
-<!--                        </div>-->
-<!--                    </form>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </div>-->
+</div>
+<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
+<!-- Script -->
+<script th:if="${alert != null}" th:inline="javascript">
+    Swal.fire({
+        toast: true,
+        icon: [[${type}]], // Đảm bảo `type` là kiểu string (success, error,...)
+        title: [[${alert}]],
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true
+    });
+</script>
 
-    <!-- Script -->
-    <script th:if="${alert != null}" th:inline="javascript">
-        Swal.fire({
-            toast: true,
-            icon: [[${type}]], // Đảm bảo `type` là kiểu string (success, error,...)
-            title: [[${alert}]],
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 2000,
-            timerProgressBar: true
+<script>
+    $(document).on('click', '.hienThiThongTinModal', function () {
+        const id = $(this).data('id');
+        console.log("ID sản phẩm:", id);
+        console.log("DATA:", $(this).data()); // debug
+        console.log("ID sản phẩm:", id);      // kiểm tra có ra khôn
+        $('#product_id').val(id);
+
+        $.ajax({
+            url: `/admin/product/get-detail/${id}`,
+            type: 'GET',
+            success: function (response) {
+                console.log("Dữ liệu sản phẩm:", response);
+                $('#product_id').val(response.id);
+                $('#product_name_update').val(response.name);
+                $('#product_category_update').val(response.category.id);
+                $('#product_brand_update').val(response.brand.id);
+                $('#product_material_update').val(response.material.id);
+            },
+            error: function (xhr) {
+                console.error("Lỗi khi lấy dữ liệu sản phẩm:", xhr);
+            }
         });
-    </script>
-
-    <script>
-        $(document).on('click', '.hienThiThongTinModal', function () {
-            const id = $(this).data('id');
-            console.log("ID sản phẩm:", id);
-            console.log("DATA:", $(this).data()); // debug
-            console.log("ID sản phẩm:", id);      // kiểm tra có ra khôn
-            $('#product_id').val(id);
-
-            $.ajax({
-                url: `/admin/product/get-detail/${id}`,
-                type: 'GET',
-                success: function (response) {
-                    console.log("Dữ liệu sản phẩm:", response);
-                    $('#product_id').val(response.id);
-                    $('#product_name_update').val(response.name);
-                    $('#product_category_update').val(response.category.id);
-                    $('#product_brand_update').val(response.brand.id);
-                    $('#product_material_update').val(response.material.id);
-                },
-                error: function (xhr) {
-                    console.error("Lỗi khi lấy dữ liệu sản phẩm:", xhr);
-                }
-            });
-        });
-    </script>
+    });
+</script>
 
 
 </body>

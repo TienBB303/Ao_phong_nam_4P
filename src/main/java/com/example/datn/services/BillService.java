@@ -68,30 +68,6 @@ public class BillService {
     @Autowired
     com.example.datn.repositories.PaymentMethodRepository paymentMethodRepository;
 
-//
-//    @Autowired
-//    CustomerService customerService;
-//
-//    public Bill saveBill(BillSessionDto billSessionDto){
-//        Bill bill = new Bill();
-//        bill.setCode(billSessionDto.getBillDto().getCode());
-//        bill.setName(billSessionDto.getBillDto().getName());
-//        bill.setDiscountAmount(billSessionDto.getBillDto().getDiscountAmount());
-//        bill.setTotalAmount(billSessionDto.getBillDto().getTotalAmount());
-//        bill.setPaymentStatus(billSessionDto.getBillDto().getPaymentStatus());
-//        bill.setStatus(billSessionDto.getBillDto().getStatus());
-//        bill.setDeliveryType(billSessionDto.getBillDto().getDeliveryType());
-//        bill.setShippingFee(billSessionDto.getBillDto().getShippingFee());
-//        bill.setName(billSessionDto.getBillDto().getName());
-//        bill.setPhoneNumber(billSessionDto.getBillDto().getPhoneNumber());
-//        bill.setEmail(billSessionDto.getBillDto().getEmail());
-//        bill.setPaymentMethod(billSessionDto.getBillDto().getPaymentMethodId());
-//        bill.setCustomer(customerService.findById(billSessionDto.getBillDto().getCustomerId()));
-//        bill.setDiscountId(billSessionDto.getBillDto().getDiscountId());
-//
-//        return billRepository.save(bill);
-//    }
-
     public Page<Bill> getAllBills(Pageable pageable) {
         return billRepository.findAll(pageable);
     }
@@ -284,7 +260,7 @@ public class BillService {
         billDetailRepository.delete(cartDetail);
 
         List<BillDetails> listCartDetails = billRepository.findAllCartDetailByCartId(cart.getId());
-        BigDecimal totalPrice = listCartDetails.stream().map(BillDetails::getPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalPrice = listCartDetails.stream().map(BillDetails::getTotal_price).reduce(BigDecimal.ZERO, BigDecimal::add);
         Integer totalQuantity = listCartDetails.stream().mapToInt(BillDetails::getQuantity).sum();
 
         cart.setTotalAmount(totalPrice);

@@ -1,0 +1,25 @@
+.filepond--root {
+    max-height: 200px !important;
+    overflow-y: auto;
+}
+
+/* Điều chỉnh kích thước ảnh preview nhỏ gọn */
+.filepond--item {
+    width: 120px !important;
+    height: 120px !important;
+}
+.filepond--drop-label {
+    font-size: 0.85rem;      /* Nhỏ hơn mặc định */
+    padding: 6px 10px;
+    line-height: 1.2;
+    text-align: center;
+}
+
+#barcode-scanner video,
+#barcode-scanner canvas {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}

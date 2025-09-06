@@ -1,281 +1,256 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments/head :: head}">
-    <title>Quan ly kieu loai | 4PStore</title>
-</head>
-<body>
-<header th:replace="~{admin/fragments/header :: header}"></header>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{admin/fragments/head :: head}"></head>
+<body data-pc-preset="preset-1" data-pc-direction="ltr" data-pc-theme="light">
 <div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
-<section>
-    <div class="pc-container">
-        <div class="pc-content">
-            <div class="page-header">
-                <div class="page-block">
-                    <div class="row align-items-center">
-                        <div class="col-md-12">
-                            <div class="page-header-title">
-                                <h5 class="m-b-10">Kiểu loại</h5>
-                            </div>
-                            <ul class="breadcrumb">
-                            </ul>
+<header th:replace="~{admin/fragments/header :: header}"></header>
+
+<div class="pc-container">
+    <div class="pc-content">
+        <!-- breadcrumb -->
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <div class="page-header-title">
+                            <h5 class="m-b-10">Kiểu loại</h5>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="container discount-form-container">
-                <!-- Main-->
-                <div id="main">
-                    <div class="page-heading">
-                        <div class="page-title">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <h3></h3>
-                                <a class="btn btn-outline-primary" href="/admin/product/view-atribute"
-                                   style="width: 70px">
-                                    <i class="bi bi-arrow-return-left"></i>
+        </div>
+        <!-- content: bạn dán phần “cards, charts, tables …” ở đây -->
+        <div class="row">
+            <div class="card">
+                <div class="card-header">
+                    <form method="get" action="/admin/category/hien-thi" th:object="${listCategory}"
+                          style="padding-bottom: 20px">
+                        <div class="row">
+                            <div class="col-5">
+                                <input type="text" id="searchInput" class="form-control"
+                                       name="categoryNameSearch"
+                                       placeholder="Nhập kiểu loại..."
+                                       th:value="${param.categoryNameSearch}">
+                            </div>
+                            <div class="col-5">
+                                <select id="status" name="categoryStatusSearch" class="form-select">
+                                    <option value="" th:selected="${categoryStatusSearch == null}">
+                                        Tất cả trạng thái
+                                    </option>
+                                    <option value="true" th:selected="${categoryStatusSearch == true}">
+                                        Hoạt động
+                                    </option>
+                                    <option value="false"
+                                            th:selected="${categoryStatusSearch == false}">Không hoạt động
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-2">
+                                <button class="btn btn-primary" type="submit" id="sbmt">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalThemMoi">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div th:if="${#lists.isEmpty(listCategory.content)}"
+                     class="d-flex flex-column justify-content-center align-items-center"
+                     style="height: 400px;">
+                    <img src="https://shop.nebulacare.in/Content/Images/nodata.jpg"
+                         style="max-height: 400px;">
+                </div>
+                <div th:if="${!#lists.isEmpty(listCategory.content)}" class="card-body">
+                    <table class="table table-striped table-bordered dataTable-table" id="table1">
+                        <thead>
+                        <tr>
+                            <th style="text-align: center">STT</th>
+                            <th style="text-align: center">Tên kiểu loại</th>
+                            <th style="text-align: center">Mô tả</th>
+                            <th style="text-align: center">Trạng thái</th>
+                            <th style="text-align: center">Hành động</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="cate, iter : ${listCategory.content}" th:data-id="${cate.id}">
+                            <td th:text="${listCategory.number * listCategory.size + iter.index + 1}"></td>
+                            <td th:text="${cate.name}"></td>
+                            <td th:text="${cate.description}"></td>
+                            <td style="text-align: center">
+                                <span th:if="${cate.status}" class="badge bg-success">Hoạt động</span>
+                                <span th:unless="${cate.status}"
+                                      class="badge bg-danger">Không hoạt động</span>
+                            </td>
+                            <td style="text-align: center">
+                                <a class="btn btn-outline-warning hienThiThongTinModal"
+                                   style="width: 70px" title="Sửa" th:attr="data-id=${cate.id}"
+                                   data-bs-toggle="modal" data-bs-target="#modalChinhSua">
+                                    <i class="bi bi-pencil-square"></i>
                                 </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="page-content">
-                        <!--        dữ liệu thực hiện trong selection-->
-                        <section class="row">
-                            <div class="card">
-                                <div class="card-header">
-                                    <form method="get" action="/admin/category/hien-thi" th:object="${listCategory}"
-                                          style="padding-bottom: 20px">
-                                        <div class="row">
-                                            <div class="col-5">
-                                                <input type="text" id="searchInput" class="form-control"
-                                                       name="categoryNameSearch"
-                                                       placeholder="Nhập kiểu loại..."
-                                                       th:value="${param.categoryNameSearch}">
-                                            </div>
-                                            <div class="col-5">
-                                                <select id="status" name="categoryStatusSearch" class="form-select">
-                                                    <option value="" th:selected="${categoryStatusSearch == null}">Tất
-                                                        cả trạng thái
-                                                    </option>
-                                                    <option value="true" th:selected="${categoryStatusSearch == true}">
-                                                        Hoạt động
-                                                    </option>
-                                                    <option value="false"
-                                                            th:selected="${categoryStatusSearch == false}">Không hoạt
-                                                        động
-                                                    </option>
-                                                </select>
-                                            </div>
-                                            <div class="col-2">
-                                                <button class="btn btn-primary" type="submit" id="sbmt">
-                                                    <i class="bi bi-search"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-success" data-bs-toggle="modal"
-                                                        data-bs-target="#modalThemMoi">
-                                                    <i class="bi bi-plus"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </form>
-                                </div>
-                                <div th:if="${#lists.isEmpty(listCategory.content)}"
-                                     class="d-flex flex-column justify-content-center align-items-center"
-                                     style="height: 400px;">
-                                    <img src="https://shop.nebulacare.in/Content/Images/nodata.jpg"
-                                         style="max-height: 400px;">
-                                </div>
-                                <div th:if="${!#lists.isEmpty(listCategory.content)}" class="card-body">
-                                    <table class="table table-striped table-bordered dataTable-table" id="table1">
-                                        <thead>
-                                        <tr>
-                                            <th style="text-align: center">STT</th>
-                                            <th style="text-align: center">Tên kiểu loại</th>
-                                            <th style="text-align: center">Mô tả</th>
-                                            <th style="text-align: center">Trạng thái</th>
-                                            <th style="text-align: center">Hành động</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        <tr th:each="cate, iter : ${listCategory.content}" th:data-id="${cate.id}">
-                                            <td th:text="${listCategory.number * listCategory.size + iter.index + 1}"></td>
-                                            <td th:text="${cate.name}"></td>
-                                            <td th:text="${cate.description}"></td>
-                                            <td style="text-align: center">
-                                                <span th:if="${cate.status}" class="badge bg-success">Hoạt động</span>
-                                                <span th:unless="${cate.status}"
-                                                      class="badge bg-danger">Không hoạt động</span>
-                                            </td>
-                                            <td style="text-align: center">
-                                                <a class="btn btn-outline-warning hienThiThongTinModal"
-                                                   style="width: 70px" title="Sửa" th:attr="data-id=${cate.id}"
-                                                   data-bs-toggle="modal" data-bs-target="#modalChinhSua">
-                                                    <i class="bi bi-pencil-square"></i>
-                                                </a>
-                                                <a class="btn btn-outline-info thayDoiTrangThai" style="width: 70px"
-                                                   title="Xem" th:attr="data-id=${cate.id}">
-                                                    <i class="bi bi-arrow-left-right"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <div class="dataTable-bottom">
-                                    <nav th:if="${listCategory.totalPages > 0}">
-                                        <ul class="pagination d-flex justify-content-end">
-                                            <li class="page-item" th:classappend="${listCategory.first} ? 'disabled'">
-                                                <a class="page-link"
-                                                   th:href="@{/admin/category/hien-thi(page=${listCategory.number > 0 ? listCategory.number - 1 : 0}, size=${listCategory.size},categoryNameSearch=${categoryNameSearch},categoryStatusSearch=${categoryStatusSearch})}">
-                                                    Trước
-                                                </a>
-                                            </li>
-
-                                            <li class="page-item"
-                                                th:each="i : ${#numbers.sequence(0, listCategory.totalPages - 1)}"
-                                                th:classappend="${i == listCategory.number} ? 'active'">
-                                                <a class="page-link"
-                                                   th:href="@{/admin/category/hien-thi(   page=${i},  size=${listCategory.size}, categoryNameSearch=${categoryNameSearch}, categoryStatusSearch=${categoryStatusSearch})}"
-                                                   th:text="${i + 1}">1</a>
-                                            </li>
-
-                                            <li class="page-item" th:classappend="${listCategory.last} ? 'disabled'">
-                                                <a class="page-link"
-                                                   th:href="@{/admin/category/hien-thi(   page=${listCategory.number + 1}, size=${listCategory.size}, categoryNameSearch=${categoryNameSearch},    categoryStatusSearch=${categoryStatusSearch})}">
-                                                    Sau
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </nav>
-
-                                </div>
-                            </div>
-                        </section>
-                    </div>
+                                <a class="btn btn-outline-info thayDoiTrangThai" style="width: 70px"
+                                   title="Xem" th:attr="data-id=${cate.id}">
+                                    <i class="bi bi-arrow-left-right"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </div>
-                <!--    modal thêm-->
-                <div class="modal fade" id="modalThemMoi" tabindex="-1" aria-labelledby="modalThemMoiLabel"
-                     aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="modalThemMoiLabel">Thêm mới kiểu loại</h5>
-                            </div>
-                            <div class="modal-body">
-                                <form id="addCategory" method="post" action="/admin/category/add">
-                                    <div class="mb-3">
-                                        <label for="category_name" class="form-label">Tên kiểu loại</label><span
-                                            class="text-danger">*</span>
-                                        <input type="text" class="form-control" id="category_name" name="categoryName"
-                                               placeholder="Nhập tên kiểu loại">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="category_description" class="form-label">Mô tả</label>
-                                        <input type="text" class="form-control" id="category_description"
-                                               name="categoryDescription" placeholder="Nhập mô tả">
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="submit" class="btn btn-outline-success">
-                                            <i class="bi bi-check-lg"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-outline-warning" data-bs-dismiss="modal">
-                                            <i class="bi bi-x"></i>
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
+                <div class="dataTable-bottom">
+                    <nav th:if="${listCategory.totalPages > 0}">
+                        <ul class="pagination d-flex justify-content-end">
+                            <li class="page-item" th:classappend="${listCategory.first} ? 'disabled'">
+                                <a class="page-link"
+                                   th:href="@{/admin/category/hien-thi(page=${listCategory.number > 0 ? listCategory.number - 1 : 0}, size=${listCategory.size},categoryNameSearch=${categoryNameSearch},categoryStatusSearch=${categoryStatusSearch})}">
+                                    Trước
+                                </a>
+                            </li>
+
+                            <li class="page-item"
+                                th:each="i : ${#numbers.sequence(0, listCategory.totalPages - 1)}"
+                                th:classappend="${i == listCategory.number} ? 'active'">
+                                <a class="page-link"
+                                   th:href="@{/admin/category/hien-thi(   page=${i},  size=${listCategory.size}, categoryNameSearch=${categoryNameSearch}, categoryStatusSearch=${categoryStatusSearch})}"
+                                   th:text="${i + 1}">1</a>
+                            </li>
+
+                            <li class="page-item" th:classappend="${listCategory.last} ? 'disabled'">
+                                <a class="page-link"
+                                   th:href="@{/admin/category/hien-thi(   page=${listCategory.number + 1}, size=${listCategory.size}, categoryNameSearch=${categoryNameSearch},    categoryStatusSearch=${categoryStatusSearch})}">
+                                    Sau
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+
                 </div>
-                <!--    Modal chỉnh sửa-->
-                <div class="modal fade" id="modalChinhSua" tabindex="-1" aria-labelledby="modalChinhSuaLabel"
-                     aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="modalChinhSuaLabel">Chỉnh sửa kiểu loại</h5>
-                            </div>
-                            <div class="modal-body">
-                                <form id="updateCategory" method="post" action="/admin/category/update">
-                                    <input type="hidden" id="category_id" name="categoryId">
-                                    <div class="mb-3">
-                                        <label for="category_name_update" class="form-label">Tên kiểu loại</label><span
-                                            class="text-danger">*</span>
-                                        <input type="text" class="form-control" id="category_name_update"
-                                               name="categoryNameUpdate" placeholder="Nhập tên kiểu loại">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="category_description_update" class="form-label">Mô tả</label>
-                                        <input type="text" class="form-control" id="category_description_update"
-                                               name="categoryDescriptionUpdate" placeholder="Nhập mô tả">
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="submit" class="btn btn-outline-success">
-                                            <i class="bi bi-check-lg"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-outline-warning" data-bs-dismiss="modal">
-                                            <i class="bi bi-x"></i>
-                                        </button>
-                                    </div>
-                                </form>
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!--    Script-->
-
-
-                <script th:if="${alert != null}" th:inline="javascript">
-                    Swal.fire({
-                        toast: true,
-                        icon: [[${type}]],
-                        title: '[[${alert}]]', // Thông báo từ controller
-                        position: 'top-end',
-                        showConfirmButton: false,
-                        timer: 2000,
-                        timerProgressBar: true
-                    });
-                </script>
-                <!--    Detail-->
-                <script>
-                    $(document).on('click', '.hienThiThongTinModal', function () {
-                        const id = $(this).data('id');
-                        console.log("ID lấy được:", id);
-                        $('#category_id').val(id); // Gắn ID vào input ẩn trong form
-
-                        $.ajax({
-                            url: `/admin/category/detail/${id}`,
-                            type: 'GET',
-                            success: function (response) {
-                                console.log("Response:", response);
-                                $('#category_id').val(response.id);
-                                $('#category_name_update').val(response.name);
-                                $('#category_description_update').val(response.description);
-                            },
-                            error: function (xhr) {
-                            }
-                        });
-                    });
-                </script>
-                <script>
-                    $(document).on('click', '.thayDoiTrangThai', function () {
-                        const id = $(this).data('id');
-                        Swal.fire({
-                            title: 'Bạn có chắc muốn đổi trạng thái?',
-                            icon: 'question',
-                            showCancelButton: true,
-                            confirmButtonText: 'Có',
-                            cancelButtonText: 'Không'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                window.location.href = `/admin/category/change-status/${id}`;
-                            }
-                        });
-                    });
-                </script>
             </div>
         </div>
     </div>
-</section>
+</div>
 <footer th:replace="~{admin/fragments/footer :: footer}"></footer>
+<!--    modal thêm-->
+<div class="modal fade" id="modalThemMoi" tabindex="-1" aria-labelledby="modalThemMoiLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalThemMoiLabel">Thêm mới kiểu loại</h5>
+            </div>
+            <div class="modal-body">
+                <form id="addCategory" method="post" action="/admin/category/add">
+                    <div class="mb-3">
+                        <label for="category_name" class="form-label">Tên kiểu loại</label><span
+                            class="text-danger">*</span>
+                        <input type="text" class="form-control" id="category_name" name="categoryName"
+                               placeholder="Nhập tên kiểu loại">
+                    </div>
+                    <div class="mb-3">
+                        <label for="category_description" class="form-label">Mô tả</label>
+                        <input type="text" class="form-control" id="category_description"
+                               name="categoryDescription" placeholder="Nhập mô tả">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-outline-success">
+                            <i class="bi bi-check-lg"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-warning" data-bs-dismiss="modal">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!--    Modal chỉnh sửa-->
+<div class="modal fade" id="modalChinhSua" tabindex="-1" aria-labelledby="modalChinhSuaLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalChinhSuaLabel">Chỉnh sửa kiểu loại</h5>
+            </div>
+            <div class="modal-body">
+                <form id="updateCategory" method="post" action="/admin/category/update">
+                    <input type="hidden" id="category_id" name="categoryId">
+                    <div class="mb-3">
+                        <label for="category_name_update" class="form-label">Tên kiểu loại</label><span
+                            class="text-danger">*</span>
+                        <input type="text" class="form-control" id="category_name_update"
+                               name="categoryNameUpdate" placeholder="Nhập tên kiểu loại">
+                    </div>
+                    <div class="mb-3">
+                        <label for="category_description_update" class="form-label">Mô tả</label>
+                        <input type="text" class="form-control" id="category_description_update"
+                               name="categoryDescriptionUpdate" placeholder="Nhập mô tả">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-outline-success">
+                            <i class="bi bi-check-lg"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-warning" data-bs-dismiss="modal">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--    Script-->
+<script th:if="${alert != null}" th:inline="javascript">
+    Swal.fire({
+        toast: true,
+        icon: [[${type}]],
+        title: '[[${alert}]]', // Thông báo từ controller
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true
+    });
+</script>
+<!--    Detail-->
+<script>
+    $(document).on('click', '.hienThiThongTinModal', function () {
+        const id = $(this).data('id');
+        console.log("ID lấy được:", id);
+        $('#category_id').val(id); // Gắn ID vào input ẩn trong form
+
+        $.ajax({
+            url: `/admin/category/detail/${id}`,
+            type: 'GET',
+            success: function (response) {
+                console.log("Response:", response);
+                $('#category_id').val(response.id);
+                $('#category_name_update').val(response.name);
+                $('#category_description_update').val(response.description);
+            },
+            error: function (xhr) {
+            }
+        });
+    });
+</script>
+<script>
+    $(document).on('click', '.thayDoiTrangThai', function () {
+        const id = $(this).data('id');
+        Swal.fire({
+            title: 'Bạn có chắc muốn đổi trạng thái?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Có',
+            cancelButtonText: 'Không'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `/admin/category/change-status/${id}`;
+            }
+        });
+    });
+</script>
+
 </body>
 </html>
