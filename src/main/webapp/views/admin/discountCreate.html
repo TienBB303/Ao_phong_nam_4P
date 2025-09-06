@@ -1,280 +1,292 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns="http://www.w3.org/1999/html"
-      layout:decorate="~{admin/admin-layout}">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{admin/fragments/head :: head}"></head>
+<body data-pc-preset="preset-1" data-pc-direction="ltr" data-pc-theme="light">
+<div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
+<header th:replace="~{admin/fragments/header :: header}"></header>
 
-<head>
-    <title></title>
-</head>
-<body>
-<div layout:fragment="content">
-        <h2 class="form-title">Thêm mã giảm giá</h2>
-    <div th:if="${error}" class="alert alert-warning alert-dismissible fade show" role="alert">
-        <span th:text="${error}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<div class="pc-container">
+    <div class="pc-content">
+        <!-- breadcrumb -->
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <div class="page-header-title">
+                            <h5 class="m-b-10">Thêm mã giảm giá</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div th:if="${error}" class="alert alert-warning alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div class="row">
+            <form th:action="@{/admin/discount/create}" th:object="${discount}" method="post" novalidate>
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label class="form-label">Mã giảm giá *</label>
+                        <input type="text" class="form-control"  th:field="*{code}" placeholder="Để trống sẽ tự sinh mã giảm giá">
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label class="form-label">Tên giảm giá *</label>
+                        <input type="text" class="form-control" id="codeName" th:field="*{codeName}">
+                        <div class="text-danger" th:if="${#fields.hasErrors('codeName')}" th:errors="*{codeName}"></div>
+                    </div>
+
+                    <div class="col-md-6 form-group">
+                        <label class="form-label">Ngày áp dụng *</label>
+                        <input type="datetime-local" class="form-control" id="startDatetime" th:field="*{startDatetime}">
+                        <div class="text-danger" th:if="${#fields.hasErrors('startDatetime')}" th:errors="*{startDatetime}"></div>
+                    </div>
+
+                    <div class="col-md-6 form-group">
+                        <label class="form-label">Ngày kết thúc *</label>
+                        <input type="datetime-local" class="form-control" id="endDatetime" th:field="*{endDatetime}">
+                        <div class="text-danger" th:if="${#fields.hasErrors('endDatetime')}" th:errors="*{endDatetime}"></div>
+                    </div>
+
+
+                    <div class="col-md-6 form-group">
+                        <label class="form-label d-block">Phương thức giảm *</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" th:field="*{discountType}" value="percent" onclick="handleDiscountTypeChange()">
+                            <label class="form-check-label">Giảm theo phần trăm</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" th:field="*{discountType}" value="amount" onclick="handleDiscountTypeChange()">
+                            <label class="form-check-label">Giảm theo tiền</label>
+                        </div>
+                        <div class="text-danger" th:if="${#fields.hasErrors('discountType')}" th:errors="*{discountType}"></div>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label class="form-label">Giá trị giảm *</label>
+                        <input type="number" class="form-control" id="discountValue" th:field="*{discountValue}">
+                        <div class="text-danger" th:if="${#fields.hasErrors('discountValue')}" th:errors="*{discountValue}"></div>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label class="form-label">Số tiền giảm tối đa (đ) *</label>
+                        <input type="number" class="form-control" id="maxDiscount" th:field="*{maxDiscount}">
+                        <div class="text-danger" th:if="${#fields.hasErrors('maxDiscount')}" th:errors="*{maxDiscount}"></div>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label class="form-label">Số tiền áp dụng cho đơn tối thiểu từ (đ) *</label>
+                        <input type="number" class="form-control" id="minPurchase" th:field="*{minPurchase}">
+                        <div class="text-danger" th:if="${#fields.hasErrors('minPurchase')}" th:errors="*{minPurchase}"></div>
+                    </div>
+
+                    <div class="col-md-6 form-group">
+                        <label class="form-label">Số lượng tối đa *</label>
+                        <input type="number" class="form-control" id="usageLimit" th:field="*{usageLimit}">
+                        <div class="text-danger" th:if="${#fields.hasErrors('usageLimit')}" th:errors="*{usageLimit}"></div>
+                    </div>
+
+                    <div class="col-md-6 form-group">
+                        <label class="form-label">Mô tả</label>
+                        <input type="text" class="form-control" th:field="*{description}">
+                        <div class="text-danger" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
+                    </div>
+                </div>
+
+                <div class="form-buttons">
+                    <a th:href="@{/admin/discount/view}" class="btn btn-cancel me-2">Hủy</a>
+                    <button type="submit" class="btn btn-primary">Lưu</button>
+                </div>
+            </form>
+        </div>
     </div>
-
-        <form th:action="@{/admin/discount/create}" th:object="${discount}" method="post" novalidate>
-            <div class="row">
-                <div class="col-md-6 form-group">
-                    <label class="form-label">Mã giảm giá *</label>
-                    <input type="text" class="form-control"  th:field="*{code}" placeholder="Để trống sẽ tự sinh mã giảm giá">
-                </div>
-                <div class="col-md-6 form-group">
-                    <label class="form-label">Tên giảm giá *</label>
-                    <input type="text" class="form-control" id="codeName" th:field="*{codeName}">
-                    <div class="text-danger" th:if="${#fields.hasErrors('codeName')}" th:errors="*{codeName}"></div>
-                </div>
-
-                <div class="col-md-6 form-group">
-                    <label class="form-label">Ngày áp dụng *</label>
-                    <input type="datetime-local" class="form-control" id="startDatetime" th:field="*{startDatetime}">
-                    <div class="text-danger" th:if="${#fields.hasErrors('startDatetime')}" th:errors="*{startDatetime}"></div>
-                </div>
-
-                <div class="col-md-6 form-group">
-                    <label class="form-label">Ngày kết thúc *</label>
-                    <input type="datetime-local" class="form-control" id="endDatetime" th:field="*{endDatetime}">
-                    <div class="text-danger" th:if="${#fields.hasErrors('endDatetime')}" th:errors="*{endDatetime}"></div>
-                </div>
-
-
-                <div class="col-md-6 form-group">
-                    <label class="form-label d-block">Phương thức giảm *</label>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" th:field="*{discountType}" value="percent" onclick="handleDiscountTypeChange()">
-                        <label class="form-check-label">Giảm theo phần trăm</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" th:field="*{discountType}" value="amount" onclick="handleDiscountTypeChange()">
-                        <label class="form-check-label">Giảm theo tiền</label>
-                    </div>
-                    <div class="text-danger" th:if="${#fields.hasErrors('discountType')}" th:errors="*{discountType}"></div>
-                </div>
-                <div class="col-md-6 form-group">
-                    <label class="form-label">Giá trị giảm *</label>
-                    <input type="number" class="form-control" id="discountValue" th:field="*{discountValue}">
-                    <div class="text-danger" th:if="${#fields.hasErrors('discountValue')}" th:errors="*{discountValue}"></div>
-                </div>
-                <div class="col-md-6 form-group">
-                    <label class="form-label">Số tiền giảm tối đa (đ) *</label>
-                    <input type="number" class="form-control" id="maxDiscount" th:field="*{maxDiscount}">
-                    <div class="text-danger" th:if="${#fields.hasErrors('maxDiscount')}" th:errors="*{maxDiscount}"></div>
-                </div>
-                <div class="col-md-6 form-group">
-                    <label class="form-label">Số tiền áp dụng cho đơn tối thiểu từ (đ) *</label>
-                    <input type="number" class="form-control" id="minPurchase" th:field="*{minPurchase}">
-                    <div class="text-danger" th:if="${#fields.hasErrors('minPurchase')}" th:errors="*{minPurchase}"></div>
-                </div>
-
-                <div class="col-md-6 form-group">
-                    <label class="form-label">Số lượng tối đa *</label>
-                    <input type="number" class="form-control" id="usageLimit" th:field="*{usageLimit}">
-                    <div class="text-danger" th:if="${#fields.hasErrors('usageLimit')}" th:errors="*{usageLimit}"></div>
-                </div>
-
-                <div class="col-md-6 form-group">
-                    <label class="form-label">Mô tả</label>
-                    <input type="text" class="form-control" th:field="*{description}">
-                    <div class="text-danger" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
-                </div>
-            </div>
-
-            <div class="form-buttons">
-                <a th:href="@{/admin/discount/view}" class="btn btn-cancel me-2">Hủy</a>
-                <button type="submit" class="btn btn-primary">Lưu</button>
-            </div>
-        </form>
-
-    <script>
-
-        function handleDiscountTypeChange() {
-            const percentRadio = document.querySelector('input[name="discountType"][value="percent"]');
-            const discountInput = document.getElementById('discountValue');
-            const maxDiscountInput = document.getElementById('maxDiscount');
-            const maxDiscountGroup = maxDiscountInput.closest('.form-group'); // 👉 THÊM DÒNG NÀY
-
-            if (percentRadio.checked) {
-                discountInput.setAttribute('min', '1');
-                discountInput.setAttribute('max', '100');
-            } else {
-                discountInput.removeAttribute('min');
-                discountInput.removeAttribute('max');
-            }
-
-            maxDiscountInput.disabled = false;
-            if (maxDiscountGroup) {
-                maxDiscountGroup.style.display = 'block';
-            }
-        }
-
-        function showError(input, message) {
-            clearError(input);
-            const error = document.createElement('div');
-            error.className = 'text-danger mt-1';
-            error.innerText = message;
-            input.parentNode.appendChild(error);
-        }
-
-        function clearError(input) {
-            const oldError = input.parentNode.querySelector('.text-danger');
-            if (oldError) oldError.remove();
-        }
-
-        function validateDates() {
-            const startInput = document.querySelector('input[name="startDatetime"]');
-            const endInput = document.querySelector('input[name="endDatetime"]');
-            const startVal = startInput.value;
-            const endVal = endInput.value;
-            const now = new Date();
-
-            let valid = true;
-
-            if (!startVal || !endVal) return false;
-
-            const startDate = new Date(startVal);
-            const endDate = new Date(endVal);
-
-            if (startDate >= endDate) {
-                showError(endInput, 'Ngày kết thúc phải sau ngày bắt đầu');
-                valid = false;
-            } else if (endDate <= now) {
-                showError(endInput, 'Ngày kết thúc phải sau thời điểm hiện tại');
-                valid = false;
-            } else {
-                clearError(endInput);
-            }
-
-            return valid;
-        }
-
-        function validateEmpty(input, message) {
-            if (!input.value.trim()) {
-                if (isSubmit) showError(input, message);
-                return false;
-            }
-            clearError(input);
-            return true;
-        }
-
-
-        function validateNonNegative(input, message) {
-            if (input.value.trim() === '') {
-                if (isSubmit) showError(input, "Không được để trống");
-                return false;
-            }
-
-            if (parseFloat(input.value) < 0) {
-                if (isSubmit) showError(input, message);
-                return false;
-            }
-
-            clearError(input);
-            return true;
-        }
-
-
-        function validateDiscountValue() {
-            const input = document.getElementById('discountValue');
-            const value = parseFloat(input.value);
-            const isPercent = document.querySelector('input[name="discountType"][value="percent"]').checked;
-
-            if (isNaN(value)) {
-                showError(input, "Không được để trống");
-                return false;
-            }
-
-            if (value < 0) {
-                showError(input, "Giá trị giảm không được âm");
-                return false;
-            }
-
-            if (isPercent && (value < 1 || value > 100)) {
-                showError(input, "Giảm phần trăm chỉ từ 1 đến 100%");
-                return false;
-            }
-
-            clearError(input);
-            return true;
-        }
-
-        function validateForm() {
-            let valid = true;
-
-
-            if (!validateEmpty(document.getElementById('codeName'), "Vui lòng nhập tên mã giảm giá")) {
-                valid = false;
-            }
-
-            if (!validateDates()) {
-                valid = false;
-            }
-
-            if (!validateDiscountValue()) {
-                valid = false;
-            }
-
-            if (!validateNonNegative(document.getElementById('minPurchase'), "Không được âm")) {
-                valid = false;
-            }
-
-            if (!validateNonNegative(document.getElementById('maxDiscount'), "Không được âm")) {
-                valid = false;
-            }
-
-            if (!validateNonNegative(document.getElementById('usageLimit'), "Không được âm")) {
-                valid = false;
-            }
-
-            return valid;
-        }
-
-        let isSubmit = false;
-        window.onload = function () {
-            handleDiscountTypeChange();
-
-            // Validate khi người dùng gõ/đổi giá trị
-
-            document.getElementById('codeName').addEventListener('input', function () {
-                validateEmpty(this, "Vui lòng nhập tên mã giảm giá");
-            });
-
-            document.getElementById('discountValue').addEventListener('input', validateDiscountValue);
-
-            document.getElementById('minPurchase').addEventListener('input', function () {
-                validateNonNegative(this, "Không được âm");
-            });
-
-            document.getElementById('maxDiscount').addEventListener('input', function () {
-                validateNonNegative(this, "Không được âm");
-            });
-
-            document.getElementById('usageLimit').addEventListener('input', function () {
-                validateNonNegative(this, "Không được âm");
-            });
-
-            document.querySelector('input[name="startDatetime"]').addEventListener('change', validateDates);
-            document.querySelector('input[name="endDatetime"]').addEventListener('change', validateDates);
-
-            const radios = document.getElementsByName("discountType");
-            for (let r of radios) {
-                r.addEventListener("click", function () {
-                    handleDiscountTypeChange();
-                    validateDiscountValue();
-                });
-            }
-
-            document.querySelector('form').addEventListener('submit', function (e) {
-                isSubmit = true;
-                if (!validateForm()) {
-                    e.preventDefault();
-                }
-            });
-        };
-    </script>
 </div>
 
+<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
+<script>
 
+    function handleDiscountTypeChange() {
+        const percentRadio = document.querySelector('input[name="discountType"][value="percent"]');
+        const discountInput = document.getElementById('discountValue');
+        const maxDiscountInput = document.getElementById('maxDiscount');
+        const maxDiscountGroup = maxDiscountInput.closest('.form-group'); // 👉 THÊM DÒNG NÀY
+
+        if (percentRadio.checked) {
+            discountInput.setAttribute('min', '1');
+            discountInput.setAttribute('max', '100');
+        } else {
+            discountInput.removeAttribute('min');
+            discountInput.removeAttribute('max');
+        }
+
+        maxDiscountInput.disabled = false;
+        if (maxDiscountGroup) {
+            maxDiscountGroup.style.display = 'block';
+        }
+    }
+
+    function showError(input, message) {
+        clearError(input);
+        const error = document.createElement('div');
+        error.className = 'text-danger mt-1';
+        error.innerText = message;
+        input.parentNode.appendChild(error);
+    }
+
+    function clearError(input) {
+        const oldError = input.parentNode.querySelector('.text-danger');
+        if (oldError) oldError.remove();
+    }
+
+    function validateDates() {
+        const startInput = document.querySelector('input[name="startDatetime"]');
+        const endInput = document.querySelector('input[name="endDatetime"]');
+        const startVal = startInput.value;
+        const endVal = endInput.value;
+        const now = new Date();
+
+        let valid = true;
+
+        if (!startVal || !endVal) return false;
+
+        const startDate = new Date(startVal);
+        const endDate = new Date(endVal);
+
+        if (startDate >= endDate) {
+            showError(endInput, 'Ngày kết thúc phải sau ngày bắt đầu');
+            valid = false;
+        } else if (endDate <= now) {
+            showError(endInput, 'Ngày kết thúc phải sau thời điểm hiện tại');
+            valid = false;
+        } else {
+            clearError(endInput);
+        }
+
+        return valid;
+    }
+
+    function validateEmpty(input, message) {
+        if (!input.value.trim()) {
+            if (isSubmit) showError(input, message);
+            return false;
+        }
+        clearError(input);
+        return true;
+    }
+
+
+    function validateNonNegative(input, message) {
+        if (input.value.trim() === '') {
+            if (isSubmit) showError(input, "Không được để trống");
+            return false;
+        }
+
+        if (parseFloat(input.value) < 0) {
+            if (isSubmit) showError(input, message);
+            return false;
+        }
+
+        clearError(input);
+        return true;
+    }
+
+
+    function validateDiscountValue() {
+        const input = document.getElementById('discountValue');
+        const value = parseFloat(input.value);
+        const isPercent = document.querySelector('input[name="discountType"][value="percent"]').checked;
+
+        if (isNaN(value)) {
+            showError(input, "Không được để trống");
+            return false;
+        }
+
+        if (value < 0) {
+            showError(input, "Giá trị giảm không được âm");
+            return false;
+        }
+
+        if (isPercent && (value < 1 || value > 100)) {
+            showError(input, "Giảm phần trăm chỉ từ 1 đến 100%");
+            return false;
+        }
+
+        clearError(input);
+        return true;
+    }
+
+    function validateForm() {
+        let valid = true;
+
+
+        if (!validateEmpty(document.getElementById('codeName'), "Vui lòng nhập tên mã giảm giá")) {
+            valid = false;
+        }
+
+        if (!validateDates()) {
+            valid = false;
+        }
+
+        if (!validateDiscountValue()) {
+            valid = false;
+        }
+
+        if (!validateNonNegative(document.getElementById('minPurchase'), "Không được âm")) {
+            valid = false;
+        }
+
+        if (!validateNonNegative(document.getElementById('maxDiscount'), "Không được âm")) {
+            valid = false;
+        }
+
+        if (!validateNonNegative(document.getElementById('usageLimit'), "Không được âm")) {
+            valid = false;
+        }
+
+        return valid;
+    }
+
+    let isSubmit = false;
+    window.onload = function () {
+        handleDiscountTypeChange();
+
+        // Validate khi người dùng gõ/đổi giá trị
+
+        document.getElementById('codeName').addEventListener('input', function () {
+            validateEmpty(this, "Vui lòng nhập tên mã giảm giá");
+        });
+
+        document.getElementById('discountValue').addEventListener('input', validateDiscountValue);
+
+        document.getElementById('minPurchase').addEventListener('input', function () {
+            validateNonNegative(this, "Không được âm");
+        });
+
+        document.getElementById('maxDiscount').addEventListener('input', function () {
+            validateNonNegative(this, "Không được âm");
+        });
+
+        document.getElementById('usageLimit').addEventListener('input', function () {
+            validateNonNegative(this, "Không được âm");
+        });
+
+        document.querySelector('input[name="startDatetime"]').addEventListener('change', validateDates);
+        document.querySelector('input[name="endDatetime"]').addEventListener('change', validateDates);
+
+        const radios = document.getElementsByName("discountType");
+        for (let r of radios) {
+            r.addEventListener("click", function () {
+                handleDiscountTypeChange();
+                validateDiscountValue();
+            });
+        }
+
+        document.querySelector('form').addEventListener('submit', function (e) {
+            isSubmit = true;
+            if (!validateForm()) {
+                e.preventDefault();
+            }
+        });
+    };
+</script>
 
 </body>
 </html>
+

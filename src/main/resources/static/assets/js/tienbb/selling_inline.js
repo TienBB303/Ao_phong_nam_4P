@@ -233,8 +233,8 @@ $(document).on('click', '.delete-cart', function (){
     const idCart = $(this).data("id")
     Swal.fire({
         icon: 'warning',
-        title: 'Xóa giỏ hàng?',
-        text: 'Toàn bộ sản phẩm sẽ bị xóa khỏi giỏ!',
+        title: 'Xóa hóa đơn?',
+        text: 'Toàn bộ sản phẩm sẽ bị xóa khỏi hóa đơn!',
         showCancelButton: true,
         confirmButtonText: 'Xóa',
         cancelButtonText: 'Hủy'

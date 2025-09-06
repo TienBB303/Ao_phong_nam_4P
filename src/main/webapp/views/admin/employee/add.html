@@ -1,276 +1,289 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments/head :: head}">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-<header th:replace="~{admin/fragments/header :: header}"></header>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{admin/fragments/head :: head}"></head>
+<body data-pc-preset="preset-1" data-pc-direction="ltr" data-pc-theme="light">
 <div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
-<section>
-    <div class="pc-container">
-        <div class="pc-content">
-            <div class="card-body">
-                <div class="col-12">
-                    <h5>Thêm mới tài khoản nhân viên</h5>
-                    <form id="userForm" action="/admin/users/save" method="post" th:object="${accountDto}">
-                        <div class="mb-3">
-                            <label class="form-label">Mã NV:</label>
-                            <input type="text" id="code" th:field="*{code}" class="form-control"
-                                   placeholder="Mã tự động khi bỏ trống"/>
+<header th:replace="~{admin/fragments/header :: header}"></header>
+
+<div class="pc-container">
+    <div class="pc-content">
+        <!-- breadcrumb -->
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <div class="page-header-title">
+                            <h5 class="m-b-10">Thêm mới tài khoản nhân viên</h5>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- content: bạn dán phần “cards, charts, tables …” ở đây -->
+        <div class="row">
+            <form id="userForm" action="/admin/users/save" method="post" th:object="${accountDto}">
+                <div class="mb-3">
+                    <label class="form-label">Mã NV:</label>
+                    <input type="text" id="code" th:field="*{code}" class="form-control"
+                           placeholder="Mã tự động khi bỏ trống"/>
+                </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Họ tên:</label>
-                            <input type="text" id="fullName" th:field="*{fullName}" class="form-control"/>
-                            <span id="error-fullName" class="text-danger"></span>
-                        </div>
+                <div class="mb-3">
+                    <label class="form-label">Họ tên:</label>
+                    <input type="text" id="fullName" th:field="*{fullName}" class="form-control"/>
+                    <span id="error-fullName" class="text-danger"></span>
+                </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Email:</label>
-                            <input type="email" id="email" th:field="*{email}" class="form-control"/>
-                            <span id="error-email" class="text-danger"></span>
-                        </div>
+                <div class="mb-3">
+                    <label class="form-label">Email:</label>
+                    <input type="email" id="email" th:field="*{email}" class="form-control"/>
+                    <span id="error-email" class="text-danger"></span>
+                </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Số điện thoại:</label>
-                            <input type="text" id="sdt" th:field="*{phoneNumber}" class="form-control"/>
-                            <span id="error-sdt" class="text-danger"></span>
-                        </div>
+                <div class="mb-3">
+                    <label class="form-label">Số điện thoại:</label>
+                    <input type="text" id="sdt" th:field="*{phoneNumber}" class="form-control"/>
+                    <span id="error-sdt" class="text-danger"></span>
+                </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Ngày sinh:</label>
-                            <input type="date" id="birthOfDate" th:field="*{birthDate}" class="form-control"/>
-                            <span id="error-birthOfDate" class="text-danger"></span>
-                        </div>
+                <div class="mb-3">
+                    <label class="form-label">Ngày sinh:</label>
+                    <input type="date" id="birthOfDate" th:field="*{birthDate}" class="form-control"/>
+                    <span id="error-birthOfDate" class="text-danger"></span>
+                </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Giới tính:</label>
-                            <div>
-                                <input type="radio" name="gender" id="male" value="true" th:field="*{gender}">
-                                <label for="male">Nam</label>
-                                <input type="radio" name="gender" id="female" value="false" th:field="*{gender}">
-                                <label for="female">Nữ</label>
-                            </div>
-                            <span id="error-gender" class="text-danger"></span>
-                        </div>
+                <div class="mb-3">
+                    <label class="form-label">Giới tính:</label>
+                    <div>
+                        <input type="radio" name="gender" id="male" value="true" th:field="*{gender}">
+                        <label for="male">Nam</label>
+                        <input type="radio" name="gender" id="female" value="false" th:field="*{gender}">
+                        <label for="female">Nữ</label>
+                    </div>
+                    <span id="error-gender" class="text-danger"></span>
+                </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Trạng thái:</label>
-                            <select th:field="*{status}" class="form-select">
-                                <option value="true">Hoạt động</option>
-                                <option value="false">Đã khoá</option>
-                            </select>
-                        </div>
+                <div class="mb-3">
+                    <label class="form-label">Trạng thái:</label>
+                    <select th:field="*{status}" class="form-select">
+                        <option value="true">Hoạt động</option>
+                        <option value="false">Đã khoá</option>
+                    </select>
+                </div>
 
-                        <hr/>
-                        <h5 class="fw-semibold">ĐỊA CHỈ</h5>
+                <hr/>
+                <h5 class="fw-semibold">ĐỊA CHỈ</h5>
 
-                        <div class="mb-3">
-                            <label for="province" class="form-label">Tỉnh/Thành phố</label>
-                            <select id="province" th:field="*{address.provinceId}" class="form-select"></select>
-                            <input type="hidden" id="provinceName" th:field="*{address.provinceName}"/>
-                            <span id="error-province" class="text-danger"></span>
-                        </div>
+                <div class="mb-3">
+                    <label for="province" class="form-label">Tỉnh/Thành phố</label>
+                    <select id="province" th:field="*{address.provinceId}" class="form-select"></select>
+                    <input type="hidden" id="provinceName" th:field="*{address.provinceName}"/>
+                    <span id="error-province" class="text-danger"></span>
+                </div>
 
-                        <div class="mb-3">
-                            <label for="district" class="form-label">Quận/Huyện</label>
-                            <select id="district" th:field="*{address.districtId}" class="form-select"></select>
-                            <input type="hidden" id="districtName" th:field="*{address.districtName}"/>
-                            <span id="error-district" class="text-danger"></span>
-                        </div>
+                <div class="mb-3">
+                    <label for="district" class="form-label">Quận/Huyện</label>
+                    <select id="district" th:field="*{address.districtId}" class="form-select"></select>
+                    <input type="hidden" id="districtName" th:field="*{address.districtName}"/>
+                    <span id="error-district" class="text-danger"></span>
+                </div>
 
-                        <div class="mb-3">
-                            <label for="ward" class="form-label">Phường/Xã</label>
-                            <select id="ward" th:field="*{address.wardId}" class="form-select"></select>
-                            <input type="hidden" id="wardName" th:field="*{address.wardName}"/>
-                            <span id="error-ward" class="text-danger"></span>
-                        </div>
+                <div class="mb-3">
+                    <label for="ward" class="form-label">Phường/Xã</label>
+                    <select id="ward" th:field="*{address.wardId}" class="form-select"></select>
+                    <input type="hidden" id="wardName" th:field="*{address.wardName}"/>
+                    <span id="error-ward" class="text-danger"></span>
+                </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Địa chỉ chi tiết:</label>
-                            <input type="text" id="addressDetail" th:field="*{address.addressDetail}"
-                                   class="form-control"/>
-                            <span id="error-addressDetail" class="text-danger"></span>
-                        </div>
+                <div class="mb-3">
+                    <label class="form-label">Địa chỉ chi tiết:</label>
+                    <input type="text" id="addressDetail" th:field="*{address.addressDetail}"
+                           class="form-control"/>
+                    <span id="error-addressDetail" class="text-danger"></span>
+                </div>
 
-                        <div class="d-flex justify-content-between">
-                            <a th:href="@{/admin/users}" class="btn btn-outline-secondary">⬅ Quay lại</a>
-                            <button type="submit" id="btnSubmit" class="btn btn-primary">💾 Lưu nhân viên</button>
-                        </div>
-                    </form>
+                <div class="d-flex justify-content-between">
+                    <a th:href="@{/admin/users}" class="btn btn-outline-secondary">⬅ Quay lại</a>
+                    <button type="submit" id="btnSubmit" class="btn btn-primary">💾 Lưu nhân viên</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
 
-                    <script>
-                        const provinceSelect = document.getElementById('province');
-                        const districtSelect = document.getElementById('district');
-                        const wardSelect = document.getElementById('ward');
+<script>
+    const provinceSelect = document.getElementById('province');
+    const districtSelect = document.getElementById('district');
+    const wardSelect = document.getElementById('ward');
 
-                        function loadOnlyHaNoi() {
-                            provinceSelect.innerHTML = `<option value="01">Thành phố Hà Nội</option>`;
-                            setProvinceName();
-                            fetchDistricts(); // Lấy quận/huyện Hà Nội
-                        }
+    function loadOnlyHaNoi() {
+        provinceSelect.innerHTML = `<option value="01">Thành phố Hà Nội</option>`;
+        setProvinceName();
+        fetchDistricts(); // Lấy quận/huyện Hà Nội
+    }
 
-                        function fetchDistricts() {
-                            const provinceId = provinceSelect.value; // luôn là 01
-                            fetch(`https://provinces.open-api.vn/api/p/${provinceId}?depth=2`)
-                                .then(res => res.json())
-                                .then(data => {
-                                    const districts = data.districts || [];
-                                    districtSelect.innerHTML = districts.map(d => `<option value="${d.code}">${d.name}</option>`).join('');
-                                    setDistrictName();
-                                    fetchWards();
-                                });
-                        }
+    function fetchDistricts() {
+        const provinceId = provinceSelect.value; // luôn là 01
+        fetch(`https://provinces.open-api.vn/api/p/${provinceId}?depth=2`)
+            .then(res => res.json())
+            .then(data => {
+                const districts = data.districts || [];
+                districtSelect.innerHTML = districts.map(d => `<option value="${d.code}">${d.name}</option>`).join('');
+                setDistrictName();
+                fetchWards();
+            });
+    }
 
-                        function fetchWards() {
-                            const districtId = districtSelect.value;
-                            fetch(`https://provinces.open-api.vn/api/d/${districtId}?depth=2`)
-                                .then(res => res.json())
-                                .then(data => {
-                                    const wards = data.wards || [];
-                                    wardSelect.innerHTML = wards.map(w => `<option value="${w.code}">${w.name}</option>`).join('');
-                                    setWardName();
-                                });
-                        }
+    function fetchWards() {
+        const districtId = districtSelect.value;
+        fetch(`https://provinces.open-api.vn/api/d/${districtId}?depth=2`)
+            .then(res => res.json())
+            .then(data => {
+                const wards = data.wards || [];
+                wardSelect.innerHTML = wards.map(w => `<option value="${w.code}">${w.name}</option>`).join('');
+                setWardName();
+            });
+    }
 
-                        function setProvinceName() {
-                            document.getElementById('provinceName').value = provinceSelect.options[provinceSelect.selectedIndex]?.text || '';
-                        }
+    function setProvinceName() {
+        document.getElementById('provinceName').value = provinceSelect.options[provinceSelect.selectedIndex]?.text || '';
+    }
 
-                        function setDistrictName() {
-                            document.getElementById('districtName').value = districtSelect.options[districtSelect.selectedIndex]?.text || '';
-                        }
+    function setDistrictName() {
+        document.getElementById('districtName').value = districtSelect.options[districtSelect.selectedIndex]?.text || '';
+    }
 
-                        function setWardName() {
-                            document.getElementById('wardName').value = wardSelect.options[wardSelect.selectedIndex]?.text || '';
-                        }
+    function setWardName() {
+        document.getElementById('wardName').value = wardSelect.options[wardSelect.selectedIndex]?.text || '';
+    }
 
-                        provinceSelect.addEventListener('change', () => {
-                            setProvinceName();
-                            fetchDistricts();
-                        });
+    provinceSelect.addEventListener('change', () => {
+        setProvinceName();
+        fetchDistricts();
+    });
 
-                        districtSelect.addEventListener('change', () => {
-                            setDistrictName();
-                            fetchWards();
-                        });
+    districtSelect.addEventListener('change', () => {
+        setDistrictName();
+        fetchWards();
+    });
 
-                        wardSelect.addEventListener('change', setWardName);
+    wardSelect.addEventListener('change', setWardName);
 
-                        document.addEventListener('DOMContentLoaded', loadOnlyHaNoi);
+    document.addEventListener('DOMContentLoaded', loadOnlyHaNoi);
 
-                        function check() {
-                            let isValid = true;
+    function check() {
+        let isValid = true;
 
-                            const fullName = document.getElementById("fullName");
-                            const email = document.getElementById("email");
-                            const birthOfDate = document.getElementById("birthOfDate");
-                            const sdt = document.getElementById("sdt");
-                            const addressDetail = document.getElementById("addressDetail");
-                            const genderRadios = document.getElementsByName("gender");
+        const fullName = document.getElementById("fullName");
+        const email = document.getElementById("email");
+        const birthOfDate = document.getElementById("birthOfDate");
+        const sdt = document.getElementById("sdt");
+        const addressDetail = document.getElementById("addressDetail");
+        const genderRadios = document.getElementsByName("gender");
 
-                            const province = document.getElementById("province");
-                            const district = document.getElementById("district");
-                            const ward = document.getElementById("ward");
+        const province = document.getElementById("province");
+        const district = document.getElementById("district");
+        const ward = document.getElementById("ward");
 
-                            const errorFullName = document.getElementById("error-fullName");
-                            const errorEmail = document.getElementById("error-email");
-                            const errorBirthOfDate = document.getElementById("error-birthOfDate");
-                            const errorSdt = document.getElementById("error-sdt");
-                            const errorAddressDetail = document.getElementById("error-addressDetail");
-                            const errorGender = document.getElementById("error-gender");
-                            const errorProvince = document.getElementById("error-province");
-                            const errorDistrict = document.getElementById("error-district");
-                            const errorWard = document.getElementById("error-ward");
+        const errorFullName = document.getElementById("error-fullName");
+        const errorEmail = document.getElementById("error-email");
+        const errorBirthOfDate = document.getElementById("error-birthOfDate");
+        const errorSdt = document.getElementById("error-sdt");
+        const errorAddressDetail = document.getElementById("error-addressDetail");
+        const errorGender = document.getElementById("error-gender");
+        const errorProvince = document.getElementById("error-province");
+        const errorDistrict = document.getElementById("error-district");
+        const errorWard = document.getElementById("error-ward");
 
-                            errorFullName.textContent = "";
-                            errorEmail.textContent = "";
-                            errorBirthOfDate.textContent = "";
-                            errorSdt.textContent = "";
-                            errorAddressDetail.textContent = "";
-                            errorGender.textContent = "";
-                            errorProvince.textContent = "";
-                            errorDistrict.textContent = "";
-                            errorWard.textContent = "";
+        errorFullName.textContent = "";
+        errorEmail.textContent = "";
+        errorBirthOfDate.textContent = "";
+        errorSdt.textContent = "";
+        errorAddressDetail.textContent = "";
+        errorGender.textContent = "";
+        errorProvince.textContent = "";
+        errorDistrict.textContent = "";
+        errorWard.textContent = "";
 
-                            if (fullName.value.trim() === "") {
-                                errorFullName.textContent = "Vui lòng nhập họ và tên!";
-                                isValid = false;
-                            }
+        if (fullName.value.trim() === "") {
+            errorFullName.textContent = "Vui lòng nhập họ và tên!";
+            isValid = false;
+        }
 
-                            if (email.value.trim() === "") {
-                                errorEmail.textContent = "Vui lòng nhập email!";
-                                isValid = false;
-                            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
-                                errorEmail.textContent = "Email không hợp lệ!";
-                                isValid = false;
-                            }
+        if (email.value.trim() === "") {
+            errorEmail.textContent = "Vui lòng nhập email!";
+            isValid = false;
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
+            errorEmail.textContent = "Email không hợp lệ!";
+            isValid = false;
+        }
 
-                            if (sdt.value.trim() === "") {
-                                errorSdt.textContent = "Vui lòng nhập số điện thoại!";
-                                isValid = false;
-                            } else if (!/^\d{10,15}$/.test(sdt.value.trim())) {
-                                errorSdt.textContent = "Số điện thoại không hợp lệ!";
-                                isValid = false;
-                            }
+        if (sdt.value.trim() === "") {
+            errorSdt.textContent = "Vui lòng nhập số điện thoại!";
+            isValid = false;
+        } else if (!/^\d{10,15}$/.test(sdt.value.trim())) {
+            errorSdt.textContent = "Số điện thoại không hợp lệ!";
+            isValid = false;
+        }
 
-                            if (birthOfDate.value === "") {
-                                errorBirthOfDate.textContent = "Vui lòng chọn ngày sinh!";
-                                isValid = false;
-                            } else {
-                                const dob = new Date(birthOfDate.value);
-                                const now = new Date();
+        if (birthOfDate.value === "") {
+            errorBirthOfDate.textContent = "Vui lòng chọn ngày sinh!";
+            isValid = false;
+        } else {
+            const dob = new Date(birthOfDate.value);
+            const now = new Date();
 
-                                const minDob = new Date();
-                                minDob.setFullYear(minDob.getFullYear() - 15);
+            const minDob = new Date();
+            minDob.setFullYear(minDob.getFullYear() - 15);
 
-                                if (dob > minDob) {
-                                    errorBirthOfDate.textContent = "Nhân viên phải từ 15 tuổi trở lên!";
-                                    isValid = false;
-                                }
-                            }
+            if (dob > minDob) {
+                errorBirthOfDate.textContent = "Nhân viên phải từ 15 tuổi trở lên!";
+                isValid = false;
+            }
+        }
 
-                            let genderSelected = false;
-                            for (const radio of genderRadios) {
-                                if (radio.checked) {
-                                    genderSelected = true;
-                                    break;
-                                }
-                            }
-                            if (!genderSelected) {
-                                errorGender.textContent = "Vui lòng chọn giới tính!";
-                                isValid = false;
-                            }
+        let genderSelected = false;
+        for (const radio of genderRadios) {
+            if (radio.checked) {
+                genderSelected = true;
+                break;
+            }
+        }
+        if (!genderSelected) {
+            errorGender.textContent = "Vui lòng chọn giới tính!";
+            isValid = false;
+        }
 
-                            if (!province.value) {
-                                errorProvince.textContent = "Vui lòng chọn tỉnh/thành phố!";
-                                isValid = false;
-                            }
-                            if (!district.value) {
-                                errorDistrict.textContent = "Vui lòng chọn quận/huyện!";
-                                isValid = false;
-                            }
-                            if (!ward.value) {
-                                errorWard.textContent = "Vui lòng chọn phường/xã!";
-                                isValid = false;
-                            }
+        if (!province.value) {
+            errorProvince.textContent = "Vui lòng chọn tỉnh/thành phố!";
+            isValid = false;
+        }
+        if (!district.value) {
+            errorDistrict.textContent = "Vui lòng chọn quận/huyện!";
+            isValid = false;
+        }
+        if (!ward.value) {
+            errorWard.textContent = "Vui lòng chọn phường/xã!";
+            isValid = false;
+        }
 
-                            if (addressDetail.value.trim() === "") {
-                                errorAddressDetail.textContent = "Vui lòng nhập địa chỉ chi tiết!";
-                                isValid = false;
-                            }
+        if (addressDetail.value.trim() === "") {
+            errorAddressDetail.textContent = "Vui lòng nhập địa chỉ chi tiết!";
+            isValid = false;
+        }
 
-                            return isValid;
-                        }
+        return isValid;
+    }
 
-                        document.getElementById("userForm").addEventListener("submit", function (e) {
-                            if (!check()) {
-                                e.preventDefault(); // Chặn submit nếu không hợp lệ
-                            } else {
-                                alert("Thêm mới thành công!");
-                            }
-                        });
-                    </script>
-                    <header th:replace="~{admin/fragments/footer :: footer}"></header>
+    document.getElementById("userForm").addEventListener("submit", function (e) {
+        if (!check()) {
+            e.preventDefault(); // Chặn submit nếu không hợp lệ
+        } else {
+            alert("Thêm mới thành công!");
+        }
+    });
+</script>
+
 </body>
 </html>

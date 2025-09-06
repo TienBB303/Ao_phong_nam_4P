@@ -1,107 +1,91 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments/head :: head}">
-    <title>Quan ly khuyen mai | 4PStore</title>
-</head>
-<body>
-<header th:replace="~{admin/fragments/header :: header}"></header>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{admin/fragments/head :: head}"></head>
+<body data-pc-preset="preset-1" data-pc-direction="ltr" data-pc-theme="light">
 <div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
-<section>
-    <div class="pc-container">
-        <div class="pc-content">
-            <div class="page-header">
-                <div class="page-block">
-                    <div class="row align-items-center">
-                        <div class="col-md-12">
-                            <div class="page-header-title">
-                                <h5 class="m-b-10">Quản lý sản phẩm</h5>
-                            </div>
-                            <ul class="breadcrumb">
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+<header th:replace="~{admin/fragments/header :: header}"></header>
 
+<div class="pc-container">
+    <div class="pc-content">
+        <!-- breadcrumb -->
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <div class="page-header-title">
+                            <h5 class="m-b-10">Các thuộc tính</h5>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="container discount-form-container">
-    <!-- Main-->
-    <div id="main" class="container mt-4">
-        <h3>Thuộc tính</h3>
-        <div class="card-header">
-            <a class="btn btn-outline-primary" href="/admin/product/hien-thi" style="width: 70px">
-                <i class="bi bi-arrow-return-left"></i>
-            </a>
         </div>
-        <div class="page-content">
-            <section class="row">
-                <div class="card">
-                    <div class="row">
-                        <div class="col-3">
-                            <div class="card shadow" style="border: 2px solid #EEE8AA; background-color: #FFEFD5;">
-                                <img style="height: 200px" src="https://dongphucatlan.vn/wp-content/uploads/2020/03/%C3%81o-ph%C3%B4ng.jpg" alt="ảnh công suất">
-                                <div class="card-body text-center">
-                                    <h4 class="card-title" style="color: #B0C4DE; font-weight: bold;">Kiểu loại</h4>
-                                    <a href="/admin/category/hien-thi" class="btn btn-warning w-100">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-3">
-                            <div class="card shadow" style="border: 2px solid #EEE8AA; background-color: #FFEFD5;">
-                                <img style="height: 200px" src="https://zumiuniform.vn/Uploads/tin-tuc/cac-loai-vai-may-ao-thun-cao-cap-nhat-hien-nay/cac-loai-vai-may-ao-thun-cao-cap-nhat-hien-nay-1.jpg" class="card-img-top" alt="ảnh công suất">
-                                <div class="card-body text-center">
-                                    <h4 class="card-title" style="color: #B0C4DE; font-weight: bold;">Màu sắc</h4>
-                                    <a href="/admin/color/hien-thi" class="btn btn-warning w-100">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-3">
-                            <div class="card shadow" style="border: 2px solid #EEE8AA; background-color: #FFEFD5;">
-                                <img style="height: 200px" src="https://file.hstatic.net/200000579135/article/vai-kaki-tot_80bf05abd65c42749314eb845f535c77.jpg" class="card-img-top" alt="ảnh công suất">
-                                <div class="card-body text-center">
-                                    <h4 class="card-title" style="color: #B0C4DE; font-weight: bold;">Chất liệu</h4>
-                                    <a href="/admin/material/hien-thi" class="btn btn-warning w-100">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-3">
-                            <div class="card shadow" style="border: 2px solid #EEE8AA; background-color: #FFEFD5;">
-                                <img style="height: 200px" src="https://ecpvn.com/wp-content/uploads/2022/12/brand-image-1.jpg" class="card-img-top" alt="ảnh công suất">
-                                <div class="card-body text-center">
-                                    <h4 class="card-title" style="color: #B0C4DE; font-weight: bold;">Hãng</h4>
-                                    <a href="/admin/brand/hien-thi" class="btn btn-warning w-100">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                </div>
+        <!-- content: bạn dán phần “cards, charts, tables …” ở đây -->
+        <div class="row">
+            <div class="card">
+                <div class="row">
+                    <div class="col-3">
+                        <div class="card shadow" style="border: 2px solid #EEE8AA; background-color: #FFEFD5;">
+                            <img style="height: 200px" src="https://dongphucatlan.vn/wp-content/uploads/2020/03/%C3%81o-ph%C3%B4ng.jpg" alt="ảnh công suất">
+                            <div class="card-body text-center">
+                                <h4 class="card-title" style="color: #B0C4DE; font-weight: bold;">Kiểu loại</h4>
+                                <a href="/admin/category/hien-thi" class="btn btn-warning w-100">
+                                    <i class="bi bi-eye"></i>
+                                </a>
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-3">
-                            <div class="card shadow" style="border: 2px solid #EEE8AA; background-color: #FFEFD5;">
-                                <img style="height: 200px" src="https://lamia.com.vn/storage/huong-dan-chon-size-ao-chuan-nhat-cho-dang-nguoi-nam-va-nu-2.png" class="card-img-top" alt="ảnh công suất">
-                                <div class="card-body text-center">
-                                    <h4 class="card-title" style="color: #B0C4DE; font-weight: bold;">Kích thước</h4>
-                                    <a href="/admin/size/hien-thi" class="btn btn-warning w-100">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                </div>
+                    <div class="col-3">
+                        <div class="card shadow" style="border: 2px solid #EEE8AA; background-color: #FFEFD5;">
+                            <img style="height: 200px" src="https://zumiuniform.vn/Uploads/tin-tuc/cac-loai-vai-may-ao-thun-cao-cap-nhat-hien-nay/cac-loai-vai-may-ao-thun-cao-cap-nhat-hien-nay-1.jpg" class="card-img-top" alt="ảnh công suất">
+                            <div class="card-body text-center">
+                                <h4 class="card-title" style="color: #B0C4DE; font-weight: bold;">Màu sắc</h4>
+                                <a href="/admin/color/hien-thi" class="btn btn-warning w-100">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="card shadow" style="border: 2px solid #EEE8AA; background-color: #FFEFD5;">
+                            <img style="height: 200px" src="https://file.hstatic.net/200000579135/article/vai-kaki-tot_80bf05abd65c42749314eb845f535c77.jpg" class="card-img-top" alt="ảnh công suất">
+                            <div class="card-body text-center">
+                                <h4 class="card-title" style="color: #B0C4DE; font-weight: bold;">Chất liệu</h4>
+                                <a href="/admin/material/hien-thi" class="btn btn-warning w-100">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="card shadow" style="border: 2px solid #EEE8AA; background-color: #FFEFD5;">
+                            <img style="height: 200px" src="https://ecpvn.com/wp-content/uploads/2022/12/brand-image-1.jpg" class="card-img-top" alt="ảnh công suất">
+                            <div class="card-body text-center">
+                                <h4 class="card-title" style="color: #B0C4DE; font-weight: bold;">Hãng</h4>
+                                <a href="/admin/brand/hien-thi" class="btn btn-warning w-100">
+                                    <i class="bi bi-eye"></i>
+                                </a>
                             </div>
                         </div>
                     </div>
                 </div>
-            </section>
+                <div class="row">
+                    <div class="col-3">
+                        <div class="card shadow" style="border: 2px solid #EEE8AA; background-color: #FFEFD5;">
+                            <img style="height: 200px" src="https://lamia.com.vn/storage/huong-dan-chon-size-ao-chuan-nhat-cho-dang-nguoi-nam-va-nu-2.png" class="card-img-top" alt="ảnh công suất">
+                            <div class="card-body text-center">
+                                <h4 class="card-title" style="color: #B0C4DE; font-weight: bold;">Kích thước</h4>
+                                <a href="/admin/size/hien-thi" class="btn btn-warning w-100">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+</div>
 
-    <!-- Script -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
-</section>
 <footer th:replace="~{admin/fragments/footer :: footer}"></footer>
 </body>
 </html>

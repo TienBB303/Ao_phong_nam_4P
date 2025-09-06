@@ -1,29 +1,26 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments/head :: head}">
-</head>
-<body>
-<header th:replace="~{admin/fragments/header :: header}"></header>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{admin/fragments/head :: head}"></head>
+<body data-pc-preset="preset-1" data-pc-direction="ltr" data-pc-theme="light">
 <div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
-<section>
-    <div class="pc-container">
-        <div class="pc-content">
-            <div class="page-header">
-                <div class="page-block">
-                    <div class="row align-items-center">
-                        <div class="col-md-12">
-                            <div class="page-header-title">
-                                <h5 class="m-b-10">Quản lý nhân viên</h5>
-                            </div>
-                            <ul class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
-                                <li class="breadcrumb-item" aria-current="page">Quản lý tài khoản</li>
-                                <li class="breadcrumb-item" aria-current="page">Nhân viên</li>
-                            </ul>
+<header th:replace="~{admin/fragments/header :: header}"></header>
+
+<div class="pc-container">
+    <div class="pc-content">
+        <!-- breadcrumb -->
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <div class="page-header-title">
+                            <h5 class="m-b-10">Quản lý nhân viên</h5>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+        <!-- content: bạn dán phần “cards, charts, tables …” ở đây -->
+        <div class="row">
             <div class="card-body">
                 <form class="p-4 rounded shadow-sm mb-4" method="get">
                     <div class="row gy-3 align-items-end">
@@ -73,12 +70,12 @@
                         <td th:text="${e.customer.birthDate}"></td>
                         <td th:text="${e.customer.gender == true ? 'Nam' : 'Nữ'}"></td>
                         <td>
-<!--        <span th:if="${e.customer.addresses != null and !e.customer.addresses.isEmpty()}"-->
-<!--              th:text="${e.customer.addresses[0].addressDetail-->
-<!--                + (e.customer.addresses[0].wardName != null ? ', ' + e.customer.addresses[0].wardName : '')-->
-<!--                + (e.customer.addresses[0].districtName != null ? ', ' + e.customer.addresses[0].districtName : '')-->
-<!--                + (e.customer.addresses[0].provinceName != null ? ', ' + e.customer.addresses[0].provinceName : '')}">-->
-<!--        </span>-->
+                            <!--        <span th:if="${e.customer.addresses != null and !e.customer.addresses.isEmpty()}"-->
+                            <!--              th:text="${e.customer.addresses[0].addressDetail-->
+                            <!--                + (e.customer.addresses[0].wardName != null ? ', ' + e.customer.addresses[0].wardName : '')-->
+                            <!--                + (e.customer.addresses[0].districtName != null ? ', ' + e.customer.addresses[0].districtName : '')-->
+                            <!--                + (e.customer.addresses[0].provinceName != null ? ', ' + e.customer.addresses[0].provinceName : '')}">-->
+                            <!--        </span>-->
                             <span th:if="${e.customer.addresses == null or e.customer.addresses.isEmpty()}" th:text="''"></span>
                         </td>
 
@@ -87,8 +84,8 @@
                         <!--                            <td th:text="${e.gender}"></td>-->
                         <!--                            <td th:text="${e.addressDetail}"></td>-->
                         <td>
-    <span th:class="${e.status} ? 'badge bg-success' : 'badge bg-danger'"
-          th:text="${e.status} ? 'Đang hoạt động' : 'Đã khóa'"></span>
+                            <span th:class="${e.status} ? 'badge bg-success' : 'badge bg-danger'"
+                                  th:text="${e.status} ? 'Đang hoạt động' : 'Đã khóa'"></span>
                         </td>
 
                         <td>
@@ -127,7 +124,8 @@
             </div>
         </div>
     </div>
-</section>
-<header th:replace="~{admin/fragments/footer :: footer}"></header>
+</div>
+
+<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
 </body>
 </html>

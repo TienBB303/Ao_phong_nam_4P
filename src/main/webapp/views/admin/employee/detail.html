@@ -1,104 +1,94 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments/head :: head}">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-<header th:replace="~{admin/fragments/header :: header}"></header>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{admin/fragments/head :: head}"></head>
+<body data-pc-preset="preset-1" data-pc-direction="ltr" data-pc-theme="light">
 <div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
+<header th:replace="~{admin/fragments/header :: header}"></header>
 
-<section>
-  <div class="pc-container">
+<div class="pc-container">
     <div class="pc-content">
-      <div class="page-header">
+    <!-- breadcrumb -->
+    <div class="page-header">
         <div class="page-block">
-          <div class="row align-items-center">
-            <div class="col-md-12">
-              <div class="page-header-title">
-                <h5 class="m-b-10">Quản lý nhân viên</h5>
+            <div class="row align-items-center">
+                <div class="col-md-12">
+                    <div class="page-header-title">
+                      <h5 class="m-b-10">Chi tiết | Cập nhật tài khoản nhân viên</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- content: bạn dán phần “cards, charts, tables …” ở đây -->
+    <div class="row">
+      <div class="card">
+        <div class="card-header">
+          <h5>Chi tiết | Cập nhật tài khoản nhân viên</h5>
+        </div>
+        <div class="card-body">
+          <form action="/admin/employee/update" method="post">
+            <div class="mb-3">
+              <label class="form-label">Id:</label>
+              <input type="text" name="id" class="form-control" th:value="${detail.id}" readonly>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Mã TK:</label>
+              <input type="text" name="code" class="form-control" th:value="${detail.code}" readonly>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Họ và tên:</label>
+              <input type="text" name="fullName" id="fullName" class="form-control" th:value="${detail.fullName}" placeholder="Mời nhập họ và tên">
+              <span id="error-fullName" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Email:</label>
+              <input type="email" name="email" id="email" class="form-control" th:value="${detail.email}" placeholder="Mời nhập email">
+              <span id="error-email" class="text-danger"></span>
+            </div>
+            <div class="mb-3" style="display: none">
+              <label class="form-label">Mật khẩu:</label>
+              <input type="password" name="password" id="password"  th:value="${detail.password}" class="form-control" placeholder="Mời nhập mật khẩu">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Ngày sinh:</label>
+              <input type="date" name="birthOfDate" id="birthOfDate" class="form-control" th:value="${detail.birthOfDate}">
+              <span id="error-birthOfDate" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">SĐT:</label>
+              <input type="text" name="phoneNumber" id="sdt" class="form-control" th:value="${detail.phoneNumber}" placeholder="Mời nhập sđt">
+              <span id="error-sdt" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Địa chỉ:</label>
+              <textarea name="addressDetail" id="addressDetail" class="form-control" placeholder="Mời nhập địa chỉ" th:text="${detail.addressDetail}"></textarea>
+              <span id="error-addressDetail" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Trạng thái:</label>
+              <input type="checkbox" name="status" th:checked="${detail.status}" value="true">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Giới tính:</label>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="gender" value="Nam" th:checked="${detail.gender == 'Nam'}">
+                <label class="form-check-label">Nam</label>
               </div>
-              <ul class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
-                <li class="breadcrumb-item">Quản lý tài khoản</li>
-                <li class="breadcrumb-item">Nhân viên</li>
-              </ul>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="gender" value="Nữ" th:checked="${detail.gender == 'Nữ'}">
+                <label class="form-check-label">Nữ</label>
+              </div>
+              <span id="error-gender" class="text-danger"></span>
             </div>
-          </div>
+            <button type="submit" id="btnSubmit" class="btn btn-primary">Cập nhật</button>
+            <a href="/admin/employee" class="btn btn-dark">Quay lại</a>
+          </form>
         </div>
       </div>
-
-      <div class="card-body">
-        <div class="col-12">
-          <div class="card">
-            <div class="card-header">
-              <h5>Chi tiết | Cập nhật tài khoản nhân viên</h5>
-            </div>
-            <div class="card-body">
-              <form action="/admin/employee/update" method="post">
-                <div class="mb-3">
-                  <label class="form-label">Id:</label>
-                  <input type="text" name="id" class="form-control" th:value="${detail.id}" readonly>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Mã TK:</label>
-                  <input type="text" name="code" class="form-control" th:value="${detail.code}" readonly>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Họ và tên:</label>
-                  <input type="text" name="fullName" id="fullName" class="form-control" th:value="${detail.fullName}" placeholder="Mời nhập họ và tên">
-                  <span id="error-fullName" class="text-danger"></span>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Email:</label>
-                  <input type="email" name="email" id="email" class="form-control" th:value="${detail.email}" placeholder="Mời nhập email">
-                  <span id="error-email" class="text-danger"></span>
-                </div>
-                <div class="mb-3" style="display: none">
-                  <label class="form-label">Mật khẩu:</label>
-                  <input type="password" name="password" id="password"  th:value="${detail.password}" class="form-control" placeholder="Mời nhập mật khẩu">
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Ngày sinh:</label>
-                  <input type="date" name="birthOfDate" id="birthOfDate" class="form-control" th:value="${detail.birthOfDate}">
-                  <span id="error-birthOfDate" class="text-danger"></span>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">SĐT:</label>
-                  <input type="text" name="phoneNumber" id="sdt" class="form-control" th:value="${detail.phoneNumber}" placeholder="Mời nhập sđt">
-                  <span id="error-sdt" class="text-danger"></span>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Địa chỉ:</label>
-                  <textarea name="addressDetail" id="addressDetail" class="form-control" placeholder="Mời nhập địa chỉ" th:text="${detail.addressDetail}"></textarea>
-                  <span id="error-addressDetail" class="text-danger"></span>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Trạng thái:</label>
-                  <input type="checkbox" name="status" th:checked="${detail.status}" value="true">
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Giới tính:</label>
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="gender" value="Nam" th:checked="${detail.gender == 'Nam'}">
-                    <label class="form-check-label">Nam</label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="gender" value="Nữ" th:checked="${detail.gender == 'Nữ'}">
-                    <label class="form-check-label">Nữ</label>
-                  </div>
-                  <span id="error-gender" class="text-danger"></span>
-                </div>
-                <button type="submit" id="btnSubmit" class="btn btn-primary">Cập nhật</button>
-                <a href="/admin/employee" class="btn btn-dark">Quay lại</a>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-
     </div>
   </div>
-</section>
+</div>
+<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
 
 <script>
   function check() {
@@ -189,6 +179,5 @@
   });
 </script>
 
-<header th:replace="~{admin/fragments/footer :: footer}"></header>
 </body>
 </html>

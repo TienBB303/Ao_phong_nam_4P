@@ -1,149 +1,154 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments/head :: head}">
-    <title>Quản lý sản phẩm | 4PStore</title>
-</head>
-<link rel="stylesheet" th:href="@{/assets/css/tienbb/addNext.css}">
-<body>
-<header th:replace="~{admin/fragments/header :: header}"></header>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{admin/fragments/head :: head}"></head>
+<body data-pc-preset="preset-1" data-pc-direction="ltr" data-pc-theme="light">
 <div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
-<section>
-    <div class="pc-container">
-        <div class="content">
-            <div class="row align-items-center">
-                <h5>Thêm biến thể</h5>
-            </div>
-            <div class="container">
-                <div class="container mt-5">
-                    <form id="TaoBienThe" th:object="${productForm}" th:action="@{/admin/product/save-product}" method="post" enctype="multipart/form-data">
-                        <input type="hidden" class="form-control" id="product_code" name="code" th:value="${productForm.code}">
-                        <input type="hidden" class="form-control" id="product_name" name="name" th:value="${productForm.name}">
-                        <input type="hidden" class="form-control" id="product_category" name="categoryId" th:value="${productForm.categoryId}">
-                        <input type="hidden" class="form-control" id="product_brand" name="brandId" th:value="${productForm.brandId}">
-                        <input type="hidden" class="form-control" id="product_material" name="materialId" th:value="${productForm.materialId}">
-                        <input type="hidden" class="form-control" id="product_description" name="description" th:value="${productForm.description}">
+<header th:replace="~{admin/fragments/header :: header}"></header>
 
-                        <br>
-
-                        <div class="variant-item row bg-light p-3 rounded-3 shadow-sm mb-3 mx-1">
-                            <!-- Màu sắc -->
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="multi_color" class="form-label">Chọn nhiều màu sắc</label>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <select id="multi_color"
-                                                class="form-select shadow-sm rounded-3 select-compact flex-grow-1"
-                                                name="selectedColorIds" multiple>
-                                            <option th:each="color : ${listColor}"
-                                                    th:value="${color.id}"
-                                                    th:text="${color.name}"
-                                                    th:attr="data-color=${color.code}"
-                                                    th:selected="${selectedColorIds != null and selectedColorIds.contains(color.id)}">
-                                            </option>
-                                        </select>
-                                        <button id="add_color" type="button"
-                                                class="btn btn-outline-primary shadow-sm btn-equal"
-                                                data-bs-toggle="modal" data-bs-target="#modalAddColor" title="Thêm màu">
-                                            <i class="fas fa-plus"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Kích cỡ -->
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="multi_size" class="form-label">Chọn nhiều kích cỡ</label>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <select id="multi_size"
-                                                class="form-select shadow-sm rounded-3 select-compact flex-grow-1"
-                                                name="selectedSizeIds" multiple>
-                                            <option th:each="size : ${listSize}"
-                                                    th:value="${size.id}"
-                                                    th:text="${size.code}"
-                                                    th:selected="${selectedSizeIds != null and selectedSizeIds.contains(size.id)}">
-                                            </option>
-                                        </select>
-                                        <button id="add_size" type="button"
-                                                class="btn btn-outline-primary shadow-sm btn-equal"
-                                                data-bs-toggle="modal" data-bs-target="#modalAddSize" title="Thêm size">
-                                            <i class="fas fa-plus"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+<div class="pc-container">
+    <div class="pc-content">
+        <!-- breadcrumb -->
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <div class="page-header-title">
+                            <h5 class="m-b-10">Thêm sản phẩm mới</h5>
                         </div>
-                        <div class="price-quantity row bg-light p-3 rounded-3 shadow-sm mb-3 mx-1">
-                            <div class="col-md-4">
-                                <label for="so_luong_chung" class="form-label">Số lượng chung</label>
-                                <input type="number" id="so_luong_chung" class="form-control" placeholder="Nhập số lượng chung">
-                            </div>
-                            <div class="col-md-4">
-                                <label for="gia_chung" class="form-label">Giá chung</label>
-                                <!-- input hiển thị -->
-                                <input type="text" id="gia_chung_display" class="form-control price-display" placeholder="Nhập giá chung">
-                                <!-- input gửi server / apply -->
-                                <input type="hidden" id="gia_chung" value="0">
-                            </div>
-                            <div class="col-md-4 d-flex align-items-end">
-                                <button type="button" id="apply_all" class="btn btn-warning w-100">Áp dụng tất cả</button>
-                            </div>
-                        </div>
-
-                        <hr>
-                        <div id="variant-group-list">
-                            <div th:each="variant, stat : ${productForm.variants}" class="variant-item row mb-3">
-                                <div class="col-md-2">
-                                    <label>Màu sắc</label>
-                                    <input class="form-control" th:each="color : ${listColor}" th:if="${color.id == variant.colorId}" th:value="${color.name}" disabled/>
-                                    <input type="hidden" th:name="'variants[' + ${stat.index} + '].colorId'" th:value="${variant.colorId}"/>
-                                </div>
-
-                                <!-- Kích cỡ -->
-                                <div class="col-md-2">
-                                    <label>Kích cỡ</label>
-                                    <input class="form-control" th:each="size : ${listSize}" th:if="${size.id == variant.sizeId}" th:value="${size.name}" disabled/>
-                                    <input type="hidden" th:name="'variants[' + ${stat.index} + '].sizeId'" th:value="${variant.sizeId}"/>
-                                </div>
-
-                                <!-- Số lượng -->
-                                <div class="col-md-2">
-                                    <label>Số lượng</label>
-                                    <input type="number" class="form-control" th:name="'variants[' + ${stat.index} + '].quantity'" th:value="${variant.quantity}" placeholder="nhập số lượng">
-                                </div>
-
-                                <!-- Giá tiền -->
-                                <div class="col-md-2">
-                                    <label>Giá tiền</label>
-                                    <input type="number" class="form-control" th:name="'variants[' + ${stat.index} + '].price'" th:value="${variant.price}" placeholder="nhập số lượng">
-                                </div>
-
-                                <!-- Nút Xóa -->
-                                <div class="col-md-2 d-flex align-items-end">
-                                    <button type="button" class="btn btn-danger remove-variant">Xóa</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <button type="button" class="btn btn-primary" id="add-variant-btn">
-                                <i class="bi bi-plus-circle"></i> Thêm biến thể
-                            </button>
-
-                            <div>
-                                <a type="button" class="btn btn-secondary" id="back" href="/admin/product/view-add" title="Quay lại">
-                                    <i class="bi bi-arrow-bar-left"></i>Quay lại
-                                </a>
-                                <button type="submit" class="btn btn-success" id="Confirm">
-                                    <i class="bi bi-check-circle-fill"></i> Xác nhận
-                                </button>
-                            </div>
-                        </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
+        <!-- content: bạn dán phần “cards, charts, tables …” ở đây -->
+        <div class="row">
+            <form id="TaoBienThe" th:object="${productForm}" th:action="@{/admin/product/save-product}" method="post" enctype="multipart/form-data">
+                <input type="hidden" class="form-control" id="product_code" name="code" th:value="${productForm.code}">
+                <input type="hidden" class="form-control" id="product_name" name="name" th:value="${productForm.name}">
+                <input type="hidden" class="form-control" id="product_category" name="categoryId" th:value="${productForm.categoryId}">
+                <input type="hidden" class="form-control" id="product_brand" name="brandId" th:value="${productForm.brandId}">
+                <input type="hidden" class="form-control" id="product_material" name="materialId" th:value="${productForm.materialId}">
+                <input type="hidden" class="form-control" id="product_description" name="description" th:value="${productForm.description}">
+
+                <br>
+
+                <div class="variant-item row bg-light p-3 rounded-3 shadow-sm mb-3 mx-1">
+                    <!-- Màu sắc -->
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="multi_color" class="form-label">Chọn nhiều màu sắc</label>
+                            <div class="d-flex align-items-center gap-2">
+                                <select id="multi_color"
+                                        class="form-select shadow-sm rounded-3 select-compact flex-grow-1"
+                                        name="selectedColorIds" multiple>
+                                    <option th:each="color : ${listColor}"
+                                            th:value="${color.id}"
+                                            th:text="${color.name}"
+                                            th:attr="data-color=${color.code}"
+                                            th:selected="${selectedColorIds != null and selectedColorIds.contains(color.id)}">
+                                    </option>
+                                </select>
+                                <button id="add_color" type="button"
+                                        class="btn btn-outline-primary shadow-sm btn-equal"
+                                        data-bs-toggle="modal" data-bs-target="#modalAddColor" title="Thêm màu">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kích cỡ -->
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="multi_size" class="form-label">Chọn nhiều kích cỡ</label>
+                            <div class="d-flex align-items-center gap-2">
+                                <select id="multi_size"
+                                        class="form-select shadow-sm rounded-3 select-compact flex-grow-1"
+                                        name="selectedSizeIds" multiple>
+                                    <option th:each="size : ${listSize}"
+                                            th:value="${size.id}"
+                                            th:text="${size.code}"
+                                            th:selected="${selectedSizeIds != null and selectedSizeIds.contains(size.id)}">
+                                    </option>
+                                </select>
+                                <button id="add_size" type="button"
+                                        class="btn btn-outline-primary shadow-sm btn-equal"
+                                        data-bs-toggle="modal" data-bs-target="#modalAddSize" title="Thêm size">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="price-quantity row bg-light p-3 rounded-3 shadow-sm mb-3 mx-1">
+                    <div class="col-md-4">
+                        <label for="so_luong_chung" class="form-label">Số lượng chung</label>
+                        <input type="number" id="so_luong_chung" class="form-control" placeholder="Nhập số lượng chung">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="gia_chung" class="form-label">Giá chung</label>
+                        <!-- input hiển thị -->
+                        <input type="text" id="gia_chung_display" class="form-control price-display" placeholder="Nhập giá chung">
+                        <!-- input gửi server / apply -->
+                        <input type="hidden" id="gia_chung" value="0">
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="button" id="apply_all" class="btn btn-warning w-100">Áp dụng tất cả</button>
+                    </div>
+                </div>
+
+                <hr>
+                <div id="variant-group-list">
+                    <div th:each="variant, stat : ${productForm.variants}" class="variant-item row mb-3">
+                        <div class="col-md-2">
+                            <label>Màu sắc</label>
+                            <input class="form-control" th:each="color : ${listColor}" th:if="${color.id == variant.colorId}" th:value="${color.name}" disabled/>
+                            <input type="hidden" th:name="'variants[' + ${stat.index} + '].colorId'" th:value="${variant.colorId}"/>
+                        </div>
+
+                        <!-- Kích cỡ -->
+                        <div class="col-md-2">
+                            <label>Kích cỡ</label>
+                            <input class="form-control" th:each="size : ${listSize}" th:if="${size.id == variant.sizeId}" th:value="${size.name}" disabled/>
+                            <input type="hidden" th:name="'variants[' + ${stat.index} + '].sizeId'" th:value="${variant.sizeId}"/>
+                        </div>
+
+                        <!-- Số lượng -->
+                        <div class="col-md-2">
+                            <label>Số lượng</label>
+                            <input type="number" class="form-control" th:name="'variants[' + ${stat.index} + '].quantity'" th:value="${variant.quantity}" placeholder="nhập số lượng">
+                        </div>
+
+                        <!-- Giá tiền -->
+                        <div class="col-md-2">
+                            <label>Giá tiền</label>
+                            <input type="number" class="form-control" th:name="'variants[' + ${stat.index} + '].price'" th:value="${variant.price}" placeholder="nhập số lượng">
+                        </div>
+
+                        <!-- Nút Xóa -->
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="button" class="btn btn-danger remove-variant">Xóa</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <button type="button" class="btn btn-primary" id="add-variant-btn">
+                        <i class="bi bi-plus-circle"></i> Thêm biến thể
+                    </button>
+
+                    <div>
+                        <a type="button" class="btn btn-secondary" id="back" href="/admin/product/view-add" title="Quay lại">
+                            <i class="bi bi-arrow-bar-left"></i>Quay lại
+                        </a>
+                        <button type="submit" class="btn btn-success" id="Confirm">
+                            <i class="bi bi-check-circle-fill"></i> Xác nhận
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
-</section>
+</div>
+<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
 
 <!--modal add nhanh màu-->
 <div class="modal fade" id="modalAddColor" tabindex="-1" aria-labelledby="modalAddColorLabel" aria-hidden="true">
@@ -206,15 +211,7 @@
         </div>
     </div>
 </div>
-<footer th:replace="admin/fragments/footer :: footer"></footer>
 
-<!--file pond-->
-<script src="https://unpkg.com/filepond@^4/dist/filepond.min.js"></script>
-
-<script src="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.js"></script>
-<script src="https://unpkg.com/filepond-plugin-file-validate-size/dist/filepond-plugin-file-validate-size.min.js"></script>
-<script src="https://unpkg.com/filepond-plugin-image-exif-orientation/dist/filepond-plugin-image-exif-orientation.min.js"></script>
-<script src="https://unpkg.com/filepond-plugin-image-edit/dist/filepond-plugin-image-edit.min.js"></script>
 
 <!--báo lỗi-->
 <script th:if="${alert != null}" th:inline="javascript">
@@ -228,6 +225,7 @@
         timerProgressBar: true
     });
 </script>
+<!--Format giá tiền-->
 <script>
     function formatVND(n) {
         const v = Number(n || 0);
@@ -355,24 +353,24 @@
         <div class="collapse show" id="color-body-${colorId}">
             <div class="p-3">
                 <!-- Danh sách biến thể -->
-                <div class="variant-list-inner"></div>
+        <div class="variant-list-inner"></div>
 
-                <!-- FilePond input -->
-               <div class="form-group mt-3">
-                    <input type="file"
-                        name="colorImages[${colorId}]"
-                        id="filepond-color-${colorId}"
-                        class="filepond"
-                        multiple
-                        data-max-files="5"
-                        data-allow-reorder="true"
-                        data-label-idle="Kéo & thả hoặc chọn ảnh cho màu này"
-                        accept="image/*">
-                </div>
-            </div>
+            <!-- FilePond input -->
+        <div class="form-group mt-3">
+        <input type="file"
+        name="colorImages[${colorId}]"
+        id="filepond-color-${colorId}"
+        class="filepond"
+        multiple
+        data-max-files="5"
+        data-allow-reorder="true"
+        data-label-idle="Kéo & thả hoặc chọn ảnh cho màu này"
+        accept="image/*">
         </div>
-    </div>`;
-    }
+        </div>
+        </div>
+        </div>`;
+        }
 
 
     function updateVariantIndexes() {
@@ -553,7 +551,6 @@
         });
     });
 </script>
-
 
 </body>
 </html>
