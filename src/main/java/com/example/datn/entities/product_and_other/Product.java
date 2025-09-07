@@ -50,4 +50,18 @@ public class Product {
     @JoinColumn(name = "material_id")
     private Material material;
 
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<ProductDetail> productDetails;
+
+    @Transient
+    public String getMainImagePath() {
+        if (productDetails != null && !productDetails.isEmpty()) {
+            for (ProductDetail detail : productDetails) {
+                if (detail.getImages() != null && !detail.getImages().isEmpty()) {
+                    return detail.getImages().get(0).getPath_file(); // lấy ảnh đầu tiên có sẵn
+                }
+            }
+        }
+        return "/images/no-image.png"; // ảnh mặc định
+    }
 }

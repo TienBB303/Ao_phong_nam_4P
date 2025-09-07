@@ -60,6 +60,9 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                         <li><a class="dropdown-item" th:href="@{/user/profile}"><i class="fas fa-user me-2"></i>Tài khoản</a></li>
+                        <li><a class="dropdown-item" th:href="@{/user/change-password-request}">
+                            <i class="fas fa-key me-2"></i>Đổi mật khẩu
+                        </a></li>
                         <li><a class="dropdown-item" th:href="@{/user/orders}"><i class="fas fa-shopping-bag me-2"></i>Đơn hàng</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" th:href="@{/user/logout}"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>

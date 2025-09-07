@@ -20,6 +20,5 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     Optional<Account> findTopByOrderByCodeDesc();
 
     boolean existsByEmail(String email);
-
     Optional<Account> findByEmail(String email);
 }

@@ -7,7 +7,9 @@ import com.example.datn.services.CustomerService;
 import com.example.datn.services.EmailService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -15,6 +17,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/user")
 public class UserController {
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private CustomerService customerService;
@@ -75,7 +79,7 @@ public class UserController {
                 // Lưu thông tin người dùng vào session
                 session.setAttribute("userAccount", account);
                 session.setAttribute("userCustomer", account.getCustomer());
-                session.setMaxInactiveInterval(15 * 60);
+//                session.setMaxInactiveInterval(15 * 60);
                 
                 // Kiểm tra xem có phải lần đầu đăng nhập không
                 if (account.getStatus() == null || !account.getStatus()) {
@@ -153,14 +157,109 @@ public class UserController {
 
     // Hiển thị trang profile
     @GetMapping("/profile")
+    @Transactional(readOnly = true)
     public String showProfile(Model model, HttpSession session) {
         Account account = (Account) session.getAttribute("userAccount");
         if (account == null) {
             return "redirect:/user/login";
         }
+        // Lấy lại Customer với addresses được load sẵn từ database
+        Integer customerId = account.getCustomer().getId();
+        Customer customerEntity = customerService.findByIdWithAddresses(customerId);
+        if (customerEntity == null) {
+            return "redirect:/user/login";
+        }
         model.addAttribute("account", account);
-        model.addAttribute("customer", account.getCustomer());
+        CustomerDto customerDto = new CustomerDto();
+        if (customerEntity != null) {
+            customerDto.setId(customerEntity.getId());
+            customerDto.setCode(customerEntity.getCode());
+            customerDto.setName(customerEntity.getName());
+            customerDto.setGender(customerEntity.getGender());
+            customerDto.setBirthday(customerEntity.getBirthDate());
+            customerDto.setPhoneNumber(customerEntity.getPhoneNumber());
+            customerDto.setEmail(account.getEmail());
+            customerDto.setIsActive(customerEntity.getIsActive());
+            // Nếu có địa chỉ mặc định
+            if (customerEntity.getAddresses() != null && !customerEntity.getAddresses().isEmpty()) {
+                var defaultAddress = customerEntity.getAddresses().stream().filter(a -> Boolean.TRUE.equals(a.getIsDefault())).findFirst().orElse(customerEntity.getAddresses().get(0));
+                com.example.datn.dto.AddressDto addressDto = new com.example.datn.dto.AddressDto();
+                addressDto.setAddressDetail(defaultAddress.getAddressDetail());
+                addressDto.setProvinceId(defaultAddress.getProvinceId());
+                addressDto.setProvinceName(defaultAddress.getProvinceName());
+                addressDto.setDistrictId(defaultAddress.getDistrictId());
+                addressDto.setDistrictName(defaultAddress.getDistrictName());
+                addressDto.setWardId(defaultAddress.getWardId());
+                customerDto.setAddress(addressDto);
+            }
+        }
+        model.addAttribute("customer", customerDto);
         return "user/profile";
+    }
+   // Hiển thị trang đổi mật khẩu (cho user đã login)
+    @GetMapping("/change-password-request")
+    public String showChangePasswordRequestPage(HttpSession session, RedirectAttributes redirectAttributes) {
+        Account account = (Account) session.getAttribute("userAccount");
+        if (account == null) {
+            redirectAttributes.addFlashAttribute("error", "Vui lòng đăng nhập trước khi đổi mật khẩu.");
+            return "redirect:/user/login";
+        }
+        return "user/change-password-request";
+
+    }
+    @PostMapping("/change-password-request")
+    public String handleChangePasswordRequest(@RequestParam String oldPassword,
+                                              @RequestParam String newPassword,
+                                              @RequestParam String confirmPassword,
+                                              HttpSession session,
+                                              RedirectAttributes redirectAttributes) {
+        try {
+            Account account = (Account) session.getAttribute("userAccount");
+            if (account == null) {
+                redirectAttributes.addFlashAttribute("error", "Phiên đăng nhập đã hết hạn.");
+                return "redirect:/user/login";
+            }
+
+            // Kiểm tra mật khẩu xác nhận
+            if (!newPassword.equals(confirmPassword)) {
+                redirectAttributes.addFlashAttribute("error", "Mật khẩu xác nhận không khớp!");
+                return "redirect:/user/change-password-request";
+            }
+
+            // Kiểm tra độ dài mật khẩu mới
+            if (newPassword.length() < 6) {
+                redirectAttributes.addFlashAttribute("error", "Mật khẩu phải có ít nhất 6 ký tự.");
+                return "redirect:/user/change-password-request";
+            }
+
+            // Kiểm tra mật khẩu mới không trùng mật khẩu cũ
+            if (oldPassword.equals(newPassword)) {
+                redirectAttributes.addFlashAttribute("error", "Mật khẩu mới phải khác mật khẩu hiện tại!");
+                return "redirect:/user/change-password-request";
+            }
+
+            // Kiểm tra mật khẩu cũ
+            if (!customerService.verifyPassword(oldPassword, account.getPassword())) {
+                redirectAttributes.addFlashAttribute("error", "Mật khẩu hiện tại không đúng!");
+                return "redirect:/user/change-password-request";
+            }
+
+            // Cập nhật mật khẩu mới
+            customerService.updatePassword(account.getId(), newPassword);
+
+            // Cập nhật lại Account trong session với thông tin mới
+            Account updatedAccount = customerService.findAccountById(account.getId());
+            if (updatedAccount != null) {
+                session.setAttribute("userAccount", updatedAccount);
+            }
+
+            redirectAttributes.addFlashAttribute("success", "Đổi mật khẩu thành công!");
+            return "redirect:/user/profile";
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Đổi mật khẩu thất bại: " + e.getMessage());
+            return "redirect:/user/change-password-request";
+        }
     }
 
     // Hiển thị trang đơn hàng
@@ -182,4 +281,27 @@ public class UserController {
         redirectAttributes.addFlashAttribute("success", "Đăng xuất thành công!");
         return "redirect:/";
     }
-} 
+
+    // Xử lý cập nhật thông tin cá nhân
+    @PostMapping("/profile/edit")
+    public String editProfile(@ModelAttribute CustomerDto customerDto,
+                             HttpSession session,
+                             RedirectAttributes redirectAttributes) {
+        Account account = (Account) session.getAttribute("userAccount");
+        if (account == null) {
+            return "redirect:/user/login";
+        }
+        try {
+            // Cập nhật thông tin cá nhân, địa chỉ mặc định
+            customerService.updateCustomerProfile(account.getCustomer().getId(), customerDto);
+            // Cập nhật lại thông tin trong session
+            Customer updatedCustomer = customerService.findById(account.getCustomer().getId());
+            account.setCustomer(updatedCustomer);
+            session.setAttribute("userCustomer", updatedCustomer);
+            redirectAttributes.addFlashAttribute("success", "Cập nhật thông tin thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Cập nhật thất bại: " + e.getMessage());
+        }
+        return "redirect:/user/profile";
+    }
+}

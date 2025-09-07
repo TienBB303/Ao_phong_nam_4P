@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 
@@ -20,6 +21,7 @@ public class CustomerDto {
     @Size(min = 2, max = 50)
     private String name;
     private Boolean gender; // true = nam, false = nữ
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @NotNull(message = "Ngày sinh không được để trống")
     private LocalDate birthday;
     @NotBlank(message = "SĐT không được để trống")

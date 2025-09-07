@@ -47,15 +47,14 @@
                                     <label class="fw-bold">Ngày tạo:</label>
                                     <p class="text-muted" th:text="${#temporals.format(account.createdAt, 'dd/MM/yyyy HH:mm')}">Ngày tạo</p>
                                 </div>
-                                <div class="mb-3">
-                                    <label class="fw-bold">Vai trò:</label>
-                                    <p class="text-muted" th:text="${account.role.name}">Vai trò</p>
-                                </div>
+<!--                                <div class="mb-3">-->
+<!--                                    <label class="fw-bold">Vai trò:</label>-->
+<!--                                    <p class="text-muted" th:text="${account.role.name}">Vai trò</p>-->
+<!--                                </div>-->
                             </div>
                         </div>
                         
                         <hr class="my-4">
-                        
                         <div class="text-center">
                             <a href="/" class="btn btn-primary me-2">
                                 <i class="fas fa-home me-1"></i>Về trang chủ
@@ -63,6 +62,56 @@
                             <a href="/user/orders" class="btn btn-outline-primary">
                                 <i class="fas fa-shopping-bag me-1"></i>Xem đơn hàng
                             </a>
+                            <button type="button" class="btn btn-warning ms-2" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                                <i class="fas fa-edit me-1"></i>Chỉnh sửa thông tin
+                            </button>
+                        </div>
+                        <!-- Modal chỉnh sửa thông tin cá nhân -->
+                        <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+                          <div class="modal-dialog">
+                            <div class="modal-content">
+                              <form th:action="@{/user/profile/edit}" method="post" th:object="${customer}">
+                                <div class="modal-header">
+                                  <h5 class="modal-title" id="editProfileModalLabel">Chỉnh sửa thông tin cá nhân</h5>
+                                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                  <div class="mb-3">
+                                    <label for="name" class="form-label">Họ và tên</label>
+                                    <input type="text" id="name" th:field="*{name}" class="form-control" required>
+                                  </div>
+                                  <div class="mb-3">
+                                      <label class="form-label">Giới tính:</label>
+                                    <div>
+                                      <input type="radio" id="male" name="gender" th:field="*{gender}" value="true"> <label for="male">Nam</label>
+                                      <input type="radio" id="female" name="gender" th:field="*{gender}" value="false"> <label for="female">Nữ</label>
+                                    </div>
+                                  </div>
+                                  <div class="mb-3">
+                                    <label for="birthday" class="form-label">Ngày sinh</label>
+                                    <input type="date" id="birthday" th:field="*{birthday}" class="form-control">
+                                  </div>
+                                  <div class="mb-3">
+                                    <label for="phoneNumber" class="form-label">Số điện thoại</label>
+                                    <input type="tel" id="phoneNumber" th:field="*{phoneNumber}" class="form-control" required>
+                                  </div>
+                                  <div class="mb-3">
+                                    <label for="email" class="form-label">Email</label>
+                                    <input type="email" id="email" th:field="*{email}" class="form-control" readonly>
+                                  </div>
+                                  <div class="mb-3">
+                                    <label for="addressDetail" class="form-label">Địa chỉ cụ thể</label>
+                                    <input type="text" id="addressDetail" th:field="*{address.addressDetail}" class="form-control">
+                                  </div>
+                                  <!-- Các trường tỉnh/thành, quận/huyện, phường/xã, isDefault, receiverName, receiverPhoneNumber có thể bổ sung thêm -->
+                                </div>
+                                <div class="modal-footer">
+                                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                  <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                                </div>
+                              </form>
+                            </div>
+                          </div>
                         </div>
                     </div>
                 </div>
@@ -71,4 +120,4 @@
     </div>
 </main>
 </body>
-</html> 
+</html>

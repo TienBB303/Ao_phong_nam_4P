@@ -247,6 +247,10 @@
             if (!isValid) {
                 e.preventDefault();
             }
+            // --- Hiển thị alert xác nhận ---
+            if (!confirm("Bạn có chắc chắn muốn thêm khách hàng này không?")) {
+                e.preventDefault();
+            }
         });
     });
 </script>
