@@ -142,6 +142,16 @@ public class SellingInlineController {
         return "admin/selling/inline";
     }
 
+    @GetMapping("/list-product-search")
+    @ResponseBody
+    public List<ProductDetailDto> listProductSearch() {
+        return productService.getAllProductDetailsInStock()
+                .stream()
+                .map(ProductDetailDto::new) // constructor map từ entity -> DTO
+                .collect(Collectors.toList());
+    }
+
+
     @GetMapping("/search-product-detail")
     @ResponseBody
     public List<ProductDetailDto> searchProductDetail(@RequestParam("keyword") String keyword){
@@ -240,16 +250,21 @@ public class SellingInlineController {
                                       @RequestParam("typePayment") String typePayment) {
         try {
             billService.checkOut(idCart, typePayment);
-            return ResponseEntity.ok("Thanh toán thành công!");
+            Bill bill = billService.findById(idCart);
+            Map<String, Object> body = new HashMap<>();
+            body.put("message", "Thanh toán thành công!");
+            body.put("billId", bill.getId());
+            body.put("billCode", bill.getCode());
+            return ResponseEntity.ok(body);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    @GetMapping("/thanh-toan")
-    public String redirectThanhToan() {
-        return "redirect:/admin/sell-inline/hien-thi";
-    }
+//    @GetMapping("/thanh-toan")
+//    public String redirectThanhToan() {
+//        return "redirect:/admin/sell-inline/hien-thi";
+//    }
 
     //Hiện list discount
     public List<Discount> listDiscountCanApply(BigDecimal minPrice) {
@@ -363,6 +378,41 @@ public class SellingInlineController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @GetMapping("/print/{id}")
+    public String printInvoice(@PathVariable("id") Integer billId, Model model) {
+        Bill bill = billService.findById(billId);
+
+        Customer customer = null;
+        if (bill.getCustomer() != null) {
+            customer = customerService.findById(bill.getCustomer().getId());
+        }
+
+        List<BillDetails> list_san_pham = billService.findBillDetailsByBillId(billId);
+
+        int tongSoLuong = (bill.getTotal_quantity() != null)
+                ? bill.getTotal_quantity()
+                : list_san_pham.stream()
+                .map(BillDetails::getQuantity)
+                .filter(java.util.Objects::nonNull)
+                .mapToInt(Integer::intValue)
+                .sum();
+
+        // Đảm bảo shippingFee không null
+        BigDecimal shippingFee = bill.getShippingFee() == null
+                ? BigDecimal.ZERO
+                : bill.getShippingFee();
+
+        model.addAttribute("bill", bill);
+        model.addAttribute("customer", customer);
+        model.addAttribute("list_san_pham", list_san_pham);
+        model.addAttribute("shippingFee", shippingFee);
+        model.addAttribute("tongSoLuong", tongSoLuong);
+
+
+
+        return "admin/selling/print";
     }
 
 }

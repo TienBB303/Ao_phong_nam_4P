@@ -132,6 +132,9 @@ public class ProductService {
         return productDetailRepository.getAllProductDetails();
     }
 
+    public List<ProductDetail> getAllProductDetailsInStock() {
+        return productDetailRepository.findAllInStock();
+    }
 
     public Map<Integer, String> getMinMaxPriceByProduct() {
         List<Object[]> results = productDetailRepository.findMinMaxPricesGroupedByProductId();

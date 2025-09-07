@@ -22,6 +22,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +32,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -72,11 +74,34 @@ public class BillService {
         return billRepository.findAll(pageable);
     }
 
-    public Page<Bill> searchBills(String code, String name, String phoneNumber,
-                                  LocalDateTime startDate, LocalDateTime endDate,
-                                  Integer status, Boolean typeBill, Pageable pageable) {
-        return billRepository.filterBills(code, name, phoneNumber, startDate, endDate, status, typeBill, pageable);
+    public Page<Bill> getFilteredBills(String code,
+                                       String name,
+                                       String phoneNumber,
+                                       LocalDate start,
+                                       LocalDate end,
+                                       Integer status,
+                                       Boolean typeBill,
+                                       int page,
+                                       int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        LocalDateTime startDateTime = (start != null) ? start.atStartOfDay() : null;
+        LocalDateTime endDateTime = (end != null) ? end.atTime(23, 59, 59) : null;
+
+        Page<Bill> pageBills = billRepository.filterBills(
+                (code == null || code.isEmpty()) ? null : code,
+                (name == null || name.isEmpty()) ? null : name,
+                (phoneNumber == null || phoneNumber.isEmpty()) ? null : phoneNumber,
+                startDateTime,
+                endDateTime,
+                status,
+                typeBill,
+                pageable
+        );
+
+        return pageBills;
     }
+
 
     public Bill findByCodeAndTypeBill(String code, Boolean typeBill) {
 
@@ -486,7 +511,6 @@ public class BillService {
             cart.setStatus(4);                              // không giao hàng
         }
         cart.setTypeBill(false); // bán tại quầy
-        cart.setShippingFee(BigDecimal.ZERO);
         PaymentMethod paymentMethod = paymentMethodService.findByPaymentMethodName(paymentMethodStr);
         cart.setPaymentMethod(paymentMethod);
         cart.setUpdatedAt(LocalDateTime.now());

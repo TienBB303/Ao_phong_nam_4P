@@ -21,9 +21,9 @@
         </div>
         <!-- content: bạn dán phần “cards, charts, tables …” ở đây -->
         <div class="row">
-            <div class="card">
-                <div class="card-header">
-                    <form method="get" action="/admin/size/hien-thi" th:object="${listSize}" style="padding-bottom: 20px">
+            <div class="card" style="padding-top: 10px">
+                <div class="card-header" style="padding-top: 10px; padding-bottom: 10px">
+                    <form method="get" action="/admin/size/hien-thi" th:object="${listSize}">
                         <div class="row">
                             <div class="col-5">
                                 <input type="text" id="searchInput" class="form-control" name="sizeNameSearch"
@@ -38,10 +38,10 @@
                             </div>
                             <div class="col-2">
                                 <button class="btn btn-primary" type="submit" id="sbmt">
-                                    <i class="bi bi-search"></i>
+                                    <i class="ti ti-search"></i>
                                 </button>
                                 <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalThemMoi">
-                                    <i class="bi bi-plus"></i>
+                                    <i class="ti ti-plus"></i>
                                 </button>
                             </div>
                         </div>
@@ -72,10 +72,10 @@
                             </td>
                             <td style="text-align: center">
                                 <a class="btn btn-outline-warning hienThiThongTinModal" style="width: 70px" title="Sửa" th:attr="data-id=${cate.id}" data-bs-toggle="modal" data-bs-target="#modalChinhSua">
-                                    <i class="bi bi-pencil-square"></i>
+                                    <i class="ti ti-pencil"></i>
                                 </a>
                                 <a class="btn btn-outline-info thayDoiTrangThai" style="width: 70px" title="Xem" th:attr="data-id=${cate.id}">
-                                    <i class="bi bi-arrow-left-right"></i>
+                                    <i class="ti ti-arrows-right-left"></i>
                                 </a>
                             </td>
                         </tr>
@@ -84,7 +84,7 @@
                 </div>
                 <div class="dataTable-bottom">
                     <nav th:if="${listSize.totalPages > 0}">
-                        <ul class="pagination">
+                        <ul class="pagination d-flex justify-content-end">
                             <li class="page-item" th:classappend="${listSize.first} ? 'disabled'">
                                 <a class="page-link"
                                    th:href="@{/admin/size/hien-thi(page=${listSize.number > 0 ? listSize.number - 1 : 0}, size=${listSize.size},sizeNameSearch=${sizeNameSearch},sizeStatusSearch=${sizeStatusSearch})}">

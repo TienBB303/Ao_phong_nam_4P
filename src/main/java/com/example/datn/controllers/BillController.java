@@ -38,19 +38,16 @@ public class BillController {
             @RequestParam(required = false) String code,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String phoneNumber,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end,
             @RequestParam(required = false) Integer status,
-            @RequestParam(required = false) Boolean type,
+            @RequestParam(required = false) Boolean typeBill,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
             Model model
     ) {
-        Pageable pageable = PageRequest.of(page, size);
-        LocalDateTime startDateTime = (startDate != null) ? startDate.atStartOfDay() : null;
-        LocalDateTime endDateTime = (endDate != null) ? endDate.atTime(23, 59, 59) : null;
 
-        Page<Bill> billPage = billService.searchBills(code, name, phoneNumber, startDateTime, endDateTime, status, type, pageable);
+        Page<Bill> billPage = billService.getFilteredBills(code, name, phoneNumber, start, end, status, typeBill, page,size);
 
         model.addAttribute("bills", billPage.getContent());
         model.addAttribute("currentPage", page);
@@ -60,10 +57,10 @@ public class BillController {
         model.addAttribute("code", code);
         model.addAttribute("name", name);
         model.addAttribute("phoneNumber", phoneNumber);
-        model.addAttribute("startDate", startDate);
-        model.addAttribute("endDate", endDate);
+        model.addAttribute("startDate", start);
+        model.addAttribute("endDate", end);
         model.addAttribute("status", status);
-        model.addAttribute("type", type);
+        model.addAttribute("type", typeBill);
 
         return "admin/bill";
     }
