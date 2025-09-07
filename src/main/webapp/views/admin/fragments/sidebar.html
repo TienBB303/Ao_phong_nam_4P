@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:fragment="sidebar">
-<nav class="pc-sidebar">
+<html xmlns:th="http://www.thymeleaf.org" >
+<nav class="pc-sidebar" th:fragment="sidebar">
     <div class="navbar-wrapper">
-        <div class="m-header">
-            <a th:href="@{/}" class="b-brand text-primary">
-                <img th:src="@{/assets/images/logo_4P.png}" class="img-fluid logo-lg" alt="logo">
+        <div class="header d-flex justify-content-center align-items-center" style="height:85px">
+            <a th:href="@{/}" class="b-brand text-primary d-inline-flex align-items-center justify-content-center">
+                <img th:src="@{/assets/images/logo_4P.png}" class="img-fluid logo-lg" alt="logo" style="width:100px; height:auto;">
             </a>
         </div>
 
