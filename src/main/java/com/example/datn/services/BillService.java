@@ -477,7 +477,6 @@ public class BillService {
             cart.setStatus(4);                              // không giao hàng
         }
         cart.setTypeBill(false); // bán tại quầy
-        cart.setShippingFee(BigDecimal.ZERO);
         PaymentMethod paymentMethod = paymentMethodService.findByPaymentMethodName(paymentMethodStr);
         cart.setPaymentMethod(paymentMethod);
         cart.setUpdatedAt(LocalDateTime.now());
