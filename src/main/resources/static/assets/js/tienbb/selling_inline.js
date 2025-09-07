@@ -89,7 +89,7 @@ function renderSuggestionBox(data) {
                 data-price="${item.price}">
                 <div>
                     <div class="fw-semibold">${item.displayName}</div>
-                    <div class="text-muted small">Barcode: ${item.barcodes}</div>
+                    <div class="text-muted small">Barcode: ${item.barCode}</div>
                     <div class="text-muted small">Tồn kho: ${item.quantity}</div>
                 </div>
                 <div class="fw-bold text-success">${item.price.toLocaleString()} đ</div>
