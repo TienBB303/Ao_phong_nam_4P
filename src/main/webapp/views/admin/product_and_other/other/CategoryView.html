@@ -21,10 +21,9 @@
         </div>
         <!-- content: bạn dán phần “cards, charts, tables …” ở đây -->
         <div class="row">
-            <div class="card">
-                <div class="card-header">
-                    <form method="get" action="/admin/category/hien-thi" th:object="${listCategory}"
-                          style="padding-bottom: 20px">
+            <div class="card" style="padding-top: 10px">
+                <div class="card-header" style="padding-top: 10px; padding-bottom: 10px">
+                    <form method="get" action="/admin/category/hien-thi" th:object="${listCategory}">
                         <div class="row">
                             <div class="col-5">
                                 <input type="text" id="searchInput" class="form-control"
@@ -47,10 +46,10 @@
                             </div>
                             <div class="col-2">
                                 <button class="btn btn-primary" type="submit" id="sbmt">
-                                    <i class="bi bi-search"></i>
+                                    <i class="ti ti-search"></i>
                                 </button>
                                 <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalThemMoi">
-                                    <i class="bi bi-plus"></i>
+                                    <i class="ti ti-plus"></i>
                                 </button>
                             </div>
                         </div>
@@ -87,11 +86,11 @@
                                 <a class="btn btn-outline-warning hienThiThongTinModal"
                                    style="width: 70px" title="Sửa" th:attr="data-id=${cate.id}"
                                    data-bs-toggle="modal" data-bs-target="#modalChinhSua">
-                                    <i class="bi bi-pencil-square"></i>
+                                    <i class="ti ti-pencil"></i>
                                 </a>
                                 <a class="btn btn-outline-info thayDoiTrangThai" style="width: 70px"
                                    title="Xem" th:attr="data-id=${cate.id}">
-                                    <i class="bi bi-arrow-left-right"></i>
+                                    <i class="ti ti-arrows-right-left"></i>
                                 </a>
                             </td>
                         </tr>

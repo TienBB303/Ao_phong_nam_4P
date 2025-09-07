@@ -12,8 +12,15 @@
             <div class="page-block">
                 <div class="row align-items-center">
                     <div class="col-md-12">
-                        <div class="page-header-title">
-                            <h5 class="m-b-10">Quản lý sản phẩm</h5>
+                        <div class="page-header-title align-items-center mb-3">
+                            <div class="d-flex align-items-center">
+                                <h5 class="mb-0 me-2">Quản lý sản phẩm</h5>
+                                <a th:href="@{/admin/product/view-add}"
+                                   class="btn btn-sm btn-primary rounded-circle shadow-lg d-flex align-items-center justify-content-center"
+                                   style="width: 32px; height: 32px;" title="Thêm sản phẩm mới ">
+                                    <i class="ti ti-plus"></i>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -83,28 +90,30 @@
                     </div>
                     <div class="col-md-1 d-grid">
                         <button type="submit" class="btn btn-primary mt-4" id="search_product_btn" title="Tìm kiếm">
-                            🔍
+                            <i class="ti ti-search"></i>
                         </button>
                     </div>
                     <div class="col-md-1 d-grid">
-                        <button type="button" class="btn btn-secondary mt-4" id="clear_search" title="Xóa tìm kiếm">
-                            🧹
-                        </button>
-                    </div>
-                </div>
-
-
-                <!-- Nút chức năng -->
-                <div class="row mt-3">
-                    <div class="col-12 text-end">
-                        <a th:href="@{/admin/product/view-add}" class="btn btn-primary shadow-sm">
-                            ➕ Thêm sản phẩm
-                        </a>
-                        <a th:href="@{/admin/product/view-atribute}" class="btn btn-outline-secondary ms-2 shadow-sm">
-                            ⚙️ Thuộc tính
+<!--                        <button type="button" class="btn btn-secondary mt-4" id="clear_search" title="Xóa tìm kiếm">-->
+<!--                            <i  class="ti ti-eraser" href="/admin/product/hien-thi"></i>-->
+<!--                        </button>-->
+                        <a th:href="@{/admin/product/hien-thi}" class="btn btn-secondary mt-4" id="clear_search" title="Xóa tìm kiếm">
+                            <i  class="ti ti-eraser"></i>
                         </a>
                     </div>
                 </div>
+
+<!--                &lt;!&ndash; Nút chức năng &ndash;&gt;-->
+<!--                <div class="row mt-3">-->
+<!--                    <div class="col-12 text-end">-->
+<!--                        <a th:href="@{/admin/product/view-add}" class="btn btn-primary shadow-sm">-->
+<!--                            <i class="ti ti-plus"></i>Thêm sản phẩm-->
+<!--                        </a>-->
+<!--                        <a th:href="@{/admin/product/view-atribute}" class="btn btn-outline-secondary ms-2 shadow-sm">-->
+<!--                            <i class="ti ti-list"></i>Thuộc tính-->
+<!--                        </a>-->
+<!--                    </div>-->
+<!--                </div>-->
             </form>
             <!-- Nếu không tìm thấy sản phẩm -> load ảnh null-->
             <div th:if="${#lists.isEmpty(listProduct.content)}" class="d-flex flex-column justify-content-center align-items-center" style="height: 400px;">

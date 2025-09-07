@@ -24,10 +24,14 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, In
             "JOIN FETCH pd.color c " +
             "JOIN FETCH pd.size s " +
             "WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "AND pd.quantity > 0" +
             "OR LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(s.code) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(pd.barcode) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<ProductDetail> searchProductDetailByKeyword(@Param("keyword") String keyword);
+
+    @Query("SELECT pd FROM ProductDetail pd WHERE pd.quantity > 0")
+    List<ProductDetail> findAllInStock();
 
     @Query("SELECT pd.product.id, MIN(pd.price), MAX(pd.price) " +
             "FROM ProductDetail pd " +
