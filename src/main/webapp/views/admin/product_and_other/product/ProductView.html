@@ -4,7 +4,16 @@
 <body data-pc-preset="preset-1" data-pc-direction="ltr" data-pc-theme="light">
 <div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
 <header th:replace="~{admin/fragments/header :: header}"></header>
-
+<style>
+    .btn i {
+        line-height: 2;      /* bỏ thừa chiều cao */
+        vertical-align: middle;
+        display: inline-flex;
+        align-items: center; /* căn icon giữa */
+        justify-content: center;
+        font-size: 1rem;     /* chỉnh nếu muốn icon đều nhau */
+    }
+</style>
 <div class="pc-container">
     <div class="pc-content">
         <!-- breadcrumb -->
@@ -94,15 +103,11 @@
                         </button>
                     </div>
                     <div class="col-md-1 d-grid">
-<!--                        <button type="button" class="btn btn-secondary mt-4" id="clear_search" title="Xóa tìm kiếm">-->
-<!--                            <i  class="ti ti-eraser" href="/admin/product/hien-thi"></i>-->
-<!--                        </button>-->
-                        <a th:href="@{/admin/product/hien-thi}" class="btn btn-secondary mt-4" id="clear_search" title="Xóa tìm kiếm">
+                        <a th:href="@{/admin/product/hien-thi}" class="btn btn-warning mt-4" id="clear_search" title="Xóa tìm kiếm">
                             <i  class="ti ti-eraser"></i>
                         </a>
                     </div>
                 </div>
-
 <!--                &lt;!&ndash; Nút chức năng &ndash;&gt;-->
 <!--                <div class="row mt-3">-->
 <!--                    <div class="col-12 text-end">-->
@@ -149,13 +154,8 @@
                             <span th:unless="${sp.status}" class="badge bg-danger">Không hoạt động</span>
                         </td>
                         <td style="text-align: center">
-                            <!--                                <a class="btn btn-outline-warning hienThiThongTinModal" th:attr="data-id=${sp.id}" style="width: 70px" title="Sửa" data-bs-toggle="modal" data-bs-target="#modalChinhSua">-->
-                            <!--&lt;!&ndash;                                    <i class="bi bi-pencil-square"></i>&ndash;&gt;-->
-                            <!--                                    ✏️️-->
-                            <!--                                </a>-->
                             <a class="btn btn-outline-info" th:href="@{'/admin/product/view-detail/' + ${sp.id}}" style="width: 70px" title="Xem">
-                                <!--                                    <i class="bi bi-eye"></i>-->
-                                ️ 👁️
+                            ️ 👁️
                             </a>
                         </td>
                     </tr>

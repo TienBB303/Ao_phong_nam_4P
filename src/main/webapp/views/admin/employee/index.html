@@ -12,8 +12,15 @@
             <div class="page-block">
                 <div class="row align-items-center">
                     <div class="col-md-12">
-                        <div class="page-header-title">
-                            <h5 class="m-b-10">Quản lý nhân viên</h5>
+                        <div class="page-header-title align-items-center mb-3">
+                            <div class="d-flex align-items-center">
+                                <h5 class="m-b-10">Quản lý nhân viên</h5>
+                                <a th:href="@{/admin/users/save}"
+                                   class="btn btn-sm btn-primary rounded-circle shadow-lg d-flex align-items-center justify-content-center"
+                                   style="width: 32px; height: 32px;" title="Thêm mới nhân viên">
+                                    <i class="ti ti-plus"></i>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -23,86 +30,93 @@
         <div class="row">
             <div class="card-body">
                 <form class="p-4 rounded shadow-sm mb-4" method="get">
-                    <div class="row gy-3 align-items-end">
-                        <div class="col-md-3">
+                    <div class="row g-3 align-items-end mb-3">
+                        <div class="col-md-10">
                             <label for="keyword" class="form-label">Tìm kiếm theo tên hoặc mã NV</label>
                             <input type="text" name="keyword" id="keyword" class="form-control"
                                    placeholder="Nhập tên hoặc mã..." th:value="${keyword}">
                         </div>
-                        <div class="col-md-2">
-                            <button type="button" class="btn btn-primary w-100" id="search-btn">
-                                <i class="ti ti-search me-1"></i> Tìm kiếm
+                        <div class="col-md-1 d-grid">
+                            <button type="submit" class="btn btn-primary mt-4" id="search-btn" title="Tìm kiếm">
+                                <i class="ti ti-search"></i>
                             </button>
-
                         </div>
-                        <div class="col-md-2">
-                            <a th:href="@{/admin/users}" class="btn btn-outline-secondary w-100">
-                                Hủy
+                        <div class="col-md-1 d-grid">
+                            <a th:href="@{/admin/users}" class="btn btn-warning mt-4" id="clear_search" title="Xóa tìm kiếm">
+                                <i  class="ti ti-eraser"></i>
                             </a>
                         </div>
                     </div>
                 </form>
-                <div class="d-flex justify-content-end mb-3">
-                    <a th:href="@{/admin/users/save}" class="btn btn-primary">➕ Thêm mới nhân viên</a>
+                <div class="table-responsive">
+                    <table id="multi-colum-dt" class="table table-bordered table-hover">
+                        <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Mã NV</th>
+                            <th>Họ và tên</th>
+                            <th>Email</th>
+                            <th>SĐT</th>
+                            <th>Ngày sinh</th>
+                            <th>Giới tính</th>
+                            <th>Địa chỉ</th>
+                            <th>Trạng thái</th>
+                            <th>Hành động</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="e, i : ${accountPage.content}">
+                            <td th:text="${i.index + 1}"></td>
+                            <td th:text="${e.code}"></td>
+                            <td th:text="${e.customer.name}"></td>
+                            <td th:text="${e.email}"></td>
+                            <td th:text="${e.customer.phoneNumber}"></td>
+                            <td th:text="${e.customer.birthDate}"></td>
+                            <td th:text="${e.customer.gender == true ? 'Nam' : 'Nữ'}"></td>
+                            <td>
+                                <!--        <span th:if="${e.customer.addresses != null and !e.customer.addresses.isEmpty()}"-->
+                                <!--              th:text="${e.customer.addresses[0].addressDetail-->
+                                <!--                + (e.customer.addresses[0].wardName != null ? ', ' + e.customer.addresses[0].wardName : '')-->
+                                <!--                + (e.customer.addresses[0].districtName != null ? ', ' + e.customer.addresses[0].districtName : '')-->
+                                <!--                + (e.customer.addresses[0].provinceName != null ? ', ' + e.customer.addresses[0].provinceName : '')}">-->
+                                <!--        </span>-->
+                                <span th:if="${e.customer.addresses == null or e.customer.addresses.isEmpty()}" th:text="''"></span>
+                            </td>
+
+                            <!--                            <td th:text="${e.phoneNumber}"></td>-->
+                            <!--                            <td th:text="${e.birthOfDate}"></td>-->
+                            <!--                            <td th:text="${e.gender}"></td>-->
+                            <!--                            <td th:text="${e.addressDetail}"></td>-->
+                            <td>
+                                <span th:class="${e.status} ? 'badge bg-success' : 'badge bg-danger'"
+                                      th:text="${e.status} ? 'Đang hoạt động' : 'Đã khóa'"></span>
+                            </td>
+
+    <!--                        <td>-->
+    <!--                            <a th:href="@{'/admin/users/detail'(id=${e.id})}">-->
+    <!--                                <button class="btn-icon text-dark">-->
+    <!--                                    <i class="ti ti-pencil"></i>-->
+    <!--                                </button>-->
+    <!--                            </a>-->
+    <!--                            -->
+    <!--                        </td>-->
+                            <td style="text-align: center">
+                                <a class="btn btn-outline-info" th:href="@{'/admin/users/detail'(id=${e.id})}" style="width: 70px" title="Xem">
+    <!--                                ️ <i class="ti ti-eye"></i>-->
+                                    👁️
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </div>
-                <table id="multi-colum-dt" class="table table-bordered table-hover">
-                    <thead>
-                    <tr>
-                        <th>STT</th>
-                        <th>Mã NV</th>
-                        <th>Họ và tên</th>
-                        <th>Email</th>
-                        <th>SĐT</th>
-                        <th>Ngày sinh</th>
-                        <th>Giới tính</th>
-                        <th>Địa chỉ</th>
-                        <th>Trạng thái</th>
-                        <th>Hành động</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="e, i : ${accountPage.content}">
-                        <td th:text="${i.index + 1}"></td>
-                        <td th:text="${e.code}"></td>
-                        <td th:text="${e.customer.name}"></td>
-                        <td th:text="${e.email}"></td>
-                        <td th:text="${e.customer.phoneNumber}"></td>
-                        <td th:text="${e.customer.birthDate}"></td>
-                        <td th:text="${e.customer.gender == true ? 'Nam' : 'Nữ'}"></td>
-                        <td>
-                            <!--        <span th:if="${e.customer.addresses != null and !e.customer.addresses.isEmpty()}"-->
-                            <!--              th:text="${e.customer.addresses[0].addressDetail-->
-                            <!--                + (e.customer.addresses[0].wardName != null ? ', ' + e.customer.addresses[0].wardName : '')-->
-                            <!--                + (e.customer.addresses[0].districtName != null ? ', ' + e.customer.addresses[0].districtName : '')-->
-                            <!--                + (e.customer.addresses[0].provinceName != null ? ', ' + e.customer.addresses[0].provinceName : '')}">-->
-                            <!--        </span>-->
-                            <span th:if="${e.customer.addresses == null or e.customer.addresses.isEmpty()}" th:text="''"></span>
-                        </td>
-
-                        <!--                            <td th:text="${e.phoneNumber}"></td>-->
-                        <!--                            <td th:text="${e.birthOfDate}"></td>-->
-                        <!--                            <td th:text="${e.gender}"></td>-->
-                        <!--                            <td th:text="${e.addressDetail}"></td>-->
-                        <td>
-                            <span th:class="${e.status} ? 'badge bg-success' : 'badge bg-danger'"
-                                  th:text="${e.status} ? 'Đang hoạt động' : 'Đã khóa'"></span>
-                        </td>
-
-                        <td>
-                            <a th:href="@{'/admin/users/detail'(id=${e.id})}">
-                                <button class="btn-icon text-dark">✏️</button>
-                            </a>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
                 <nav aria-label="Page navigation">
                     <ul class="pagination justify-content-end">
 
                         <!-- Previous -->
                         <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
                             <a class="page-link"
-                               th:href="${currentPage > 0} ? @{|?page=${currentPage - 1}&size=5|} : '#'">Previous</a>
+                               th:href="${currentPage > 0} ? @{|?page=${currentPage - 1}&size=5|} : '#'">Trước</a>
                         </li>
 
                         <!-- Page Numbers -->
@@ -116,7 +130,7 @@
                         <!-- Next -->
                         <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
                             <a class="page-link"
-                               th:href="${currentPage < totalPages - 1} ? @{|?page=${currentPage + 1}&size=5|} : '#'">Next</a>
+                               th:href="${currentPage < totalPages - 1} ? @{|?page=${currentPage + 1}&size=5|} : '#'">Sau</a>
                         </li>
 
                     </ul>
