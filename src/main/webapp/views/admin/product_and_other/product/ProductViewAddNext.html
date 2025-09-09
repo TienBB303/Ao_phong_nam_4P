@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head th:replace="~{admin/fragments/head :: head}"></head>
+<link rel="stylesheet" th:href="@{/assets/css/tienbb/addNext.css}">
 <body data-pc-preset="preset-1" data-pc-direction="ltr" data-pc-theme="light">
 <div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
 <header th:replace="~{admin/fragments/header :: header}"></header>
@@ -328,7 +329,7 @@
             allowMultiple: true,
             credits: false,
             storeAsFile: true,              // QUAN TRỌNG để FormData(form) gom file
-            imagePreviewHeight: 100,
+            imagePreviewHeight: 50,
             imageCropAspectRatio: '1:1',
             imageResizeTargetWidth: 150,
             imageResizeTargetHeight: 150,

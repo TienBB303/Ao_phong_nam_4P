@@ -1,6 +1,17 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head th:replace="~{admin/fragments/head :: head}"></head>
+<style>
+    .color-box {
+        display: inline-block;     /* nằm gọn trong ô */
+        width: 150px;               /* chiều rộng cố định */
+        padding: 4px 0;            /* khoảng cách trên/dưới */
+        border-radius: 4px;        /* bo góc */
+        color: #fff;               /* chữ trắng */
+        text-align: center;        /* chữ giữa */
+        white-space: nowrap;       /* không xuống dòng */
+    }
+</style>
 <body data-pc-preset="preset-1" data-pc-direction="ltr" data-pc-theme="light">
 <div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
 <header th:replace="~{admin/fragments/header :: header}"></header>
@@ -21,7 +32,6 @@
         </div>
         <!-- content: bạn dán phần “cards, charts, tables …” ở đây -->
         <div class="row">
-            <h5 class="mb-3 text-success"><i class="bi bi-list-ul me-1"></i> Thông tin sản phẩm</h5>
             <div class="card shadow-sm mb-4">
                 <div class="card-body row g-3">
                     <!-- Tên sản phẩm -->
@@ -92,28 +102,33 @@
                         <td>
                             <img th:src="@{'/barcode-images/' + ${detail.barcode} + '.png'}" width="150" alt="Barcode"/>
                         </td>
+<!--                        <td>-->
+<!--                                <span class="px-2 py-1 rounded text-white border shadow-sm d-inline-block text-center"-->
+<!--                                      style="display: block; width: 80px"-->
+<!--                                      th:text="${detail.color.name}"-->
+<!--                                      th:style="'background-color:' + ${detail.color.code}">-->
+<!--                                </span>-->
                         <td>
-                                <span class="px-2 py-1 rounded text-white border shadow-sm d-inline-block text-center"
-                                      style="width: 80px"
-                                      th:text="${detail.color.name}"
-                                      th:style="'background-color:' + ${detail.color.code}">
-                                </span>
+                              <span class="color-box"
+                                    th:text="${detail.color.name}"
+                                    th:style="'background-color:' + ${detail.color.code}">
+                              </span>
                         </td>
-                        <!--                            <td th:text="${detail.size.name}">Size</td>-->
+                        </td>
                         <td th:text="${detail.price}" class="giaVND">Giá</td>
                         <td th:text="${detail.quantity}">Số lượng</td>
                         <td style="text-align: center">
-                            <span th:if="${detail.status}" class="badge bg-success">Hoạt động</span>
-                            <span th:unless="${detail.status}" class="badge bg-danger">Không hoạt động</span>
+                            <span th:if="${detail.status}" class="badge bg-success">Đang bán</span>
+                            <span th:unless="${detail.status}" class="badge bg-danger">Ngừng bán</span>
                         </td>
                         <td style="text-align: center">
                             <a class="btn btn-outline-info thayDoiTrangThai" style="width: 70px" title="đổi trạng thái sản phẩm" th:attr="data-id=${detail.id}">
-                                <i class="bi bi-arrow-left-right"></i>
+                                <i class="ti ti-arrows-right-left"></i>
                             </a>
                             <a class="btn btn-outline-warning hienThiThongTinModal" style="width: 70px" title="Sửa"
                                th:attr="data-id=${detail.id}"
                                data-bs-toggle="modal" data-bs-target="#modalChinhSua">
-                                <i class="bi bi-pencil-square"></i>
+                                <i class="ti ti-pencil"></i>
                             </a>
                         </td>
 
