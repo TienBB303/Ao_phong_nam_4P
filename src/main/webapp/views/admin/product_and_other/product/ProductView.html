@@ -45,7 +45,7 @@
                         <label for="searchInput" class="form-label">Tên sản phẩm</label>
                         <div class="input-group shadow-sm">
                             <input type="text" id="searchInput" name="productNameSearch"
-                                   class="form-control" placeholder="Nhập tên..."
+                                   class="form-control" placeholder="Nhập tên hoặc mã sản phẩm..."
                                    th:value="${param.productNameSearch}">
                         </div>
                     </div>
@@ -93,8 +93,8 @@
                         <label for="status_search" class="form-label">Loại sản phẩm</label>
                         <select id="status_search" name="productStatusSearch" class="form-select shadow-sm">
                             <option value="" th:selected="${productStatusSearch == null}">Tất cả trạng thái</option>
-                            <option value="true" th:selected="${productStatusSearch == true}">Hoạt động</option>
-                            <option value="false" th:selected="${productStatusSearch == false}">Không hoạt động</option>
+                            <option value="true" th:selected="${productStatusSearch == true}">Đang bán</option>
+                            <option value="false" th:selected="${productStatusSearch == false}">Ngừng bán</option>
                         </select>
                     </div>
                     <div class="col-md-1 d-grid">
@@ -108,17 +108,6 @@
                         </a>
                     </div>
                 </div>
-<!--                &lt;!&ndash; Nút chức năng &ndash;&gt;-->
-<!--                <div class="row mt-3">-->
-<!--                    <div class="col-12 text-end">-->
-<!--                        <a th:href="@{/admin/product/view-add}" class="btn btn-primary shadow-sm">-->
-<!--                            <i class="ti ti-plus"></i>Thêm sản phẩm-->
-<!--                        </a>-->
-<!--                        <a th:href="@{/admin/product/view-atribute}" class="btn btn-outline-secondary ms-2 shadow-sm">-->
-<!--                            <i class="ti ti-list"></i>Thuộc tính-->
-<!--                        </a>-->
-<!--                    </div>-->
-<!--                </div>-->
             </form>
             <!-- Nếu không tìm thấy sản phẩm -> load ảnh null-->
             <div th:if="${#lists.isEmpty(listProduct.content)}" class="d-flex flex-column justify-content-center align-items-center" style="height: 400px;">
@@ -150,8 +139,8 @@
                         <td th:text="${sp.material.name}"></td>
                         <td th:text="${totalQuantity[sp.id]}">0</td>
                         <td style="text-align: center">
-                            <span th:if="${sp.status}" class="badge bg-success">Hoạt động</span>
-                            <span th:unless="${sp.status}" class="badge bg-danger">Không hoạt động</span>
+                            <span th:if="${sp.status}" class="badge bg-success">Đang bán</span>
+                            <span th:unless="${sp.status}" class="badge bg-danger">Ngừng bán</span>
                         </td>
                         <td style="text-align: center">
                             <a class="btn btn-outline-info" th:href="@{'/admin/product/view-detail/' + ${sp.id}}" style="width: 70px" title="Xem">

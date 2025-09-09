@@ -101,7 +101,7 @@ public class ProductController {
             totalQuantity.put(p.getId(),total);
         }
         model.addAttribute("categoryNameSearch", name.trim());
-        model.addAttribute("categoryStatusSearch", status != null ? status : "");
+        model.addAttribute("productStatusSearch", status != null ? status : "");
         model.addAttribute("productCategorySearch", categoryId);
         model.addAttribute("productBrandSearch", brandId);
         model.addAttribute("productMaterialSearch", materialId);

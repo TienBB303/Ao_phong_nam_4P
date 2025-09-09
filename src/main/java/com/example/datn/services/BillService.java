@@ -229,6 +229,9 @@ public class BillService {
         if (productDetail == null) {
             throw new Exception("Không tìm thấy sản phẩm với barcode: " + barcode);
         }
+        if (productDetail.getStatus() == false){
+            throw new Exception("Sản phẩm đã ngừng bán!");
+        }
         addProductToCart(cartId, productDetail.getId());
     }
 

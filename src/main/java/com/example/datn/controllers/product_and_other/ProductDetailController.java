@@ -34,16 +34,16 @@ public class ProductDetailController {
         BigDecimal price;
         Integer quantity;
 
-        try {
-            price = new BigDecimal(priceStr);
-            if (price.compareTo(BigDecimal.ZERO) <= 0) {
-                throw new NumberFormatException("Giá nhỏ hơn hoặc bằng 0");
-            }
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("alert", "Giá không hợp lệ");
-            redirectAttributes.addFlashAttribute("type", "error");
-            return "redirect:/admin/product/view-detail/" + productDetail.getProduct().getId();
-        }
+//        try {
+//            price = new BigDecimal(priceStr);
+//            if (price.compareTo(BigDecimal.ZERO) <= 0) {
+//                throw new NumberFormatException("Giá nhỏ hơn hoặc bằng 0");
+//            }
+//        } catch (Exception e) {
+//            redirectAttributes.addFlashAttribute("alert", "Giá không hợp lệ");
+//            redirectAttributes.addFlashAttribute("type", "error");
+//            return "redirect:/admin/product/view-detail/" + productDetail.getProduct().getId();
+//        }
 
         try {
             quantity = Integer.parseInt(quantityStr);
@@ -56,7 +56,7 @@ public class ProductDetailController {
             return "redirect:/admin/product/view-detail/" + productDetail.getProduct().getId();
         }
 
-        productDetail.setPrice(price);
+//        productDetail.setPrice(price);
         productDetail.setQuantity(quantity);
         productService.updateProductDetail(productDetail);
 
@@ -64,13 +64,12 @@ public class ProductDetailController {
     }
 
     @GetMapping("/change-status/{id}")
-    public String changeStatus(
-            @PathVariable("id") Integer id, RedirectAttributes redirectAttributes){
+    public String changeStatus( @PathVariable("id") Integer id, RedirectAttributes redirectAttributes){
         ProductDetail productDetail = productService.changeStatus(id);
 
         redirectAttributes.addFlashAttribute("alert", "Thay đổi trạng thái thành công!");
         redirectAttributes.addFlashAttribute("type", "success");
-        return "redirect:/admin/product/view-detail/" + productDetail.getId();
+        return "redirect:/admin/product/view-detail/" + productDetail.getProduct().getId();
     }
 
 

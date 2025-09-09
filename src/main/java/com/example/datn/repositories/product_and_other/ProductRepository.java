@@ -47,8 +47,9 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     Product findByCode(String code);
 
     @Query("SELECT p FROM Product p " +
-            "WHERE (LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')) " +
-            "AND (:status IS NULL OR p.status = :status)) " +
+            "WHERE ( (LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%'))) " +
+            "   OR  (LOWER(p.code) LIKE LOWER(CONCAT('%', :name, '%'))) ) " +   // <- gom OR lại
+            "AND (:status IS NULL OR p.status = :status) " +
             "AND (:categoryId IS NULL OR p.category.id = :categoryId) " +
             "AND (:brandId IS NULL OR p.brand.id = :brandId) " +
             "AND (:materialId IS NULL OR p.material.id = :materialId) " +
