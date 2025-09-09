@@ -19,11 +19,9 @@ import java.time.LocalDateTime;
 public class BillHistoryService {
     @Autowired
     private BillHistoryRepository billHistoryRepository;
-
-    @Autowired
-    private BillService billService;
     @Autowired
     private AccountRepository accountRepository;
+
 
     public void saveHistory(Bill bill, int status, String note) {
         BillHistory history = new BillHistory();
@@ -32,16 +30,13 @@ public class BillHistoryService {
         history.setNote(note);
         history.setCreatedAt(LocalDateTime.now());
 
-        // ✅ Lấy account đang đăng nhập
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.getPrincipal() instanceof UserDetails) {
-            String email = ((UserDetails) auth.getPrincipal()).getUsername();
-            Account account = accountRepository.findByEmail(email)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy account với email: " + email));
+        if (auth != null && auth.getPrincipal() instanceof Account) {
+            Account account = (Account) auth.getPrincipal();
             history.setAccount(account);
         }
 
+
         billHistoryRepository.save(history);
     }
-
 }

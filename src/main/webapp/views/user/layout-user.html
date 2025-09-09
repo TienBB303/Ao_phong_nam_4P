@@ -45,9 +45,9 @@
                 <li class="nav-item">
                     <a class="nav-link" th:href="@{/tracking}">Tra cứu đơn hàng</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/admin}">admin</a>
-                </li>
+<!--                <li class="nav-item">-->
+<!--                    <a class="nav-link" th:href="@{/admin}">admin</a>-->
+<!--                </li>-->
             </ul>
         </div>
         <div class="d-flex align-items-center gap-3">
@@ -63,6 +63,9 @@
                         <li><a class="dropdown-item" th:href="@{/user/change-password-request}">
                             <i class="fas fa-key me-2"></i>Đổi mật khẩu
                         </a></li>
+                        <li class="nav-item">
+                            <a class="dropdown-item" th:href="@{/admin}"><i class="fas fa-shopping-manage me-2"></i>Trang quản lý</a>
+                        </li>
                         <li><a class="dropdown-item" th:href="@{/user/orders}"><i class="fas fa-shopping-bag me-2"></i>Đơn hàng</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" th:href="@{/user/logout}"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
