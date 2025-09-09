@@ -94,4 +94,8 @@ public class ColorService {
         }
         return String.format("CL%03d",nextCode);
     }
+
+    public String chuyenIDSangName(Integer idColor){
+        return colorRepository.findByIdColor(idColor).getName();
+    }
 }
