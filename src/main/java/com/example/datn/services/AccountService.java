@@ -15,4 +15,6 @@ public interface AccountService {
     String generateEmployeeCode();
 
     String generateRandomPassword(int length);
+
+
 }

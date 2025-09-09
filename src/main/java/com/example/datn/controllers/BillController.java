@@ -65,7 +65,6 @@ public class BillController {
         return "admin/bill";
     }
 
-
     @GetMapping("/update-bill-status/{billId}")
     public String updateBillStatus(Model model,
                                    @PathVariable Integer billId,
@@ -82,7 +81,7 @@ public class BillController {
 
             Bill bill = billService.updateStatus(trangThaiDonHang, billId);
 
-
+            // ❌ bỏ account
             billHistoryService.saveHistory(bill, status, note);
 
             redirectAttributes.addFlashAttribute("message",
