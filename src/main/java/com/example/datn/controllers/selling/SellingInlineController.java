@@ -15,6 +15,7 @@ import com.example.datn.services.product_and_other.ProductService;
 import com.google.zxing.qrcode.decoder.Mode;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -47,6 +48,9 @@ public class SellingInlineController {
 
     @Autowired
     private PaymentMethodService paymentMethodService;
+
+    @Autowired
+    private MomoService momoService;
 
     @ModelAttribute("listProduct")
     public List<Product> listProduct() {
@@ -249,7 +253,7 @@ public class SellingInlineController {
     public ResponseEntity<?> checkOut(@RequestParam("idCart") Integer idCart,
                                       @RequestParam("typePayment") String typePayment) {
         try {
-            billService.checkOut(idCart, typePayment);
+            billService.checkOut(idCart, typePayment); // tiền mặt hoặc chuyển khoản
             Bill bill = billService.findById(idCart);
             Map<String, Object> body = new HashMap<>();
             body.put("message", "Thanh toán thành công!");
@@ -259,6 +263,77 @@ public class SellingInlineController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @PostMapping("/create-momo-order")
+    @ResponseBody
+    public ResponseEntity<?> createMomoOrder(@RequestParam Integer idCart) {
+        try {
+            Bill cart = billService.findCartById(idCart);
+            if (cart == null) return ResponseEntity.badRequest().body("Không tìm thấy giỏ hàng");
+
+            BigDecimal amount = cart.getTotal_checkout();
+
+            // Service trả về payUrl
+            String payUrl = momoService.createQrOrder(idCart, amount);
+
+            Map<String, Object> res = new HashMap<>();
+            res.put("payUrl", payUrl);
+            res.put("billId", idCart);
+            return ResponseEntity.ok(res);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+
+    @RequestMapping(value = "/momo-ipn", method = {RequestMethod.POST, RequestMethod.GET})
+    public ResponseEntity<String> momoIpn(@RequestBody(required = false) Map<String, Object> payload,
+                                          @RequestParam Map<String, String> params) {
+        if ((payload == null || payload.isEmpty()) && (params == null || params.isEmpty())) {
+            return ResponseEntity.ok("IPN received without body");
+        }
+
+        System.out.println("MOMO IPN payload=" + payload + ", params=" + params);
+
+        String orderId = payload != null ? (String) payload.get("orderId") : params.get("orderId");
+        String resultCode = payload != null ? String.valueOf(payload.get("resultCode")) : params.get("resultCode");
+
+        if ("0".equals(resultCode)) {
+            Integer cartId = extractCartId(orderId);
+            try {
+                billService.checkOut(cartId, "Chuyển khoản");
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Checkout fail");
+            }
+        }
+        return ResponseEntity.ok("IPN received");
+    }
+
+    private Integer extractCartId(String orderId) {
+        String idStr = orderId.replace("CART", "").split("_")[0];
+        return Integer.parseInt(idStr);
+    }
+
+    @GetMapping("/momo-return")
+    public String momoReturn(@RequestParam Map<String, String> params, Model model) {
+        String resultCode = params.get("resultCode");
+        String orderId = params.get("orderId");
+
+        if ("0".equals(resultCode)) {
+            Integer cartId = extractCartId(orderId);
+            try {
+                billService.checkOut(cartId, "Chuyển khoản");
+            } catch (Exception e) {
+                model.addAttribute("success", false);
+                model.addAttribute("error", "Checkout fail: " + e.getMessage());
+                return "admin/selling/momo-result";
+            }
+        }
+
+        model.addAttribute("success", "0".equals(resultCode));
+        model.addAttribute("orderId", orderId);
+        return "admin/selling/momo-result"; // view thymeleaf
     }
 
 //    @GetMapping("/thanh-toan")
