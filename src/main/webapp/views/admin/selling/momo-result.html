@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Kết quả thanh toán MoMo</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const success = [[${success}]];
+    const orderId = [[${orderId}]];
+    if (success) {
+        Swal.fire({
+            icon: 'success',
+            title: 'Thanh toán thành công!',
+            showCancelButton: true,
+            confirmButtonText: 'In hóa đơn',
+            cancelButtonText: 'Đóng'
+        }).then((ans) => {
+            if (ans.isConfirmed) {
+                // mở trang in
+                window.open('/admin/sell-inline/print/' + orderId.split("_")[0].replace("CART",""),
+                    '_blank','width=900,height=800');
+            }
+            window.location.href = '/admin/sell-inline/hien-thi';
+        });
+    } else {
+        Swal.fire({
+            icon: 'error',
+            title: 'Thanh toán thất bại!',
+            confirmButtonText: 'Quay lại'
+        }).then(() => {
+            window.location.href = '/admin/sell-inline/hien-thi';
+        });
+    }
+    /*]]>*/
+</script>
+</body>
+</html>
