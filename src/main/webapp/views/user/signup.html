@@ -22,14 +22,14 @@
                         <div th:if="${error}" class="alert alert-danger" role="alert">
                             <span th:text="${error}"></span>
                         </div>
-                        
-                        <form th:action="@{/user/register}" method="post" th:object="${customerDto}">
+
+                        <!-- Sửa action ở đây -->
+                        <form th:action="@{/user/signup}" method="post" th:object="${customerDto}">
                             <div class="mb-3">
                                 <label for="name" class="form-label">Họ và tên <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="name" name="name" th:field="*{name}" required>
                                 <div class="form-text">Vui lòng nhập họ và tên đầy đủ</div>
                             </div>
-
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
                                 <input type="email" class="form-control" id="email" name="email" th:field="*{email}" required>

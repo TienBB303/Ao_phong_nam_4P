@@ -246,12 +246,13 @@ public class CustomerServiceImpl implements CustomerService {
         String encodedPassword = passwordEncoder.encode(rawPassword);
         account.setPassword(encodedPassword);
 
-        // Set role cho khách hàng
         Role role = roleRepository.findByName("ROLE_CUSTOMER")
                 .orElseThrow(() -> new RuntimeException("Role ROLE_CUSTOMER không tồn tại!"));
         account.setRole(role);
 
-        // Set trạng thái ban đầu là false (chưa đổi mật khẩu)
+        // Thêm dòng này để tránh NULL cho cột first_login
+        account.setFirstLogin(1);
+
         account.setStatus(false);
         account.setCreatedAt(java.time.LocalDateTime.now());
 
