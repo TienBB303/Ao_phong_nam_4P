@@ -6,7 +6,6 @@
 <body>
 <header th:replace="~{admin/fragments/header :: header}"></header>
 <div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
-
 <section>
   <div class="pc-container">
     <div class="pc-content">
@@ -17,16 +16,11 @@
               <div class="page-header-title">
                 <h5 class="m-b-10">Quản lý nhân viên</h5>
               </div>
-              <ul class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
-                <li class="breadcrumb-item">Quản lý tài khoản</li>
-                <li class="breadcrumb-item">Nhân viên</li>
-              </ul>
+              <!-- Xóa breadcrumb Dashboard / Quản lý tài khoản / Nhân viên -->
             </div>
           </div>
         </div>
       </div>
-
       <div class="card-body">
         <div class="col-12">
           <div class="card">
@@ -95,10 +89,11 @@
           </div>
         </div>
       </div>
-
     </div>
   </div>
 </section>
+</body>
+</html>
 
 <script>
   function check() {

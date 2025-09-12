@@ -15,11 +15,7 @@
                             <div class="page-header-title">
                                 <h5 class="m-b-10">Quản lý nhân viên</h5>
                             </div>
-                            <ul class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
-                                <li class="breadcrumb-item" aria-current="page">Quản lý tài khoản</li>
-                                <li class="breadcrumb-item" aria-current="page">Nhân viên</li>
-                            </ul>
+                            <!-- Xóa breadcrumb Dashboard / Quản lý tài khoản / Nhân viên và nút Hủy về /admin/users. -->
                         </div>
                     </div>
                 </div>
@@ -36,12 +32,9 @@
                             <button type="button" class="btn btn-primary w-100" id="search-btn">
                                 <i class="ti ti-search me-1"></i> Tìm kiếm
                             </button>
-
                         </div>
                         <div class="col-md-2">
-                            <a th:href="@{/admin/users}" class="btn btn-outline-secondary w-100">
-                                Hủy
-                            </a>
+                            <!-- Xóa nút Hủy về /admin/users -->
                         </div>
                     </div>
                 </form>
@@ -67,19 +60,18 @@
                     <tr th:each="e, i : ${accountPage.content}">
                         <td th:text="${i.index + 1}"></td>
                         <td th:text="${e.code}"></td>
-                        <td th:text="${e.customer.name}"></td>
+                        <td th:text="${e.customer != null ? e.customer.name : ''}"></td>
                         <td th:text="${e.email}"></td>
-                        <td th:text="${e.customer.phoneNumber}"></td>
-                        <td th:text="${e.customer.birthDate}"></td>
-                        <td th:text="${e.customer.gender == true ? 'Nam' : 'Nữ'}"></td>
+                        <td th:text="${e.customer != null ? e.customer.phoneNumber : ''}"></td>
+                        <td th:text="${e.customer != null ? e.customer.birthDate : ''}"></td>
+                        <td th:text="${e.customer != null ? (e.customer.gender == true ? 'Nam' : 'Nữ') : ''}"></td>
                         <td>
-<!--        <span th:if="${e.customer.addresses != null and !e.customer.addresses.isEmpty()}"-->
-<!--              th:text="${e.customer.addresses[0].addressDetail-->
-<!--                + (e.customer.addresses[0].wardName != null ? ', ' + e.customer.addresses[0].wardName : '')-->
-<!--                + (e.customer.addresses[0].districtName != null ? ', ' + e.customer.addresses[0].districtName : '')-->
-<!--                + (e.customer.addresses[0].provinceName != null ? ', ' + e.customer.addresses[0].provinceName : '')}">-->
-<!--        </span>-->
-                            <span th:if="${e.customer.addresses == null or e.customer.addresses.isEmpty()}" th:text="''"></span>
+<span th:if="${e.customer != null && e.customer.addresses != null && !e.customer.addresses.isEmpty()}"
+      th:text="${e.customer.addresses[0].addressDetail
+        + (e.customer.addresses[0].wardName != null ? ', ' + e.customer.addresses[0].wardName : '')
+        + (e.customer.addresses[0].districtName != null ? ', ' + e.customer.addresses[0].districtName : '')
+        + (e.customer.addresses[0].provinceName != null ? ', ' + e.customer.addresses[0].provinceName : '')}"></span>
+<span th:if="${e.customer == null || e.customer.addresses == null || e.customer.addresses.isEmpty()}" th:text="''"></span>
                         </td>
 
                         <!--                            <td th:text="${e.phoneNumber}"></td>-->

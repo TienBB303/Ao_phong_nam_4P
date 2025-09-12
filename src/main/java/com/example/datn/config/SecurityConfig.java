@@ -12,15 +12,16 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import com.example.datn.config.UserLoginSuccessHandler;
+import org.thymeleaf.extras.springsecurity6.dialect.SpringSecurityDialect;
 
 @Configuration
 public class SecurityConfig {
 
     @Autowired
     private LoginService loginService;
-
     @Autowired
-    private UserLoginSuccessHandler customLoginSuccessHandler;
+    private UserLoginSuccessHandler userLoginSuccessHandler;
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -42,11 +43,17 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable()
+        http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/register").permitAll()
-//                        .requestMatchers("/admin/**").authenticated()
-//                        .requestMatchers("/user/**").authenticated()
+                        .requestMatchers(
+                                "/css/**", "/js/**", "/images/**", "/fonts/**",
+                                "/static/**", "/webjars/**", "/assets/**"
+                        ).permitAll()
+                        .requestMatchers("/login", "/register", "/user/signup").permitAll()
+                        // ADMIN và EMPLOYEE đều truy cập được dashboard, bán hàng, hóa đơn
+                        .requestMatchers("/admin/dashboard", "/admin/sell-inline/**", "/admin/sell-inline", "/admin/bill/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_EMPLOYEE")
+                        .requestMatchers("/admin/**", "/all-admin/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/user/**").hasAnyAuthority("ROLE_CUSTOMER", "ROLE_EMPLOYEE", "ROLE_ADMIN")
                         .anyRequest().permitAll()
                 )
                 .formLogin(form -> form
@@ -54,7 +61,7 @@ public class SecurityConfig {
                         .loginProcessingUrl("/login")
                         .usernameParameter("email")
                         .passwordParameter("password")
-                        .successHandler(customLoginSuccessHandler)
+                        .successHandler(userLoginSuccessHandler)
                         .failureUrl("/login?error=true")
                         .permitAll()
                 )
@@ -63,21 +70,16 @@ public class SecurityConfig {
                         .logoutSuccessUrl("/login?logout=true")
                         .permitAll()
                 )
-                // SESSION MANAGEMENT CONFIG - FIX LOGOUT ISSUE
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // chỉ tạo khi cần
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                         .invalidSessionUrl("/login?expired")
                 )
-
-
-                // THÊM EXCEPTION HANDLING
                 .exceptionHandling(ex -> ex
                         .accessDeniedPage("/login?access-denied")
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.sendRedirect("/login?session-expired");
                         })
                 );
-
 
         return http.build();
     }
@@ -86,5 +88,9 @@ public class SecurityConfig {
     public UserDetailsService userDetailsService() {
         return loginService;
     }
+    // ✅ Thêm bean này để sec:authorize hoạt động
+    @Bean
+    public SpringSecurityDialect springSecurityDialect() {
+        return new SpringSecurityDialect();
+    }
 }
-

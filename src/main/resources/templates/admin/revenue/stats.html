@@ -1,303 +1,303 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{admin/admin-layout}">
-<head>
-    <title>Thống Kê Doanh Thu</title>
-</head>
-<div layout:fragment="content">
-    <div class="container py-4">
-        <h3 class="mb-4">Thống Kê Doanh Thu</h3>
-        <div class="row mb-4">
-            <div class="col-xl-3 col-md-6">
-                <div class="card card-stats">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col">
-                                <h5 class="card-title text-uppercase text-muted mb-0">Tổng Đơn Đặt Hàng</h5>
-                                <span class="h2 font-weight-bold mb-0" th:text="${revenueSummary.totalOrders}">0</span>
-                            </div>
-                            <div class="col-auto">
-                                <div class="icon icon-shape bg-primary text-white rounded-circle shadow">
-                                    <i class="fas fa-list"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="mt-3 mb-0 text-sm">
-                            <span class="text-success mr-2" th:text="${revenueSummary.totalOrders + ' đơn hàng'}">0 đơn hàng</span>
-                            <span class="text-nowrap">toàn hệ thống</span>
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-md-6">
-                <div class="card card-stats">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col">
-                                <h5 class="card-title text-uppercase text-muted mb-0">Doanh Thu Hôm Nay</h5>
-                                <span class="h2 font-weight-bold mb-0"
-                                      th:text="${#numbers.formatDecimal(revenueSummary.totalRevenueToday, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">0 VNĐ</span>
-                            </div>
-                            <div class="col-auto">
-                                <div class="icon icon-shape bg-info text-white rounded-circle shadow">
-                                    <i class="fas fa-coins"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="mt-3 mb-0 text-sm">
-                            <span class="text-success mr-2" th:text="${revenueSummary.totalOrdersToday + ' đơn hàng'}">0 đơn hàng</span>
-                            <span class="text-nowrap">hôm nay</span>
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-md-6">
-                <div class="card card-stats">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col">
-                                <h5 class="card-title text-uppercase text-muted mb-0">Doanh Thu Tháng Này</h5>
-                                <span class="h2 font-weight-bold mb-0"
-                                      th:text="${#numbers.formatDecimal(revenueSummary.totalRevenueThisMonth, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">0 VNĐ</span>
-                            </div>
-                            <div class="col-auto">
-                                <div class="icon icon-shape bg-success text-white rounded-circle shadow">
-                                    <i class="fas fa-chart-line"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="mt-3 mb-0 text-sm">
-                        <span class="text-success mr-2"
-                              th:text="${revenueSummary.growthPercentage != null ? '+' + #numbers.formatDecimal(revenueSummary.growthPercentage, 1, 1) + '%' : '+0%'}">+0%</span>
-                            <span class="text-nowrap">so với tháng trước</span>
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-md-6">
-                <div class="card card-stats">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col">
-                                <h5 class="card-title text-uppercase text-muted mb-0">Doanh Thu Năm Này</h5>
-                                <span class="h2 font-weight-bold mb-0"
-                                      th:text="${#numbers.formatDecimal(revenueSummary.totalRevenueThisYear, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">0 VNĐ</span>
-                            </div>
-                            <div class="col-auto">
-                                <div class="icon icon-shape bg-danger text-white rounded-circle shadow">
-                                    <i class="fas fa-calendar-alt"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="mt-3 mb-0 text-sm">
-                            <span class="text-success mr-2" th:text="${revenueSummary.totalOrdersThisYear + ' đơn hàng'}">0 đơn hàng</span>
-                            <span class="text-nowrap">năm nay</span>
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row mb-4">
-            <div class="col-md-6 mb-4">
-                <div class="card">
-                    <div class="card-header">Biểu đồ doanh thu theo ngày</div>
-                    <div class="card-body">
-                        <div class="btn-group mb-2" role="group">
-                            <button type="button" class="btn btn-sm btn-outline-primary active" onclick="loadDailyChart(7)">7 ngày</button>
-                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="loadDailyChart(30)">30 ngày</button>
-                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="loadDailyChart(90)">90 ngày</button>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="dailyRevenueChart"></canvas>
-                            <div id="dailyChartLoading" class="text-center" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="sr-only">Đang tải...</span>
-                                </div>
-                                <p class="mt-2">Đang tải dữ liệu...</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 mb-4">
-                <div class="card">
-                    <div class="card-header">Biểu đồ doanh thu theo tháng</div>
-                    <div class="card-body">
-                        <select class="form-select form-select-sm mb-2" id="yearSelect" onchange="loadMonthlyChart()">
-                            <option th:value="${currentYear}" th:text="${currentYear}" selected></option>
-                            <option th:value="${currentYear - 1}" th:text="${currentYear - 1}"></option>
-                            <option th:value="${currentYear - 2}" th:text="${currentYear - 2}"></option>
-                        </select>
-                        <div class="chart-container" style="height: 300px;">
-                            <canvas id="monthlyRevenueChart"></canvas>
-                            <div id="monthlyChartLoading" class="text-center" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                                <div class="spinner-border text-success" role="status">
-                                    <span class="sr-only">Đang tải...</span>
-                                </div>
-                                <p class="mt-2">Đang tải dữ liệu...</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">Biểu đồ doanh thu theo khoảng thời gian</div>
-                    <div class="card-body">
-                        <div class="d-flex gap-2 mb-2">
-                            <input type="date" class="form-control form-control-sm" id="startDate" style="width: 150px;">
-                            <input type="date" class="form-control form-control-sm" id="endDate" style="width: 150px;">
-                            <button class="btn btn-sm btn-primary" onclick="loadRangeChart()">Áp dụng</button>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="rangeRevenueChart"></canvas>
-                            <div id="rangeChartLoading" class="text-center" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                                <div class="spinner-border text-info" role="status">
-                                    <span class="sr-only">Đang tải...</span>
-                                </div>
-                                <p class="mt-2">Đang tải dữ liệu...</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<script layout:fragment="script">
-    let dailyChart, monthlyChart, rangeChart;
-    function waitForChart() {
-        return new Promise((resolve, reject) => {
-            if (typeof Chart !== 'undefined') { resolve(); return; }
-            let attempts = 0;
-            const maxAttempts = 50;
-            const checkChart = setInterval(() => {
-                attempts++;
-                if (typeof Chart !== 'undefined') { clearInterval(checkChart); resolve(); }
-                else if (attempts >= maxAttempts) { clearInterval(checkChart); reject(new Error('Chart.js failed to load')); }
-            }, 100);
-        });
-    }
-    document.addEventListener('DOMContentLoaded', function() {
-        waitForChart().then(() => {
-            initializeDatePickers();
-            setTimeout(() => {
-                loadDailyChart(30);
-                loadMonthlyChart();
-                loadRangeChart();
-            }, 100);
-        });
-    });
-    function initializeDatePickers() {
-        const today = new Date();
-        const thirtyDaysAgo = new Date(today);
-        thirtyDaysAgo.setDate(today.getDate() - 30);
-        document.getElementById('startDate').value = thirtyDaysAgo.toISOString().split('T')[0];
-        document.getElementById('endDate').value = today.toISOString().split('T')[0];
-    }
-    function loadDailyChart(days) {
-        const endDate = new Date();
-        const startDate = new Date();
-        startDate.setDate(endDate.getDate() - days);
-        const startDateStr = startDate.toISOString().split('T')[0];
-        const endDateStr = endDate.toISOString().split('T')[0];
-        fetch(`/admin/revenue/api/daily?startDate=${startDateStr}&endDate=${endDateStr}`)
-            .then(response => response.json())
-            .then(data => {
-                const loadingEl = document.getElementById('dailyChartLoading');
-                if (loadingEl) loadingEl.style.display = 'none';
-                if (dailyChart) dailyChart.destroy();
-                const ctx = document.getElementById('dailyRevenueChart');
-                if (!ctx) return;
-                dailyChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: data.map(item => formatDate(item.date)),
-                        datasets: [{
-                            label: 'Doanh Thu (VNĐ)',
-                            data: data.map(item => item.totalRevenue),
-                            backgroundColor: 'rgba(0, 123, 255, 0.8)',
-                            borderColor: '#007bff',
-                            borderWidth: 2,
-                            borderRadius: 8,
-                            borderSkipped: false,
-                        }]
-                    },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-                });
-            });
-    }
-    function loadMonthlyChart() {
-        const yearSelect = document.getElementById('yearSelect');
-        const year = yearSelect ? yearSelect.value : new Date().getFullYear();
-        fetch(`/admin/revenue/api/monthly?year=${year}`)
-            .then(response => response.json())
-            .then(data => {
-                const loadingEl = document.getElementById('monthlyChartLoading');
-                if (loadingEl) loadingEl.style.display = 'none';
-                if (monthlyChart) monthlyChart.destroy();
-                const ctx = document.getElementById('monthlyRevenueChart');
-                if (!ctx) return;
-                monthlyChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: data.map(item => 'Tháng ' + item.period.split('-')[1]),
-                        datasets: [{
-                            label: 'Doanh Thu (VNĐ)',
-                            data: data.map(item => item.totalRevenue),
-                            backgroundColor: 'rgba(40, 167, 69, 0.8)',
-                            borderColor: 'rgba(40, 167, 69, 1)',
-                            borderWidth: 2,
-                            borderRadius: 8,
-                            borderSkipped: false,
-                        }]
-                    },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-                });
-            });
-    }
-    function loadRangeChart() {
-        const startDate = document.getElementById('startDate').value;
-        const endDate = document.getElementById('endDate').value;
-        fetch(`/admin/revenue/api/daily?startDate=${startDate}&endDate=${endDate}`)
-            .then(response => response.json())
-            .then(data => {
-                const loadingEl = document.getElementById('rangeChartLoading');
-                if (loadingEl) loadingEl.style.display = 'none';
-                if (rangeChart) rangeChart.destroy();
-                const ctx = document.getElementById('rangeRevenueChart');
-                if (!ctx) return;
-                rangeChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: data.map(item => formatDate(item.date)),
-                        datasets: [{
-                            label: 'Doanh Thu (VNĐ)',
-                            data: data.map(item => item.totalRevenue),
-                            backgroundColor: 'rgba(23, 162, 184, 0.8)',
-                            borderColor: 'rgba(23, 162, 184, 1)',
-                            borderWidth: 2,
-                            borderRadius: 8,
-                            borderSkipped: false,
-                        }]
-                    },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-                });
-            });
-    }
-    function formatCurrency(amount) {
-        return new Intl.NumberFormat('vi-VN').format(amount) + ' VND';
-    }
-    function formatDate(dateString) {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    }
-</script>
-<style layout:fragment="style">
-    .chart-container { position: relative; height: 350px; width: 100%; padding: 10px; }
-    .chart-container canvas { max-height: 100% !important; width: 100% !important; }
-</style>
-</html>
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org"-->
+<!--      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"-->
+<!--      layout:decorate="~{admin/admin-layout}">-->
+<!--<head>-->
+<!--    <title>Thống Kê Doanh Thu</title>-->
+<!--</head>-->
+<!--<div layout:fragment="content">-->
+<!--    <div class="container py-4">-->
+<!--        <h3 class="mb-4">Thống Kê Doanh Thu</h3>-->
+<!--        <div class="row mb-4">-->
+<!--            <div class="col-xl-3 col-md-6">-->
+<!--                <div class="card card-stats">-->
+<!--                    <div class="card-body">-->
+<!--                        <div class="row">-->
+<!--                            <div class="col">-->
+<!--                                <h5 class="card-title text-uppercase text-muted mb-0">Tổng Đơn Đặt Hàng</h5>-->
+<!--                                <span class="h2 font-weight-bold mb-0" th:text="${revenueSummary.totalOrders}">0</span>-->
+<!--                            </div>-->
+<!--                            <div class="col-auto">-->
+<!--                                <div class="icon icon-shape bg-primary text-white rounded-circle shadow">-->
+<!--                                    <i class="fas fa-list"></i>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <p class="mt-3 mb-0 text-sm">-->
+<!--                            <span class="text-success mr-2" th:text="${revenueSummary.totalOrders + ' đơn hàng'}">0 đơn hàng</span>-->
+<!--                            <span class="text-nowrap">toàn hệ thống</span>-->
+<!--                        </p>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="col-xl-3 col-md-6">-->
+<!--                <div class="card card-stats">-->
+<!--                    <div class="card-body">-->
+<!--                        <div class="row">-->
+<!--                            <div class="col">-->
+<!--                                <h5 class="card-title text-uppercase text-muted mb-0">Doanh Thu Hôm Nay</h5>-->
+<!--                                <span class="h2 font-weight-bold mb-0"-->
+<!--                                      th:text="${#numbers.formatDecimal(revenueSummary.totalRevenueToday, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">0 VNĐ</span>-->
+<!--                            </div>-->
+<!--                            <div class="col-auto">-->
+<!--                                <div class="icon icon-shape bg-info text-white rounded-circle shadow">-->
+<!--                                    <i class="fas fa-coins"></i>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <p class="mt-3 mb-0 text-sm">-->
+<!--                            <span class="text-success mr-2" th:text="${revenueSummary.totalOrdersToday + ' đơn hàng'}">0 đơn hàng</span>-->
+<!--                            <span class="text-nowrap">hôm nay</span>-->
+<!--                        </p>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="col-xl-3 col-md-6">-->
+<!--                <div class="card card-stats">-->
+<!--                    <div class="card-body">-->
+<!--                        <div class="row">-->
+<!--                            <div class="col">-->
+<!--                                <h5 class="card-title text-uppercase text-muted mb-0">Doanh Thu Tháng Này</h5>-->
+<!--                                <span class="h2 font-weight-bold mb-0"-->
+<!--                                      th:text="${#numbers.formatDecimal(revenueSummary.totalRevenueThisMonth, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">0 VNĐ</span>-->
+<!--                            </div>-->
+<!--                            <div class="col-auto">-->
+<!--                                <div class="icon icon-shape bg-success text-white rounded-circle shadow">-->
+<!--                                    <i class="fas fa-chart-line"></i>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <p class="mt-3 mb-0 text-sm">-->
+<!--                        <span class="text-success mr-2"-->
+<!--                              th:text="${revenueSummary.growthPercentage != null ? '+' + #numbers.formatDecimal(revenueSummary.growthPercentage, 1, 1) + '%' : '+0%'}">+0%</span>-->
+<!--                            <span class="text-nowrap">so với tháng trước</span>-->
+<!--                        </p>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="col-xl-3 col-md-6">-->
+<!--                <div class="card card-stats">-->
+<!--                    <div class="card-body">-->
+<!--                        <div class="row">-->
+<!--                            <div class="col">-->
+<!--                                <h5 class="card-title text-uppercase text-muted mb-0">Doanh Thu Năm Này</h5>-->
+<!--                                <span class="h2 font-weight-bold mb-0"-->
+<!--                                      th:text="${#numbers.formatDecimal(revenueSummary.totalRevenueThisYear, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">0 VNĐ</span>-->
+<!--                            </div>-->
+<!--                            <div class="col-auto">-->
+<!--                                <div class="icon icon-shape bg-danger text-white rounded-circle shadow">-->
+<!--                                    <i class="fas fa-calendar-alt"></i>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <p class="mt-3 mb-0 text-sm">-->
+<!--                            <span class="text-success mr-2" th:text="${revenueSummary.totalOrdersThisYear + ' đơn hàng'}">0 đơn hàng</span>-->
+<!--                            <span class="text-nowrap">năm nay</span>-->
+<!--                        </p>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--        <div class="row mb-4">-->
+<!--            <div class="col-md-6 mb-4">-->
+<!--                <div class="card">-->
+<!--                    <div class="card-header">Biểu đồ doanh thu theo ngày</div>-->
+<!--                    <div class="card-body">-->
+<!--                        <div class="btn-group mb-2" role="group">-->
+<!--                            <button type="button" class="btn btn-sm btn-outline-primary active" onclick="loadDailyChart(7)">7 ngày</button>-->
+<!--                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="loadDailyChart(30)">30 ngày</button>-->
+<!--                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="loadDailyChart(90)">90 ngày</button>-->
+<!--                        </div>-->
+<!--                        <div class="chart-container">-->
+<!--                            <canvas id="dailyRevenueChart"></canvas>-->
+<!--                            <div id="dailyChartLoading" class="text-center" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">-->
+<!--                                <div class="spinner-border text-primary" role="status">-->
+<!--                                    <span class="sr-only">Đang tải...</span>-->
+<!--                                </div>-->
+<!--                                <p class="mt-2">Đang tải dữ liệu...</p>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="col-md-6 mb-4">-->
+<!--                <div class="card">-->
+<!--                    <div class="card-header">Biểu đồ doanh thu theo tháng</div>-->
+<!--                    <div class="card-body">-->
+<!--                        <select class="form-select form-select-sm mb-2" id="yearSelect" onchange="loadMonthlyChart()">-->
+<!--                            <option th:value="${currentYear}" th:text="${currentYear}" selected></option>-->
+<!--                            <option th:value="${currentYear - 1}" th:text="${currentYear - 1}"></option>-->
+<!--                            <option th:value="${currentYear - 2}" th:text="${currentYear - 2}"></option>-->
+<!--                        </select>-->
+<!--                        <div class="chart-container" style="height: 300px;">-->
+<!--                            <canvas id="monthlyRevenueChart"></canvas>-->
+<!--                            <div id="monthlyChartLoading" class="text-center" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">-->
+<!--                                <div class="spinner-border text-success" role="status">-->
+<!--                                    <span class="sr-only">Đang tải...</span>-->
+<!--                                </div>-->
+<!--                                <p class="mt-2">Đang tải dữ liệu...</p>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--        <div class="row mb-4">-->
+<!--            <div class="col-12">-->
+<!--                <div class="card">-->
+<!--                    <div class="card-header">Biểu đồ doanh thu theo khoảng thời gian</div>-->
+<!--                    <div class="card-body">-->
+<!--                        <div class="d-flex gap-2 mb-2">-->
+<!--                            <input type="date" class="form-control form-control-sm" id="startDate" style="width: 150px;">-->
+<!--                            <input type="date" class="form-control form-control-sm" id="endDate" style="width: 150px;">-->
+<!--                            <button class="btn btn-sm btn-primary" onclick="loadRangeChart()">Áp dụng</button>-->
+<!--                        </div>-->
+<!--                        <div class="chart-container">-->
+<!--                            <canvas id="rangeRevenueChart"></canvas>-->
+<!--                            <div id="rangeChartLoading" class="text-center" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">-->
+<!--                                <div class="spinner-border text-info" role="status">-->
+<!--                                    <span class="sr-only">Đang tải...</span>-->
+<!--                                </div>-->
+<!--                                <p class="mt-2">Đang tải dữ liệu...</p>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+<!--<script layout:fragment="script">-->
+<!--    let dailyChart, monthlyChart, rangeChart;-->
+<!--    function waitForChart() {-->
+<!--        return new Promise((resolve, reject) => {-->
+<!--            if (typeof Chart !== 'undefined') { resolve(); return; }-->
+<!--            let attempts = 0;-->
+<!--            const maxAttempts = 50;-->
+<!--            const checkChart = setInterval(() => {-->
+<!--                attempts++;-->
+<!--                if (typeof Chart !== 'undefined') { clearInterval(checkChart); resolve(); }-->
+<!--                else if (attempts >= maxAttempts) { clearInterval(checkChart); reject(new Error('Chart.js failed to load')); }-->
+<!--            }, 100);-->
+<!--        });-->
+<!--    }-->
+<!--    document.addEventListener('DOMContentLoaded', function() {-->
+<!--        waitForChart().then(() => {-->
+<!--            initializeDatePickers();-->
+<!--            setTimeout(() => {-->
+<!--                loadDailyChart(30);-->
+<!--                loadMonthlyChart();-->
+<!--                loadRangeChart();-->
+<!--            }, 100);-->
+<!--        });-->
+<!--    });-->
+<!--    function initializeDatePickers() {-->
+<!--        const today = new Date();-->
+<!--        const thirtyDaysAgo = new Date(today);-->
+<!--        thirtyDaysAgo.setDate(today.getDate() - 30);-->
+<!--        document.getElementById('startDate').value = thirtyDaysAgo.toISOString().split('T')[0];-->
+<!--        document.getElementById('endDate').value = today.toISOString().split('T')[0];-->
+<!--    }-->
+<!--    function loadDailyChart(days) {-->
+<!--        const endDate = new Date();-->
+<!--        const startDate = new Date();-->
+<!--        startDate.setDate(endDate.getDate() - days);-->
+<!--        const startDateStr = startDate.toISOString().split('T')[0];-->
+<!--        const endDateStr = endDate.toISOString().split('T')[0];-->
+<!--        fetch(`/admin/revenue/api/daily?startDate=${startDateStr}&endDate=${endDateStr}`)-->
+<!--            .then(response => response.json())-->
+<!--            .then(data => {-->
+<!--                const loadingEl = document.getElementById('dailyChartLoading');-->
+<!--                if (loadingEl) loadingEl.style.display = 'none';-->
+<!--                if (dailyChart) dailyChart.destroy();-->
+<!--                const ctx = document.getElementById('dailyRevenueChart');-->
+<!--                if (!ctx) return;-->
+<!--                dailyChart = new Chart(ctx, {-->
+<!--                    type: 'bar',-->
+<!--                    data: {-->
+<!--                        labels: data.map(item => formatDate(item.date)),-->
+<!--                        datasets: [{-->
+<!--                            label: 'Doanh Thu (VNĐ)',-->
+<!--                            data: data.map(item => item.totalRevenue),-->
+<!--                            backgroundColor: 'rgba(0, 123, 255, 0.8)',-->
+<!--                            borderColor: '#007bff',-->
+<!--                            borderWidth: 2,-->
+<!--                            borderRadius: 8,-->
+<!--                            borderSkipped: false,-->
+<!--                        }]-->
+<!--                    },-->
+<!--                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }-->
+<!--                });-->
+<!--            });-->
+<!--    }-->
+<!--    function loadMonthlyChart() {-->
+<!--        const yearSelect = document.getElementById('yearSelect');-->
+<!--        const year = yearSelect ? yearSelect.value : new Date().getFullYear();-->
+<!--        fetch(`/admin/revenue/api/monthly?year=${year}`)-->
+<!--            .then(response => response.json())-->
+<!--            .then(data => {-->
+<!--                const loadingEl = document.getElementById('monthlyChartLoading');-->
+<!--                if (loadingEl) loadingEl.style.display = 'none';-->
+<!--                if (monthlyChart) monthlyChart.destroy();-->
+<!--                const ctx = document.getElementById('monthlyRevenueChart');-->
+<!--                if (!ctx) return;-->
+<!--                monthlyChart = new Chart(ctx, {-->
+<!--                    type: 'bar',-->
+<!--                    data: {-->
+<!--                        labels: data.map(item => 'Tháng ' + item.period.split('-')[1]),-->
+<!--                        datasets: [{-->
+<!--                            label: 'Doanh Thu (VNĐ)',-->
+<!--                            data: data.map(item => item.totalRevenue),-->
+<!--                            backgroundColor: 'rgba(40, 167, 69, 0.8)',-->
+<!--                            borderColor: 'rgba(40, 167, 69, 1)',-->
+<!--                            borderWidth: 2,-->
+<!--                            borderRadius: 8,-->
+<!--                            borderSkipped: false,-->
+<!--                        }]-->
+<!--                    },-->
+<!--                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }-->
+<!--                });-->
+<!--            });-->
+<!--    }-->
+<!--    function loadRangeChart() {-->
+<!--        const startDate = document.getElementById('startDate').value;-->
+<!--        const endDate = document.getElementById('endDate').value;-->
+<!--        fetch(`/admin/revenue/api/daily?startDate=${startDate}&endDate=${endDate}`)-->
+<!--            .then(response => response.json())-->
+<!--            .then(data => {-->
+<!--                const loadingEl = document.getElementById('rangeChartLoading');-->
+<!--                if (loadingEl) loadingEl.style.display = 'none';-->
+<!--                if (rangeChart) rangeChart.destroy();-->
+<!--                const ctx = document.getElementById('rangeRevenueChart');-->
+<!--                if (!ctx) return;-->
+<!--                rangeChart = new Chart(ctx, {-->
+<!--                    type: 'bar',-->
+<!--                    data: {-->
+<!--                        labels: data.map(item => formatDate(item.date)),-->
+<!--                        datasets: [{-->
+<!--                            label: 'Doanh Thu (VNĐ)',-->
+<!--                            data: data.map(item => item.totalRevenue),-->
+<!--                            backgroundColor: 'rgba(23, 162, 184, 0.8)',-->
+<!--                            borderColor: 'rgba(23, 162, 184, 1)',-->
+<!--                            borderWidth: 2,-->
+<!--                            borderRadius: 8,-->
+<!--                            borderSkipped: false,-->
+<!--                        }]-->
+<!--                    },-->
+<!--                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }-->
+<!--                });-->
+<!--            });-->
+<!--    }-->
+<!--    function formatCurrency(amount) {-->
+<!--        return new Intl.NumberFormat('vi-VN').format(amount) + ' VND';-->
+<!--    }-->
+<!--    function formatDate(dateString) {-->
+<!--        const date = new Date(dateString);-->
+<!--        return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });-->
+<!--    }-->
+<!--</script>-->
+<!--<style layout:fragment="style">-->
+<!--    .chart-container { position: relative; height: 350px; width: 100%; padding: 10px; }-->
+<!--    .chart-container canvas { max-height: 100% !important; width: 100% !important; }-->
+<!--</style>-->
+<!--</html>-->

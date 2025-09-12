@@ -95,6 +95,11 @@ public class AccountServiceImpl implements AccountService {
             System.err.println("Email gui that bai: " + e.getMessage());
         }
     }
+    @Override
+    public Account findByEmail(String email) {
+        return accountRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Account not found with email: " + email));
+    }
 
     @Override
     public void update(AccountDto accountDto) {
@@ -144,5 +149,6 @@ public class AccountServiceImpl implements AccountService {
         Collections.shuffle(chars);
         return chars.stream().map(String::valueOf).collect(Collectors.joining());
     }
+
 
 }

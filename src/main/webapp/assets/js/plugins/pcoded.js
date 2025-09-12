@@ -532,6 +532,7 @@ function removeClassByPrefix(node, prefix) {
 }
 
 let slideUp = (target, duration = 0) => {
+  if (!target) return;
   target.style.transitionProperty = 'height, margin, padding';
   target.style.transitionDuration = duration + 'ms';
   target.style.boxSizing = 'border-box';

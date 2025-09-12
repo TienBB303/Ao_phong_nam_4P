@@ -64,57 +64,80 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
     );
     // ================== DASHBOARD ==================
 
-    // Tổng đơn hàng (chỉ tính hoàn thành)
-    @Query(value = "SELECT COUNT(*) FROM bill WHERE status = 4 AND payment_status = 1", nativeQuery = true)
-    Long getTotalCompletedOrders();
+    // Tổng tất cả đơn chờ xác nhận (status = 1, không phân biệt thanh toán)
+    @Query(value = "SELECT COUNT(*) FROM bill WHERE status = 1 AND type_bill IN (0, 1)", nativeQuery = true)
+    Long getTotalWaitingConfirmOrders();
 
-    // Số đơn chờ xử lý
-    @Query(value = "SELECT COUNT(*) FROM bill WHERE status = 1 AND payment_status = 1", nativeQuery = true)
+    // Số đơn chờ xác nhận đã thanh toán (status = 1 AND payment_status = 1)
+    @Query(value = "SELECT COUNT(*) FROM bill WHERE status = 1 AND payment_status = 1 AND type_bill IN (0, 1)", nativeQuery = true)
+    Long getPaidWaitingConfirmOrders();
+
+    //     Tổng tất cả đơn (mọi trạng thái, cả online + offline)
+    //     => Dùng để hiển thị "Tổng đơn hàng"
+    @Query(value = "SELECT COUNT(*) FROM bill WHERE status > 0 AND type_bill IN (0, 1)", nativeQuery = true)
+    Long getTotalOrders();
+    // Tổng đơn hàng (cả online + offline, chỉ tính hoàn thành)
+    @Query(value = "SELECT COUNT(*) FROM bill WHERE status = 4 AND payment_status = 1 AND type_bill IN (0, 1)", nativeQuery = true)
+    Long getTotalCompletedOrders();
+    // Số đơn chờ xử lý (cả online + offline, Bao gồm: Chờ xác nhận (1), Đã xác nhận (2), Đang giao (3))
+    @Query(value = "SELECT COUNT(*) FROM bill WHERE status IN (1, 2, 3) AND payment_status = 1 AND type_bill IN (0, 1)", nativeQuery = true)
     Long getPendingOrders();
 
-    // Tổng doanh thu (không tính phí ship)
+    // Tổng doanh thu (cả online + offline, không tính phí ship)
+    // - Đơn hoàn thành (status = 4): + doanh thu
+// - Đơn giao thất bại (status = 5): - doanh thu (hoàn tiền)
+// - Đơn online đã thanh toán qua app và được xác nhận: + doanh thu
     @Query(value = """
-    SELECT ISNULL(SUM(b.total_amount - ISNULL(b.shipping_fee,0) - ISNULL(b.discount_amount,0)), 0)
+    SELECT COALESCE(SUM(
+        CASE 
+            WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+            WHEN b.status = 5 THEN -(b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+            ELSE 0
+        END
+    ), 0)
     FROM bill b
-    WHERE b.status = 4 AND b.payment_status = 1
+    WHERE b.type_bill IN (0, 1)
 """, nativeQuery = true)
     BigDecimal getTotalRevenue();
 
-    // Thêm method lấy tổng doanh thu đã hoàn thành
+    // Method lấy doanh thu và số đơn theo khoảng thời gian (cả online + offline)
     @Query(value = """
-    SELECT ISNULL(SUM(b.total_amount - ISNULL(b.shipping_fee,0) - ISNULL(b.discount_amount,0)), 0)
+    SELECT COALESCE(SUM(
+               CASE 
+                   WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+                   WHEN b.status = 5 THEN -(b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+                   ELSE 0
+               END
+           ), 0),
+           COUNT(*)
     FROM bill b
-    WHERE b.status = 4 AND b.payment_status = 1
-""", nativeQuery = true)
-    BigDecimal getTotalRevenueCompleted();
-    // Method lấy doanh thu và số đơn theo khoảng thời gian
-    @Query(value = """
-        SELECT ISNULL(SUM(b.total_amount - ISNULL(b.shipping_fee,0) - ISNULL(b.discount_amount,0)), 0),
-               COUNT(*)
-        FROM bill b
-        WHERE b.status = 4 AND b.payment_status = 1
-          AND b.created_at BETWEEN :startDate AND :endDate
+    WHERE b.type_bill IN (0, 1)
+      AND b.created_at BETWEEN :startDate AND :endDate
     """, nativeQuery = true)
     Object[] getRevenueAndOrdersByRange(@Param("startDate") LocalDateTime startDate,
                                         @Param("endDate") LocalDateTime endDate);
 
-    // Số đơn hàng hôm nay
+    // Số đơn hàng hôm nay (cả online + offline)
     @Query(value = """
-        SELECT COUNT(*) FROM bill
-        WHERE status = 4 AND payment_status = 1
-          AND created_at BETWEEN :startOfDay AND :endOfDay
+    SELECT COUNT(*) FROM bill
+    WHERE status = 4 AND payment_status = 1 AND type_bill IN (0, 1)
+      AND created_at BETWEEN :startOfDay AND :endOfDay
     """, nativeQuery = true)
     Long getTodayOrderCount(@Param("startOfDay") LocalDateTime startOfDay,
                             @Param("endOfDay") LocalDateTime endOfDay);
 
-    // Doanh thu 7 ngày gần nhất
+    // Doanh thu 7 ngày gần nhất (cả online + offline)
     @Query(value = """
     SELECT CAST(b.created_at AS DATE) AS date,
-           COALESCE(SUM(b.total_amount 
-                        - COALESCE(b.shipping_fee, 0) 
-                        - COALESCE(b.discount_amount, 0)), 0) AS totalRevenue
+           COALESCE(SUM(
+               CASE 
+                   WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+                   WHEN b.status = 5 THEN -(b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+                   ELSE 0
+               END
+           ), 0) AS totalRevenue
     FROM bill b
-    WHERE b.status = 4 AND b.payment_status = 1
+    WHERE b.type_bill IN (0, 1)
       AND b.created_at BETWEEN :startDate AND :endDate
     GROUP BY CAST(b.created_at AS DATE)
     ORDER BY CAST(b.created_at AS DATE)
@@ -122,99 +145,136 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
     List<Object[]> getRevenueLast7Days(@Param("startDate") LocalDateTime startDate,
                                        @Param("endDate") LocalDateTime endDate);
 
-    // Đơn hàng theo trạng thái
-    @Query(value = "SELECT b.status, COUNT(*) FROM bill b GROUP BY b.status", nativeQuery = true)
+
+    // Đơn hàng theo trạng thái (cả online + offline)
+    @Query(value = "SELECT b.status, COUNT(*) FROM bill b WHERE b.type_bill IN (0, 1) AND b.status IN (1,2,3,4,5,6) GROUP BY b.status",
+            nativeQuery = true)
     List<Object[]> getOrderStatusCounts();
 
-    // Tổng sản phẩm đã bán (chỉ tính đơn hoàn thành + thanh toán thành công)- (tính theo giá gốc ( dùng cho màn Danh sách sản phẩm bán nhiều nhất)
+    // Tổng sản phẩm đã bán (chỉ tính đơn hoàn thành + thanh toán thành công)- (tính theo giá gốc ( dùng cho màn Danh sách sản phẩm bán nhiều nhất) (cả online + offline)
     @Query(value = """
-            SELECT COALESCE(SUM(bd.quantity), 0)
-            FROM bill_detail bd
-            JOIN bill b ON b.id = bd.bill_id
-            WHERE b.status = 4 AND b.payment_status = 1
-            """, nativeQuery = true)
+        SELECT COALESCE(SUM(bd.quantity), 0)
+        FROM bill_detail bd
+        JOIN bill b ON b.id = bd.bill_id
+        WHERE b.status = 4 AND b.payment_status = 1 AND b.type_bill IN (0, 1)
+    """, nativeQuery = true)
     Long getTotalProductsSold();
 
-    // Sản phẩm đã bán hôm nay
+    // Sản phẩm đã bán hôm nay (cả online + offline)
     @Query(value = """
-            SELECT COALESCE(SUM(bd.quantity), 0)
-            FROM bill_detail bd
-            JOIN bill b ON b.id = bd.bill_id
-            WHERE b.status = 4 AND b.payment_status = 1
-              AND b.created_at BETWEEN :startOfDay AND :endOfDay
-            """, nativeQuery = true)
+        SELECT COALESCE(SUM(bd.quantity), 0)
+        FROM bill_detail bd
+        JOIN bill b ON b.id = bd.bill_id
+        WHERE b.status = 4 AND b.payment_status = 1 AND b.type_bill IN (0, 1)
+          AND b.created_at BETWEEN :startOfDay AND :endOfDay
+    """, nativeQuery = true)
     Long getTodayProductsSold(@Param("startOfDay") LocalDateTime startOfDay,
                               @Param("endOfDay") LocalDateTime endOfDay);
 
     // ================== REVENUE (stats.html) ==================
 
-    // Doanh thu hôm nay
     @Query(value = """
-        SELECT ISNULL(SUM(b.total_amount - ISNULL(b.shipping_fee,0) - ISNULL(b.discount_amount,0)), 0)
-        FROM bill b
-        WHERE b.status = 4 AND b.payment_status = 1
-          AND b.created_at BETWEEN :startOfDay AND :endOfDay
-    """, nativeQuery = true)
+    SELECT COALESCE(SUM(
+        CASE 
+            WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+            WHEN b.status = 5 THEN -(b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+            ELSE 0
+        END
+    ), 0)
+    FROM bill b
+    WHERE b.type_bill IN (0, 1)
+      AND b.created_at BETWEEN :startOfDay AND :endOfDay
+""", nativeQuery = true)
     BigDecimal getTodayRevenue(@Param("startOfDay") LocalDateTime startOfDay,
                                @Param("endOfDay") LocalDateTime endOfDay);
 
-    // Doanh thu tháng hiện tại
+    // Doanh thu tháng hiện tại (cả online + offline)
     @Query(value = """
-        SELECT ISNULL(SUM(b.total_amount - ISNULL(b.shipping_fee,0) - ISNULL(b.discount_amount,0)), 0)
-        FROM bill b
-        WHERE b.status = 4 AND b.payment_status = 1
-          AND b.created_at BETWEEN :startOfMonth AND :endOfMonth
-    """, nativeQuery = true)
+    SELECT COALESCE(SUM(
+        CASE 
+            WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+            WHEN b.status = 5 THEN -(b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+            ELSE 0
+        END
+    ), 0)
+    FROM bill b
+    WHERE b.type_bill IN (0, 1)
+      AND b.created_at BETWEEN :startOfMonth AND :endOfMonth
+""", nativeQuery = true)
     BigDecimal getCurrentMonthRevenue(@Param("startOfMonth") LocalDateTime startOfMonth,
                                       @Param("endOfMonth") LocalDateTime endOfMonth);
-    // Doanh thu năm hiện tại (SQL Server)
+
+    // Doanh thu năm hiện tại (cả online + offline)
     @Query(value = """
-        SELECT ISNULL(SUM(b.total_amount - ISNULL(b.shipping_fee,0) - ISNULL(b.discount_amount,0)), 0)
-        FROM bill b
-        WHERE b.status = 4 AND b.payment_status = 1
-          AND YEAR(b.created_at) = YEAR(GETDATE())
-    """, nativeQuery = true)
+    SELECT COALESCE(SUM(
+        CASE 
+            WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+            WHEN b.status = 5 THEN -(b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+            ELSE 0
+        END
+    ), 0)
+    FROM bill b
+    WHERE b.type_bill IN (0, 1)
+      AND YEAR(b.created_at) = YEAR(GETDATE())
+""", nativeQuery = true)
     BigDecimal getCurrentYearRevenue();
 
-
-
-    // Doanh thu theo khoảng ngày
+    // Doanh thu theo khoảng ngày (cả online + offline)
     @Query(value = """
-        SELECT CAST(b.created_at AS DATE),
-               ISNULL(SUM(b.total_amount - ISNULL(b.shipping_fee,0) - ISNULL(b.discount_amount,0)), 0),
-               COUNT(*)
-        FROM bill b
-        WHERE b.status = 4 AND b.payment_status = 1
-          AND b.created_at BETWEEN :startDate AND :endDate
-        GROUP BY CAST(b.created_at AS DATE)
-        ORDER BY CAST(b.created_at AS DATE)
-    """, nativeQuery = true)
+    SELECT CAST(b.created_at AS DATE),
+           COALESCE(SUM(
+               CASE 
+                   WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+                   WHEN b.status = 5 THEN -(b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+                   ELSE 0
+               END
+           ), 0),
+           COUNT(*)
+    FROM bill b
+    WHERE b.type_bill IN (0, 1)
+      AND b.created_at BETWEEN :startDate AND :endDate
+    GROUP BY CAST(b.created_at AS DATE)
+    ORDER BY CAST(b.created_at AS DATE)
+""", nativeQuery = true)
     List<Object[]> getRevenueByDate(@Param("startDate") LocalDateTime startDate,
                                     @Param("endDate") LocalDateTime endDate);
 
-    // Doanh thu theo tháng trong năm
+
+    // Doanh thu theo tháng trong năm (cả online + offline)
     @Query(value = """
-        SELECT YEAR(b.created_at), MONTH(b.created_at),
-               ISNULL(SUM(b.total_amount - ISNULL(b.shipping_fee,0) - ISNULL(b.discount_amount,0)), 0),
-               COUNT(*)
-        FROM bill b
-        WHERE b.status = 4 AND b.payment_status = 1
-          AND YEAR(b.created_at) = :year
-        GROUP BY YEAR(b.created_at), MONTH(b.created_at)
-        ORDER BY YEAR(b.created_at), MONTH(b.created_at)
-    """, nativeQuery = true)
+    SELECT YEAR(b.created_at), MONTH(b.created_at),
+           COALESCE(SUM(
+               CASE 
+                   WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+                   WHEN b.status = 5 THEN -(b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+                   ELSE 0
+               END
+           ), 0),
+           COUNT(*)
+    FROM bill b
+    WHERE b.type_bill IN (0, 1)
+      AND YEAR(b.created_at) = :year
+    GROUP BY YEAR(b.created_at), MONTH(b.created_at)
+    ORDER BY YEAR(b.created_at), MONTH(b.created_at)
+""", nativeQuery = true)
     List<Object[]> getRevenueByMonth(@Param("year") int year);
 
-    // Doanh thu theo năm
+    // Doanh thu theo năm (cả online + offline)
     @Query(value = """
-        SELECT YEAR(b.created_at),
-               ISNULL(SUM(b.total_amount - ISNULL(b.shipping_fee,0) - ISNULL(b.discount_amount,0)), 0),
-               COUNT(*)
-        FROM bill b
-        WHERE b.status = 4 AND b.payment_status = 1
-        GROUP BY YEAR(b.created_at)
-        ORDER BY YEAR(b.created_at)
-    """, nativeQuery = true)
+    SELECT YEAR(b.created_at),
+           COALESCE(SUM(
+               CASE 
+                   WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+                   WHEN b.status = 5 THEN -(b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+                   ELSE 0
+               END
+           ), 0),
+           COUNT(*)
+    FROM bill b
+    WHERE b.type_bill IN (0, 1)
+    GROUP BY YEAR(b.created_at)
+    ORDER BY YEAR(b.created_at)
+""", nativeQuery = true)
     List<Object[]> getRevenueByYear();
 
 //    // Top sản phẩm bán chạy
