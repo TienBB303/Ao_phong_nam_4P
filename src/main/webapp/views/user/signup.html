@@ -23,7 +23,7 @@
                             <span th:text="${error}"></span>
                         </div>
                         
-                        <form th:action="@{/user/signup}" method="post" th:object="${customerDto}">
+                        <form th:action="@{/user/register}" method="post" th:object="${customerDto}">
                             <div class="mb-3">
                                 <label for="name" class="form-label">Họ và tên <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="name" name="name" th:field="*{name}" required>
@@ -45,7 +45,7 @@
                             <button type="submit" class="btn btn-primary w-100 mb-3">Đăng ký</button>
                             
                             <div class="text-center">
-                                <p class="mb-0">Đã có tài khoản? <a href="/user/login" class="text-decoration-none">Đăng nhập</a></p>
+                                <p class="mb-0">Đã có tài khoản? <a href="/login" class="text-decoration-none">Đăng nhập</a></p>
                             </div>
                         </form>
                     </div>

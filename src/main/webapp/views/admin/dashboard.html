@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<<<<<<< HEAD
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head th:replace="~{admin/fragments/head :: head}"></head>
 <body data-pc-preset="preset-1" data-pc-direction="ltr" data-pc-theme="light">
@@ -69,6 +70,70 @@
                                         th:data-values="${orderStatusMap.values()}">
                                 </canvas>
                             </div>
+=======
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{admin/admin-layout}">
+<head>
+    <title>Dashboard</title>
+</head>
+<div layout:fragment="content">
+    <div class="container py-4">
+        <h4 class="mb-4">4PStore xin chào</h4>
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="card text-center p-3">
+                    <div class="h6">Tổng đơn đặt hàng</div>
+                    <div class="h4" th:text="${totalOrders}">0</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-center p-3">
+                    <div class="h6">Số đơn chờ xử lý</div>
+                    <div class="h4" th:text="${pendingOrders}">0</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-center p-3">
+                    <div class="h6">Số đơn chờ xác nhận</div>
+                    <div class="h4" th:text="${pendingOrders}">0</div>
+                    <div class="small text-muted">
+                        Trong đó đã thanh toán: <span th:text="${paidPendingOrders}">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <div class="card text-center p-3">
+                    <div class="h6">Tổng doanh thu</div>
+                    <div class="h4" th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">0
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-center p-3">
+                    <div class="h6">Số sản phẩm</div>
+                    <div class="h4" th:text="${totalProducts}">0</div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="h6 mb-2">Doanh thu 7 ngày gần nhất</div>
+                            <canvas id="revenueChart"
+                                    th:data-labels="${dateLabels}"
+                                    th:data-values="${revenueValues}"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="h6 mb-2">Đơn hàng theo trạng thái</div>
+                            <canvas id="orderPieChart"
+                                    th:data-labels="${orderStatusMap.keySet()}"
+                                    th:data-values="${orderStatusMap.values()}"></canvas>
+>>>>>>> Linh
                         </div>
                     </div>
                 </div>
@@ -76,10 +141,15 @@
         </div>
     </div>
 </div>
+<<<<<<< HEAD
 
 <footer th:replace="~{admin/fragments/footer :: footer}"></footer>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+=======
+<script layout:fragment="script">
+    document.addEventListener('DOMContentLoaded', function () {
+>>>>>>> Linh
         // Biểu đồ doanh thu 7 ngày gần nhất
         const revenueChart = document.getElementById('revenueChart');
         let dateLabels = revenueChart.getAttribute('data-labels');
@@ -129,7 +199,7 @@
                     y: {
                         beginAtZero: true,
                         ticks: {
-                            callback: function(value) {
+                            callback: function (value) {
                                 return new Intl.NumberFormat('vi-VN').format(value) + ' đ';
                             }
                         }
@@ -173,7 +243,6 @@
                         'rgba(108,117,125,0.7)', // Đang giao - xám
                         'rgba(40,167,69,0.7)',   // Hoàn thành - xanh lá
                         'rgba(220,53,69,0.7)',   // Đã hủy - đỏ
-                        'rgba(0,200,150,0.7)'    // Tại quầy - xanh mint
                     ],
                     borderWidth: 2,
                     borderColor: '#fff'
@@ -188,7 +257,7 @@
                     },
                     tooltip: {
                         callbacks: {
-                            label: function(context) {
+                            label: function (context) {
                                 return context.label + ': ' + context.parsed + ' đơn';
                             }
                         }

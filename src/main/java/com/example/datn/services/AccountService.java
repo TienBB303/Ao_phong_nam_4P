@@ -16,5 +16,5 @@ public interface AccountService {
 
     String generateRandomPassword(int length);
 
-
+    Account findByEmail(String email);
 }

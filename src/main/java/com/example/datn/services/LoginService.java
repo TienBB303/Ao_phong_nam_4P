@@ -17,12 +17,23 @@ public class LoginService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        System.out.println("Đang kiểm tra email: " + email);
-
         Account account = accountRepository.findByEmail(email.trim())
                 .orElseThrow(() -> new UsernameNotFoundException("❌ Email không tồn tại: " + email));
 
-        String roleName = "ROLE_" + account.getRole().getName().toUpperCase();
+        // Mapping số role -> tên role
+        String roleName;
+        switch (account.getRole().getId()) { // giả sử role có id = 1,2,3
+            case 1 -> roleName = "ROLE_CUSTOMER";
+            case 2 -> roleName = "ROLE_EMPLOYEE";
+            case 3 -> roleName = "ROLE_ADMIN";
+            default-> roleName = "ROLE_CUSTOMER";
+        }
+
+        // ✅ Log ra để debug
+        System.out.println("🔑 Email login: " + account.getEmail());
+        System.out.println("🔑 DB RoleId: " + account.getRole().getId());
+        System.out.println("🔑 Mapped RoleName: " + roleName);
+        System.out.println("🔑 Password in DB: " + account.getPassword());
 
         return new User(
                 account.getEmail(),
@@ -30,5 +41,4 @@ public class LoginService implements UserDetailsService {
                 List.of(new SimpleGrantedAuthority(roleName))
         );
     }
-
 }

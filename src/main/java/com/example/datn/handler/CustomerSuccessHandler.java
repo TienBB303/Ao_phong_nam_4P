@@ -13,20 +13,11 @@ import java.io.IOException;
 @Component
 public class CustomerSuccessHandler implements AuthenticationSuccessHandler {
 
-
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         String redirectUrl = "/";
 
-        for (GrantedAuthority auth : authentication.getAuthorities()) {
-            if (auth.getAuthority().equals("ROLE_ADMIN") || auth.getAuthority().equals("ROLE_EMPLOYEE")) {
-                redirectUrl = "/admin";
-                break;
-            } else if (auth.getAuthority().equals("ROLE_CUSTOMER")) {
-                redirectUrl = "";
-                break;
-            }
-        }
+        // Đảm bảo tất cả các role đều quay về trang chủ
         response.sendRedirect(redirectUrl);
     }
 }
