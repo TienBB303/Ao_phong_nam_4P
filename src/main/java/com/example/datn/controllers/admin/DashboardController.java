@@ -124,6 +124,6 @@ public class DashboardController {
 
     @GetMapping({"", "/"})
     public String adminRoot() {
-        return "redirect:/user/home";
+        return "redirect:/admin/dashboard";
     }
 }

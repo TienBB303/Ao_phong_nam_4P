@@ -13,7 +13,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import com.example.datn.config.UserLoginSuccessHandler;
-import org.thymeleaf.extras.springsecurity6.dialect.SpringSecurityDialect;
+//import org.thymeleaf.extras.springsecurity6.dialect.SpringSecurityDialect;
 
 @Configuration
 public class SecurityConfig {
@@ -89,8 +89,8 @@ public class SecurityConfig {
         return loginService;
     }
     // ✅ Thêm bean này để sec:authorize hoạt động
-    @Bean
-    public SpringSecurityDialect springSecurityDialect() {
-        return new SpringSecurityDialect();
-    }
+//    @Bean
+//    public SpringSecurityDialect springSecurityDialect() {
+//        return new SpringSecurityDialect();
+//    }
 }

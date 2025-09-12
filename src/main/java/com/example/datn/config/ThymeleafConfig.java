@@ -8,7 +8,7 @@ import org.thymeleaf.spring6.templateresolver.SpringResourceTemplateResolver;
 import org.thymeleaf.spring6.view.ThymeleafViewResolver;
 import org.thymeleaf.templatemode.TemplateMode;
 import nz.net.ultraq.thymeleaf.layoutdialect.LayoutDialect;
-import org.thymeleaf.extras.springsecurity6.dialect.SpringSecurityDialect;
+//import org.thymeleaf.extras.springsecurity6.dialect.SpringSecurityDialect;
 
 @Configuration
 public class ThymeleafConfig {
@@ -31,7 +31,7 @@ public class ThymeleafConfig {
         templateEngine.setTemplateResolver(templateResolver());
         templateEngine.setEnableSpringELCompiler(true);
         templateEngine.addDialect(new LayoutDialect());
-        templateEngine.addDialect(new SpringSecurityDialect()); // <-- Thêm dòng này để hỗ trợ sec:authorize
+//        templateEngine.addDialect(new SpringSecurityDialect()); // <-- Thêm dòng này để hỗ trợ sec:authorize
         return templateEngine;
     }
 
