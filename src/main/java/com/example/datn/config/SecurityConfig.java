@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import com.example.datn.config.UserLoginSuccessHandler;
 //import org.thymeleaf.extras.springsecurity6.dialect.SpringSecurityDialect;
+import org.thymeleaf.extras.springsecurity6.dialect.SpringSecurityDialect;
 
 @Configuration
 public class SecurityConfig {
@@ -90,9 +91,9 @@ public class SecurityConfig {
     public UserDetailsService userDetailsService() {
         return loginService;
     }
-    // ✅ Thêm bean này để sec:authorize hoạt động
-//    @Bean
-//    public SpringSecurityDialect springSecurityDialect() {
-//        return new SpringSecurityDialect();
-//    }
+    // ✅ Kích hoạt SpringSecurityDialect để #authentication và sec:authorize hoạt động
+    @Bean
+    public SpringSecurityDialect springSecurityDialect() {
+        return new SpringSecurityDialect();
+    }
 }

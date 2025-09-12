@@ -74,34 +74,6 @@ public void onAuthenticationSuccess(HttpServletRequest request,
     // Redirect về trang chủ sau khi login thành công
     response.sendRedirect("/");
 }
-//    HttpSession session = request.getSession();
-//
-//    // Lấy account từ DB theo email login
-//    String email = authentication.getName();
-//    Account account = accountRepository.findByEmail(email).orElse(null);
-//
-//    if (account != null) {
-//        session.setAttribute("userAccount", account);
-//        session.setAttribute("userCustomer", account.getCustomer());
-//
-//        // Lưu roleName vào session để Thymeleaf dùng
-//        String roleName = account.getRole().getName();
-//        session.setAttribute("userRole", roleName);
-//
-//        System.out.println("✅ Login success - userRole = " + roleName);
-//    }
-//
-//    // ✅ Authorities debug
-//    System.out.println("👉 Authorities after login: " + authentication.getAuthorities());
-//
-//    // Điều hướng theo role
-//    String role = (account != null) ? account.getRole().getName() : "";
-//
-//    if ("ROLE_ADMIN".equals(role)) {
-//        response.sendRedirect("/admin/dashboard");
-//    } else if ("ROLE_EMPLOYEE".equals(role)) {
-//        response.sendRedirect("/admin/sell-inline/hien-thi");
-//    } else {
-//        response.sendRedirect("/user/home");
-//    }
+
+
 }
