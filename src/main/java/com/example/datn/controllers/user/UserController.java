@@ -5,8 +5,11 @@ import com.example.datn.entities.Account;
 import com.example.datn.entities.Customer;
 import com.example.datn.services.CustomerService;
 import com.example.datn.services.EmailService;
+import jakarta.persistence.criteria.Order;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +28,13 @@ public class UserController {
 
     @Autowired
     private EmailService emailService;
+
+    @GetMapping("/home")
+    public String userHome(Model model, HttpSession session) {
+        Account account = (Account) session.getAttribute("userAccount");
+        model.addAttribute("account", account);
+        return "user/index";  // dùng index.html làm trang chính
+    }
 
     // Hiển thị trang đăng ký
     @GetMapping("/signup")
@@ -63,41 +73,6 @@ public class UserController {
     @GetMapping("/login")
     public String showLoginForm(Model model) {
         return "user/login";
-    }
-
-    // Xử lý đăng nhập
-    @PostMapping("/login")
-    public String processLogin(@RequestParam String email, 
-                              @RequestParam String password,
-                              HttpSession session,
-                              RedirectAttributes redirectAttributes) {
-        try {
-            // Xác thực người dùng
-            Account account = customerService.authenticateUser(email, password);
-            
-            if (account != null) {
-                // Lưu thông tin người dùng vào session
-                session.setAttribute("userAccount", account);
-                session.setAttribute("userCustomer", account.getCustomer());
-//                session.setMaxInactiveInterval(15 * 60);
-                
-                // Kiểm tra xem có phải lần đầu đăng nhập không
-                if (account.getStatus() == null || !account.getStatus()) {
-                    // Chuyển đến trang đổi mật khẩu
-                    return "redirect:/user/change-password";
-                }
-                
-                redirectAttributes.addFlashAttribute("success", "Đăng nhập thành công!");
-                return "redirect:/";
-            } else {
-                redirectAttributes.addFlashAttribute("error", "Email hoặc mật khẩu không đúng.");
-                return "redirect:/user/login";
-            }
-            
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Đăng nhập thất bại: " + e.getMessage());
-            return "redirect:/user/login";
-        }
     }
 
     // Hiển thị trang đổi mật khẩu
@@ -262,7 +237,6 @@ public class UserController {
         }
     }
 
-    // Hiển thị trang đơn hàng
     @GetMapping("/orders")
     public String showOrders(Model model, HttpSession session) {
         Account account = (Account) session.getAttribute("userAccount");

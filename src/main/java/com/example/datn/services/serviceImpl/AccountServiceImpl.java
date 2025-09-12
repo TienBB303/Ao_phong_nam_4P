@@ -96,6 +96,11 @@ public class AccountServiceImpl implements AccountService {
             System.err.println("Email gui that bai: " + e.getMessage());
         }
     }
+    @Override
+    public Account findByEmail(String email) {
+        return accountRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Account not found with email: " + email));
+    }
 
     @Override
     public void update(AccountDto accountDto) {
@@ -147,9 +152,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
 
+
     public Account loadUserByUsername(String email) throws UsernameNotFoundException {
         return accountRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy tài khoản: " + email));
     }
+
 
 }

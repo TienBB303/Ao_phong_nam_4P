@@ -40,7 +40,7 @@ public class RevenueService {
         summary.setTotalOrdersToday(todayOrders);
 
         // === Toàn hệ thống ===
-        BigDecimal totalRevenue = scaleValue(billRepository.getTotalRevenueCompleted());
+        BigDecimal totalRevenue = scaleValue(billRepository.getTotalRevenue());
         Long totalCompletedOrders = defaultLong(billRepository.getTotalCompletedOrders());
 
         summary.setTotalRevenue(totalRevenue);

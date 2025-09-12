@@ -21,6 +21,10 @@
                                     <i class="ti ti-plus"></i>
                                 </a>
                             </div>
+<<<<<<< HEAD
+=======
+                            <!-- Xóa breadcrumb Dashboard / Quản lý tài khoản / Nhân viên và nút Hủy về /admin/users. -->
+>>>>>>> Linh
                         </div>
                     </div>
                 </div>
@@ -41,10 +45,15 @@
                                 <i class="ti ti-search"></i>
                             </button>
                         </div>
+<<<<<<< HEAD
                         <div class="col-md-1 d-grid">
                             <a th:href="@{/admin/users}" class="btn btn-warning mt-4" id="clear_search" title="Xóa tìm kiếm">
                                 <i  class="ti ti-eraser"></i>
                             </a>
+=======
+                        <div class="col-md-2">
+                            <!-- Xóa nút Hủy về /admin/users -->
+>>>>>>> Linh
                         </div>
                     </div>
                 </form>
@@ -110,6 +119,59 @@
                         </tbody>
                     </table>
                 </div>
+<<<<<<< HEAD
+=======
+                <table id="multi-colum-dt" class="table table-bordered table-hover">
+                    <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Mã NV</th>
+                        <th>Họ và tên</th>
+                        <th>Email</th>
+                        <th>SĐT</th>
+                        <th>Ngày sinh</th>
+                        <th>Giới tính</th>
+                        <th>Địa chỉ</th>
+                        <th>Trạng thái</th>
+                        <th>Hành động</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="e, i : ${accountPage.content}">
+                        <td th:text="${i.index + 1}"></td>
+                        <td th:text="${e.code}"></td>
+                        <td th:text="${e.customer != null ? e.customer.name : ''}"></td>
+                        <td th:text="${e.email}"></td>
+                        <td th:text="${e.customer != null ? e.customer.phoneNumber : ''}"></td>
+                        <td th:text="${e.customer != null ? e.customer.birthDate : ''}"></td>
+                        <td th:text="${e.customer != null ? (e.customer.gender == true ? 'Nam' : 'Nữ') : ''}"></td>
+                        <td>
+<span th:if="${e.customer != null && e.customer.addresses != null && !e.customer.addresses.isEmpty()}"
+      th:text="${e.customer.addresses[0].addressDetail
+        + (e.customer.addresses[0].wardName != null ? ', ' + e.customer.addresses[0].wardName : '')
+        + (e.customer.addresses[0].districtName != null ? ', ' + e.customer.addresses[0].districtName : '')
+        + (e.customer.addresses[0].provinceName != null ? ', ' + e.customer.addresses[0].provinceName : '')}"></span>
+<span th:if="${e.customer == null || e.customer.addresses == null || e.customer.addresses.isEmpty()}" th:text="''"></span>
+                        </td>
+
+                        <!--                            <td th:text="${e.phoneNumber}"></td>-->
+                        <!--                            <td th:text="${e.birthOfDate}"></td>-->
+                        <!--                            <td th:text="${e.gender}"></td>-->
+                        <!--                            <td th:text="${e.addressDetail}"></td>-->
+                        <td>
+    <span th:class="${e.status} ? 'badge bg-success' : 'badge bg-danger'"
+          th:text="${e.status} ? 'Đang hoạt động' : 'Đã khóa'"></span>
+                        </td>
+
+                        <td>
+                            <a th:href="@{'/admin/users/detail'(id=${e.id})}">
+                                <button class="btn-icon text-dark">✏️</button>
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+>>>>>>> Linh
                 <nav aria-label="Page navigation">
                     <ul class="pagination justify-content-end">
 
