@@ -27,7 +27,7 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
 
     @Query("SELECT b FROM Bill b " +
             "WHERE (:code IS NULL OR b.code LIKE CONCAT('%', :code, '%')) " +
-            "AND (:name IS NULL OR b.name LIKE %:name%) " +
+            "AND (:name IS NULL OR b.name LIKE CONCAT('%', :name, '%')) " +
             "AND (:phone IS NULL OR b.phoneNumber LIKE CONCAT('%', :phone, '%')) " +
             "AND (:start IS NULL OR b.createdAt >= :start) " +
             "AND (:end IS NULL OR b.createdAt <= :end) " +

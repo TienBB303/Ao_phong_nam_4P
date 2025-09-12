@@ -52,10 +52,10 @@
                         </select>
                     </div>
                     <div class="col">
-                        <select name="type" class="form-control">
+                        <select name="typeBill" class="form-control">
                             <option value="">Loại đơn</option>
-                            <option value="0" th:selected="${type == false}">Tại quầy</option>
-                            <option value="1" th:selected="${type == true}">Online</option>
+                            <option value="false" th:selected="${typeBill  == false}">Tại quầy</option>
+                            <option value="true" th:selected="${typeBill  == true}">Online</option>
                         </select>
                     </div>
                     <div class="col">
