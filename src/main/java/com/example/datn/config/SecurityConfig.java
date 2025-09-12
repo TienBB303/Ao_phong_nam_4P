@@ -50,6 +50,8 @@ public class SecurityConfig {
                                 "/static/**", "/webjars/**", "/assets/**"
                         ).permitAll()
                         .requestMatchers("/login", "/register", "/user/signup").permitAll()
+                        // Chỉ Admin được phép xem trang & gọi API doanh thu
+                        .requestMatchers("/admin/revenue", "/admin/revenue/", "/admin/revenue/api/**").hasAuthority("ROLE_ADMIN")
                         // ADMIN và EMPLOYEE đều truy cập được dashboard, bán hàng, hóa đơn
                         .requestMatchers("/admin/dashboard", "/admin/sell-inline/**", "/admin/sell-inline", "/admin/bill/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_EMPLOYEE")
                         .requestMatchers("/admin/**", "/all-admin/**").hasAuthority("ROLE_ADMIN")

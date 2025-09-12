@@ -92,7 +92,7 @@
                 <li class="dropdown pc-h-item header-user-profile">
                     <a class="pc-head-link dropdown-toggle arrow-none me-0" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" data-bs-auto-close="outside" aria-expanded="false">
                         <img th:src="@{/assets/images/user/avatar-2.jpg}" alt="user-image" class="user-avtar">
-                        <span sec:authentication="name"></span>
+                        <span>Email or fullname</span>
                     </a>
                     <div class="dropdown-menu dropdown-user-profile dropdown-menu-end pc-h-dropdown">
                         <div class="dropdown-header">
@@ -101,8 +101,7 @@
                                     <img th:src="@{/assets/images/user/avatar-2.jpg}" alt="user-image" class="user-avtar wid-35">
                                 </div>
                                 <div class="flex-grow-1 ms-3">
-                                    <h6 class="mb-1"><span sec:authentication="name">User</span></h6>
-                                </div>
+                                    <h6 class="mb-1">Demo Users nè!!!!</h6>                                </div>
                                 <a href="#!" class="pc-head-link bg-transparent"><i class="ti ti-power text-danger"></i></a>
                             </div>
                         </div>
@@ -137,7 +136,7 @@
                                     <span>Billing</span>
                                 </a>
                                 <form th:action="@{/logout}" method="post" style="display:inline;">
-                                    <button type="submit" class="dropdown-item">
+                                    <button type="submit" style="border:none; background:none; padding:0;">
                                         <i class="ti ti-power text-danger"></i>
                                         <span>Logout</span>
                                     </button>
