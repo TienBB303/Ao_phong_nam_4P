@@ -60,7 +60,7 @@ public class BillController {
         model.addAttribute("startDate", start);
         model.addAttribute("endDate", end);
         model.addAttribute("status", status);
-        model.addAttribute("type", typeBill);
+        model.addAttribute("typeBill", typeBill);
 
         return "admin/bill";
     }
