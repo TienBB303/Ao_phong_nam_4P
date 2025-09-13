@@ -34,6 +34,9 @@ public interface CustomerService {
 
     Customer findByIdWithAddresses(Integer id);
 
+    // ✅ Thêm method fetch-join cả addresses và account để đảm bảo dữ liệu cho trang edit
+    Customer findByIdWithAddressesAndAccount(Integer id);
+
     // ✅ Cập nhật thông tin khách hàng
     Customer updateCustomer(CustomerDto dto);
 

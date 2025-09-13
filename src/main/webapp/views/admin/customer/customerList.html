@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
     <html xmlns:th="http://www.thymeleaf.org" lang="en">
     <head th:replace="~{admin/fragments/head :: head}"></head>
     <body data-pc-preset="preset-1" data-pc-direction="ltr" data-pc-theme="light">
@@ -9,6 +9,20 @@
             max-width: 250px;        /* chiều rộng ô địa chỉ, bạn chỉnh tùy ý */
             overflow-x: auto;        /* cho phép scroll ngang */
             white-space: nowrap;     /* giữ nội dung trên 1 dòng */
+        }
+        /* Làm nổi bật tiêu đề cột Trạng thái */
+        th.status-col { color: #0d6efd !important; font-weight: 600; }
+
+        .badge { border-radius: 999px; padding: 6px 10px; font-weight: 600; font-size: .85rem; }
+        .badge-active {
+            background-color: #e6f4ea !important;   /* xanh nhạt */
+            color: #137333 !important;               /* xanh đậm, dễ đọc */
+            border: 1px solid #a8d5b3 !important;
+        }
+        .badge-inactive {
+            background-color: #fdecea !important;    /* đỏ nhạt */
+            color: #a61b1b !important;               /* đỏ đậm, dễ đọc */
+            border: 1px solid #f5c6cb !important;
         }
     </style>
     <div class="pc-container">
@@ -32,7 +46,7 @@
                     </div>
                 </div>
             </div>
-            <!-- content: bạn dán phần “cards, charts, tables …” ở đây -->
+            <!-- content: -->
                 <div th:if="${error}" class="alert alert-warning alert-dismissible fade show" role="alert">
                     <span th:text="${error}"></span>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -73,7 +87,7 @@
                             <th>Giới tính</th>
                             <th>Ngày sinh</th>
                             <th>Địa chỉ</th>
-                            <th>Trạng thái</th>
+                            <th class="status-col">Trạng thái</th>
                             <th>Thao tác</th>
                         </tr>
                         </thead>
