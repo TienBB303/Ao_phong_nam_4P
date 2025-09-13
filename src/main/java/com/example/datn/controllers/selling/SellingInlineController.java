@@ -374,17 +374,12 @@ public class SellingInlineController {
     public ResponseEntity<?> addCustomertoCart(@RequestParam("idCart") Integer idCart,
                                                @RequestParam("customerId") Integer customerId) {
         try {
-            Customer customer = billService.addCustomerToCart(idCart, customerId);
-
-            String address = "";
-            if (customer.getAddresses() != null && !customer.getAddresses().isEmpty()) {
-                address = customer.getAddresses().get(0).getAddressDetail();
-            }
+            Bill bill = billService.addCustomerToCart(idCart, customerId);
 
             Map<String, Object> response = new HashMap<>();
-            response.put("name", customer.getName());
-            response.put("phone", customer.getPhoneNumber());
-            response.put("address", address);
+            response.put("name", bill.getName());
+            response.put("phone", bill.getPhoneNumber());
+            response.put("address", bill.getAddress_shipping());
 
             return ResponseEntity.ok(response);
         }catch (Exception e){

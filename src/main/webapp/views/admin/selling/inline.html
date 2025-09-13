@@ -81,7 +81,7 @@
                         </div>
                         <div class="card-body py-2">
                             <div class="row gx-1 gy-2 align-items-end">
-                                <div class="col-md-11 position-relative">
+                                <div class="col-md-12 position-relative">
                                     <!--                                        <input type="hidden" id="customerId" name="customerId">-->
                                     <input type="text" id="customer_search" th:value="${customerName}" class="form-control" placeholder="Khách lẻ" autocomplete="off">
                                     <div id="suggestionBox_Customer"
@@ -89,13 +89,14 @@
                                          style="width: 100%; display: none; max-height: 300px; overflow-y: auto; z-index: 1055;">
                                     </div>
                                 </div>
-                                <div class="col-md-1">
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-white" id="addCustomer" data-bs-toggle="modal" data-bs-target="#addCustomerModal">
-                                            <i class="bi bi-person"></i>
-                                        </span>
-                                    </div>
-                                </div>
+<!--                                13/09/2025  TienBB bỏ chức năng thêm nhanh khách hàng ở bán tại quầy-->
+<!--                                <div class="col-md-1">-->
+<!--                                    <div class="input-group">-->
+<!--                                        <span class="input-group-text bg-white" id="addCustomer" data-bs-toggle="modal" data-bs-target="#addCustomerModal">-->
+<!--                                            <i class="bi bi-person"></i>-->
+<!--                                        </span>-->
+<!--                                    </div>-->
+<!--                                </div>-->
                             </div>
                         </div>
                     </div>
@@ -105,7 +106,7 @@
             <!-- danh sách sản phẩm-->
             <div th:if="${idCart != null}" class="card shadow-sm rounded-3" style="height: 400px;">
                 <div class="card-header fw-bold bg-light">
-                    Sản phẩm trong giỏ (<span th:text="${itemInCart}">0</span>)
+                    Sản phẩm trong giỏ : <span th:text="${itemInCart}">0</span>
                 </div>
                 <div class="card-body">
                     <div id="product-in-cart" style="max-height: 325px; overflow-y: auto; overflow-x: hidden;">
@@ -267,7 +268,7 @@
                     <!--  thông tin tiền -->
                     <div class="card shadow-sm rounded-3">
                         <div class="card-header fw-bold bg-light">
-                            thông tin thanh toán - tổng sản phẩm(<span th:text="${allItemInCart}">0</span>)
+                            thông tin thanh toán - tổng số lượng sản phẩm áo(<span th:text="${allItemInCart}">0</span>)
                         </div>
                         <div class="card-body py-2">
                             <div class="row gx-1 gy-2 align-items-end">
