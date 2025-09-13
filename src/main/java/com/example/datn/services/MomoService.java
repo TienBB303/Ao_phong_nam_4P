@@ -1,5 +1,7 @@
 package com.example.datn.services;
 
+import com.example.datn.entities.Bill;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.json.JSONObject;
@@ -15,6 +17,8 @@ import com.mashape.unirest.http.Unirest;
 
 @Service
 public class MomoService {
+    @Autowired
+    BillService billService;
 
     @Value("${momo.partnerCode}")
     private String partnerCode;
@@ -35,9 +39,11 @@ public class MomoService {
     private String notifyUrl;
 
     public String createQrOrder(Integer cartId, BigDecimal amount) throws Exception {
+        Bill bill = billService.findById(cartId);
+
         String requestId = String.valueOf(System.currentTimeMillis());
         String orderId = "CART" + cartId + "_" + requestId;
-        String orderInfo = "Thanh toán đơn hàng " + cartId;
+        String orderInfo = "Thanh toán đơn hàng " + bill.getCode();
         String extraData = "";
 
         String amountStr = amount.setScale(0, RoundingMode.HALF_UP).toPlainString();
