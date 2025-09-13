@@ -56,23 +56,38 @@ public void onAuthenticationSuccess(HttpServletRequest request,
 
     HttpSession session = request.getSession();
 
-    // Lấy account từ DB theo email login
+    // Lấy account theo email đăng nhập
     String email = authentication.getName();
     Account account = accountRepository.findByEmail(email).orElse(null);
 
     if (account != null) {
         session.setAttribute("userAccount", account);
         session.setAttribute("userCustomer", account.getCustomer());
-        // Lưu role vào session để phân quyền giao diện
-        String roleName = account.getRole().getName();
+        String roleName = (account.getRole() != null) ? account.getRole().getName() : null;
         session.setAttribute("userRole", roleName);
+
+        // Chỉ ép đổi mật khẩu cho CUSTOMER
+        if ("ROLE_CUSTOMER".equals(roleName)) {
+            Boolean status = account.getStatus();
+            boolean needChangePassword = (status == null || !status);
+            if (needChangePassword) {
+                response.sendRedirect("/user/change-password");
+                return;
+            }
+        }
+
+        // Điều hướng theo role sau khi đã đổi mật khẩu (hoặc không phải CUSTOMER)
+        if ("ROLE_ADMIN".equals(roleName) || "ROLE_EMPLOYEE".equals(roleName)) {
+            response.sendRedirect("/admin/dashboard");
+            return;
+        }
+
+        response.sendRedirect("/");
+        return;
     }
 
-    // ✅ Log ra quyền thực tế để kiểm tra
-    System.out.println("👉 Authorities after login: " + authentication.getAuthorities());
-
-    // Redirect về trang chủ sau khi login thành công
-    response.sendRedirect("/");
+    // Trường hợp không tìm thấy account (rất hiếm)
+    response.sendRedirect("/login");
 }
 
 

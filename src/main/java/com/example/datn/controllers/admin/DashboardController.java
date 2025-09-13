@@ -85,7 +85,9 @@ public class DashboardController {
         System.out.println("- Revenue Data Size: " + revenueData.size());
         String role = authentication.getAuthorities().iterator().next().getAuthority();
         model.addAttribute("userRole", role);
-
+        // Thêm email vào model
+        String email = authentication.getName();
+        model.addAttribute("userEmail", email);
         return "admin/dashboard";
     }
 

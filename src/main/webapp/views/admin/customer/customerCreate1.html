@@ -126,6 +126,12 @@
 </div>
 <footer th:replace="~{admin/fragments/footer :: footer}"></footer>
 
+<style>
+    /* Đổi màu chữ cho nhãn & select Trạng thái (nếu đang hiển thị) */
+    label[for="isActive"] { color: #111 !important; }
+    #isActive, #isActive option { color: #111 !important; background-color: #fff; }
+</style>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
@@ -133,6 +139,11 @@
     const provinceSelect = document.getElementById('province');
     const districtSelect = document.getElementById('district');
     const wardSelect = document.getElementById('ward');
+
+    // Thêm placeholder mặc định
+    provinceSelect.innerHTML = '<option value="">-- Chọn Tỉnh/Thành phố --</option>';
+    districtSelect.innerHTML = '<option value="">-- Chọn Quận/Huyện --</option>';
+    wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
 
     // Load tỉnh
     fetch('https://online-gateway.ghn.vn/shiip/public-api/master-data/province', {
@@ -144,9 +155,18 @@
                 provinceSelect.innerHTML += `<option value="${province.ProvinceID}">${province.ProvinceName}</option>`;
             });
         });
-    // Load quận khi chọn tỉnh
+
+    // Load quận khi chọn tỉnh + cập nhật provinceName
     provinceSelect.addEventListener('change', () => {
-        districtSelect.innerHTML = '<option>Loading...</option>';
+        // reset danh sách quận/phường và tên hiển thị
+        districtSelect.innerHTML = '<option value="">-- Chọn Quận/Huyện --</option>';
+        wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+
+        document.getElementById("provinceName").value =
+            provinceSelect.options[provinceSelect.selectedIndex]?.text || "";
+        document.getElementById("districtName").value = "";
+        document.getElementById("wardName").value = "";
+
         fetch('https://online-gateway.ghn.vn/shiip/public-api/master-data/district', {
             method: 'POST',
             headers: {
@@ -157,33 +177,44 @@
         })
             .then(res => res.json())
             .then(data => {
-                districtSelect.innerHTML = '';
+                districtSelect.innerHTML = '<option value="">-- Chọn Quận/Huyện --</option>';
                 data.data.forEach(district => {
                     districtSelect.innerHTML += `<option value="${district.DistrictID}">${district.DistrictName}</option>`;
                 });
             });
+
+        // đồng bộ lại input ẩn
+        updateFullAddress();
     });
-    // Load phường khi chọn quận
+
+    // Load phường khi chọn quận + cập nhật districtName
     districtSelect.addEventListener('change', () => {
-        wardSelect.innerHTML = '<option>Loading...</option>';
+        wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+
+        document.getElementById("districtName").value =
+            districtSelect.options[districtSelect.selectedIndex]?.text || "";
+
         fetch(`https://online-gateway.ghn.vn/shiip/public-api/master-data/ward?district_id=${districtSelect.value}`, {
             headers: { 'token': token }
         })
             .then(res => res.json())
             .then(data => {
-                wardSelect.innerHTML = '';
+                wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
                 data.data.forEach(ward => {
                     wardSelect.innerHTML += `<option value="${ward.WardCode}">${ward.WardName}</option>`;
                 });
-                if (wardSelect.options.length > 0) {
-                    document.getElementById("wardName").value = wardSelect.options[0].text;
-                }
+
+                // Chưa chọn phường => xóa wardName, chờ user chọn
+                document.getElementById("wardName").value = "";
+                updateFullAddress();
             });
     });
+
     // Cập nhật địa chỉ khi chọn phường
     wardSelect.addEventListener('change', () => {
         updateFullAddress();
     });
+
     function updateFullAddress() {
         const provinceText = provinceSelect.options[provinceSelect.selectedIndex]?.text || "";
         const districtText = districtSelect.options[districtSelect.selectedIndex]?.text || "";
@@ -192,6 +223,7 @@
         document.getElementById("districtName").value = districtText;
         document.getElementById("wardName").value = wardText;
     }
+
     function toggleReceiverForm() {
         var checkBox = document.getElementById("otherReceiver");
         var form = document.getElementById("receiverForm");
@@ -203,6 +235,7 @@
             document.querySelector('[name="address.receiverPhoneNumber"]').value = '';
         }
     }
+
     // Gộp validate và cập nhật input ẩn vào DOMContentLoaded
     document.addEventListener("DOMContentLoaded", function () {
         const form = document.querySelector("form");
@@ -248,12 +281,14 @@
                 return;
             }
 
+            updateFullAddress();
+
             // Confirm trước khi lưu
             if (!confirm("Bạn có chắc chắn muốn thêm khách hàng này không?")) {
                 e.preventDefault();
             }
         });
-
+    }); 
 </script>
 
 </body>
