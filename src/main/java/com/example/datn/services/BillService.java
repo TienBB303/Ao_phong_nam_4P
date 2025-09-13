@@ -509,7 +509,7 @@ public class BillService {
 
         cart.setPaymentStatus(true);
         if (cart.getDelivery_type() == true) {
-            cart.setStatus(1);                              // giao hàng
+            cart.setStatus(3);                              // giao hàng
         } else {
             cart.setStatus(4);                              // không giao hàng
         }
@@ -570,21 +570,21 @@ public class BillService {
     }
 
     //    ================================Khanh==============================================================================
-    public Bill updateStatus(String statusString, Integer id) {
+    public Bill updateStatus(Integer status, Integer id) {
         Bill bill = billRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn có id: " + id));
 
-        int newStatus;
-        try {
-            newStatus = Integer.parseInt(statusString);
-        } catch (NumberFormatException e) {
-            throw new RuntimeException("Trạng thái không hợp lệ: " + statusString);
-        }
+//        int newStatus;
+//        try {
+//            newStatus = Integer.parseInt(statusString);
+//        } catch (NumberFormatException e) {
+//            throw new RuntimeException("Trạng thái không hợp lệ: " + statusString);
+//        }
 
         int currentStatus = bill.getStatus();
 
         // Nếu chuyển từ CHỜ XÁC NHẬN (1) → ĐÃ XÁC NHẬN (2) thì trừ tồn kho
-        if (currentStatus == 1 && newStatus == 2) {
+        if (currentStatus == 1 && status == 2) {
             try {
                 deductProductQuantitiesOnStatusChange(id);
             } catch (Exception e) {
@@ -594,7 +594,7 @@ public class BillService {
         }
 
         // Nếu chuyển sang HUỶ (5) từ trạng thái khác CHỜ XÁC NHẬN (1) thì cộng lại tồn kho
-        if (newStatus == 5 && currentStatus != 1) {
+        if (status == 5 && currentStatus != 1) {
             List<BillDetails> billDetailsList = billDetailRepository.findByBillId(id);
             for (BillDetails detail : billDetailsList) {
                 ProductDetail productDetail = detail.getProductDetail();
@@ -604,7 +604,7 @@ public class BillService {
             }
         }
 
-        bill.setStatus(newStatus);
+        bill.setStatus(status);
         bill.setUpdatedAt(LocalDateTime.now());
 
         return billRepository.save(bill);

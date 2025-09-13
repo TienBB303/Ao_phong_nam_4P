@@ -69,13 +69,13 @@ public class BillController {
     @GetMapping("/update-bill-status/{billId}")
     public String updateBillStatus(Model model,
                                    @PathVariable Integer billId,
-                                   @RequestParam("trangThaiDonHang") String trangThaiDonHang,
+                                   @RequestParam("trangThaiDonHang") Integer trangThaiDonHang,
                                    @RequestParam(value = "note", required = false) String note,
                                    RedirectAttributes redirectAttributes) {
         try {
-            int status = Integer.parseInt(trangThaiDonHang);
+//            int status = Integer.parseInt(trangThaiDonHang);
 
-            if (status < 1 || status > 6) {
+            if (trangThaiDonHang < 1 || trangThaiDonHang > 6) {
                 redirectAttributes.addFlashAttribute("error", "Trạng thái đơn hàng không hợp lệ.");
                 return "redirect:/admin/bill/getbill-detail/" + billId;
             }
@@ -83,7 +83,7 @@ public class BillController {
             Bill bill = billService.updateStatus(trangThaiDonHang, billId);
 
 
-            billHistoryService.saveHistory(bill, status, note);
+            billHistoryService.saveHistory(bill, trangThaiDonHang, note);
 
             redirectAttributes.addFlashAttribute("message",
                     "Hóa đơn " + bill.getCode() + " cập nhật trạng thái thành công!");
@@ -112,6 +112,7 @@ public class BillController {
                 .mapToDouble(item -> item.getPrice().doubleValue() * item.getQuantity())
                 .sum();
 
+        System.out.println("Bill status class = " + bill.getStatus().getClass().getName());
         // Đưa vào model
         model.addAttribute("bill", bill);
         model.addAttribute("billDetails", billDetailsList);
