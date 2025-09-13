@@ -60,11 +60,10 @@ public class BillController {
         model.addAttribute("startDate", start);
         model.addAttribute("endDate", end);
         model.addAttribute("status", status);
-        model.addAttribute("type", typeBill);
+        model.addAttribute("typeBill", typeBill);
 
         return "admin/bill";
     }
-
 
     @GetMapping("/update-bill-status/{billId}")
     public String updateBillStatus(Model model,
@@ -82,8 +81,10 @@ public class BillController {
 
             Bill bill = billService.updateStatus(trangThaiDonHang, billId);
 
-
             billHistoryService.saveHistory(bill, trangThaiDonHang, note);
+
+            // ❌ bỏ account
+//             billHistoryService.saveHistory(bill, status, note); TienBB chỉnh sửa thành dùng luôn biến TrangThaiDonHang
 
             redirectAttributes.addFlashAttribute("message",
                     "Hóa đơn " + bill.getCode() + " cập nhật trạng thái thành công!");

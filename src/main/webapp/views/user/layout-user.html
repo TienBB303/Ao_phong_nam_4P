@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html lang="en"
       xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
 <head>
     <meta charset="UTF-8">
     <title layout:title-pattern="$CONTENT_TITLE - Trang người dùng">Trang người dùng</title>
@@ -45,31 +47,38 @@
                 <li class="nav-item">
                     <a class="nav-link" th:href="@{/tracking}">Tra cứu đơn hàng</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/admin}">admin</a>
-                </li>
+<!--                <li class="nav-item">-->
+<!--                    <a class="nav-link" th:href="@{/admin}">admin</a>-->
+<!--                </li>-->
             </ul>
         </div>
         <div class="d-flex align-items-center gap-3">
             <!-- Hiển thị thông tin người dùng nếu đã đăng nhập -->
             <div th:if="${session.userAccount}" class="d-flex align-items-center gap-2">
                 <span class="text-muted">Xin chào, </span>
-                <span class="fw-bold" th:text="${session.userCustomer.name}">Tên người dùng</span>
+                <span class="fw-bold"
+                      th:text="${session.userCustomer != null ? session.userCustomer.name : session.userAccount.email}">
+                                Tên người dùng
+                </span>
+
                 <div class="dropdown">
-                    <button class="btn btn-link text-dark text-decoration-none dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">                        <i class="fas fa-user-circle fa-lg"></i>
+                    <button class="btn btn-link text-dark text-decoration-none dropdown-toggle" type="button"
+                            id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false"><i
+                            class="fas fa-user-circle fa-lg"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                         <li><a class="dropdown-item" th:href="@{/user/profile}"><i class="fas fa-user me-2"></i>Tài khoản</a></li>
-                        <li><a class="dropdown-item" th:href="@{/user/change-password-request}">
-                            <i class="fas fa-key me-2"></i>Đổi mật khẩu
-                        </a></li>
+                        <li><a class="dropdown-item" th:href="@{/user/change-password-request}"><i class="fas fa-key me-2"></i>Đổi mật khẩu</a></li>
                         <li><a class="dropdown-item" th:href="@{/user/orders}"><i class="fas fa-shopping-bag me-2"></i>Đơn hàng</a></li>
+                        <li th:if="${session.userRole == 'ROLE_ADMIN' || session.userRole == 'ROLE_EMPLOYEE'}">
+                            <a class="dropdown-item" th:href="@{/admin/dashboard}"><i class="fas fa-tools me-2"></i>Trang quản lý</a>
+                        </li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" th:href="@{/user/logout}"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
                     </ul>
                 </div>
             </div>
-            
+
             <!-- Hiển thị nút đăng nhập/đăng ký nếu chưa đăng nhập -->
             <div th:unless="${session.userAccount}" class="d-flex align-items-center gap-2">
                 <a th:href="@{/user/login}" class="text-dark text-decoration-none">Đăng nhập</a>

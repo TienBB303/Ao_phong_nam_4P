@@ -44,4 +44,7 @@ public class Account {
     @OneToOne
     @JoinColumn(name = "customer_id")
     private Customer customer;
+
+    @Column(name = "first_login")
+    private Integer firstLogin;
 }

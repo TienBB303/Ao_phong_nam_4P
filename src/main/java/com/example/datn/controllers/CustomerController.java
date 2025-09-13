@@ -92,7 +92,8 @@ public class CustomerController {
     // Hiển thị form chỉnh sửa khách hàng
     @GetMapping("/edit/{id}")
     public String edit(@PathVariable int id, Model model, RedirectAttributes redirect) {
-        Customer customer = customerService.findById(id);
+        // Customer customer = customerService.findById(id);
+        Customer customer = customerService.findByIdWithAddressesAndAccount(id);
         if (customer == null) {
             redirect.addFlashAttribute("errorMessage", "Không tìm thấy khách hàng!");
             return "redirect:/admin/customer/view";
@@ -153,6 +154,7 @@ public class CustomerController {
         return "admin/customer/customerDetail";
     }
     // Hàm hỗ trợ convert từ entity -> dto
+    // Method: convertToDto(Customer customer)
     private CustomerDto convertToDto(Customer customer) {
         CustomerDto dto = new CustomerDto();
         dto.setId(customer.getId());
@@ -166,22 +168,23 @@ public class CustomerController {
             dto.setEmail(customer.getAccount().getEmail());
         }
         if (customer.getAddresses() != null && !customer.getAddresses().isEmpty()) {
-            ShippingAddress address = customer.getAddresses().get(0); // hoặc lấy địa chỉ mặc định
-            AddressDto addressDto = new AddressDto();
+            var address = customer.getAddresses().get(0);
+            com.example.datn.dto.AddressDto addressDto = new com.example.datn.dto.AddressDto();
             addressDto.setAddressDetail(address.getAddressDetail() != null ? address.getAddressDetail() : "");
-            addressDto.setProvinceId(address.getProvinceId() != null ? address.getProvinceId() : 0);
+            addressDto.setProvinceId(address.getProvinceId());
             addressDto.setProvinceName(address.getProvinceName() != null ? address.getProvinceName() : "");
-            addressDto.setDistrictId(address.getDistrictId() != null ? address.getDistrictId() : 0);
+            addressDto.setDistrictId(address.getDistrictId());
             addressDto.setDistrictName(address.getDistrictName() != null ? address.getDistrictName() : "");
-            addressDto.setWardId(address.getWardId() != null ? address.getWardId() : "");
+            addressDto.setWardId(address.getWardId());
             addressDto.setWardName(address.getWardName() != null ? address.getWardName() : "");
-            addressDto.setReceiverName(address.getReceiverName() != null ? address.getReceiverName() : "");
-            addressDto.setReceiverPhoneNumber(address.getReceiverPhoneNumber() != null ? address.getReceiverPhoneNumber() : "");
-            addressDto.setIsDefault(address.getIsDefault() != null ? address.getIsDefault() : false);
-
-            // Debug log để kiểm tra giá trị
-            System.out.println("Address isDefault: " + address.getIsDefault());
-            System.out.println("AddressDto isDefault: " + addressDto.getIsDefault());
+            // addressDto.setReceiverName(address.getReceiverName() != null ? address.getReceiverName() : ""); // [Removed]
+            // addressDto.setReceiverPhoneNumber(address.getReceiverPhoneNumber() != null ? address.getReceiverPhoneNumber() : ""); // [Removed]
+            // addressDto.setIsDefault(address.getIsDefault() != null ? address.getIsDefault() : false); // [Removed]
+    
+            // // [Removed] Debug log liên quan isDefault
+            // System.out.println("Address isDefault: " + address.getIsDefault());
+            // System.out.println("AddressDto isDefault: " + addressDto.getIsDefault());
+    
             dto.setAddress(addressDto);
         }
         return dto;

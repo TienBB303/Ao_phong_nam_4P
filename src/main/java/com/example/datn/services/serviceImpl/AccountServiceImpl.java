@@ -13,6 +13,7 @@ import com.example.datn.services.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -95,6 +96,11 @@ public class AccountServiceImpl implements AccountService {
             System.err.println("Email gui that bai: " + e.getMessage());
         }
     }
+    @Override
+    public Account findByEmail(String email) {
+        return accountRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Account not found with email: " + email));
+    }
 
     @Override
     public void update(AccountDto accountDto) {
@@ -144,5 +150,13 @@ public class AccountServiceImpl implements AccountService {
         Collections.shuffle(chars);
         return chars.stream().map(String::valueOf).collect(Collectors.joining());
     }
+
+
+
+    public Account loadUserByUsername(String email) throws UsernameNotFoundException {
+        return accountRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy tài khoản: " + email));
+    }
+
 
 }
