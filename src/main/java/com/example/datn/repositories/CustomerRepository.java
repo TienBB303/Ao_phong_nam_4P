@@ -1,6 +1,7 @@
 package com.example.datn.repositories;
 
 import com.example.datn.entities.Customer;
+import com.example.datn.entities.ShippingAddress;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -63,4 +64,8 @@ public interface CustomerRepository extends JpaRepository<Customer,Integer> {
     @Query("select c from Customer c where c.phoneNumber like :phoneNumber ")
     Customer searchCustomerExistPhoneInline(String phoneNumber);
 
+
+    //TienBB thêm query truy vấn tìm tất cả địa chỉ của khách
+    @Query("select sa from ShippingAddress sa where sa.customer.id = :id")
+    List<ShippingAddress> findAllShippingAddressOfCustomer(Integer id);
 }
