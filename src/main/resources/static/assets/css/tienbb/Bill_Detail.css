@@ -1,0 +1,85 @@
+.timeline-horizontal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    margin: 40px 0;
+}
+.timeline-horizontal::before {
+    content: '';
+    position: absolute;
+    top: 20px; /* đường ngang */
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: #dee2e6;
+    z-index: 1;
+}
+.timeline-step {
+    position: relative;
+    text-align: center;
+    flex: 1;
+    z-index: 2;
+}
+.timeline-step .icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #dee2e6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+    font-size: 20px;
+    color: white;
+}
+.timeline-step.active .icon {
+    background: #0dcdfd; /* màu active */
+}
+.timeline-step.completed .icon {
+    background: #15bf77; /* màu completed */
+}
+.timeline-step .label {
+    margin-top: 10px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/*====================Nút ấn========================= */
+.action-buttons {
+    margin-top: 20px;
+    padding-right: 10px;   /* thêm khoảng cách với mép phải */
+}
+
+/* nút chung */
+.action-buttons .btn {
+    min-width: 160px;      /* rộng đều nhau */
+    font-weight: 500;      /* chữ đậm hơn */
+    border-radius: 8px;    /* bo góc mềm */
+    transition: all 0.2s ease-in-out;
+}
+
+/* hover effect */
+.action-buttons .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/*=====================bảng======================= */
+
+.card {
+    border-radius: 12px;
+    border: none;
+}
+
+.card-body h6 {
+    color: #495057;
+}
+
+.table th {
+    background-color: #f8f9fa;
+}
+
+.table tfoot td {
+    background-color: #fdfdfd;
+}

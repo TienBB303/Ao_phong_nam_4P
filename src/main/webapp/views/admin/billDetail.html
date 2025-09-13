@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head th:replace="~{admin/fragments/head :: head}"></head>
+<link rel="stylesheet" th:href="@{/assets/css/tienbb/Bill_Detail.css}">
 <body data-pc-preset="preset-1" data-pc-direction="ltr" data-pc-theme="light">
 <div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
 <header th:replace="~{admin/fragments/header :: header}"></header>
@@ -13,7 +14,7 @@
                 <div class="row align-items-center">
                     <div class="col-md-12">
                         <div class="page-header-title">
-                            <h5 class="m-b-10">Hóa đơn chi tiết</h5>
+                            <h5 class="m-b-10">Hóa đơn chi tiết</h5><span>Mã hóa đơn: <span class="fw-bold text-dark" th:text="${bill.code}">HD001</span></span>
                         </div>
                     </div>
                 </div>
@@ -22,173 +23,331 @@
         <!-- content: bạn dán phần “cards, charts, tables …” ở đây -->
         <div class="row">
             <div class="container mt-4 mb-5">
-                <!-- Tiêu đề -->
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="fw-bold text-dark">Mã HD: <span th:text="${bill.code}">HD001</span></h4>
-                    <span class="fw-bold fs-4">
-                        <span th:switch="${bill.status}">
-                            <span th:case="1" class="text-warning">Chờ xác nhận</span>
-                            <span th:case="2" class="text-primary">Đã xác nhận</span>
-                            <span th:case="3" class="text-info">Đang giao</span>
-                            <span th:case="4" class="text-success">Hoàn thành</span>
-                            <span th:case="5" class="text-danger">Đã huỷ</span>
-                            <span th:case="6" class="text-danger">Giao hàng thất bại</span>
-                            <span th:case="*" class="text-muted">Không xác định</span>
-                        </span>
-                    </span>
+
+                <!-- Time Line giao hàng, xác nhận -->
+                <div class="timeline-horizontal" th:with="st=${bill.status}">
+                    <!-- Bước 1 : Chờ xác nhận (đã qua bất kỳ trạng thái nào thì xem như completed) -->
+                    <div class="timeline-step"
+                         th:classappend="${st == 1 or st == 2 or st == 3 or st == 4 or st == 5 or st == 6} ? ' completed' : ''">
+                        <div class="icon"><i class="bi bi-hourglass-split"></i></div>
+                        <div class="label">Chờ xác nhận</div>
+                    </div>
+
+                    <!-- Bước 2 : Đã xác nhận -->
+                    <div class="timeline-step"
+                         th:classappend="${st == 2 or st == 3 or st == 4 or st == 5 or st == 6} ? ' completed' : ''">
+                        <div class="icon"><i class="ti ti-circle-check"></i></div>
+                        <div class="label">Đã xác nhận</div>
+                    </div>
+
+                    <!-- Bước 3 : Đang giao -->
+                    <div class="timeline-step"
+                         th:classappend="|${st == 3 ? ' active' : ''}${(st == 4 or st == 5 or st == 6) ? ' completed' : ''}|">
+                        <div class="icon"><i class="ti ti-truck-delivery"></i></div>
+                        <div class="label">Đang giao</div>
+                    </div>
+
+                    <!-- Bước 4 : Hoàn thành -->
+                    <div class="timeline-step"
+                         th:classappend="${st == 4} ? ' completed' : ''">
+                        <div class="icon"><i class="ti ti-pennant"></i></div>
+                        <div class="label">Hoàn thành</div>
+                    </div>
+
+                    <!-- Huỷ -->
+                    <div class="timeline-step" th:if="${st == 5}">
+                        <div class="icon bg-danger"><i class="bi bi-x-circle"></i></div>
+                        <div class="label text-danger">Đã huỷ</div>
+                    </div>
+
+                    <!-- Thất bại -->
+                    <div class="timeline-step" th:if="${st == 6}">
+                        <div class="icon bg-danger"><i class="bi bi-exclamation-triangle"></i></div>
+                        <div class="label text-danger">Giao thất bại</div>
+                    </div>
+                </div>
+
+
+<!--                    <span class="fw-bold fs-4">-->
+<!--                        <span th:switch="${bill.status}">-->
+<!--                            <span th:case="1" class="text-warning">Chờ xác nhận</span>-->
+<!--                            <span th:case="2" class="text-primary">Đã xác nhận</span>-->
+<!--                            <span th:case="3" class="text-info">Đang giao</span>-->
+<!--                            <span th:case="4" class="text-success">Hoàn thành</span>-->
+<!--                            <span th:case="5" class="text-danger">Đã huỷ</span>-->
+<!--                            <span th:case="6" class="text-danger">Giao hàng thất bại</span>-->
+<!--                            <span th:case="*" class="text-muted">Không xác định</span>-->
+<!--                        </span>-->
+<!--                    </span>-->
 
                     <!-- Các nút hành động, ẩn nếu đã hoàn thành hoặc huỷ -->
-                    <div class="d-flex justify-content-end gap-2 mt-3" th:if="${bill.status != 4 and bill.status != 5}">
-                        <!-- Nút hủy đơn: Trạng thái 1 hoặc 2 -->
-                        <button th:if="${bill.status == 1 or bill.status == 2 or bill.status == 6}"
-                                class="btn btn-outline-danger"
-                                data-bs-toggle="modal"
-                                data-bs-target="#noteModal"
-                                th:onclick="|prepareStatusUpdate(${bill.id}, 5, 'Huỷ đơn hàng')|">
-                            ❌ Huỷ đơn
-                        </button>
+                <div class="action-buttons d-flex justify-content-end gap-2 mt-3"
+                     th:if="${bill.status != 4 and bill.status != 5}" style="padding-bottom: 20px">
+                    <!-- Nút hủy đơn -->
+                    <button th:if="${bill.status == 1 or bill.status == 2 or bill.status == 6}"
+                            class="btn btn-outline-danger"
+                            data-bs-toggle="modal"
+                            data-bs-target="#noteModal"
+                            th:onclick="|prepareStatusUpdate(${bill.id}, 5, 'Huỷ đơn hàng')|">
+                        ❌ Huỷ đơn
+                    </button>
 
-                        <!-- Nút xác nhận: trạng thái 1 -->
-                        <button th:if="${bill.status == 1}"
-                                class="btn btn-outline-secondary"
-                                data-bs-toggle="modal"
-                                data-bs-target="#noteModal"
-                                th:onclick="|prepareStatusUpdate(${bill.id}, 2, 'Xác nhận duyệt đơn')|">
-                            ✔️ Xác nhận, duyệt đơn
-                        </button>
+                    <!-- Nút xác nhận -->
+                    <button th:if="${bill.status == 1}"
+                            class="btn btn-outline-secondary"
+                            data-bs-toggle="modal"
+                            data-bs-target="#noteModal"
+                            th:onclick="|prepareStatusUpdate(${bill.id}, 2, 'Xác nhận duyệt đơn')|">
+                        ✔️ Xác nhận, duyệt đơn
+                    </button>
 
-                        <!-- Nút xác nhận giao hàng: trạng thái 2 -->
-                        <button th:if="${bill.status == 2}"
-                                class="btn btn-outline-primary"
-                                data-bs-toggle="modal"
-                                data-bs-target="#noteModal"
-                                th:onclick="|prepareStatusUpdate(${bill.id}, 3, 'Xác nhận giao hàng')|">
-                            🚚 Xác nhận giao hàng
-                        </button>
+                    <!-- Nút xác nhận giao hàng -->
+                    <button th:if="${bill.status == 2}"
+                            class="btn btn-outline-primary"
+                            data-bs-toggle="modal"
+                            data-bs-target="#noteModal"
+                            th:onclick="|prepareStatusUpdate(${bill.id}, 3, 'Xác nhận giao hàng')|">
+                        🚚 Xác nhận giao hàng
+                    </button>
 
-                        <!-- Nút xác nhận hoàn thành: trạng thái 3 -->
-                        <button th:if="${bill.status == 3}"
-                                class="btn btn-outline-success"
-                                data-bs-toggle="modal"
-                                data-bs-target="#noteModal"
-                                th:onclick="|prepareStatusUpdate(${bill.id}, 4, 'Xác nhận hoàn thành')|">
-                            ✅ Đã giao thành công
-                        </button>
-                        <button th:if="${bill != null and bill.status == 3}"
-                                class="btn btn-outline-danger"
-                                data-bs-toggle="modal"
-                                data-bs-target="#noteModal"
-                                th:onclick="|prepareStatusUpdate(${bill.id}, 6, 'Giao hàng thất bại')|">
-                            🚫 Giao hàng thất bại
-                        </button>
+                    <!-- Nút hoàn thành -->
+                    <button th:if="${bill.status == 3}"
+                            class="btn btn-outline-success"
+                            data-bs-toggle="modal"
+                            data-bs-target="#noteModal"
+                            th:onclick="|prepareStatusUpdate(${bill.id}, 4, 'Xác nhận hoàn thành')|">
+                        ✅ Đã giao thành công
+                    </button>
 
-                    </div>
+                    <!-- Nút giao thất bại -->
+                    <button th:if="${bill != null and bill.status == 3}"
+                            class="btn btn-outline-danger"
+                            data-bs-toggle="modal"
+                            data-bs-target="#noteModal"
+                            th:onclick="|prepareStatusUpdate(${bill.id}, 6, 'Giao hàng thất bại')|">
+                        🚫 Giao hàng thất bại
+                    </button>
                 </div>
 
+
+                <!--                &lt;!&ndash; Thông tin cửa hàng &ndash;&gt;-->
+                <!--                <div class="mb-4">-->
+                <!--                    <h5 class="fw-bold text-dark"> 4PStore</h5>-->
+                <!--                    <p class="text-muted mb-1">Đ/C: FPT Polytechnic Trịnh Văn Bô</p>-->
+                <!--                    <p class="text-muted mb-1">Email: 4PStore@gmail.com</p>-->
+                <!--                    <p class="text-muted mb-0">SDT: 0398121210</p>-->
+                <!--                </div>-->
 
                 <!-- Thông tin cửa hàng -->
-                <div class="mb-4">
-                    <h5 class="fw-bold text-dark"> 4PStore</h5>
-                    <p class="text-muted mb-1">Đ/C: FPT Polytechnic Trịnh Văn Bô</p>
-                    <p class="text-muted mb-1">Email: 4PStore@gmail.com</p>
-                    <p class="text-muted mb-0">SDT: 0398121210</p>
+                <div class="card mb-4 shadow p">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="fw-bold text-dark mb-1">4PStore</h5>
+                            <p class="text-muted mb-1"><i class="bi bi-geo-alt"></i> FPT Polytechnic, Trịnh Văn Bô</p>
+                            <p class="text-muted mb-1"><i class="bi bi-envelope"></i> 4PStore@gmail.com</p>
+                            <p class="text-muted mb-0"><i class="bi bi-telephone"></i> 0398121210</p>
+                        </div>
+                        <div>
+                            <a th:href="@{/admin/bill/history/{id}(id=${bill.id})}"
+                               class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-clock-history"></i> Lịch sử
+                            </a>
+                        </div>
+                    </div>
                 </div>
-                <a th:href="@{/admin/bill/history/{id}(id=${bill.id})}"
-                   class="btn btn-outline-secondary btn-sm"
-                   title="Xem lịch sử trạng thái">
-                    <i class="bi bi-clock-history"></i> Lịch sử
-                </a>
-                <hr>
+
                 <!-- Thông tin khách hàng & hóa đơn -->
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <h6 class="fw-bold">Khách hàng:</h6>
-                        <p th:text="${bill.name}" class="mb-1"></p>
-                        <p th:text="${bill.phoneNumber}" class="mb-1"></p>
-                        <p th:text="${bill.address_shipping}" class="mb-1"></p>
-                        <p class="mb-1">
-                            <strong>Voucher:</strong>
-                            <span th:text="${bill.discount != null ? bill.discount.code : 'Không sử dụng'}" class="text-muted"></span>
-                        </p>
-                        <p>
-                            <strong>Giá trị giảm:</strong>
-                            <span th:text="${bill.discountAmount != null ? #numbers.formatDecimal(bill.discountAmount, 0, 'POINT', 0, 'COMMA') + '₫' : '0₫'}" class="text-danger"></span>
-                        </p>
+                <div class="card mb-4 shadow p">
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Cột khách hàng -->
+                            <div class="col-md-6">
+                                <h6 class="fw-bold mb-3">👤 Khách hàng</h6>
+                                <p><strong>Họ và Tên:</strong> <span th:text="${bill.name}"></span></p>
+                                <p><strong>Số Điện Thoại:</strong> <span th:text="${bill.phoneNumber}"></span></p>
+                                <p><strong>Địa chỉ:</strong> <span th:text="${bill.address_shipping}"></span></p>
+                                <p><strong>Giảm giá:</strong>
+                                    <span th:text="${bill.discount != null ? bill.discount.code : 'Không sử dụng'}"
+                                          class="text-muted"></span>
+                                </p>
+                                <p><strong>Giá trị giảm:</strong>
+                                    <span th:text="${bill.discountAmount != null ? #numbers.formatDecimal(bill.discountAmount,0,'POINT',0,'COMMA') + '₫' : '0₫'}"
+                                          class="text-danger"></span>
+                                </p>
+                                <p><strong>Loại đơn:</strong>
+                                    <span th:text="${bill.typeBill == true ? 'Online' : 'Tại quầy'}"
+                                          th:classappend="${bill.typeBill == true ? 'text-success' : 'text-primary'}">
+                                     </span>
+                                </p>
+                            </div>
 
-                        <p>
-                            <strong>Loại đơn:</strong>
-                            <span th:text="${bill.typeBill == true ? 'Online' : 'Tại quầy'}"
-                                  th:classappend="${bill.typeBill == true ? 'text-success' : 'text-primary'}">Tại quầy</span>
-                        </p>
-                    </div>
-                    <div class="col-md-6 text-end">
-                        <p>
-                            <strong>Ngày mua hàng:</strong>
-                            <span th:text="${#temporals.format(bill.createdAt, 'dd-MM-yyyy HH:mm')}"></span>
-                        </p>
-
-
-                    </div>
-
-                    <!-- Bảng chi tiết đơn hàng -->
-                    <h6 class="mt-4">Danh sách sản phẩm</h6>
-                    <div class="table-responsive">
-                        <table class="table table-bordered text-center align-middle">
-                            <thead class="table-light">
-                            <tr>
-                                <th>Sản phẩm</th>
-                                <th>Màu sắc</th>
-                                <th>Kích cỡ</th>
-                                <th>Giá tiền</th>
-                                <th>Số lượng</th>
-                                <th>Thành tiền</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:each="detail : ${billDetails}">
-                                <td th:text="${detail.productDetail?.product?.name}">Áo thun</td>
-                                <td th:text="${detail.productDetail?.color?.name}">Đỏ</td>
-                                <td th:text="${detail.productDetail?.size?.name}">L</td>
-                                <td th:text="${detail.price != null ? #numbers.formatDecimal(detail.price, 0, 'POINT', 0, 'COMMA') + '₫' : '0₫'}"></td>
-                                <td th:text="${detail.quantity}"></td>
-                                <td th:text="${detail.price != null && detail.quantity != null ? #numbers.formatDecimal(detail.price * detail.quantity, 0, 'POINT', 0, 'COMMA') + '₫' : '0₫'}"></td>
-                            </tr>
-                            </tbody>
-                            <tfoot>
-                            <tr>
-                                <td colspan="5" class="text-end fw-bold">Tổng tiền hàng:</td>
-                                <td th:text="${#numbers.formatDecimal(total, 0, 'POINT', 0, 'COMMA') + '₫'}">0₫</td>
-                            </tr>
-                            <tr>
-                                <td colspan="5" class="text-end fw-bold">Giảm giá (voucher):</td>
-                                <td th:text="${bill.discountAmount != null ? #numbers.formatDecimal(bill.discountAmount, 0, 'POINT', 0, 'COMMA') + '₫' : '0₫'}">0₫</td>
-                            </tr>
-                            <tr>
-                                <td colspan="5" class="text-end fw-bold">Phí giao hàng:</td>
-                                <td th:text="${bill.shippingFee != null ? #numbers.formatDecimal(bill.shippingFee, 0, 'POINT', 0, 'COMMA') + '₫' : '0₫'}">0₫</td>
-                            </tr>
-                            <tr>
-                                <td colspan="5" class="text-end fw-bold text-success">Tổng thanh toán:</td>
-                                <td th:text="${#numbers.formatDecimal(bill.total_checkout, 0, 'POINT', 0, 'COMMA') + '₫'}"
-                                    class="text-success fw-bold">0₫</td>
-                            </tr>
-                            </tfoot>
-
-                        </table>
-                        <div class="d-print-none mt-4">
-                            <div class="float-end">
-                                <a th:href="@{'/admin/bill/export/' + ${bill.id}}" target="_blank" class="btn btn-primary">
-                                    Xuất PDF
-                                </a>
-                                <a th:href="@{'/admin/bill/view'}">
-                                    <button type="button" class="btn btn-secondary w-md" data-dismiss="modal">
-                                        Đóng
-                                    </button>
-                                </a>
+                            <!-- Cột hóa đơn -->
+                            <div class="col-md-6 text-md-end">
+                                <h6 class="fw-bold mb-3">🧾 Thông tin hóa đơn</h6>
+                                <p><strong>Mã đơn:</strong> <span th:text="${bill.code}"></span></p>
+                                <p><strong>Ngày mua hàng:</strong>
+                                    <span th:text="${#temporals.format(bill.createdAt,'dd-MM-yyyy HH:mm')}"></span>
+                                </p>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- Bảng chi tiết sản phẩm -->
+                <div class="card shadow p">
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-3">📦 Danh sách sản phẩm</h6>
+                        <div class="table-responsive">
+                            <table class="table table-bordered text-center align-middle">
+                                <thead class="table-light">
+                                <tr>
+                                    <th>Sản phẩm</th>
+                                    <th>Màu sắc</th>
+                                    <th>Kích cỡ</th>
+                                    <th>Giá tiền</th>
+                                    <th>Số lượng</th>
+                                    <th>Thành tiền</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="detail : ${billDetails}">
+                                    <td th:text="${detail.productDetail?.product?.name}">Áo thun</td>
+                                    <td th:text="${detail.productDetail?.color?.name}">Đỏ</td>
+                                    <td th:text="${detail.productDetail?.size?.name}">L</td>
+                                    <td th:text="${detail.price != null ? #numbers.formatDecimal(detail.price,0,'POINT',0,'COMMA') + '₫' : '0₫'}"></td>
+                                    <td th:text="${detail.quantity}"></td>
+                                    <td th:text="${detail.price != null && detail.quantity != null ? #numbers.formatDecimal(detail.price * detail.quantity,0,'POINT',0,'COMMA') + '₫' : '0₫'}"></td>
+                                </tr>
+                                </tbody>
+                                <tfoot>
+                                <tr>
+                                    <td colspan="5" class="text-end fw-bold">Tổng tiền hàng:</td>
+                                    <td th:text="${#numbers.formatDecimal(total,0,'POINT',0,'COMMA') + '₫'}">0₫</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="5" class="text-end fw-bold">Giảm giá (voucher):</td>
+                                    <td th:text="${bill.discountAmount != null ? #numbers.formatDecimal(bill.discountAmount,0,'POINT',0,'COMMA') + '₫' : '0₫'}">0₫</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="5" class="text-end fw-bold">Phí giao hàng:</td>
+                                    <td th:text="${bill.shippingFee != null ? #numbers.formatDecimal(bill.shippingFee,0,'POINT',0,'COMMA') + '₫' : '0₫'}">0₫</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="5" class="text-end fw-bold text-success">Tổng thanh toán:</td>
+                                    <td th:text="${#numbers.formatDecimal(bill.total_checkout,0,'POINT',0,'COMMA') + '₫'}"
+                                        class="text-success fw-bold">0₫</td>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        <div class="d-flex justify-content-end mt-3">
+                            <a th:href="@{'/admin/bill/export/' + ${bill.id}}" target="_blank" class="btn btn-primary me-2">
+                                <i class="bi bi-file-earmark-pdf"></i> Xuất PDF
+                            </a>
+                            <a th:href="@{'/admin/bill/view'}" class="btn btn-secondary">
+                                Đóng
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+<!--                -->
+<!--                <a th:href="@{/admin/bill/history/{id}(id=${bill.id})}"-->
+<!--                   class="btn btn-outline-secondary btn-sm"-->
+<!--                   title="Xem lịch sử trạng thái">-->
+<!--                    <i class="ti ti-history"></i> Lịch sử-->
+<!--                </a>-->
+<!--                <hr>-->
+                <!-- Thông tin khách hàng & hóa đơn -->
+<!--                <div class="row mb-4">-->
+<!--                    <div class="col-md-6">-->
+<!--                        <h6 class="fw-bold">Khách hàng:</h6>-->
+<!--                        <p th:text="${bill.name}" class="mb-1"></p>-->
+<!--                        <p th:text="${bill.phoneNumber}" class="mb-1"></p>-->
+<!--                        <p th:text="${bill.address_shipping}" class="mb-1"></p>-->
+<!--                        <p class="mb-1">-->
+<!--                            <strong>Voucher:</strong>-->
+<!--                            <span th:text="${bill.discount != null ? bill.discount.code : 'Không sử dụng'}" class="text-muted"></span>-->
+<!--                        </p>-->
+<!--                        <p>-->
+<!--                            <strong>Giá trị giảm:</strong>-->
+<!--                            <span th:text="${bill.discountAmount != null ? #numbers.formatDecimal(bill.discountAmount, 0, 'POINT', 0, 'COMMA') + '₫' : '0₫'}" class="text-danger"></span>-->
+<!--                        </p>-->
+
+<!--                        <p>-->
+<!--                            <strong>Loại đơn:</strong>-->
+<!--                            <span th:text="${bill.typeBill == true ? 'Online' : 'Tại quầy'}"-->
+<!--                                  th:classappend="${bill.typeBill == true ? 'text-success' : 'text-primary'}">Tại quầy</span>-->
+<!--                        </p>-->
+<!--                    </div>-->
+<!--                    <div class="col-md-6 text-end">-->
+<!--                        <p>-->
+<!--                            <strong>Ngày mua hàng:</strong>-->
+<!--                            <span th:text="${#temporals.format(bill.createdAt, 'dd-MM-yyyy HH:mm')}"></span>-->
+<!--                        </p>-->
+
+
+<!--                    </div>-->
+
+<!--                    &lt;!&ndash; Bảng chi tiết đơn hàng &ndash;&gt;-->
+<!--                    <h6 class="mt-4">Danh sách sản phẩm</h6>-->
+<!--                    <div class="table-responsive">-->
+<!--                        <table class="table table-bordered text-center align-middle">-->
+<!--                            <thead class="table-light">-->
+<!--                            <tr>-->
+<!--                                <th>Sản phẩm</th>-->
+<!--                                <th>Màu sắc</th>-->
+<!--                                <th>Kích cỡ</th>-->
+<!--                                <th>Giá tiền</th>-->
+<!--                                <th>Số lượng</th>-->
+<!--                                <th>Thành tiền</th>-->
+<!--                            </tr>-->
+<!--                            </thead>-->
+<!--                            <tbody>-->
+<!--                            <tr th:each="detail : ${billDetails}">-->
+<!--                                <td th:text="${detail.productDetail?.product?.name}">Áo thun</td>-->
+<!--                                <td th:text="${detail.productDetail?.color?.name}">Đỏ</td>-->
+<!--                                <td th:text="${detail.productDetail?.size?.name}">L</td>-->
+<!--                                <td th:text="${detail.price != null ? #numbers.formatDecimal(detail.price, 0, 'POINT', 0, 'COMMA') + '₫' : '0₫'}"></td>-->
+<!--                                <td th:text="${detail.quantity}"></td>-->
+<!--                                <td th:text="${detail.price != null && detail.quantity != null ? #numbers.formatDecimal(detail.price * detail.quantity, 0, 'POINT', 0, 'COMMA') + '₫' : '0₫'}"></td>-->
+<!--                            </tr>-->
+<!--                            </tbody>-->
+<!--                            <tfoot>-->
+<!--                            <tr>-->
+<!--                                <td colspan="5" class="text-end fw-bold">Tổng tiền hàng:</td>-->
+<!--                                <td th:text="${#numbers.formatDecimal(total, 0, 'POINT', 0, 'COMMA') + '₫'}">0₫</td>-->
+<!--                            </tr>-->
+<!--                            <tr>-->
+<!--                                <td colspan="5" class="text-end fw-bold">Giảm giá (voucher):</td>-->
+<!--                                <td th:text="${bill.discountAmount != null ? #numbers.formatDecimal(bill.discountAmount, 0, 'POINT', 0, 'COMMA') + '₫' : '0₫'}">0₫</td>-->
+<!--                            </tr>-->
+<!--                            <tr>-->
+<!--                                <td colspan="5" class="text-end fw-bold">Phí giao hàng:</td>-->
+<!--                                <td th:text="${bill.shippingFee != null ? #numbers.formatDecimal(bill.shippingFee, 0, 'POINT', 0, 'COMMA') + '₫' : '0₫'}">0₫</td>-->
+<!--                            </tr>-->
+<!--                            <tr>-->
+<!--                                <td colspan="5" class="text-end fw-bold text-success">Tổng thanh toán:</td>-->
+<!--                                <td th:text="${#numbers.formatDecimal(bill.total_checkout, 0, 'POINT', 0, 'COMMA') + '₫'}"-->
+<!--                                    class="text-success fw-bold">0₫</td>-->
+<!--                            </tr>-->
+<!--                            </tfoot>-->
+
+<!--                        </table>-->
+<!--                        <div class="d-print-none mt-4">-->
+<!--                            <div class="float-end">-->
+<!--                                <a th:href="@{'/admin/bill/export/' + ${bill.id}}" target="_blank" class="btn btn-primary">-->
+<!--                                    Xuất PDF-->
+<!--                                </a>-->
+<!--                                <a th:href="@{'/admin/bill/view'}">-->
+<!--                                    <button type="button" class="btn btn-secondary w-md" data-dismiss="modal">-->
+<!--                                        Đóng-->
+<!--                                    </button>-->
+<!--                                </a>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
             </div>
             <div class="modal fade" id="noteModal" tabindex="-1" aria-labelledby="noteModalLabel" aria-hidden="true">
                 <div class="modal-dialog">

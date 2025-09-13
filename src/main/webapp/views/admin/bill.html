@@ -1,10 +1,19 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head th:replace="~{admin/fragments/head :: head}"></head>
+<style>
+    .btn i {
+        line-height: 2;      /* bỏ thừa chiều cao */
+        vertical-align: middle;
+        display: inline-flex;
+        align-items: center; /* căn icon giữa */
+        justify-content: center;
+        font-size: 1rem;     /* chỉnh nếu muốn icon đều nhau */
+    }
+</style>
 <body data-pc-preset="preset-1" data-pc-direction="ltr" data-pc-theme="light">
 <div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
 <header th:replace="~{admin/fragments/header :: header}"></header>
-
 <div class="pc-container">
     <div class="pc-content">
         <!-- breadcrumb -->
@@ -22,25 +31,78 @@
         <!-- content: bạn dán phần “cards, charts, tables …” ở đây -->
         <div class="row">
             <form method="get" action="">
-                <div class="d-flex justify-content-end align-items-center mb-3">
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary" id="search-btn">🔍 Tìm kiếm</button>
-                        <a th:href="@{/admin/bill/view}" class="btn btn-outline-secondary">🧹 Hủy</a>
+<!--                <div class="d-flex justify-content-end align-items-center mb-3">-->
+<!--                    <div class="d-flex gap-2">-->
+<!--                        <button type="submit" class="btn btn-primary" id="search-btn">🔍 Tìm kiếm</button>-->
+<!--                        <a th:href="@{/admin/bill/view}" class="btn btn-outline-secondary">🧹 Hủy</a>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="row mb-3">-->
+<!--                    <div class="col">-->
+<!--                        <input type="text" name="code" class="form-control" placeholder="Mã hóa đơn"-->
+<!--                               th:value="${code}">-->
+<!--                    </div>-->
+<!--                    <div class="col">-->
+<!--                        <input type="date" name="startDate" class="form-control" th:value="${startDate}" />-->
+<!--                    </div>-->
+<!--                    <div class="col">-->
+<!--                        <input type="date" name="endDate" class="form-control" th:value="${endDate}" />-->
+<!--                    </div>-->
+<!--                    <div class="col">-->
+<!--                        <select name="status" class="form-control">-->
+<!--                            <option value="">Trạng thái</option>-->
+<!--                            <option value="1" th:selected="${status == 1}">Chờ xác nhận</option>-->
+<!--                            <option value="2" th:selected="${status == 2}">Đã xác nhận</option>-->
+<!--                            <option value="3" th:selected="${status == 3}">Đang giao</option>-->
+<!--                            <option value="4" th:selected="${status == 4}">Hoàn thành</option>-->
+<!--                            <option value="5" th:selected="${status == 5}">Đã huỷ</option>-->
+<!--                            <option value="6" th:selected="${status == 6}">Giao hàng thất bại</option>-->
+
+<!--                        </select>-->
+<!--                    </div>-->
+<!--                    <div class="col">-->
+<!--                        <select name="type" class="form-control">-->
+<!--                            <option value="">Loại đơn</option>-->
+<!--                            <option value="0" th:selected="${type == false}">Tại quầy</option>-->
+<!--                            <option value="1" th:selected="${type == true}">Online</option>-->
+<!--                        </select>-->
+<!--                    </div>-->
+<!--                    <div class="col">-->
+<!--                        <input type="text" name="name" class="form-control" placeholder="Họ và tên"-->
+<!--                               th:value="${name}">-->
+<!--                    </div>-->
+<!--                </div>-->
+
+<!--                <div class="row mb-3 align-items-end">-->
+<!--                    <div class="col-3">-->
+<!--                        <input type="text" name="phoneNumber" class="form-control" placeholder="Số điện thoại"-->
+<!--                               th:value="${phoneNumber}">-->
+<!--                    </div>-->
+
+<!--                </div>-->
+
+                <div class="row g-3 align-items-end mb-3">
+                    <div class="col-md-4">
+                        <label for="ma_hoa_don" class="form-label">Mã hóa đơn</label>
+                        <div class="input-group shadow-sm">
+                            <input id="ma_hoa_don" type="text" name="code" class="form-control" placeholder="Mã hóa đơn" th:value="${code}">
+                        </div>
                     </div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col">
-                        <input type="text" name="code" class="form-control" placeholder="Mã hóa đơn"
-                               th:value="${code}">
+                    <div class="col-md-3">
+                        <label for="ngay_bat_dau" class="form-label">Từ ngày</label>
+                        <div class="input-group shadow-sm">
+                            <input id="ngay_bat_dau" type="date" name="startDate" class="form-control" th:value="${startDate}" />
+                        </div>
                     </div>
-                    <div class="col">
-                        <input type="date" name="startDate" class="form-control" th:value="${startDate}" />
+                    <div class="col-md-3">
+                        <label for="ngay_ket_thuc" class="form-label">Đến ngày</label>
+                        <div class="input-group shadow-sm">
+                            <input id="ngay_ket_thuc" type="date" name="endDate" class="form-control" th:value="${endDate}" />
+                        </div>
                     </div>
-                    <div class="col">
-                        <input type="date" name="endDate" class="form-control" th:value="${endDate}" />
-                    </div>
-                    <div class="col">
-                        <select name="status" class="form-control">
+                    <div class="col-md-2">
+                        <label for="trang_thai" class="form-label">Trạng thái</label>
+                        <select id="trang_thai" name="status" class="form-control">
                             <option value="">Trạng thái</option>
                             <option value="1" th:selected="${status == 1}">Chờ xác nhận</option>
                             <option value="2" th:selected="${status == 2}">Đã xác nhận</option>
@@ -48,28 +110,42 @@
                             <option value="4" th:selected="${status == 4}">Hoàn thành</option>
                             <option value="5" th:selected="${status == 5}">Đã huỷ</option>
                             <option value="6" th:selected="${status == 6}">Giao hàng thất bại</option>
-
                         </select>
                     </div>
-                    <div class="col">
-                        <select name="typeBill" class="form-control">
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label for="ho_va_ten" class="form-label">Họ và tên</label>
+                        <div class="input-group shadow-sm">
+                            <input id="ho_va_ten" type="text" name="name" class="form-control" placeholder="Họ và tên" th:value="${name}">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="so_dien_thoai" class="form-label">Số điện thoại</label>
+                        <div class="input-group shadow-sm">
+                            <input id="so_dien_thoai" type="text" name="phoneNumber" class="form-control" placeholder="Số điện thoại" th:value="${phoneNumber}">
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="type_bill" class="form-label">Loại đơn</label>
+                        <select id="type_bill" name="typeBill" class="form-control">
                             <option value="">Loại đơn</option>
                             <option value="false" th:selected="${typeBill  == false}">Tại quầy</option>
                             <option value="true" th:selected="${typeBill  == true}">Online</option>
                         </select>
                     </div>
-                    <div class="col">
-                        <input type="text" name="name" class="form-control" placeholder="Họ và tên"
-                               th:value="${name}">
+                    <div class="col-md-1 d-grid">
+                        <button type="submit" class="btn btn-primary mt-4" id="search_product_btn" title="Tìm kiếm">
+                            <i class="ti ti-search"></i>
+                        </button>
                     </div>
-                </div>
-
-                <div class="row mb-3 align-items-end">
-                    <div class="col-3">
-                        <input type="text" name="phoneNumber" class="form-control" placeholder="Số điện thoại"
-                               th:value="${phoneNumber}">
+                    <div class="col-md-1 d-grid">
+                        <a th:href="@{/admin/bill/view}" class="btn btn-warning mt-4" id="clear_search" title="Xóa tìm kiếm">
+                            <i  class="ti ti-eraser"></i>
+                        </a>
                     </div>
-
                 </div>
             </form>
 
@@ -109,8 +185,13 @@
                                      <span th:case="*" >Không xác định</span>
                                  </span>
                     </td>
-                    <td>
-                        <a th:href="@{'/admin/bill/getbill-detail/' + ${bill.id}}" class="btn btn-sm btn-primary">Xem</a>
+<!--                    <td>-->
+<!--                        <a th:href="@{'/admin/bill/getbill-detail/' + ${bill.id}}" class="btn btn-sm btn-primary">Xem</a>-->
+<!--                    </td>-->
+                    <td style="text-align: center">
+                        <a class="btn btn-outline-info thayDoiTrangThai" th:href="@{'/admin/bill/getbill-detail/' + ${bill.id}}"  style="width: 70px" title="Xem">
+                            👁️
+                        </a>
                     </td>
                 </tr>
                 </tbody>
@@ -129,7 +210,7 @@
                                            endDate=${endDate},
                                            status=${status},
                                            typeBill=${typeBill})}">
-                            «
+                            Trước
                         </a>
                     </li>
 
@@ -161,7 +242,7 @@
                                            endDate=${endDate},
                                            status=${status},
                                            typeBill=${typeBill})}">
-                            »
+                            Sau
                         </a>
                     </li>
                 </ul>
