@@ -11,8 +11,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/discount")
@@ -21,13 +23,8 @@ public class DiscountRestController {
     @Autowired
     private DiscountRepository discountRepository;
 
-    // ✅ Áp dụng mã giảm giá cho khách vãng lai (nhập tay)
     @GetMapping("/apply")
     public ResponseEntity<?> applyDiscount(@RequestParam String code) {
-        if (code == null || code.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Vui lòng nhập mã giảm giá."));
-        }
-
         Optional<Discount> optionalDiscount = discountRepository.findByCode(code.trim());
 
         if (optionalDiscount.isEmpty()) {
@@ -37,42 +34,19 @@ public class DiscountRestController {
 
         Discount discount = optionalDiscount.get();
 
-        if (!isDiscountValid(discount)) {
+        if (discount.getStartDatetime() == null || discount.getEndDatetime() == null ||
+                discount.getStartDatetime().isAfter(LocalDateTime.now()) ||
+                discount.getEndDatetime().isBefore(LocalDateTime.now())) {
+
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Collections.singletonMap("message", "Mã giảm giá không hợp lệ hoặc đã hết hạn."));
+                    .body(Collections.singletonMap("message", "Mã giảm giá đã hết hạn hoặc chưa đến thời gian áp dụng."));
         }
 
+
         Map<String, Object> result = new HashMap<>();
-        result.put("discountId", discount.getId());
         result.put("discountAmount", discount.getDiscountValue());
         result.put("message", "Áp dụng mã giảm giá thành công");
 
         return ResponseEntity.ok(result);
     }
-
-    // ✅ Lấy danh sách mã giảm giá hợp lệ dành cho người đã đăng nhập
-    @GetMapping("/valid")
-    public ResponseEntity<?> getValidDiscountsForLoggedInUser() {
-        List<Discount> validDiscounts = discountRepository.findAll().stream()
-                .filter(this::isDiscountValid)
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(validDiscounts);
-    }
-
-    // ✅ Hàm kiểm tra hợp lệ
-    private boolean isDiscountValid(Discount discount) {
-        LocalDateTime now = LocalDateTime.now();
-
-        return discount.getStatus() != null &&
-                discount.getStatus() == 1 &&
-                discount.getStartDatetime() != null &&
-                discount.getEndDatetime() != null &&
-                !discount.getStartDatetime().isAfter(now) &&
-                !discount.getEndDatetime().isBefore(now) &&
-                discount.getUsageLimit() != null &&
-                discount.getUsageLimit() > 0;
-    }
 }
-
-

@@ -82,13 +82,13 @@ public class CartOnlineController {
                 billInsert.setPhone(account.getCustomer().getPhoneNumber());
                 billInsert.setEmail(account.getEmail());
 
-                if (account.getCustomer().getAddresses() != null && !account.getCustomer().getAddresses().isEmpty()) {
-                    ShippingAddress address = account.getCustomer().getAddresses().get(0);
-                    billInsert.setProvince(address.getProvinceName());
-                    billInsert.setDistrict(address.getDistrictName());
-                    billInsert.setWard(address.getWardName());
-                    billInsert.setStreet(address.getAddressDetail());
-                }
+//                if (account.getCustomer().getAddresses() != null && !account.getCustomer().getAddresses().isEmpty()) {
+//                    ShippingAddress address = account.getCustomer().getAddresses().get(0);
+//                    billInsert.setProvince(address.getProvinceName());
+//                    billInsert.setDistrict(address.getDistrictName());
+//                    billInsert.setWard(address.getWardName());
+//                    billInsert.setStreet(address.getAddressDetail());
+//                }
             }
         }
 

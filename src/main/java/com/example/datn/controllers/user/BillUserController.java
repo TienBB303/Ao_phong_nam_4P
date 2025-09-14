@@ -119,7 +119,12 @@ public class BillUserController {
                         billInsert.getProvince());
         bill.setNote(billInsert.getNote());
         bill.setTypeBill(true);
-        bill.setStatus(1);
+
+        if (billInsert.getPaymentMethodId() == 2) {
+            bill.setStatus(2);
+        } else {
+            bill.setStatus(1);
+        }
 
         // ✅ kiểm tra login hay khách vãng lai
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -159,7 +164,6 @@ public class BillUserController {
 
         if ("Chuyển khoản".equalsIgnoreCase(paymentMethod.getName())) {
             String payUrl = momoOnlineService.createQrOrder(bill.getId(), bill.getTotal_checkout());
-            bill.setStatus(2);
             return "redirect:" + payUrl;
         }
 
@@ -181,51 +185,51 @@ public class BillUserController {
     }
 
     //    fill information user login
-    @GetMapping("/checkout")
-    public String checkout(HttpSession session, Model model) {
-        BillInsert billInsert = new BillInsert();
-
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)) {
-            Account account = (Account) auth.getPrincipal();
-            Customer customer = customerRepository.findByAccount(account);
-
-            if (customer != null) {
-                billInsert.setFullName(customer.getName());
-                billInsert.setPhone(customer.getPhoneNumber());
-                billInsert.setEmail(account.getEmail());
-
-                // Lấy địa chỉ mặc định
-                if (customer.getAddresses() != null && !customer.getAddresses().isEmpty()) {
-                    ShippingAddress defaultAddress = customer.getAddresses()
-                            .stream()
-                            .filter(ShippingAddress::getIsDefault) // nếu có cờ mặc định
-                            .findFirst()
-                            .orElse(customer.getAddresses().get(0));
-
-                    billInsert.setProvince(defaultAddress.getProvinceName());
-                    billInsert.setDistrict(defaultAddress.getDistrictName());
-                    billInsert.setWard(defaultAddress.getWardName());
-                }
-            }
-
-            model.addAttribute("isGuest", false);
-        } else {
-            model.addAttribute("isGuest", true);
-        }
-
-        // giỏ hàng
-        Integer cartId = (Integer) session.getAttribute("cartId");
-        if (cartId != null) {
-            Cart cart = cartService.findCartById(cartId);
-            model.addAttribute("cart", cart);
-            model.addAttribute("totalCart", cartService.calTotalCart(cart));
-        }
-
-        model.addAttribute("billInsert", billInsert);
-
-        return "user/cart";
-    }
+//    @GetMapping("/checkout")
+//    public String checkout(HttpSession session, Model model) {
+//        BillInsert billInsert = new BillInsert();
+//
+//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+//        if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)) {
+//            Account account = (Account) auth.getPrincipal();
+//            Customer customer = customerRepository.findByAccount(account);
+//
+//            if (customer != null) {
+//                billInsert.setFullName(customer.getName());
+//                billInsert.setPhone(customer.getPhoneNumber());
+//                billInsert.setEmail(account.getEmail());
+//
+//                // Lấy địa chỉ mặc định
+//                if (customer.getAddresses() != null && !customer.getAddresses().isEmpty()) {
+//                    ShippingAddress defaultAddress = customer.getAddresses()
+//                            .stream()
+//                            .filter(ShippingAddress::getIsDefault) // nếu có cờ mặc định
+//                            .findFirst()
+//                            .orElse(customer.getAddresses().get(0));
+//
+//                    billInsert.setProvince(defaultAddress.getProvinceName());
+//                    billInsert.setDistrict(defaultAddress.getDistrictName());
+//                    billInsert.setWard(defaultAddress.getWardName());
+//                }
+//            }
+//
+//            model.addAttribute("isGuest", false);
+//        } else {
+//            model.addAttribute("isGuest", true);
+//        }
+//
+//        // giỏ hàng
+//        Integer cartId = (Integer) session.getAttribute("cartId");
+//        if (cartId != null) {
+//            Cart cart = cartService.findCartById(cartId);
+//            model.addAttribute("cart", cart);
+//            model.addAttribute("totalCart", cartService.calTotalCart(cart));
+//        }
+//
+//        model.addAttribute("billInsert", billInsert);
+//
+//        return "user/cart";
+//    }
 
 
     @GetMapping("/momo-return")

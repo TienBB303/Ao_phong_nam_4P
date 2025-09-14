@@ -6,6 +6,21 @@
     <title>Chi tiết sản phẩm</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.css" rel="stylesheet">
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+    <style>
+        #productImageCarousel .carousel-inner {
+            height: 450px; /* khung cố định */
+        }
+
+        #productImageCarousel img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;  /* giữ nguyên tỷ lệ, không crop */
+            margin: auto;         /* căn giữa */
+            display: block;
+        }
+    </style>
+
 </head>
 
 <body>
@@ -15,13 +30,14 @@
             <div class="row g-4">
                 <!-- Ảnh sản phẩm -->
                 <div class="col-md-6" th:if="${!listProductDetail.isEmpty()}">
+                    <!-- Container giới hạn kích thước -->
                     <div class="position-relative bg-light rounded shadow-sm p-3">
                         <div id="productImageCarousel" class="carousel slide" data-mdb-ride="carousel"
                              style="max-width: 100%; height: 450px; overflow: hidden;">
                             <div class="carousel-inner h-100">
                                 <div th:each="image, iterStat : ${uniqueImages}"
                                      th:class="'carousel-item h-100' + (${iterStat.index == 0} ? ' active' : '')">
-                                    <img th:src="@{'/image-detail/' + ${image.path_file}}"
+                                    <img th:src="${image.path_file}"
                                          class="d-block mx-auto"
                                          alt="Ảnh sản phẩm"
                                          style="max-height: 450px; object-fit: contain;">
