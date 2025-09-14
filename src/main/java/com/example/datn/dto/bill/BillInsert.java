@@ -31,4 +31,5 @@ public class BillInsert {
 
     private Integer discountId;
 
+    private Integer paymentMethodId;
 }

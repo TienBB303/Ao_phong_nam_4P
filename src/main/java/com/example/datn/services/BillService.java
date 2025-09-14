@@ -1,11 +1,7 @@
 package com.example.datn.services;
 
 
-import com.example.datn.entities.Bill;
-import com.example.datn.entities.BillDetails;
-import com.example.datn.entities.Customer;
-import com.example.datn.entities.Discount;
-import com.example.datn.entities.PaymentMethod;
+import com.example.datn.entities.*;
 import com.example.datn.entities.Selling.Cart;
 import com.example.datn.entities.Selling.CartDetail;
 import com.example.datn.entities.product_and_other.ProductDetail;
@@ -419,7 +415,7 @@ public class BillService {
         billRepository.save(cart);
     }
 
-    public Customer addCustomerToCart(Integer cartId, Integer customerId) throws Exception {
+    public Bill addCustomerToCart(Integer cartId, Integer customerId) throws Exception {
         Bill cart = billRepository.findByIdBill(cartId);
         if (cart == null) {
             throw new Exception("Không tìm thấy giỏ hàng");
@@ -431,20 +427,21 @@ public class BillService {
         }
 
         cart.setCustomer(customer);
-//        if (customer.getName() != null && !customer.getName().trim().isEmpty()) {
-        cart.setName(customer.getName());
-//        }
-//        if (customer.getPhoneNumber() != null && !customer.getPhoneNumber().trim().isEmpty()) {
-        cart.setPhoneNumber(customer.getPhoneNumber());
-//        }
-//        if (customer.getAddresses() != null && !customer.getAddresses().isEmpty()) {
-        cart.setAddress_shipping(customer.getAddresses().get(0).toString());
-//        }
         cart.setName(customer.getName());
         cart.setPhoneNumber(customer.getPhoneNumber());
 
+        List<ShippingAddress> listShippingAddressOfCustomer = customerRepository.findAllShippingAddressOfCustomer(customerId);
+        if(listShippingAddressOfCustomer != null && !listShippingAddressOfCustomer.isEmpty()){
+            ShippingAddress firstAddress = listShippingAddressOfCustomer.get(0);
+
+            String fullAddress = String.format("%s, %s, %s, %s",
+                    firstAddress.getProvinceName(), firstAddress.getDistrictName(), firstAddress.getWardName(), firstAddress.getAddressDetail());
+
+            cart.setAddress_shipping(fullAddress);
+        }
+
         billRepository.save(cart);
-        return customer;
+        return cart;
     }
 
     public void removeCustomerFromCart(Integer cartId) throws Exception {
@@ -509,7 +506,7 @@ public class BillService {
 
         cart.setPaymentStatus(true);
         if (cart.getDelivery_type() == true) {
-            cart.setStatus(1);                              // giao hàng
+            cart.setStatus(3);                              // giao hàng
         } else {
             cart.setStatus(4);                              // không giao hàng
         }
@@ -525,13 +522,13 @@ public class BillService {
                 cart.setName(cart.getCustomer().getName());
                 cart.setPhoneNumber(cart.getCustomer().getPhoneNumber());
             }
-        }
-
-        if (cart.getDelivery_type() == true) {
+        }else{
             if (cart.getName() == null || cart.getName().trim().isEmpty() || cart.getName().trim().equals("")) {
                 throw new Exception("Giao hàng không được để trống tên khách hàng");
             } else if (cart.getPhoneNumber() == null || cart.getPhoneNumber().isEmpty() || cart.getPhoneNumber().trim().equals("")) {
                 throw new Exception("Giao hàng không được để trống số điện thoại");
+            } else if (!cart.getPhoneNumber().matches("^\\d{9,10}$")) {
+                throw new Exception("Số điện thoại phải từ 9 đến 10 chữ số");
             } else if (cart.getAddress_shipping() == null || cart.getAddress_shipping().isEmpty() || cart.getAddress_shipping().trim().equals("")) {
                 throw new Exception("Giao hàng không được để trống địa chỉ khách hàng");
             } else if (cart.getShippingFee().compareTo(BigDecimal.ZERO) < 0) {
@@ -570,21 +567,21 @@ public class BillService {
     }
 
     //    ================================Khanh==============================================================================
-    public Bill updateStatus(String statusString, Integer id) {
+    public Bill updateStatus(Integer status, Integer id) {
         Bill bill = billRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn có id: " + id));
 
-        int newStatus;
-        try {
-            newStatus = Integer.parseInt(statusString);
-        } catch (NumberFormatException e) {
-            throw new RuntimeException("Trạng thái không hợp lệ: " + statusString);
-        }
+//        int newStatus;
+//        try {
+//            newStatus = Integer.parseInt(statusString);
+//        } catch (NumberFormatException e) {
+//            throw new RuntimeException("Trạng thái không hợp lệ: " + statusString);
+//        }
 
         int currentStatus = bill.getStatus();
 
         // Nếu chuyển từ CHỜ XÁC NHẬN (1) → ĐÃ XÁC NHẬN (2) thì trừ tồn kho
-        if (currentStatus == 1 && newStatus == 2) {
+        if (currentStatus == 1 && status == 2) {
             try {
                 deductProductQuantitiesOnStatusChange(id);
             } catch (Exception e) {
@@ -594,7 +591,7 @@ public class BillService {
         }
 
         // Nếu chuyển sang HUỶ (5) từ trạng thái khác CHỜ XÁC NHẬN (1) thì cộng lại tồn kho
-        if (newStatus == 5 && currentStatus != 1) {
+        if (status == 5 && currentStatus != 1) {
             List<BillDetails> billDetailsList = billDetailRepository.findByBillId(id);
             for (BillDetails detail : billDetailsList) {
                 ProductDetail productDetail = detail.getProductDetail();
@@ -604,7 +601,7 @@ public class BillService {
             }
         }
 
-        bill.setStatus(newStatus);
+        bill.setStatus(status);
         bill.setUpdatedAt(LocalDateTime.now());
 
         return billRepository.save(bill);
