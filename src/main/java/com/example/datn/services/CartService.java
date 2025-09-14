@@ -431,4 +431,10 @@ public class CartService {
         return discount.getId();
     }
 
+    public Cart createCartForAccount(Account account) {
+        Cart cart = new Cart();
+        cart.setAccount(account);
+        return cartRepository.save(cart);
+    }
+
 }
