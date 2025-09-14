@@ -1,7 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{user/layout-user.html}">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" layout:decorate="~{user/layout-user.html}">
 
 <head>
     <meta charset="UTF-8">
@@ -17,13 +15,13 @@
             <div class="row g-4">
                 <!-- Ảnh sản phẩm -->
                 <div class="col-md-6" th:if="${!listProductDetail.isEmpty()}">
-                    <!-- Container giới hạn kích thước -->
                     <div class="position-relative bg-light rounded shadow-sm p-3">
-                        <div id="productImageCarousel" class="carousel slide" data-mdb-ride="carousel" style="max-width: 100%; height: 450px; overflow: hidden;">
+                        <div id="productImageCarousel" class="carousel slide" data-mdb-ride="carousel"
+                             style="max-width: 100%; height: 450px; overflow: hidden;">
                             <div class="carousel-inner h-100">
                                 <div th:each="image, iterStat : ${uniqueImages}"
                                      th:class="'carousel-item h-100' + (${iterStat.index == 0} ? ' active' : '')">
-                                    <img th:src="${image.path_file}"
+                                    <img th:src="@{'/image-detail/' + ${image.path_file}}"
                                          class="d-block mx-auto"
                                          alt="Ảnh sản phẩm"
                                          style="max-height: 450px; object-fit: contain;">
@@ -34,10 +32,12 @@
                             </div>
 
                             <!-- Nút điều hướng -->
-                            <button class="carousel-control-prev" type="button" data-mdb-target="#productImageCarousel" data-mdb-slide="prev">
+                            <button class="carousel-control-prev" type="button" data-mdb-target="#productImageCarousel"
+                                    data-mdb-slide="prev">
                                 <span class="carousel-control-prev-icon"></span>
                             </button>
-                            <button class="carousel-control-next" type="button" data-mdb-target="#productImageCarousel" data-mdb-slide="next">
+                            <button class="carousel-control-next" type="button" data-mdb-target="#productImageCarousel"
+                                    data-mdb-slide="next">
                                 <span class="carousel-control-next-icon"></span>
                             </button>
                         </div>
@@ -53,6 +53,7 @@
                         </div>
 
                         <h2 class="fw-bold mb-3" th:text="${product.name}">Tên sản phẩm</h2>
+
                         <div class="mb-3">
                             <label for="colorSelect" class="form-label">Chọn màu:</label>
                             <select id="colorSelect" name="colorId" class="form-select form-select-sm w-50">
@@ -71,8 +72,10 @@
 
                         <div class="mb-3">
                             <label for="quantity" class="form-label">Số lượng:</label>
-                            <input type="number" id="quantity" name="quantity" value="1" min="1" class="form-control w-25">
+                            <input type="number" id="quantity" name="quantity" value="1" min="1"
+                                   class="form-control w-25">
                         </div>
+
                         <div class="mb-3">
                             <label class="form-label">Giá: </label>
                             <span id="priceDisplay" class="fw-bold text-danger">--</span>
@@ -90,38 +93,40 @@
                             <input type="hidden" id="productDetailId" name="productDetailId"/>
                             <input type="hidden" id="cartId" name="cartId" th:value="${session.cartId}"/>
                             <input type="hidden" id="quantityHidden" name="quantity"/>
+                            <input type="hidden" id="actionInput" name="action"/>
 
-                            <button type="submit" class="btn btn-primary me-2" name="action" value="addToCart">
+                            <button type="submit" class="btn btn-primary me-2" name="actionBtn" value="addToCart" disabled>
                                 Thêm vào giỏ
                             </button>
-                            <button type="submit" class="btn btn-danger" name="action" value="buyNow">
+                            <button type="submit" class="btn btn-danger" name="actionBtn" value="buyNow" disabled>
                                 Mua ngay
                             </button>
                         </form>
-
                     </div>
                 </div>
             </div>
-            <!-- Divider -->
-            <hr class="my-5"/>
 
-            <!--            &lt;!&ndash; Sản phẩm liên quan &ndash;&gt;-->
-            <!--            <h4 class="mb-4 text-center">Sản phẩm liên quan</h4>-->
-            <!--            <div class="row">-->
-            <!--                <div class="col-md-4 mb-4">-->
-            <!--                    <img src="" class="img-fluid rounded shadow-sm" alt="">-->
-            <!--                    <h5 class="card-title" th:text="${product.name}">Tên sản phẩm</h5>-->
-            <!--                    <a th:href="@{'/product-detail/' + ${product.code}}" class="btn btn-outline-primary btn-sm">Chi tiết</a>-->
-            <!--                </div>-->
-            <!--            </div>-->
+            <hr class="my-5"/>
         </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
             const colorSelect = document.getElementById("colorSelect");
             const sizeSelect = document.getElementById("sizeSelect");
             const priceDisplay = document.getElementById("priceDisplay");
             const quantityDisplay = document.getElementById("quantityDisplay");
-
             const productId = document.getElementById("productInfo").getAttribute("data-product-id");
+
+            const form = document.querySelector("form");
+            const quantityInput = document.getElementById("quantity");
+            const actionInput = document.getElementById("actionInput");
+            const buttons = document.querySelectorAll("button[name='actionBtn']");
+
+            let clickedButton = null;
+
+            function toggleButtons(enable) {
+                buttons.forEach(btn => btn.disabled = !enable);
+            }
 
             function fetchPriceAndQuantity() {
                 const colorId = colorSelect.value;
@@ -140,29 +145,29 @@
                             }).format(data.price);
                             priceDisplay.textContent = priceFormatted;
                             quantityDisplay.textContent = data.quantity;
+                            toggleButtons(true);
                         })
                         .catch(error => {
                             priceDisplay.textContent = "--";
                             quantityDisplay.textContent = "--";
+                            toggleButtons(false);
                             console.error("Lỗi khi lấy biến thể:", error);
                         });
                 } else {
-                    console.log("Chưa chọn đủ màu và size");
+                    priceDisplay.textContent = "--";
+                    quantityDisplay.textContent = "--";
+                    toggleButtons(false);
                 }
             }
 
             colorSelect.addEventListener("change", fetchPriceAndQuantity);
             sizeSelect.addEventListener("change", fetchPriceAndQuantity);
 
-            let clickedButton = null;
-            document.querySelectorAll("button[name='action']").forEach(btn => {
-                btn.addEventListener("click", function () {
+            buttons.forEach(btn => {
+                btn.addEventListener("click", () => {
                     clickedButton = btn;
                 });
             });
-
-            const form = document.querySelector("form");
-            const quantityInput = document.getElementById("quantity");
 
             form.addEventListener("submit", function (e) {
                 e.preventDefault();
@@ -170,21 +175,30 @@
                 const colorId = colorSelect.value;
                 const sizeId = sizeSelect.value;
                 const quantity = quantityInput.value;
+                const stock = parseInt(quantityDisplay.textContent);
 
                 if (!colorId || !sizeId) {
-                    alert("Vui lòng chọn đầy đủ màu và size!");
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Thiếu lựa chọn',
+                        text: 'Vui lòng chọn đầy đủ màu và size!'
+                    });
+                    return;
+                }
+
+                if (isNaN(stock) || parseInt(quantity) > stock) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Không đủ hàng',
+                        text: 'Số lượng vượt quá tồn kho!'
+                    });
                     return;
                 }
 
                 document.getElementById("colorIdInput").value = colorId;
                 document.getElementById("sizeIdInput").value = sizeId;
                 document.getElementById("quantityHidden").value = quantity;
-
-                const actionInput = document.createElement("input");
-                actionInput.type = "hidden";
-                actionInput.name = "action";
                 actionInput.value = clickedButton ? clickedButton.value : "addToCart";
-                form.appendChild(actionInput);
 
                 fetch(`/api/product-detail/id?productId=${productId}&colorId=${colorId}&sizeId=${sizeId}`)
                     .then(res => {
@@ -193,14 +207,38 @@
                     })
                     .then(data => {
                         if (!data.id) {
-                            alert("Không tìm thấy biến thể phù hợp!");
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Không tìm thấy biến thể',
+                                text: 'Vui lòng chọn màu/size khác!'
+                            });
                             return;
                         }
+
                         document.getElementById("productDetailId").value = data.id;
-                        form.submit();
+
+                        if (actionInput.value === "buyNow") {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Đang chuyển đến trang thanh toán...',
+                                showConfirmButton: false,
+                                timer: 1000
+                            }).then(() => form.submit());
+                        } else {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Đã thêm sản phẩm vào giỏ hàng!',
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then(() => form.submit());
+                        }
                     })
                     .catch(err => {
-                        alert("Lỗi khi lấy thông tin sản phẩm.");
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi hệ thống',
+                            text: 'Có lỗi khi lấy thông tin sản phẩm.'
+                        });
                         console.error(err);
                     });
             });

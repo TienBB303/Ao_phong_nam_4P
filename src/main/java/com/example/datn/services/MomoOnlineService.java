@@ -1,10 +1,12 @@
 package com.example.datn.services;
 
 import com.example.datn.entities.Bill;
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.json.JSONObject;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -12,31 +14,31 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.Unirest;
-
 @Service
-public class MomoService {
-    @Autowired
-    BillService billService;
+public class MomoOnlineService {
 
-    @Value("${momo.offline.partnerCode}")
+    @Autowired
+    private BillService billService;
+
+    @Value("${momo.online.partnerCode}")
     private String partnerCode;
 
-    @Value("${momo.offline.accessKey}")
+    @Value("${momo.online.accessKey}")
     private String accessKey;
 
-    @Value("${momo.offline.secretKey}")
+    @Value("${momo.online.secretKey}")
     private String secretKey;
 
-    @Value("${momo.offline.endpoint}")
+    @Value("${momo.online.endpoint}")
     private String endpoint;
 
-    @Value("${momo.offline.returnUrl}")
+    @Value("${momo.online.returnUrl}")
     private String returnUrl;
 
-    @Value("${momo.offline.notifyUrl}")
+    @Value("${momo.online.notifyUrl}")
     private String notifyUrl;
+
+    // createQrOrder(...) giống như bạn viết
 
     public String createQrOrder(Integer cartId, BigDecimal amount) throws Exception {
         Bill bill = billService.findById(cartId);
