@@ -4,6 +4,7 @@ package com.example.datn.services;
 
 import com.example.datn.dto.AddressDto;
 import com.example.datn.dto.customer.CustomerDto;
+import com.example.datn.entities.Account;
 import com.example.datn.entities.ShippingAddress;
 import com.example.datn.entities.Customer;
 import com.example.datn.entities.ShippingAddress;
@@ -63,4 +64,5 @@ public interface CustomerService {
 
     com.example.datn.entities.Account findAccountById(Integer accountId);
 
+    Account findAccountByCustomerID(Integer id);
 }
