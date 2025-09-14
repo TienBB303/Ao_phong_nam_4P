@@ -278,160 +278,58 @@
     }
 
     // Hàm áp dụng mã giảm giá cho khách chưa đăng nhập
-    function applyDiscount() {
-        const code = document.getElementById("discount-code").value.trim();
-        const messageDiv = document.getElementById("discount-message");
-
-        if (!code) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Lỗi',
-                text: 'Vui lòng nhập mã giảm giá.'
-            });
-            return;
-        }
-
-        fetch(`/api/discount/apply?code=${encodeURIComponent(code)}`)
-            .then(res => res.json().then(data => ({ok: res.ok, data})))
-            .then(response => {
-                if (response.ok) {
-                    const {discountId, discountAmount, message} = response.data;
-                    document.getElementById("discountCodeInput").value = code;
-                    document.getElementById("discountValueInput").value = discountAmount;
-                    document.getElementById("discountIdInput").value = discountId;
-
-                    document.getElementById("giamgia").innerText = "- " + formatCurrency(discountAmount);
-                    updateTotalAmount();
-
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Thành công',
-                        text: message || 'Áp dụng mã thành công.'
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Lỗi',
-                        text: response.data.message || 'Mã giảm giá không hợp lệ.'
-                    });
-
-                    // Xóa input ẩn nếu mã sai
-                    document.getElementById("discountCodeInput").value = '';
-                    document.getElementById("discountValueInput").value = '';
-                    document.getElementById("discountIdInput").value = '';
-                }
-            })
-            .catch(err => {
-                console.error("Lỗi gọi API:", err);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Lỗi',
-                    text: 'Đã xảy ra lỗi khi áp dụng mã.'
-                });
-            });
-    }
+    // Hàm áp dụng mã giảm giá
+    let discountValue = 0;
 
     function parseCurrency(str) {
-        return parseInt(str.replace(/[^\d]/g, '')) || 0;
+        const match = str.match(/-?\d+/g);
+        if (!match) return 0;
+        return parseInt(match.join(''));
     }
 
     function formatCurrency(num) {
         return num.toLocaleString('vi-VN') + 'đ';
     }
 
-    function updateTotalAmount() {
-        const tongTienHang = parseCurrency(document.getElementById('tongtienhang').innerText);
-        const giamGia = parseCurrency(document.getElementById('giamgia').innerText);
-        const phiShip = parseCurrency(document.getElementById('phiship').innerText);
+    function updateSummary() {
+        const tongTien = parseCurrency(document.getElementById("tongtienhang").textContent);
+        const phiShip = parseCurrency(document.getElementById("phiship").textContent);
 
-        const tamTinh = tongTienHang - giamGia;
-        const phaiThanhToan = tamTinh + phiShip;
+        const tamTinh = tongTien - discountValue;
+        const thanhToan = tamTinh + phiShip;
 
-        document.getElementById('tamtinh').innerText = formatCurrency(tamTinh);
-        document.getElementById('phaithanhtoan').innerText = formatCurrency(phaiThanhToan);
+        document.getElementById("giamgia").textContent = '- ' + formatCurrency(discountValue);
+        document.getElementById("tamtinh").textContent = formatCurrency(tamTinh);
+        document.getElementById("phaithanhtoan").textContent = formatCurrency(thanhToan);
     }
-
 
     function applyDiscount() {
         const code = document.getElementById("discount-code").value.trim();
-        const messageDiv = document.getElementById("discount-message");
+        if (!code) return alert("Vui lòng nhập mã giảm giá");
 
-        if (!code) {
-            messageDiv.innerText = "Vui lòng nhập mã giảm giá.";
-            messageDiv.classList.remove("text-success");
-            messageDiv.classList.add("text-danger");
-            return;
-        }
-
-        fetch(`/api/discount/apply?code=${encodeURIComponent(code)}`)
-            .then(res => res.json().then(data => ({ok: res.ok, data})))
-            .then(response => {
-                if (response.ok) {
-                    const {discountId, discountAmount, message} = response.data;
-                    document.getElementById("discountCodeInput").value = code;
-                    document.getElementById("discountValueInput").value = discountAmount;
-                    document.getElementById("discountIdInput").value = discountId;
-
-                    messageDiv.innerText = message;
-                    messageDiv.classList.remove("text-danger");
-                    messageDiv.classList.add("text-success");
-                } else {
-                    messageDiv.innerText = response.data.message || "Mã không hợp lệ.";
-                    messageDiv.classList.remove("text-success");
-                    messageDiv.classList.add("text-danger");
-
-                    // Xóa input ẩn nếu mã sai
-                    document.getElementById("discountCodeInput").value = '';
-                    document.getElementById("discountValueInput").value = '';
-                    document.getElementById("discountIdInput").value = '';
-                }
+        fetch(`/api/discount/apply?code=${code}`)
+            .then(res => {
+                if (!res.ok) throw res;
+                return res.json();
             })
-            .catch(err => {
-                console.error("Lỗi gọi API:", err);
-                messageDiv.innerText = "Đã xảy ra lỗi.";
-                messageDiv.classList.remove("text-success");
-                messageDiv.classList.add("text-danger");
+            .then(data => {
+                discountValue = data.discountAmount || 0;
+                document.getElementById("discountCodeInput").value = code;
+                document.getElementById("discountValueInput").value = discountValue;
+                alert(data.message);
+                updateSummary();
+            })
+            .catch(async err => {
+                const errMsg = await err.json();
+                alert(errMsg.message || "Lỗi khi áp mã");
+                discountValue = 0;
+                document.getElementById("discountCodeInput").value = "";
+                document.getElementById("discountValueInput").value = "0";
+                updateSummary();
             });
     }
 
-    function applySelectedDiscount() {
-        const select = document.getElementById("discountSelect");
-        const selectedOption = select.options[select.selectedIndex];
-
-        if (!selectedOption.value) {
-            // Nếu chọn "-- Không áp dụng mã --"
-            document.getElementById("discountCodeInput").value = '';
-            document.getElementById("discountValueInput").value = '';
-            document.getElementById("discountIdInput").value = '';
-            document.getElementById("giamgia").innerText = "- 0đ";
-            updateTotalAmount();
-            return;
-        }
-
-        const code = selectedOption.getAttribute("data-code");
-        const amount = parseInt(selectedOption.getAttribute("data-amount")) || 0;
-
-        document.getElementById("discountCodeInput").value = code;
-        document.getElementById("discountValueInput").value = amount;
-        document.getElementById("discountIdInput").value = selectedOption.value;
-
-        document.getElementById("giamgia").innerText = "- " + formatCurrency(amount);
-        updateTotalAmount();
-
-        const msg = document.getElementById("discount-message");
-        if (msg) {
-            msg.innerText = `Áp dụng mã ${code} thành công.`;
-            msg.classList.remove("text-danger");
-            msg.classList.add("text-success");
-
-            msg.style.display = "block";
-            setTimeout(() => {
-                msg.style.display = "none";
-            }, 3000);
-        }
-    }
-
-    window.addEventListener('DOMContentLoaded', updateTotalAmount);
+    document.addEventListener("DOMContentLoaded", updateSummary);
 </script>
 </body>
 </html>
