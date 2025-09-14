@@ -6,10 +6,12 @@ import com.example.datn.entities.Discount;
 import com.example.datn.entities.Selling.Cart;
 import com.example.datn.entities.Selling.CartDetail;
 import com.example.datn.entities.ShippingAddress;
+import com.example.datn.entities.product_and_other.ProductDetail;
 import com.example.datn.repositories.AccountRepository;
 import com.example.datn.repositories.DiscountRepository;
 import com.example.datn.repositories.cart.CartDetailRepositoty;
 import com.example.datn.repositories.cart.CartRepository;
+import com.example.datn.repositories.product_and_other.ProductDetailRepository;
 import com.example.datn.services.CartService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +47,9 @@ public class CartOnlineController {
 
     @Autowired
     private DiscountRepository discountRepository;
+
+    @Autowired
+    private ProductDetailRepository productDetailRepository;
 
     @GetMapping
     public String showCart(Model model, HttpSession session) {
@@ -134,7 +139,10 @@ public class CartOnlineController {
     }
 
     @GetMapping("/up-down")
-    public String upAndDownQuantity(@RequestParam Integer productDetailId, @RequestParam Integer quantity, HttpSession session) {
+    public String upAndDownQuantity(@RequestParam Integer productDetailId,
+                                    @RequestParam Integer quantity,
+                                    HttpSession session,
+                                    RedirectAttributes redirectAttributes) {
         Integer cartId = (Integer) session.getAttribute("cartId");
         if (cartId != null) {
             Cart cart = cartService.findCartById(cartId);
@@ -142,10 +150,21 @@ public class CartOnlineController {
                 for (CartDetail cd : cart.getCartDetails()) {
                     if (cd.getProductDetail().getId().equals(productDetailId)) {
                         int newQuantity = cd.getQuantity() + quantity;
-                        if (newQuantity > 0 && newQuantity <= cd.getProductDetail().getQuantity()) {
-                            cd.setQuantity(newQuantity);
-                            cartDetailRepositoty.save(cd);
+
+                        if (newQuantity <= 0) {
+                            redirectAttributes.addFlashAttribute("errorMessage",
+                                    "Số lượng tối thiểu là 1 sản phẩm!");
+                            return "redirect:/cart";
                         }
+
+                        if (newQuantity > cd.getProductDetail().getQuantity()) {
+                            redirectAttributes.addFlashAttribute("errorMessage",
+                                    "Số lượng sản phẩm trong kho không đủ!");
+                            return "redirect:/cart";
+                        }
+
+                        cd.setQuantity(newQuantity);
+                        cartDetailRepositoty.save(cd);
                     }
                 }
             }
@@ -167,7 +186,7 @@ public class CartOnlineController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()
                 && !"anonymousUser".equals(authentication.getPrincipal())) {
-            String email = authentication.getName(); // hoặc (String) authentication.getPrincipal();
+            String email = authentication.getName();
             account = accountRepository.findByEmail(email).orElse(null);
         }
 
@@ -178,30 +197,35 @@ public class CartOnlineController {
             newCart.setTotal_price_cart(BigDecimal.ZERO);
             newCart.setTotal_price_checkout(BigDecimal.ZERO);
             newCart.setTotal_discount(BigDecimal.ZERO);
-
-            // 👉 Gán Account nếu có
             if (account != null) {
                 newCart.setAccount(account);
             }
-
             cartRepository.save(newCart);
             cartId = newCart.getId();
             session.setAttribute("cartId", cartId);
         }
 
         try {
-            // 👉 Gửi account vào service
             cartService.addProductOnlineToCart(cartId, productDetailId, quantity, account);
 
             if ("buyNow".equals(action)) {
                 return "redirect:/cart";
             }
 
+            ProductDetail pd = productDetailRepository.findById(productDetailId)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy biến thể"));
+            Integer productId = pd.getProduct().getId();
+
             redirectAttributes.addFlashAttribute("successMessage", "Đã thêm sản phẩm vào giỏ hàng!");
-            return "redirect:/product-detail/" + productDetailId;
+            return "redirect:/product-detail/" + productId;
+
         } catch (Exception e) {
+            ProductDetail pd = productDetailRepository.findById(productDetailId)
+                    .orElse(null);
+            Integer productId = (pd != null) ? pd.getProduct().getId() : 0;
+
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/product-detail/" + productDetailId;
+            return "redirect:/product-detail/" + productId;
         }
     }
 
@@ -261,4 +285,3 @@ public class CartOnlineController {
     }
 
 }
-
