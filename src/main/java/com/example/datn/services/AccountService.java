@@ -1,6 +1,7 @@
 package com.example.datn.services;
 import com.example.datn.dto.employee.AccountDto;
 import com.example.datn.entities.Account;
+import com.example.datn.entities.Selling.Cart;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -17,4 +18,6 @@ public interface AccountService {
     String generateRandomPassword(int length);
 
     Account findByEmail(String email);
+
+    Cart getCartByAccountID(Integer id);
 }

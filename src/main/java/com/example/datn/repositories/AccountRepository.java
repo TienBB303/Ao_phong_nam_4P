@@ -2,6 +2,7 @@ package com.example.datn.repositories;
 
 import com.example.datn.dto.response.AccountResponseDto;
 import com.example.datn.entities.Account;
+import com.example.datn.entities.Selling.Cart;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,4 +23,6 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     boolean existsByEmail(String email);
     Optional<Account> findByEmail(String email);
 
+    @Query("select c from Cart c where c.account.id = :accountId")
+    Cart findByAccountID(Integer accountId);
 }

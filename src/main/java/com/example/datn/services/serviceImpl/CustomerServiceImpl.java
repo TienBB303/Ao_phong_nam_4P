@@ -455,4 +455,9 @@ public class CustomerServiceImpl implements CustomerService {
     public Account findAccountById(Integer accountId) {
         return accountRepository.findById(accountId).orElse(null);
     }
+
+    @Override
+    public Account findAccountByCustomerID(Integer id) {
+        return customerRepository.findAccountByCustomerID(id);
+    }
 }

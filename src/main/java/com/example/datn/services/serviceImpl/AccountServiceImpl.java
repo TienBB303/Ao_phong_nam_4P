@@ -3,6 +3,7 @@ import com.example.datn.dto.employee.AccountDto;
 import com.example.datn.entities.Account;
 import com.example.datn.entities.Customer;
 import com.example.datn.entities.Role;
+import com.example.datn.entities.Selling.Cart;
 import com.example.datn.entities.ShippingAddress;
 import com.example.datn.repositories.AccountRepository;
 import com.example.datn.repositories.CustomerRepository;
@@ -102,6 +103,7 @@ public class AccountServiceImpl implements AccountService {
                 .orElseThrow(() -> new RuntimeException("Account not found with email: " + email));
     }
 
+
     @Override
     public void update(AccountDto accountDto) {
 
@@ -158,5 +160,10 @@ public class AccountServiceImpl implements AccountService {
                 .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy tài khoản: " + email));
     }
 
+
+    @Override
+    public Cart getCartByAccountID(Integer accountId) {
+        return accountRepository.findByAccountID(accountId);
+    }
 
 }
