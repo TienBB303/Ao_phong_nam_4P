@@ -39,7 +39,7 @@
 
                 <div class="info">
                     <span class="label">Giá trị:</span>
-                    <span class="value" th:text="${discount.discountValue}">Giá trị</span>
+                    <span th:text="${#numbers.formatDecimal(discount.discountValue, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
                 </div>
 
                 <div class="info">
@@ -54,12 +54,14 @@
 
                 <div class="info">
                     <span class="label">Đơn tối thiểu:</span>
-                    <span class="value" th:text="${discount.minPurchase}">Đơn tối thiểu</span>
+                    <span th:text="${#numbers.formatDecimal(discount.minPurchase, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
+
                 </div>
 
                 <div class="info">
                     <span class="label">Giảm tối đa:</span>
-                    <span class="value" th:text="${discount.maxDiscount}">Giảm tối đa</span>
+                    <span th:text="${#numbers.formatDecimal(discount.minPurchase, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
+
                 </div>
 
                 <div class="info">
