@@ -42,7 +42,7 @@
             </div>
         </div>
         <div th:if="${idCart == null}" class="d-flex flex-column justify-content-center align-items-center" style="height: 400px;">
-            <img src="https://shop.nebulacare.in/Content/Images/nodata.jpg" style="max-height: 400px;">
+            <img src="https://img.freepik.com/premium-vector/man-with-question-mark-looking-computer-screen-with-no-data-error-message_808505-4655.jpg?semt=ais_incoming&w=740&q=80" style="max-height: 400px;">
         </div>
         <div class="card-body">
             <div th:if="${idCart != null}" class="row gx-3 mb-3">
@@ -268,10 +268,10 @@
                     <!--  thông tin tiền -->
                     <div class="card shadow-sm rounded-3">
                         <div class="card-header fw-bold bg-light">
-                            thông tin thanh toán - tổng số lượng sản phẩm áo(<span th:text="${allItemInCart}">0</span>)
+                            thông tin thanh toán - tổng số lượng sản phẩm áo : <span th:text="${allItemInCart}">0</span>
                         </div>
                         <div class="card-body py-2">
-                            <div class="row gx-1 gy-2 align-items-end">
+                            <div class="row gx-1 gy-2 align-items-end" style="padding-top: 15px">
                                 <div class="col-md-6 position-relative">
                                     <label for="total_price_all_product">Tổng tiền sản phẩm</label>
                                     <input type="text" id="total_price_all_product" class="form-control giaVND" th:value="${totalPriceInCart}" readonly>
@@ -281,7 +281,7 @@
                                     <input type="text" id="total_price_discount" class="form-control giaVND" th:value="${totalPriceDiscount}" readonly>
                                 </div>
                             </div>
-                            <div class="row gx-1 gy-2 align-items-end">
+                            <div class="row gx-1 gy-2 align-items-end" style="padding-top: 10px; padding-bottom: 10px">
                                 <div class="col-md-12 position-relative">
                                     <label for="total_price_checkout">Thành tiền</label>
                                     <input type="text" id="total_price_checkout" class="form-control giaVND" th:value="${totalPriceCheckOut}" readonly>

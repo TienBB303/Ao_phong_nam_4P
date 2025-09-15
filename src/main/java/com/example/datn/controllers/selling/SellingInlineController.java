@@ -17,6 +17,8 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -51,6 +53,9 @@ public class SellingInlineController {
 
     @Autowired
     private MomoService momoService;
+
+    @Autowired
+    private AccountService accountService;
 
     @ModelAttribute("listProduct")
     public List<Product> listProduct() {
@@ -452,6 +457,16 @@ public class SellingInlineController {
 
     @GetMapping("/print/{id}")
     public String printInvoice(@PathVariable("id") Integer billId, Model model) {
+        Account account = null;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()
+                && !"anonymousUser".equals(authentication.getPrincipal())) {
+            String email = authentication.getName();
+            account = accountService.findByEmail(email);
+        }
+
+        String name_employee = account.getCustomer().getName();
+
         Bill bill = billService.findById(billId);
 
         Customer customer = null;
@@ -479,8 +494,7 @@ public class SellingInlineController {
         model.addAttribute("list_san_pham", list_san_pham);
         model.addAttribute("shippingFee", shippingFee);
         model.addAttribute("tongSoLuong", tongSoLuong);
-
-
+        model.addAttribute("name_employee", name_employee);
 
         return "admin/selling/print";
     }

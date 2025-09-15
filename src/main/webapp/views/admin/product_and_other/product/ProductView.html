@@ -111,7 +111,8 @@
             </form>
             <!-- Nếu không tìm thấy sản phẩm -> load ảnh null-->
             <div th:if="${#lists.isEmpty(listProduct.content)}" class="d-flex flex-column justify-content-center align-items-center" style="height: 400px;">
-                <img src="https://shop.nebulacare.in/Content/Images/nodata.jpg" style="max-height: 400px;">
+<!--                <img src="https://shop.nebulacare.in/Content/Images/nodata.jpg" style="max-height: 400px;">-->
+                <img src="https://img.freepik.com/premium-vector/man-with-question-mark-looking-computer-screen-with-no-data-error-message_808505-4655.jpg?semt=ais_incoming&w=740&q=80" style="max-height: 400px;">
             </div>
             <!-- Nếu tìm thấy sản phẩm -> show table-->
             <div th:if="${!#lists.isEmpty(listProduct.content)}" class="card-body">

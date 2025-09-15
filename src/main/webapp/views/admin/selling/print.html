@@ -34,6 +34,7 @@
 <div class="invoice">
     <div class="head">
         <div>
+            <img th:src="@{/assets/images/logo_4P.png}" class="img-fluid logo-lg" alt="logo" style="width:100px; height:auto;">
             <div class="brand">4P Store</div>
             <div class="muted">Địa chỉ cửa hàng · Hotline: 0123 456 789</div>
         </div>
@@ -41,6 +42,8 @@
             <div class="title">HÓA ĐƠN BÁN HÀNG</div>
             <div class="muted">Mã: <span th:text="${bill.code}">HD000001</span></div>
             <div class="muted">Ngày: <span th:text="${#temporals.format(bill.createdAt, 'dd/MM/yyyy HH:mm')}">07/09/2025 14:00</span></div>
+            <div class="muted">Nhân viên thực hiện: <strong th:text="${name_employee}">Demo</strong></div>
+
         </div>
     </div>
 
