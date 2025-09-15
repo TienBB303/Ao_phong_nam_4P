@@ -196,7 +196,16 @@
                 <!-- Bảng chi tiết sản phẩm -->
                 <div class="card shadow p">
                     <div class="card-body">
-                        <h6 class="fw-bold mb-3">📦 Danh sách sản phẩm</h6>
+<!--                        <h6 class="fw-bold mb-3">📦 Danh sách sản phẩm</h6>-->
+                        <div class="d-flex align-items-center" style="padding-bottom: 10px">
+                            <h5 class="mb-0 me-2">📦 Danh sách sản phẩm</h5>
+<!--                            <a th:if="${bill.status == 1 or bill.status == 2}" th:href="@{/admin/product/view-add}"-->
+                            <a th:href="@{/admin/product/view-add}"
+                               class="btn btn-sm btn-primary rounded-circle shadow-lg d-flex align-items-center justify-content-center"
+                               style="width: 32px; height: 32px;" title="Thêm sản phẩm vào hóa đơn hiện tại ">
+                                <i class="ti ti-plus"></i>
+                            </a>
+                        </div>
                         <div class="table-responsive">
                             <table class="table table-bordered text-center align-middle">
                                 <thead class="table-light">
