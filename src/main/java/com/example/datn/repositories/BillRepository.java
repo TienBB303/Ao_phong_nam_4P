@@ -117,6 +117,7 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
     Object[] getRevenueAndOrdersByRange(@Param("startDate") LocalDateTime startDate,
                                         @Param("endDate") LocalDateTime endDate);
 
+
     // Số đơn hàng hôm nay (cả online + offline)
     @Query(value = """
     SELECT COUNT(*) FROM bill

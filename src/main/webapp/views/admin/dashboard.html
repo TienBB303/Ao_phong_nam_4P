@@ -13,54 +13,55 @@
                     <div class="h4" th:text="${totalOrders}">0</div>
                 </div>
             </div>
-            <div class="col-md-3 mb-3">
-                <div class="card text-center p-3">
-                    <div class="h6">Số đơn chờ xử lý</div>
-                    <div class="h4" th:text="${pendingOrders}">0</div>
-                </div>
-            </div>
-            <div class="col-md-3 mb-3">
-                <div class="card text-center p-3">
-                    <div class="h6">Số đơn chờ xác nhận</div>
-                    <div class="h4" th:text="${pendingOrders}">0</div>
-                    <div class="small text-muted">
-                        Trong đó đã thanh toán: <span th:text="${paidPendingOrders}">0</span>
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="card text-center p-3">
+                        <div class="h6">Số đơn chờ xử lý</div>
+                        <div class="h4" th:text="${pendingOrders}">0</div>
                     </div>
                 </div>
-            </div>
-
-            <div class="col-md-3 mb-3">
-                <div class="card text-center p-3">
-                    <div class="h6">Tổng doanh thu</div>
-                    <div class="h4" th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">0
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 mb-3">
-                <div class="card text-center p-3">
-                    <div class="h6">Số sản phẩm</div>
-                    <div class="h4" th:text="${totalProducts}">0</div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="h6 mb-2">Doanh thu 7 ngày gần nhất</div>
-                            <canvas id="revenueChart"
-                                    th:data-labels="${dateLabels}"
-                                    th:data-values="${revenueValues}"></canvas>
+                <div class="col-md-3 mb-3">
+                    <div class="card text-center p-3">
+                        <div class="h6">Số đơn chờ xác nhận</div>
+                        <div class="h4" th:text="${waitingOrders}">0</div>
+                        <div class="small text-muted">
+                            Trong đó đã thanh toán: <span th:text="${paidPendingOrders}">0</span>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6 mb-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="h6 mb-2">Đơn hàng theo trạng thái</div>
-                            <canvas id="orderPieChart"
-                                    th:data-labels="${orderStatusMap.keySet()}"
-                                    th:data-values="${orderStatusMap.values()}"></canvas>
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-center p-3">
+                            <div class="h6">Tổng doanh thu</div>
+                            <div class="h4" th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">0</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-center p-3">
+                            <div class="h6">Số sản phẩm</div>
+                            <div class="h4" th:text="${totalProducts}">0</div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="h6 mb-2">Doanh thu 7 ngày gần nhất</div>
+                                    <canvas id="revenueChart"
+                                            th:data-labels="${dateLabels}"
+                                            th:data-values="${revenueValues}"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="h6 mb-2">Đơn hàng theo trạng thái</div>
+                                <canvas id="orderPieChart"
+                                        th:data-labels="${orderStatusMap.keySet()}"
+                                        th:data-values="${orderStatusMap.values()}">
+                                </canvas>
+                            </div>
                         </div>
                     </div>
                 </div>
