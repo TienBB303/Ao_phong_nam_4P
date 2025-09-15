@@ -506,7 +506,7 @@ public class BillService {
 
         cart.setPaymentStatus(true);
         if (cart.getDelivery_type() == true) {
-            cart.setStatus(3);                              // giao hàng
+            cart.setStatus(1);                              // giao hàng
         } else {
             cart.setStatus(4);                              // không giao hàng
         }

@@ -110,15 +110,6 @@
                         🚚 Xác nhận giao hàng
                     </button>
 
-                    <!-- Nút hoàn thành -->
-                    <button th:if="${bill.status == 3}"
-                            class="btn btn-outline-success"
-                            data-bs-toggle="modal"
-                            data-bs-target="#noteModal"
-                            th:onclick="|prepareStatusUpdate(${bill.id}, 4, 'Xác nhận hoàn thành')|">
-                        ✅ Đã giao thành công
-                    </button>
-
                     <!-- Nút giao thất bại -->
                     <button th:if="${bill != null and bill.status == 3}"
                             class="btn btn-outline-danger"
@@ -127,16 +118,16 @@
                             th:onclick="|prepareStatusUpdate(${bill.id}, 6, 'Giao hàng thất bại')|">
                         🚫 Giao hàng thất bại
                     </button>
+
+                    <!-- Nút hoàn thành -->
+                    <button th:if="${bill.status == 3}"
+                            class="btn btn-outline-success"
+                            data-bs-toggle="modal"
+                            data-bs-target="#noteModal"
+                            th:onclick="|prepareStatusUpdate(${bill.id}, 4, 'Xác nhận hoàn thành')|">
+                        ✅ Đã giao thành công
+                    </button>
                 </div>
-
-
-                <!--                &lt;!&ndash; Thông tin cửa hàng &ndash;&gt;-->
-                <!--                <div class="mb-4">-->
-                <!--                    <h5 class="fw-bold text-dark"> 4PStore</h5>-->
-                <!--                    <p class="text-muted mb-1">Đ/C: FPT Polytechnic Trịnh Văn Bô</p>-->
-                <!--                    <p class="text-muted mb-1">Email: 4PStore@gmail.com</p>-->
-                <!--                    <p class="text-muted mb-0">SDT: 0398121210</p>-->
-                <!--                </div>-->
 
                 <!-- Thông tin cửa hàng -->
                 <div class="card mb-4 shadow p">
@@ -200,11 +191,11 @@
                         <div class="d-flex align-items-center" style="padding-bottom: 10px">
                             <h5 class="mb-0 me-2">📦 Danh sách sản phẩm</h5>
 <!--                            <a th:if="${bill.status == 1 or bill.status == 2}" th:href="@{/admin/product/view-add}"-->
-                            <a th:href="@{/admin/product/view-add}"
-                               class="btn btn-sm btn-primary rounded-circle shadow-lg d-flex align-items-center justify-content-center"
-                               style="width: 32px; height: 32px;" title="Thêm sản phẩm vào hóa đơn hiện tại ">
-                                <i class="ti ti-plus"></i>
-                            </a>
+<!--                            <a th:href="@{/admin/product/view-add}"-->
+<!--                               class="btn btn-sm btn-primary rounded-circle shadow-lg d-flex align-items-center justify-content-center"-->
+<!--                               style="width: 32px; height: 32px;" title="Thêm sản phẩm vào hóa đơn hiện tại ">-->
+<!--                                <i class="ti ti-plus"></i>-->
+<!--                            </a>-->
                         </div>
                         <div class="table-responsive">
                             <table class="table table-bordered text-center align-middle">
