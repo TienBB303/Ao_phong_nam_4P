@@ -1,6 +1,8 @@
 package com.example.datn.repositories;
 
+import com.example.datn.entities.Account;
 import com.example.datn.entities.Customer;
+import com.example.datn.entities.ShippingAddress;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,7 +15,7 @@ import java.util.Optional;
 
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer,Integer> {
-//    boolean existsByEmail(String email);
+    //    boolean existsByEmail(String email);
     //check unique
     boolean existsByCode(String code);
 
@@ -21,7 +23,9 @@ public interface CustomerRepository extends JpaRepository<Customer,Integer> {
 
     @Query("SELECT c FROM Customer c WHERE c.isActive = true AND (c.name LIKE %:keyword% OR c.code LIKE %:keyword%)")
     Page<Customer> searchCustomerKeyword(@Param("keyword") String keyword, Pageable pageable);
+
     Page<Customer> findByIsActiveTrue(Pageable pageable);
+
     // ma tu sinh
     Customer findTopByOrderByIdDesc();
 
@@ -31,6 +35,7 @@ public interface CustomerRepository extends JpaRepository<Customer,Integer> {
             "lower(c.name) like lower(concat('%', :keyword, '%') ) " +
             "or lower(c.phoneNumber) like lower(concat('%', :keyword, '%') ) ")
     List<Customer> searchCustomerByKeywordInline(@Param("keyword") String keyword);
+
 
     @Query("select c from Customer c where lower(c.name) like lower(concat('%%', :name, '%')) " +
             "or c.phoneNumber like :phoneNumber ")
@@ -54,4 +59,22 @@ public interface CustomerRepository extends JpaRepository<Customer,Integer> {
             "WHERE a.email = :email")
     Optional<Customer> findByAccountEmailWithAddresses(@Param("email") String email);
 
+
+//    @Query("select c from Customer c where lower(c.name) like lower(concat('%%', :name, '%')) " +
+//            "or c.phoneNumber like :phoneNumber ")
+//    Customer searchCustomerExistNameOrPhoneInline(String name, String phoneNumber);
+
+    @Query("select c from Customer c where c.phoneNumber like :phoneNumber ")
+    Customer searchCustomerExistPhoneInline(String phoneNumber);
+
+
+    //TienBB thêm query truy vấn tìm tất cả địa chỉ của khách
+    @Query("select sa from ShippingAddress sa where sa.customer.id = :id")
+    List<ShippingAddress> findAllShippingAddressOfCustomer(Integer id);
+
+    //TienBB thêm query truy vấn tìm account by user
+    @Query("SELECT a FROM Account a WHERE a.customer.id = :customerId")
+    Account findAccountByCustomerID(Integer customerId);
+
+    Customer findByAccount(Account account);
 }

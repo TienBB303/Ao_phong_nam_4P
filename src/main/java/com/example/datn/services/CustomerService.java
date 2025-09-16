@@ -4,6 +4,7 @@ package com.example.datn.services;
 
 import com.example.datn.dto.AddressDto;
 import com.example.datn.dto.customer.CustomerDto;
+import com.example.datn.entities.Account;
 import com.example.datn.entities.ShippingAddress;
 import com.example.datn.entities.Customer;
 import com.example.datn.entities.ShippingAddress;
@@ -34,6 +35,9 @@ public interface CustomerService {
 
     Customer findByIdWithAddresses(Integer id);
 
+    // ✅ Thêm method fetch-join cả addresses và account để đảm bảo dữ liệu cho trang edit
+    Customer findByIdWithAddressesAndAccount(Integer id);
+
     // ✅ Cập nhật thông tin khách hàng
     Customer updateCustomer(CustomerDto dto);
 
@@ -59,5 +63,7 @@ public interface CustomerService {
     void updateCustomerProfile(Integer customerId, CustomerDto dto);
 
     com.example.datn.entities.Account findAccountById(Integer accountId);
+
+    Account findAccountByCustomerID(Integer id);
 
 }

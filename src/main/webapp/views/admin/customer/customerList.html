@@ -1,46 +1,82 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{admin/admin-layout}">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{admin/fragments/head :: head}"></head>
+<body data-pc-preset="preset-1" data-pc-direction="ltr" data-pc-theme="light">
+<div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
+<header th:replace="~{admin/fragments/header :: header}"></header>
+<style>
+    .address-scroll {
+        max-width: 250px;        /* chiều rộng ô địa chỉ, bạn chỉnh tùy ý */
+        overflow-x: auto;        /* cho phép scroll ngang */
+        white-space: nowrap;     /* giữ nội dung trên 1 dòng */
+    }
+    /* Làm nổi bật tiêu đề cột Trạng thái */
+    th.status-col { color: #0d6efd !important; font-weight: 600; }
 
-<head>
-    <title></title>
-</head>
-<body>
-<div layout:fragment="content">
-                <div th:if="${error}" class="alert alert-warning alert-dismissible fade show" role="alert">
-                    <span th:text="${error}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-                <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
-                    <span th:text="${message}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-
-                <h4 class="mb-4 fw-semibold">Danh sách khách hàng</h4>
-
-                <form class="p-4 rounded shadow-sm mb-4" method="get" th:action="@{/admin/customer/view}">
-                    <div class="row gy-3 align-items-end">
-                        <div class="col-md-3">
-                            <label for="keyword" class="form-label">Tìm kiếm theo tên hoặc mã KH</label>
-                            <input type="text" name="keyword" id="keyword" class="form-control"
-                                   placeholder="Nhập tên hoặc mã..." th:value="${keyword}">
-                        </div>
-                        <div class="col-md-2">
-                            <button type="button" class="btn btn-primary w-100" id="search-btn">
-                                <i class="ti ti-search me-1"></i> Tìm kiếm
-                            </button>
-                        </div>
-                        <div class="col-md-2">
-                            <a th:href="@{/admin/customer/view}" class="btn btn-outline-secondary w-100">
-                                Hủy
-                            </a>
+    .badge { border-radius: 999px; padding: 6px 10px; font-weight: 600; font-size: .85rem; }
+    .badge-active {
+        background-color: #e6f4ea !important;   /* xanh nhạt */
+        color: #137333 !important;               /* xanh đậm, dễ đọc */
+        border: 1px solid #a8d5b3 !important;
+    }
+    .badge-inactive {
+        background-color: #fdecea !important;    /* đỏ nhạt */
+        color: #a61b1b !important;               /* đỏ đậm, dễ đọc */
+        border: 1px solid #f5c6cb !important;
+    }
+</style>
+<div class="pc-container">
+    <div class="pc-content">
+        <!-- breadcrumb -->
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <div class="page-header-title align-items-center mb-3">
+                            <div class="d-flex align-items-center">
+                                <h5 class="m-b-10">Danh sách khách hàng</h5>
+                                <a th:href="@{/admin/customer/create}"
+                                   class="btn btn-sm btn-primary rounded-circle shadow-lg d-flex align-items-center justify-content-center"
+                                   style="width: 32px; height: 32px;" title="Thêm mới khách hàng">
+                                    <i class="ti ti-plus"></i>
+                                </a>
+                            </div>
                         </div>
                     </div>
-                </form>
-                <div class="d-flex justify-content-end mb-3">
-                    <a th:href="@{/admin/customer/create}" class="btn btn-primary">➕ Thêm mới khách hàng</a>
                 </div>
+            </div>
+        </div>
+        <!-- content: -->
+        <div th:if="${error}" class="alert alert-warning alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${message}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div class="row">
+            <form class="p-4 rounded shadow-sm mb-4" method="get" th:action="@{/admin/customer/view}">
+                <div class="row g-3 align-items-end mb-3">
+                    <div class="col-md-10">
+                        <label for="keyword" class="form-label">Tìm kiếm theo tên hoặc mã khách hàng</label>
+                        <input type="text" name="keyword" id="keyword" class="form-control"
+                               placeholder="Nhập tên hoặc mã..." th:value="${keyword}">
+                    </div>
+                    <div class="col-md-1 d-grid">
+                        <button type="submit" class="btn btn-primary mt-4" id="search-btn" title="Tìm kiếm">
+                            <i class="ti ti-search"></i>
+                        </button>
+                    </div>
+                    <div class="col-md-1 d-grid">
+                        <a th:href="@{/admin/customer/view}" class="btn btn-warning mt-4" id="clear_search" title="Xóa tìm kiếm">
+                            <i  class="ti ti-eraser"></i>
+                        </a>
+                    </div>
+                </div>
+            </form>
+
+            <div class="table-responsive">
                 <table class="table table-hover table-bordered align-middle text-center">
                     <thead>
                     <tr>
@@ -51,7 +87,7 @@
                         <th>Giới tính</th>
                         <th>Ngày sinh</th>
                         <th>Địa chỉ</th>
-                        <th>Trạng thái</th>
+                        <th class="status-col">Trạng thái</th>
                         <th>Thao tác</th>
                     </tr>
                     </thead>
@@ -64,49 +100,63 @@
                         <td th:text="${c.gender == true ? 'Nam' : (c.gender == false ? 'Nữ' : '')}"></td>
                         <td th:text="${c.birthDate != null ? #temporals.format(c.birthDate, 'dd/MM/yyyy') : ''}"></td>
                         <td>
-                    <span th:if="${c.addresses != null && !c.addresses.isEmpty()}"
-                        th:text="${c.addresses[0].addressDetail
-                           + (c.addresses[0].wardName != null ? ', ' + c.addresses[0].wardName : '')
-                           + (c.addresses[0].districtName != null ? ', ' + c.addresses[0].districtName : '')
-                           + (c.addresses[0].provinceName != null ? ', ' + c.addresses[0].provinceName : '')}">
-                    </span>
-                            <span th:if="${c.addresses == null || c.addresses.isEmpty()}" th:text="''"></span>
+                            <div class="address-scroll">
+                                    <span th:if="${c.addresses != null && !c.addresses.isEmpty()}"
+                                          th:text="${c.addresses[0].addressDetail
+                                            + (c.addresses[0].wardName != null ? ', ' + c.addresses[0].wardName : '')
+                                            + (c.addresses[0].districtName != null ? ', ' + c.addresses[0].districtName : '')
+                                            + (c.addresses[0].provinceName != null ? ', ' + c.addresses[0].provinceName : '')}">
+                                    </span>
+                                <span th:if="${c.addresses == null || c.addresses.isEmpty()}" th:text="''"></span>
+                            </div>
                         </td>
                         <td>
-                            <span th:if="${c.isActive != null and c.isActive}"
-                                  class="badge badge-active">Hoạt động</span>
+                                    <span th:if="${c.isActive != null and c.isActive}"
+                                          class="badge badge-active">Hoạt động</span>
                             <span th:if="${c.isActive != null and !c.isActive}" class="badge badge-inactive">Không hoạt động</span>
                             <span th:if="${c.isActive == null}" class="badge badge-inactive">Không xác định</span>
                         </td>
-                        <td>
-                            <a th:href="${c.id != null ? '/admin/customer/edit/' + c.id : '#'}">
-                                <button class="btn-icon text-dark">✏️</button>
+                        <!--                    <td>-->
+                        <!--                        <a th:href="${c.id != null ? '/admin/customer/edit/' + c.id : '#'}">-->
+                        <!--                            <button class="btn-icon text-dark">✏️</button>-->
+                        <!--                        </a>-->
+                        <!--                        <a th:href="${c.id != null ? '/admin/customer/delete/' + c.id : '#'}">-->
+                        <!--                            <button class="btn-icon text-danger" onclick="return confirm('Bạn có chắc muốn xóa?')">-->
+                        <!--                                🗑️-->
+                        <!--                            </button>-->
+                        <!--                        </a>-->
+                        <!--                    </td>-->
+                        <td style="text-align: center">
+                            <a class="btn btn-outline-warning" style="width: 70px" title="Sửa" th:href="${c.id != null ? '/admin/customer/edit/' + c.id : '#'}" >
+                                <i class="ti ti-pencil"></i>
                             </a>
-                            <a th:href="${c.id != null ? '/admin/customer/delete/' + c.id : '#'}">
-                                <button class="btn-icon text-danger" onclick="return confirm('Bạn có chắc muốn xóa?')">
-                                    🗑️
-                                </button>
+                            <a class="btn btn-outline-danger" style="width: 70px" title="Xóa" th:href="${c.id != null ? '/admin/customer/delete/' + c.id : '#'}">
+                                <i class="ti ti-trash"></i>
                             </a>
                         </td>
                     </tr>
                     </tbody>
                 </table>
-
-    <div class="d-flex justify-content-end">
-        <ul class="pagination">
-            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                <a class="page-link page-link-ajax" href="#" th:data-page="${currentPage - 1}">«</a>
-            </li>
-            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                th:classappend="${i == currentPage} ? 'active'">
-                <a class="page-link page-link-ajax" href="#" th:data-page="${i}" th:text="${i + 1}">1</a>
-            </li>
-            <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
-                <a class="page-link page-link-ajax" href="#" th:data-page="${currentPage + 1}">»</a>
-            </li>
-        </ul>
+            </div>
+            <div class="d-flex justify-content-end">
+                <ul class="pagination">
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link page-link-ajax" href="#" th:data-page="${currentPage - 1}">Trước</a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                        th:classappend="${i == currentPage} ? 'active'">
+                        <a class="page-link page-link-ajax" href="#" th:data-page="${i}" th:text="${i + 1}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                        <a class="page-link page-link-ajax" href="#" th:data-page="${currentPage + 1}">Sau</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</div>
+<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
+
 <script>
     function changePage(page) {
         const params = new URLSearchParams(window.location.search);
@@ -149,6 +199,6 @@
         });
     });
 </script>
-</div>
+
 </body>
 </html>
