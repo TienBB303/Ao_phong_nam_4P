@@ -47,8 +47,9 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     Product findByCode(String code);
 
     @Query("SELECT p FROM Product p " +
-            "WHERE (LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')) " +
-            "AND (:status IS NULL OR p.status = :status)) " +
+            "WHERE ( (LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%'))) " +
+            "   OR  (LOWER(p.code) LIKE LOWER(CONCAT('%', :name, '%'))) ) " +   // <- gom OR lại
+            "AND (:status IS NULL OR p.status = :status) " +
             "AND (:categoryId IS NULL OR p.category.id = :categoryId) " +
             "AND (:brandId IS NULL OR p.brand.id = :brandId) " +
             "AND (:materialId IS NULL OR p.material.id = :materialId) " +
@@ -98,7 +99,6 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     @Query("SELECT COUNT(DISTINCT p.brand.id) FROM Product p WHERE p.brand.status = true")
     Long countActiveBrands();
     // Sản phẩm bán chạy nhất theo số lượng (Sử dụng cho bảng chính)
-    // Sản phẩm bán chạy nhất theo số lượng (Sử dụng cho bảng chính)
     @Query(value = """
     SELECT p.id, p.code, p.name, c.name AS category_name, br.name AS brand_name,
            COALESCE(SUM(bd.quantity), 0) AS totalSold,
@@ -110,7 +110,6 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
                             / NULLIF(CAST(COALESCE(bsum.total_price_sum, 0) AS DECIMAL(38, 10)), 0))
                            *
                            (CAST(COALESCE(b.total_amount, 0) AS DECIMAL(38, 2))
-                            - CAST(COALESCE(b.shipping_fee, 0) AS DECIMAL(38, 2))
                             - CAST(COALESCE(b.discount_amount, 0) AS DECIMAL(38, 2)))
                        )
                    ELSE 0
@@ -151,7 +150,6 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
                             / NULLIF(CAST(COALESCE(bsum.total_price_sum, 0) AS DECIMAL(38, 10)), 0))
                            *
                            (CAST(COALESCE(b.total_amount, 0) AS DECIMAL(38, 2))
-                            - CAST(COALESCE(b.shipping_fee, 0) AS DECIMAL(38, 2))
                             - CAST(COALESCE(b.discount_amount, 0) AS DECIMAL(38, 2)))
                        )
                    ELSE 0
@@ -194,7 +192,6 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
                             / NULLIF(CAST(COALESCE(bsum.total_price_sum, 0) AS DECIMAL(38, 10)), 0))
                            *
                            (CAST(COALESCE(b.total_amount, 0) AS DECIMAL(38, 2))
-                            - CAST(COALESCE(b.shipping_fee, 0) AS DECIMAL(38, 2))
                             - CAST(COALESCE(b.discount_amount, 0) AS DECIMAL(38, 2)))
                        )
                    ELSE 0
@@ -239,7 +236,6 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
                              / NULLIF(CAST(SUM(COALESCE(bd.total_price, 0)) OVER (PARTITION BY b.id) AS DECIMAL(38, 10)), 0))
                             *
                             (CAST(COALESCE(b.total_amount, 0) AS DECIMAL(38, 2))
-                             - CAST(COALESCE(b.shipping_fee, 0) AS DECIMAL(38, 2))
                              - CAST(COALESCE(b.discount_amount, 0) AS DECIMAL(38, 2)))
                         )
                     ELSE 0

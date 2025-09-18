@@ -72,7 +72,6 @@ public class CustomerServiceImpl implements CustomerService {
     public Customer findByIdWithAddressesAndAccount(Integer id) {
         return customerRepository.findByIdWithAddressesAndAccount(id).orElse(null);
     }
-
     // Tạo khách hàng mới từ entity
     @Override
     public Customer createCustomerEntity(Customer customer) {
@@ -177,6 +176,28 @@ public class CustomerServiceImpl implements CustomerService {
         existing.setName(dto.getName());
         existing.setPhoneNumber(dto.getPhoneNumber());
         existing.setIsActive(dto.getIsActive());
+        existing.setGender(dto.getGender());
+        if (dto.getBirthday() != null) {
+            existing.setBirthDate(dto.getBirthday());
+        } else {
+            existing.setBirthDate(null); // hoặc giữ nguyên tùy rule của bạn
+        }
+        if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
+            Account account = existing.getAccount();
+            if (account != null) {
+                String newEmail = dto.getEmail().trim();
+                String currentEmail = account.getEmail();
+                if (currentEmail == null || !newEmail.equalsIgnoreCase(currentEmail)) {
+                    // Kiểm tra trùng email với account khác
+                    Optional<Account> other = accountRepository.findByEmail(newEmail);
+                    if (other.isPresent() && !other.get().getId().equals(account.getId())) {
+                        throw new RuntimeException("Email đã tồn tại.");
+                    }
+                    account.setEmail(newEmail);
+                    accountRepository.save(account);
+                }
+            }
+        }
 
         // --- Bổ sung cập nhật địa chỉ ---
         AddressDto addressDto = dto.getAddress();
@@ -199,6 +220,12 @@ public class CustomerServiceImpl implements CustomerService {
             address.setDistrictName(addressDto.getDistrictName());
             address.setWardId(addressDto.getWardId());
             address.setWardName(addressDto.getWardName());
+            if (addressDto.getReceiverName() != null && !addressDto.getReceiverName().isBlank()) {
+                address.setReceiverName(addressDto.getReceiverName());
+            }
+            if (addressDto.getReceiverPhoneNumber() != null && !addressDto.getReceiverPhoneNumber().isBlank()) {
+                address.setReceiverPhoneNumber(addressDto.getReceiverPhoneNumber());
+            }
 //            address.setReceiverName(addressDto.getReceiverName());
 //            address.setReceiverPhoneNumber(addressDto.getReceiverPhoneNumber());
 
@@ -216,6 +243,13 @@ public class CustomerServiceImpl implements CustomerService {
 
             // Debug log
 //            System.out.println("Updating address isDefault: " + isDefault);
+            if (addressDto.getIsDefault() != null) {
+                Boolean isDefault = addressDto.getIsDefault();
+                address.setIsDefault(isDefault);
+                if (Boolean.TRUE.equals(isDefault)) {
+                    shippingAddressRepository.updateAllDefaultFalseByCustomerId(existing.getId());
+                }
+            }
             shippingAddressRepository.save(address);
         }
         return customerRepository.save(existing);
@@ -316,9 +350,9 @@ public class CustomerServiceImpl implements CustomerService {
         return customerRepository.searchCustomerByKeywordInline(keyword);
     }
 
-    public Boolean khachHangTonTaiInline(String phoneNumber) {
+    public Boolean khachHangTonTaiInline( String phoneNumber){
         Customer customer = customerRepository.searchCustomerExistPhoneInline(phoneNumber);
-        if (customer != null) {
+        if(customer != null){
             return true;
         } else {
             return false;
@@ -328,7 +362,8 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public Customer createCustomerInline(com.example.datn.dto.selling_inline.CustomerDto customerDto) throws Exception {
         Customer customer = new Customer();
-        if (khachHangTonTaiInline(customerDto.getPhoneNumber())) {
+
+        if(khachHangTonTaiInline(customerDto.getPhoneNumber())){
             throw new Exception("Khách hàng đã tồn tại bằng số điện thoại này!");
         }
         if (customerDto.getPhoneNumber().isEmpty() || customerDto.getPhoneNumber().trim().equals("")) {

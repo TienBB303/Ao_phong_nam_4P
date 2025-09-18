@@ -80,7 +80,7 @@ public class TrackingController {
             }
 
             // Cập nhật trạng thái
-            billService.updateStatus(trangThaiDonHang, billId);
+            billService.updateStatus(status, billId); // TienBB sửa trangThaiDonHang thành status đã ép kiểu
             redirectAttributes.addFlashAttribute("message",
                     "Bạn đã huỷ đơn hàng " + bill.getCode() + " thành công!");
         } catch (Exception e) {

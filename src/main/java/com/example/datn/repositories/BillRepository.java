@@ -25,12 +25,33 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
 
     Page<Bill> findAll(Pageable pageable);
 
+    @Query("SELECT b FROM Bill b " +
+            "WHERE (:code IS NULL OR b.code LIKE CONCAT('%', :code, '%')) " +
+            "AND (:name IS NULL OR b.name LIKE CONCAT('%', :name, '%')) " +
+            "AND (:phone IS NULL OR b.phoneNumber LIKE CONCAT('%', :phone, '%')) " +
+            "AND (:start IS NULL OR b.createdAt >= :start) " +
+            "AND (:end IS NULL OR b.createdAt <= :end) " +
+            "AND (:status IS NULL OR b.status = :status) " +
+            "AND (:typeBill IS NULL OR b.typeBill = :typeBill) " +
+            "AND (b.status <> 9 AND b.status <> 10) " +
+            "ORDER BY b.id DESC")
+    Page<Bill> filterBills(
+            @Param("code") String code,
+            @Param("name") String name,
+            @Param("phone") String phone,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end,
+            @Param("status") Integer status,
+            @Param("typeBill") Boolean typeBill,
+            Pageable pageable
+    );
+
+
     @Query("SELECT b FROM Bill b LEFT JOIN FETCH b.discount WHERE b.id = :id")
     Bill findWithDiscountById(Integer id);
 
     @Query("SELECT b.code FROM Bill b WHERE b.code LIKE 'HD___' ORDER BY b.code DESC")
     List<String> findOfflineBillCodes();
-
     @Query("SELECT b FROM Bill b WHERE b.code = :code")
     Bill findByCode(@Param("code") String code);
 
@@ -43,25 +64,25 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
             "WHERE b.code = :code AND b.typeBill = :targetTypeBill")
     Bill findByCodeWithAllDetailsAndTypeBill(@Param("code") String code, @Param("targetTypeBill") Boolean targetTypeBill);
 
-    @Query("SELECT b FROM Bill b " +
-            "WHERE (:code IS NULL OR b.code LIKE %:code%) " +
-            "AND (:name IS NULL OR b.name LIKE %:name%) " +
-            "AND (:phoneNumber IS NULL OR b.phoneNumber LIKE %:phoneNumber%) " +
-            "AND (:startDate IS NULL OR b.createdAt >= :startDate) " +
-            "AND (:endDate IS NULL OR b.createdAt <= :endDate) " +
-            "AND (:status IS NULL OR b.status = :status) " +
-            "AND (:typeBill IS NULL OR b.typeBill = :typeBill) " +
-            "ORDER BY b.id DESC")
-    Page<Bill> filterBills(
-            @Param("code") String code,
-            @Param("name") String name,
-            @Param("phoneNumber") String phoneNumber,
-            @Param("startDate") java.time.LocalDateTime startDate,
-            @Param("endDate") java.time.LocalDateTime endDate,
-            @Param("status") Integer status,
-            @Param("typeBill") Boolean typeBill,
-            Pageable pageable
-    );
+//    @Query("SELECT b FROM Bill b " +
+//            "WHERE (:code IS NULL OR b.code LIKE %:code%) " +
+//            "AND (:name IS NULL OR b.name LIKE %:name%) " +
+//            "AND (:phoneNumber IS NULL OR b.phoneNumber LIKE %:phoneNumber%) " +
+//            "AND (:startDate IS NULL OR b.createdAt >= :startDate) " +
+//            "AND (:endDate IS NULL OR b.createdAt <= :endDate) " +
+//            "AND (:status IS NULL OR b.status = :status) " +
+//            "AND (:typeBill IS NULL OR b.typeBill = :typeBill) " +
+//            "ORDER BY b.id DESC")
+//    Page<Bill> filterBills(
+//            @Param("code") String code,
+//            @Param("name") String name,
+//            @Param("phoneNumber") String phoneNumber,
+//            @Param("startDate") java.time.LocalDateTime startDate,
+//            @Param("endDate") java.time.LocalDateTime endDate,
+//            @Param("status") Integer status,
+//            @Param("typeBill") Boolean typeBill,
+//            Pageable pageable
+//    );
     // ================== DASHBOARD ==================
 
     // Tổng tất cả đơn chờ xác nhận (status = 1, không phân biệt thanh toán)
@@ -96,7 +117,7 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
     @Query(value = """
     SELECT COALESCE(SUM(
         CASE 
-            WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+            WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.discount_amount,0))
             ELSE 0
         END
     ), 0)
@@ -110,8 +131,7 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
     @Query(value = """
     SELECT COALESCE(SUM(
                CASE 
-                   WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
-                   WHEN b.status IN (5, 6) THEN -(b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+                   WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.discount_amount,0))
                    ELSE 0
                END
            ), 0),
@@ -139,7 +159,7 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
     SELECT CAST(b.created_at AS DATE) AS date,
            COALESCE(SUM(
                CASE 
-                   WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+                   WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.discount_amount,0))
                    ELSE 0
                END
            ), 0) AS totalRevenue
@@ -185,7 +205,7 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
     @Query(value = """
     SELECT COALESCE(SUM(
         CASE 
-            WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+            WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.discount_amount,0))
             ELSE 0
         END
     ), 0)
@@ -201,7 +221,7 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
     @Query(value = """
     SELECT COALESCE(SUM(
         CASE 
-            WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+            WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.discount_amount,0))
             ELSE 0
         END
     ), 0)
@@ -217,7 +237,7 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
     @Query(value = """
     SELECT COALESCE(SUM(
         CASE 
-            WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+            WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.discount_amount,0))
             ELSE 0
         END
     ), 0)
@@ -233,7 +253,7 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
     SELECT CAST(b.created_at AS DATE) AS day_value,
            COALESCE(SUM(
                CASE 
-                   WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+                   WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.discount_amount,0))
                    ELSE 0
                END
            ), 0) AS total_revenue,
@@ -254,7 +274,7 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
     SELECT YEAR(b.created_at), MONTH(b.created_at),
            COALESCE(SUM(
                CASE 
-                   WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+                   WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.discount_amount,0))
                    ELSE 0
                END
            ), 0),
@@ -273,7 +293,7 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
     SELECT YEAR(b.created_at),
            COALESCE(SUM(
                CASE 
-                   WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+                   WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.discount_amount,0))
                    ELSE 0
                END
            ), 0),
@@ -312,4 +332,6 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
 
     @Query("select cd from Bill cd where cd.status = 9")
     List<Bill> getAllCartInline();
+
+
 }

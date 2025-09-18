@@ -3,6 +3,7 @@ import com.example.datn.dto.employee.AccountDto;
 import com.example.datn.entities.Account;
 import com.example.datn.entities.Customer;
 import com.example.datn.entities.Role;
+import com.example.datn.entities.Selling.Cart;
 import com.example.datn.entities.ShippingAddress;
 import com.example.datn.repositories.AccountRepository;
 import com.example.datn.repositories.CustomerRepository;
@@ -13,6 +14,7 @@ import com.example.datn.services.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -101,6 +103,7 @@ public class AccountServiceImpl implements AccountService {
                 .orElseThrow(() -> new RuntimeException("Account not found with email: " + email));
     }
 
+
     @Override
     public void update(AccountDto accountDto) {
 
@@ -150,5 +153,17 @@ public class AccountServiceImpl implements AccountService {
         return chars.stream().map(String::valueOf).collect(Collectors.joining());
     }
 
+
+
+    public Account loadUserByUsername(String email) throws UsernameNotFoundException {
+        return accountRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy tài khoản: " + email));
+    }
+
+
+    @Override
+    public Cart getCartByAccountID(Integer accountId) {
+        return accountRepository.findByAccountID(accountId);
+    }
 
 }

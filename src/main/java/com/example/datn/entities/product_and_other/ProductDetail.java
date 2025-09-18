@@ -53,4 +53,5 @@ public class ProductDetail {
 
     @OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> images = new ArrayList<>();
+
 }

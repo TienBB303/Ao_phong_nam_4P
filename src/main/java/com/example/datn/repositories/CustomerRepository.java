@@ -71,7 +71,6 @@ public interface CustomerRepository extends JpaRepository<Customer,Integer> {
     //TienBB thêm query truy vấn tìm tất cả địa chỉ của khách
     @Query("select sa from ShippingAddress sa where sa.customer.id = :id")
     List<ShippingAddress> findAllShippingAddressOfCustomer(Integer id);
-
     //TienBB thêm query truy vấn tìm account by user
     @Query("SELECT a FROM Account a WHERE a.customer.id = :customerId")
     Account findAccountByCustomerID(Integer customerId);

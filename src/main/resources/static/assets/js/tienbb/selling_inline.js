@@ -34,7 +34,19 @@ $('#taoCartMoi').on('submit', function (e) {
     });
 });
 
-// tim kiem san pham
+$(document).on('mousedown', function (e) {
+    if (!$(e.target).closest('#productSearchName, #suggestionBox').length) {
+        $('#suggestionBox').hide();
+    }
+});
+
+$('#productSearchName').on('keydown', function (e) {
+    if (e.key === 'Escape') {
+        $('#suggestionBox').hide();
+    }
+});
+
+// Khi nhập -> search theo keyword
 $('#productSearchName').on('input', function () {
     const keyword = $(this).val();
     if (keyword.length < 1) {
@@ -47,25 +59,45 @@ $('#productSearchName').on('input', function () {
         method: 'GET',
         data: { keyword: keyword },
         success: function (data) {
-            let html = '';
-            data.forEach(item => {
-                html += `
-                        <div class="p-2 suggestion-item border-bottom d-flex justify-content-between align-items-center" 
-                        data-id="${item.id}"
-                        data-name="${item.displayName}"
-                        data-price="${item.price}">
-                            <div>
-                                <div class="fw-semibold">${item.displayName}</div>
-                                <div class="text-muted small">Barcode: ${item.barcodes}</div>
-                                <div class="text-muted small">Tồn kho: ${item.quantity}</div>
-                            </div>
-                            <div class="fw-bold text-success">${item.price.toLocaleString()} đ</div>
-                        </div>`;
-            });
-            $('#suggestionBox').html(html).show();
+            renderSuggestionBox(data);
         }
     });
 });
+
+// Khi click/focus -> show toàn bộ sản phẩm
+$('#productSearchName').on('focus', function () {
+    // chỉ gọi list-product khi ô trống
+    if ($(this).val().trim().length === 0) {
+        $.ajax({
+            url: '/admin/sell-inline/list-product-search',
+            method: 'GET',
+            success: function (data) {
+                renderSuggestionBox(data);
+            }
+        });
+    }
+});
+
+// Hàm chung để render
+function renderSuggestionBox(data) {
+    let html = '';
+    data.forEach(item => {
+        html += `
+            <div class="p-2 suggestion-item border-bottom d-flex justify-content-between align-items-center" 
+                data-id="${item.id}"
+                data-name="${item.displayName}"
+                data-price="${item.price}">
+                <div>
+                    <div class="fw-semibold">${item.displayName}</div>
+                    <div class="text-muted small">Barcode: ${item.barCode}</div>
+                    <div class="text-muted small">Tồn kho: ${item.quantity}</div>
+                </div>
+                <div class="fw-bold text-success">${item.price.toLocaleString()} đ</div>
+            </div>`;
+    });
+    $('#suggestionBox').html(html).show();
+}
+
 
 // san pham sau khi tim kiem, an de them vao gio
 $('#suggestionBox').on('click', '.suggestion-item', function () {
@@ -233,8 +265,8 @@ $(document).on('click', '.delete-cart', function (){
     const idCart = $(this).data("id")
     Swal.fire({
         icon: 'warning',
-        title: 'Xóa giỏ hàng?',
-        text: 'Toàn bộ sản phẩm sẽ bị xóa khỏi giỏ!',
+        title: 'Xóa hóa đơn?',
+        text: 'Toàn bộ sản phẩm sẽ bị xóa khỏi hóa đơn!',
         showCancelButton: true,
         confirmButtonText: 'Xóa',
         cancelButtonText: 'Hủy'
@@ -271,7 +303,7 @@ $(document).on('click', '.delete-cart', function (){
     });
 });
 
-// thanh toán
+//Thanh toán
 $('#thanhToanBtn').click(function () {
     const idCart = $(this).data('id');
     const typePayment = $('#type_payment_select').val();
@@ -283,37 +315,66 @@ $('#thanhToanBtn').click(function () {
         confirmButtonText: 'Thanh toán',
         cancelButtonText: 'Hủy',
     }).then((result) => {
-        if (result.isConfirmed) {
-            $.ajax({
-                url: '/admin/sell-inline/thanh-toan',
-                method: 'POST',
-                data: { idCart: idCart , typePayment: typePayment },
-                success: function (res) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: res,
-                        toast: true,
-                        position: 'top-end',
-                        timer: 1000,
-                        showConfirmButton: false
-                    }).then(() => {
-                        window.location.href = '/admin/sell-inline/hien-thi';// Hoặc chuyển sang trang in hóa đơn
-                    });
-                },
-                error: function (err) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: err.responseText,
-                        toast: true,
-                        position: 'top-end',
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
+        if (!result.isConfirmed) return;
+
+        // ===== CASE MOMO (Chuyển khoản) =====
+        if (typePayment === 'Chuyển khoản') {
+            $.post('/admin/sell-inline/create-momo-order', { idCart: idCart }, function (res) {
+                if (res.payUrl) {
+                    // 👉 Redirect sang trang MoMo để khách thanh toán
+                    window.location.href = res.payUrl;
+                } else {
+                    Swal.fire({ icon: 'error', text: 'Không lấy được link thanh toán MoMo' });
                 }
+            }).fail(function (xhr) {
+                Swal.fire({ icon: 'error', text: xhr.responseText || 'Lỗi tạo đơn Momo' });
             });
+            return;
         }
+
+        // ===== CASE TIỀN MẶT =====
+        $.ajax({
+            url: '/admin/sell-inline/thanh-toan',
+            method: 'POST',
+            data: { idCart: idCart, typePayment: typePayment },
+            success: function (res) {
+                Swal.fire({
+                    icon: 'success',
+                    title: res.message || 'Thanh toán thành công',
+                    toast: true,
+                    position: 'top-end',
+                    timer: 1000,
+                    showConfirmButton: false
+                }).then(() => {
+                    Swal.fire({
+                        title: 'Bạn có muốn in hóa đơn không?',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'In ngay',
+                        cancelButtonText: 'Để sau'
+                    }).then((ans) => {
+                        if (ans.isConfirmed) {
+                            window.open('/admin/sell-inline/print/' + res.billId,
+                                '_blank', 'width=900,height=800');
+                        }
+                        window.location.href = '/admin/sell-inline/hien-thi';
+                    });
+                });
+            },
+            error: function (err) {
+                Swal.fire({
+                    icon: 'error',
+                    title: (err.responseJSON && err.responseJSON.message) || err.responseText || 'Thanh toán thất bại',
+                    toast: true,
+                    position: 'top-end',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            }
+        });
     });
 });
+
 
 //áp mã giảm giá cho cart
 $('#discount_select').change(function () {

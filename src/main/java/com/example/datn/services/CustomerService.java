@@ -65,5 +65,4 @@ public interface CustomerService {
     com.example.datn.entities.Account findAccountById(Integer accountId);
 
     Account findAccountByCustomerID(Integer id);
-
 }

@@ -131,6 +131,7 @@ public class UserController {
     }
 
     // Hiển thị trang profile
+    // Method: showProfile(Model model, HttpSession session)
     @GetMapping("/profile")
     @Transactional(readOnly = true)
     public String showProfile(Model model, HttpSession session) {
@@ -157,14 +158,20 @@ public class UserController {
             customerDto.setIsActive(customerEntity.getIsActive());
             // Nếu có địa chỉ mặc định
             if (customerEntity.getAddresses() != null && !customerEntity.getAddresses().isEmpty()) {
-                var defaultAddress = customerEntity.getAddresses().stream().filter(a -> Boolean.TRUE.equals(a.getIsDefault())).findFirst().orElse(customerEntity.getAddresses().get(0));
+                // // [Removed] Không chọn địa chỉ mặc định nữa
+                // var defaultAddress = customerEntity.getAddresses().stream()
+                //     .filter(a -> Boolean.TRUE.equals(a.getIsDefault()))
+                //     .findFirst()
+                //     .orElse(customerEntity.getAddresses().get(0));
+                var firstAddress = customerEntity.getAddresses().get(0); // lấy địa chỉ đầu tiên
                 com.example.datn.dto.AddressDto addressDto = new com.example.datn.dto.AddressDto();
-                addressDto.setAddressDetail(defaultAddress.getAddressDetail());
-                addressDto.setProvinceId(defaultAddress.getProvinceId());
-                addressDto.setProvinceName(defaultAddress.getProvinceName());
-                addressDto.setDistrictId(defaultAddress.getDistrictId());
-                addressDto.setDistrictName(defaultAddress.getDistrictName());
-                addressDto.setWardId(defaultAddress.getWardId());
+                addressDto.setAddressDetail(firstAddress.getAddressDetail());
+                addressDto.setProvinceId(firstAddress.getProvinceId());
+                addressDto.setProvinceName(firstAddress.getProvinceName());
+                addressDto.setDistrictId(firstAddress.getDistrictId());
+                addressDto.setDistrictName(firstAddress.getDistrictName());
+                addressDto.setWardId(firstAddress.getWardId());
+                addressDto.setWardName(firstAddress.getWardName());
                 customerDto.setAddress(addressDto);
             }
         }

@@ -109,24 +109,35 @@ public class CustomerController {
     public String updateCustomer(@Valid @ModelAttribute("customerDto") CustomerDto dto,
                                  BindingResult result,
                                  RedirectAttributes redirectAttributes) {
+        System.out.println("[DEBUG] UpdateCustomer incoming DTO: "
+                + "id=" + dto.getId()
+                + ", gender=" + dto.getGender()
+                + ", birthday=" + dto.getBirthday()
+                + ", name=" + dto.getName()
+                + ", email=" + dto.getEmail()
+                + ", phone=" + dto.getPhoneNumber()
+                + ", isActive=" + dto.getIsActive());
         if (result.hasErrors()) {
+            System.out.println("[DEBUG] BindingResult has errors:");
+            result.getAllErrors().forEach(err -> System.out.println("  - " + err));
             // Nếu có lỗi validation, quay lại form chỉnh sửa
             return "admin/customer/customerEdit";
         }
-
         try {
             // KHÔNG CẦN convertToEntity ở đây vì service sẽ tự tìm và cập nhật entity
             Customer updated = customerService.updateCustomer(dto);
             if (updated == null) {
+                System.out.println("[DEBUG] Update failed: customerService.updateCustomer(dto) returned null");
                 result.reject("error", "Không tìm thấy khách hàng để cập nhật!");
                 return "admin/customer/customerEdit";
             } else {
+                System.out.println("[DEBUG] Update success for customer id=" + updated.getId());
                 redirectAttributes.addFlashAttribute("message", "Cập nhật khách hàng thành công!");
             }
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Lỗi khi cập nhật khách hàng: " + e.getMessage());
-            // In lỗi ra console để debug, rất quan trọng!
+            System.out.println("[DEBUG] Exception in updateCustomer: " + e.getMessage());
             e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Lỗi khi cập nhật khách hàng: " + e.getMessage());
         }
 
         return "redirect:/admin/customer/view";

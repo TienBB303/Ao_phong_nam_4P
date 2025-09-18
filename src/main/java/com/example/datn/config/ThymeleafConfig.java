@@ -3,12 +3,12 @@ package com.example.datn.config;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
+import org.thymeleaf.extras.springsecurity6.dialect.SpringSecurityDialect;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.spring6.templateresolver.SpringResourceTemplateResolver;
 import org.thymeleaf.spring6.view.ThymeleafViewResolver;
 import org.thymeleaf.templatemode.TemplateMode;
 import nz.net.ultraq.thymeleaf.layoutdialect.LayoutDialect;
-import org.thymeleaf.extras.springsecurity6.dialect.SpringSecurityDialect;
 
 @Configuration
 public class ThymeleafConfig {
@@ -25,15 +25,20 @@ public class ThymeleafConfig {
         return templateResolver;
     }
 
-    @Bean
-    public SpringTemplateEngine templateEngine() {
-        SpringTemplateEngine templateEngine = new SpringTemplateEngine();
-        templateEngine.setTemplateResolver(templateResolver());
-        templateEngine.setEnableSpringELCompiler(true);
-        templateEngine.addDialect(new LayoutDialect());
-        templateEngine.addDialect(new SpringSecurityDialect()); // <-- Thêm dòng này để hỗ trợ sec:authorize
-        return templateEngine;
-    }
+@Bean
+public SpringTemplateEngine templateEngine() {
+    SpringTemplateEngine templateEngine = new SpringTemplateEngine();
+    templateEngine.setTemplateResolver(templateResolver());
+    templateEngine.setEnableSpringELCompiler(true);
+
+    // Thêm layout dialect
+    templateEngine.addDialect(new LayoutDialect());
+
+    // ✅ Thêm spring security dialect để dùng sec:authorize
+    templateEngine.addDialect(new SpringSecurityDialect());
+
+    return templateEngine;
+}
 
     @Bean
     public ThymeleafViewResolver viewResolver() {

@@ -7,6 +7,7 @@
 
 <div class="pc-container">
     <div class="pc-content">
+        <!-- breadcrumb -->
         <div class="page-header">
             <div class="page-block">
                 <div class="row align-items-center">
@@ -21,11 +22,14 @@
                                 </a>
                             </div>
 
+                            <!-- Xóa breadcrumb Dashboard / Quản lý tài khoản / Nhân viên và nút Hủy về /admin/users. -->
+
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        <!-- content: bạn dán phần “cards, charts, tables …” ở đây -->
         <div class="row">
             <div class="card-body">
                 <form class="p-4 rounded shadow-sm mb-4" method="get">
@@ -102,11 +106,13 @@
                 <nav aria-label="Page navigation">
                     <ul class="pagination justify-content-end">
 
+                        <!-- Previous -->
                         <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
                             <a class="page-link"
                                th:href="${currentPage > 0} ? @{|?page=${currentPage - 1}&size=5|} : '#'">Trước</a>
                         </li>
 
+                        <!-- Page Numbers -->
                         <li class="page-item"
                             th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
                             th:classappend="${i == currentPage} ? 'active'">
@@ -114,6 +120,7 @@
                                th:text="${i + 1}">1</a>
                         </li>
 
+                        <!-- Next -->
                         <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
                             <a class="page-link"
                                th:href="${currentPage < totalPages - 1} ? @{|?page=${currentPage + 1}&size=5|} : '#'">Sau</a>

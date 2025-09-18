@@ -31,7 +31,7 @@
             border-radius: 0;
         }
     </style>
-    <script src="js/address.js"></script>
+    <script th:src="@{/js/address.js}"></script>
     <script>
         window.onload = function () {
             loadAddress();
@@ -47,6 +47,7 @@
             return true;
         }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 <div class="container py-5">
@@ -54,106 +55,102 @@
     <div class="row">
         <!-- Form thông tin giao hàng -->
         <div class="col-md-7">
-            <form th:action="@{/bill/createNotLogin}" method="post" th:object="${billInsert}"
+            <form th:action="@{/bill/create}" method="post" th:object="${billInsert}"
                   onsubmit="return checkForm()">
                 <!-- 👤 Thông tin khách hàng -->
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label>Họ và tên</label>
-                        <th:block th:if="${isGuest}">
-                            <input type="text" th:field="*{fullName}" class="form-control" placeholder="Họ và tên"
-                                   required>
-                        </th:block>
-                        <th:block th:unless="${isGuest}">
-                            <input type="hidden" th:field="*{fullName}"/>
-                            <div class="form-control bg-light" th:text="*{fullName}"></div>
-                        </th:block>
+                        <input type="text" th:field="*{fullName}" class="form-control"
+                               placeholder="Họ và tên" th:readonly="${!isGuest}">
                     </div>
                     <div class="col-md-6">
                         <label>Số điện thoại</label>
-                        <th:block th:if="${isGuest}">
-                            <input type="text" th:field="*{phone}" id="phoneck" class="form-control"
-                                   placeholder="Số điện thoại" required>
-                        </th:block>
-                        <th:block th:unless="${isGuest}">
-                            <input type="hidden" th:field="*{phone}"/>
-                            <div class="form-control bg-light" th:text="*{phone}"></div>
-                        </th:block>
+                        <input type="text" th:field="*{phone}" class="form-control"
+                               placeholder="Số điện thoại" th:readonly="${!isGuest}" required>
                     </div>
                 </div>
 
                 <div class="mb-3">
                     <label>Email</label>
-                    <th:block th:if="${isGuest}">
-                        <input type="email" th:field="*{email}" class="form-control" placeholder="Email" required>
-                    </th:block>
-                    <th:block th:unless="${isGuest}">
-                        <input type="hidden" th:field="*{email}"/>
-                        <div class="form-control bg-light" th:text="*{email}"></div>
-                    </th:block>
+                    <input type="email" th:field="*{email}" class="form-control"
+                           placeholder="Email" th:readonly="${!isGuest}" required>
                 </div>
 
+                <!-- 📦 Địa chỉ giao hàng -->
                 <div class="row">
+                    <th:block th:if="${!isGuest}">
+                        <!-- Nếu là khách hàng đã đăng nhập -->
+                        <div class="col-sm-12 mb-3">
+                            <label>Chọn địa chỉ giao hàng</label>
+                            <select class="form-select"
+                                    onchange="fillAddress(this)" id="addressSelect">
+                                <option value="">-- Chọn địa chỉ --</option>
+                                <option th:each="addr : ${customer.addresses}"
+                                        th:value="${addr.province + '|' + addr.district + '|' + addr.ward + '|' + addr.street}"
+                                        th:text="${addr.street + ', ' + addr.ward + ', ' + addr.district + ', ' + addr.province}">
+                                </option>
+                            </select>
+                        </div>
+                    </th:block>
+
+                    <!-- Tỉnh -->
                     <div class="col-sm-4">
                         <label>Tỉnh/Thành</label>
-                        <th:block th:if="${isGuest}">
-                            <select th:field="*{province}" class="form-select" id="tinh"
-                                    onchange="loadHuyen(this.options[this.selectedIndex].getAttribute('name-add'));"></select>
-                        </th:block>
-                        <th:block th:unless="${isGuest}">
-                            <input type="hidden" th:field="*{province}" id="provinceValue" th:value="*{province}"/>
-                            <div class="form-control bg-light" th:text="*{province}"></div>
-                        </th:block>
+                        <select th:field="*{province}" class="form-select" id="tinh"
+                                onchange="loadHuyen(this.options[this.selectedIndex].getAttribute('name-add'))"
+                                th:disabled="${!isGuest}">
+                        </select>
                     </div>
+
+                    <!-- Huyện -->
                     <div class="col-sm-4">
                         <label>Quận/Huyện</label>
-                        <th:block th:if="${isGuest}">
-                            <select th:field="*{district}" class="form-select" id="huyen"
-                                    onchange="loadXa(this.options[this.selectedIndex].getAttribute('name-add'));"></select>
-                        </th:block>
-                        <th:block th:unless="${isGuest}">
-                            <input type="hidden" th:field="*{district}"/>
-                            <div class="form-control bg-light" th:text="*{district}"></div>
-                        </th:block>
+                        <select th:field="*{district}" class="form-select" id="huyen"
+                                onchange="loadXa(this.options[this.selectedIndex].getAttribute('name-add'))"
+                                th:disabled="${!isGuest}">
+                        </select>
                     </div>
+
+                    <!-- Xã -->
                     <div class="col-sm-4 mb-4">
                         <label>Phường/Xã</label>
-                        <th:block th:if="${isGuest}">
-                            <select th:field="*{ward}" class="form-select" id="xa"></select>
-                        </th:block>
-                        <th:block th:unless="${isGuest}">
-                            <input type="hidden" th:field="*{ward}"/>
-                            <div class="form-control bg-light" th:text="*{ward}"></div>
-                        </th:block>
+                        <select th:field="*{ward}" class="form-select" id="xa"
+                                th:disabled="${!isGuest}">
+                        </select>
                     </div>
+
+                    <!-- Đường -->
                     <div class="col-sm-12 mb-3">
                         <label>Địa chỉ chi tiết</label>
-                        <th:block th:if="${isGuest}">
-                            <input th:field="*{street}" class="form-control" placeholder="Tên đường, số nhà">
-                        </th:block>
-                        <th:block th:unless="${isGuest}">
-                            <input type="hidden" th:field="*{street}"/>
-                            <div class="form-control bg-light"
-                                 th:text="*{street}"></div>
-                        </th:block>
+                        <input th:field="*{street}" class="form-control" placeholder="Tên đường, số nhà"
+                               th:readonly="${!isGuest}">
                     </div>
                 </div>
 
                 <div class="mb-3">
                     <label>Ghi chú</label>
-                    <textarea th:field="*{note}" class="form-control" rows="3" placeholder="Ghi chú thêm..."></textarea>
+                    <textarea th:field="*{note}" class="form-control" rows="3"
+                              placeholder="Ghi chú thêm..."></textarea>
                 </div>
 
                 <h5 class="mb-3">Phương thức thanh toán</h5>
+
                 <div class="form-check payment-method active">
-                    <input class="form-check-input" type="radio" name="paymentMethod" id="cod" value="COD" checked/>
-                    <label class="form-check-label" for="cod">Thanh toán khi nhận hàng (COD)</label>
-                </div>
-                <div class="form-check payment-method">
-                    <input class="form-check-input" type="radio" name="paymentMethod" id="bank" value="BANK"/>
-                    <label class="form-check-label" for="bank">Thanh toán chuyển khoản</label>
+                    <input class="form-check-input" type="radio"
+                           name="paymentMethodId" id="cod" value="1" checked/>
+                    <label class="form-check-label" for="cod">
+                        Thanh toán khi nhận hàng (COD)
+                    </label>
                 </div>
 
+                <div class="form-check payment-method">
+                    <input class="form-check-input" type="radio"
+                           name="paymentMethodId" id="Chuyển khoản" value="2"/>
+                    <label class="form-check-label" for="Chuyển khoản">
+                        Thanh toán qua MoMo
+                    </label>
+                </div>
                 <!-- 🔐 Hidden inputs cho giảm giá -->
                 <input type="hidden" name="discountCode" id="discountCodeInput"/>
                 <input type="hidden" name="discountValue" id="discountValueInput"/>
@@ -169,9 +166,11 @@
                        th:text="${item.productDetail.product.name} + ' - ' + ${item.productDetail.color.name} + ' - ' + ${item.productDetail.size.name}"></p>
                     <span class="fw-bold text-danger"
                           th:text="${#numbers.formatInteger(item.productDetail.price, 0, 'POINT')} + 'đ'"></span>
-                    <a th:href="@{/cart/delete-cart(productDetailId=${item.productDetail.id})}"
-                       onclick="return confirm('Bạn chắc chắn muốn xóa sản phẩm này không?')"><i
-                            class="fa fa-trash"></i></a>
+                    <a href="javascript:void(0);"
+                       th:attr="data-href=@{/cart/delete-cart(productDetailId=${item.productDetail.id})}"
+                       onclick="confirmDelete(this)">
+                        <i class="fa fa-trash text-danger"></i>
+                    </a>
                     <div class="mt-2">
                         <a th:href="@{/cart/up-down(productDetailId=${item.productDetail.id},quantity=${-1})}"
                            class="btn btn-sm btn-outline-secondary">-</a>
@@ -232,107 +231,105 @@
         </div>
     </div>
 </div>
-<script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    let errorMessage = [[${errorMessage}]];
+    if (errorMessage !== null && errorMessage !== 'null') {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Thông báo',
+            text: errorMessage,
+            confirmButtonText: 'OK'
+        });
+    }
+
+    /*]]>*/
+    function confirmDelete(el) {
+        const href = el.getAttribute('data-href');
+        Swal.fire({
+            title: 'Bạn chắc chắn?',
+            text: "Bạn muốn xóa sản phẩm này khỏi giỏ hàng?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Xóa',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = href;
+            }
+        });
+    }
+
+    // Hàm kiểm tra form trước khi submit
+    function checkForm() {
+        var phone = document.getElementById("phoneck").value;
+        var regex = /^0\d{9}$/;
+        if (!regex.test(phone)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: 'Số điện thoại phải là 10 số'
+            });
+            return false;
+        }
+        return true;
+    }
+
+    // Hàm áp dụng mã giảm giá cho khách chưa đăng nhập
+    // Hàm áp dụng mã giảm giá
+    let discountValue = 0;
+
     function parseCurrency(str) {
-        return parseInt(str.replace(/[^\d]/g, '')) || 0;
+        const match = str.match(/-?\d+/g);
+        if (!match) return 0;
+        return parseInt(match.join(''));
     }
 
     function formatCurrency(num) {
         return num.toLocaleString('vi-VN') + 'đ';
     }
 
-    function updateTotalAmount() {
-        const tongTienHang = parseCurrency(document.getElementById('tongtienhang').innerText);
-        const giamGia = parseCurrency(document.getElementById('giamgia').innerText);
-        const phiShip = parseCurrency(document.getElementById('phiship').innerText);
+    function updateSummary() {
+        const tongTien = parseCurrency(document.getElementById("tongtienhang").textContent);
+        const phiShip = parseCurrency(document.getElementById("phiship").textContent);
 
-        const tamTinh = tongTienHang - giamGia;
-        const phaiThanhToan = tamTinh + phiShip;
+        const tamTinh = tongTien - discountValue;
+        const thanhToan = tamTinh + phiShip;
 
-        document.getElementById('tamtinh').innerText = formatCurrency(tamTinh);
-        document.getElementById('phaithanhtoan').innerText = formatCurrency(phaiThanhToan);
+        document.getElementById("giamgia").textContent = '- ' + formatCurrency(discountValue);
+        document.getElementById("tamtinh").textContent = formatCurrency(tamTinh);
+        document.getElementById("phaithanhtoan").textContent = formatCurrency(thanhToan);
     }
-
 
     function applyDiscount() {
         const code = document.getElementById("discount-code").value.trim();
-        const messageDiv = document.getElementById("discount-message");
+        if (!code) return alert("Vui lòng nhập mã giảm giá");
 
-        if (!code) {
-            messageDiv.innerText = "Vui lòng nhập mã giảm giá.";
-            messageDiv.classList.remove("text-success");
-            messageDiv.classList.add("text-danger");
-            return;
-        }
-
-        fetch(`/api/discount/apply?code=${encodeURIComponent(code)}`)
-            .then(res => res.json().then(data => ({ok: res.ok, data})))
-            .then(response => {
-                if (response.ok) {
-                    const {discountId, discountAmount, message} = response.data;
-                    document.getElementById("discountCodeInput").value = code;
-                    document.getElementById("discountValueInput").value = discountAmount;
-                    document.getElementById("discountIdInput").value = discountId;
-
-                    messageDiv.innerText = message;
-                    messageDiv.classList.remove("text-danger");
-                    messageDiv.classList.add("text-success");
-                } else {
-                    messageDiv.innerText = response.data.message || "Mã không hợp lệ.";
-                    messageDiv.classList.remove("text-success");
-                    messageDiv.classList.add("text-danger");
-
-                    // Xóa input ẩn nếu mã sai
-                    document.getElementById("discountCodeInput").value = '';
-                    document.getElementById("discountValueInput").value = '';
-                    document.getElementById("discountIdInput").value = '';
-                }
+        fetch(`/api/discount/apply?code=${code}`)
+            .then(res => {
+                if (!res.ok) throw res;
+                return res.json();
             })
-            .catch(err => {
-                console.error("Lỗi gọi API:", err);
-                messageDiv.innerText = "Đã xảy ra lỗi.";
-                messageDiv.classList.remove("text-success");
-                messageDiv.classList.add("text-danger");
+            .then(data => {
+                discountValue = data.discountAmount || 0;
+                document.getElementById("discountCodeInput").value = code;
+                document.getElementById("discountValueInput").value = discountValue;
+                alert(data.message);
+                updateSummary();
+            })
+            .catch(async err => {
+                const errMsg = await err.json();
+                alert(errMsg.message || "Lỗi khi áp mã");
+                discountValue = 0;
+                document.getElementById("discountCodeInput").value = "";
+                document.getElementById("discountValueInput").value = "0";
+                updateSummary();
             });
     }
 
-    function applySelectedDiscount() {
-        const select = document.getElementById("discountSelect");
-        const selectedOption = select.options[select.selectedIndex];
-
-        if (!selectedOption.value) {
-            // Nếu chọn "-- Không áp dụng mã --"
-            document.getElementById("discountCodeInput").value = '';
-            document.getElementById("discountValueInput").value = '';
-            document.getElementById("discountIdInput").value = '';
-            document.getElementById("giamgia").innerText = "- 0đ";
-            updateTotalAmount();
-            return;
-        }
-
-        const code = selectedOption.getAttribute("data-code");
-        const amount = parseInt(selectedOption.getAttribute("data-amount")) || 0;
-
-        document.getElementById("discountCodeInput").value = code;
-        document.getElementById("discountValueInput").value = amount;
-        document.getElementById("discountIdInput").value = selectedOption.value;
-
-        document.getElementById("giamgia").innerText = "- " + formatCurrency(amount);
-        updateTotalAmount();
-
-        const msg = document.getElementById("discount-message");
-        if (msg) {
-            msg.innerText = `Áp dụng mã ${code} thành công.`;
-            msg.classList.remove("text-danger");
-            msg.classList.add("text-success");
-
-            msg.style.display = "block";
-            setTimeout(() => {
-                msg.style.display = "none";
-            }, 3000);
-        }
-    }
-    window.addEventListener('DOMContentLoaded', updateTotalAmount);
+    document.addEventListener("DOMContentLoaded", updateSummary);
 </script>
 </body>
 </html>

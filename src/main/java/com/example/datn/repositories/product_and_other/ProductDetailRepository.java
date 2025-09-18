@@ -17,6 +17,7 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, In
     @Query("SELECT pd FROM ProductDetail pd WHERE pd.id = :id")
     ProductDetail findProductDetailById(Integer id);
 
+//    @Query("select pd from ProductDetail pd where pd.barcode like :barcode and pd.status = true")
     ProductDetail findProductDetailsByBarcode(String barcode);
 
     @Query("SELECT pd FROM ProductDetail pd " +
@@ -24,10 +25,16 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, In
             "JOIN FETCH pd.color c " +
             "JOIN FETCH pd.size s " +
             "WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "AND pd.quantity > 0 " +
+            "AND pd.status = true " +
             "OR LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(s.code) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(pd.barcode) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<ProductDetail> searchProductDetailByKeyword(@Param("keyword") String keyword);
+
+    @Query("SELECT pd FROM ProductDetail pd WHERE pd.quantity > 0 " +
+            "AND pd.status = true")
+    List<ProductDetail> findAllInStock();
 
     @Query("SELECT pd.product.id, MIN(pd.price), MAX(pd.price) " +
             "FROM ProductDetail pd " +

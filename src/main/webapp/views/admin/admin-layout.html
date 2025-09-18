@@ -92,7 +92,7 @@
                 <li class="dropdown pc-h-item header-user-profile">
                     <a class="pc-head-link dropdown-toggle arrow-none me-0" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" data-bs-auto-close="outside" aria-expanded="false">
                         <img th:src="@{/assets/images/user/avatar-2.jpg}" alt="user-image" class="user-avtar">
-                        <span sec:authentication="name"></span>
+                        <span>Email or fullname</span>
                     </a>
                     <div class="dropdown-menu dropdown-user-profile dropdown-menu-end pc-h-dropdown">
                         <div class="dropdown-header">
@@ -101,9 +101,13 @@
                                     <img th:src="@{/assets/images/user/avatar-2.jpg}" alt="user-image" class="user-avtar wid-35">
                                 </div>
                                 <div class="flex-grow-1 ms-3">
-                                    <h6 class="mb-1"><span sec:authentication="name">User</span></h6>
-                                </div>
-                                <a href="#!" class="pc-head-link bg-transparent"><i class="ti ti-power text-danger"></i></a>
+                                    <h6 class="mb-1">Demo Users nè!!!!</h6>                                </div>
+                                <!-- Sửa DUY NHẤT phần icon logout -->
+                                <form action="/logout" method="post" style="margin:0;">
+                                    <button type="submit" class="pc-head-link bg-transparent" style="border:none;background:none;padding:0;">
+                                        <i class="ti ti-power text-danger"></i>
+                                    </button>
+                                </form>
                             </div>
                         </div>
                         <ul class="nav drp-tabs nav-fill nav-tabs" id="mydrpTab" role="tablist">
@@ -136,8 +140,9 @@
                                     <i class="ti ti-wallet"></i>
                                     <span>Billing</span>
                                 </a>
-                                <form th:action="@{/logout}" method="post" style="display:inline;">
-                                    <button type="submit" class="dropdown-item">
+                                <!-- Sửa: dùng action thuần để luôn hoạt động -->
+                                <form action="/logout" method="post" style="display:inline;">
+                                    <button type="submit" class="dropdown-item" style="border:none; background:none; padding:0;">
                                         <i class="ti ti-power text-danger"></i>
                                         <span>Logout</span>
                                     </button>

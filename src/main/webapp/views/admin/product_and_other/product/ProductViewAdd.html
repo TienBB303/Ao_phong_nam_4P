@@ -1,123 +1,124 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments/head :: head}">
-    <title>Quản lý sản phẩm | 4PStore</title>
-
-</head>
-<body>
-<header th:replace="~{admin/fragments/header :: header}"></header>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{admin/fragments/head :: head}"></head>
+<body data-pc-preset="preset-1" data-pc-direction="ltr" data-pc-theme="light">
 <div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
-<section>
-    <div class="pc-container">
-        <div class="pc-content">
-            <div class="page-header">
+<header th:replace="~{admin/fragments/header :: header}"></header>
+
+<div class="pc-container">
+    <div class="pc-content">
+        <!-- breadcrumb -->
+        <div class="page-header">
+            <div class="page-block">
                 <div class="row align-items-center">
                     <div class="col-md-12">
-                        <h5 class="m-b-10">Thêm sản phẩm</h5>
+                        <div class="page-header-title">
+                            <h5 class="m-b-10">Thêm sản phẩm mới</h5>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="container discount-form-container">
-                <div class="container mt-5">
-                    <form id="add1" th:object="${productForm}" th:action="@{/admin/product/add1}" method="post" enctype="multipart/form-data">
-                        <div class="card shadow-sm rounded mb-4">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="product_code" class="form-label">Mã sản phẩm <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control" id="product_code" name="code" th:value="${productForm.code}" placeholder="Mã tạo tự động/ nhập thủ công">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="product_name" class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control" id="product_name" name="name" th:value="${productForm.name}" placeholder="Nhập tên sản phẩm">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="product_category" class="form-label">Loại sản phẩm</label>
-                                            <div class="d-flex align-items-center">
-                                                <select class="form-select me-2" id="product_category" name="categoryId">
-                                                    <option th:each="cate : ${listCategory}"
-                                                            th:value="${cate.id}"
-                                                            th:text="${cate.name}"
-                                                            th:if="${cate.status}"
-                                                            th:selected="${cate.id == productForm.categoryId}">
-                                                    </option>
-                                                </select>
-                                                <span id="add_category" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalAddCategory">
-                                                    <i class="fas fa-plus"></i>
-                                                </span>
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="product_brand" class="form-label">Hãng</label>
-                                            <div class="d-flex align-items-center">
-                                                <select class="form-select me-2" id="product_brand" name="brandId">
-                                                    <option th:each="brand : ${listBrand}"
-                                                            th:value="${brand.id}"
-                                                            th:text="${brand.name}"
-                                                            th:if="${brand.status}"
-                                                            th:selected="${brand.id == productForm.brandId}">
-                                                    </option>
-                                                </select>
-                                                <span id="add_brand" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalAddBrand">
-                                                    <i class="fas fa-plus"></i>
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="product_category" class="form-label">Chất liệu</label>
-                                            <div class="d-flex align-items-center">
-                                                <select class="form-select me-2" id="product_material" name="materialId">
-                                                    <option th:each="mate : ${listMaterial}"
-                                                            th:value="${mate.id}"
-                                                            th:text="${mate.name}"
-                                                            th:if="${mate.status}"
-                                                            th:selected="${mate.id == productForm.materialId}">
-                                                    </option>
-                                                </select>
-                                                <span id="add_material" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalAddMaterial">
-                                                    <i class="fas fa-plus"></i>
-                                                </span>
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-12">
-                                        <div class="mb-3">
-                                            <label for="product_brand" class="form-label">Mô tả</label>
-                                            <textarea class="form-control" id="product_description"  name="description" placeholder="Nhập mô tả" th:field="*{description}"></textarea>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="text-center mt-4">
-                                    <button type="submit" class="btn btn-primary shadow rounded-pill px-4 py-2" title="Tiếp theo">
-                                        <i class="bi bi-arrow-bar-right"></i>
-                                    </button>
+        </div>
+        <!-- content: bạn dán phần “cards, charts, tables …” ở đây -->
+        <div class="row">
+            <form id="add1" th:object="${productForm}" th:action="@{/admin/product/add1}" method="post" enctype="multipart/form-data">
+                <div class="card shadow-sm rounded mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="product_code" class="form-label">Mã sản phẩm <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="product_code" name="code" th:value="${productForm.code}" placeholder="Mã tạo tự động/ nhập thủ công">
                                 </div>
                             </div>
                         </div>
-                    </form>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="product_name" class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="product_name" name="name" th:value="${productForm.name}" placeholder="Nhập tên sản phẩm">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="product_category" class="form-label">Loại sản phẩm</label>
+                                    <div class="d-flex align-items-center">
+                                        <select class="form-select me-2" id="product_category" name="categoryId">
+                                            <option th:each="cate : ${listCategory}"
+                                                    th:value="${cate.id}"
+                                                    th:text="${cate.name}"
+                                                    th:if="${cate.status}"
+                                                    th:selected="${cate.id == productForm.categoryId}">
+                                            </option>
+                                        </select>
+                                        <span id="add_category" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalAddCategory">
+                                                    <i class="fas fa-plus"></i>
+                                                </span>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="product_brand" class="form-label">Hãng</label>
+                                    <div class="d-flex align-items-center">
+                                        <select class="form-select me-2" id="product_brand" name="brandId">
+                                            <option th:each="brand : ${listBrand}"
+                                                    th:value="${brand.id}"
+                                                    th:text="${brand.name}"
+                                                    th:if="${brand.status}"
+                                                    th:selected="${brand.id == productForm.brandId}">
+                                            </option>
+                                        </select>
+                                        <span id="add_brand" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalAddBrand">
+                                                    <i class="fas fa-plus"></i>
+                                                </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="product_category" class="form-label">Chất liệu</label>
+                                    <div class="d-flex align-items-center">
+                                        <select class="form-select me-2" id="product_material" name="materialId">
+                                            <option th:each="mate : ${listMaterial}"
+                                                    th:value="${mate.id}"
+                                                    th:text="${mate.name}"
+                                                    th:if="${mate.status}"
+                                                    th:selected="${mate.id == productForm.materialId}">
+                                            </option>
+                                        </select>
+                                        <span id="add_material" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalAddMaterial">
+                                                    <i class="fas fa-plus"></i>
+                                                </span>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="product_brand" class="form-label">Mô tả</label>
+                                    <textarea class="form-control" id="product_description"  name="description" placeholder="Nhập mô tả" th:field="*{description}"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary shadow rounded-pill px-4 py-2" title="Tiếp theo">
+                                <i class="bi bi-arrow-bar-right"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
-</section>
 </div>
+<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
+
 <!--Modal add kiểu loại nhanh-->
 <div class="modal fade" id="modalAddCategory" tabindex="-1" aria-labelledby="modalAddCategoryLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -215,7 +216,6 @@
         </div>
     </div>
 </div>
-<footer th:replace="admin/fragments/footer :: footer"></footer>
 
 <!--báo lỗi-->
 <script th:if="${alert != null}" th:inline="javascript">
@@ -248,5 +248,6 @@
         document.getElementById("hidden_product_description_material").value = document.getElementById("product_description").value;
     });
 </script>
+
 </body>
 </html>

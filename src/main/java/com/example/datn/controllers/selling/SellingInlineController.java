@@ -15,7 +15,10 @@ import com.example.datn.services.product_and_other.ProductService;
 import com.google.zxing.qrcode.decoder.Mode;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -47,6 +50,12 @@ public class SellingInlineController {
 
     @Autowired
     private PaymentMethodService paymentMethodService;
+
+    @Autowired
+    private MomoService momoService;
+
+    @Autowired
+    private AccountService accountService;
 
     @ModelAttribute("listProduct")
     public List<Product> listProduct() {
@@ -141,6 +150,16 @@ public class SellingInlineController {
 
         return "admin/selling/inline";
     }
+
+    @GetMapping("/list-product-search")
+    @ResponseBody
+    public List<ProductDetailDto> listProductSearch() {
+        return productService.getAllProductDetailsInStock()
+                .stream()
+                .map(ProductDetailDto::new) // constructor map từ entity -> DTO
+                .collect(Collectors.toList());
+    }
+
 
     @GetMapping("/search-product-detail")
     @ResponseBody
@@ -239,17 +258,93 @@ public class SellingInlineController {
     public ResponseEntity<?> checkOut(@RequestParam("idCart") Integer idCart,
                                       @RequestParam("typePayment") String typePayment) {
         try {
-            billService.checkOut(idCart, typePayment);
-            return ResponseEntity.ok("Thanh toán thành công!");
+            billService.checkOut(idCart, typePayment); // tiền mặt hoặc chuyển khoản
+            Bill bill = billService.findById(idCart);
+            Map<String, Object> body = new HashMap<>();
+            body.put("message", "Thanh toán thành công!");
+            body.put("billId", bill.getId());
+            body.put("billCode", bill.getCode());
+            return ResponseEntity.ok(body);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    @GetMapping("/thanh-toan")
-    public String redirectThanhToan() {
-        return "redirect:/admin/sell-inline/hien-thi";
+    @PostMapping("/create-momo-order")
+    @ResponseBody
+    public ResponseEntity<?> createMomoOrder(@RequestParam Integer idCart) {
+        try {
+            Bill cart = billService.findCartById(idCart);
+            if (cart == null) return ResponseEntity.badRequest().body("Không tìm thấy giỏ hàng");
+
+            BigDecimal amount = cart.getTotal_checkout();
+
+            // Service trả về payUrl
+            String payUrl = momoService.createQrOrder(idCart, amount);
+
+            Map<String, Object> res = new HashMap<>();
+            res.put("payUrl", payUrl);
+            res.put("billId", idCart);
+            return ResponseEntity.ok(res);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
+
+
+    @RequestMapping(value = "/momo-ipn", method = {RequestMethod.POST, RequestMethod.GET})
+    public ResponseEntity<String> momoIpn(@RequestBody(required = false) Map<String, Object> payload,
+                                          @RequestParam Map<String, String> params) {
+        if ((payload == null || payload.isEmpty()) && (params == null || params.isEmpty())) {
+            return ResponseEntity.ok("IPN received without body");
+        }
+
+        System.out.println("MOMO IPN payload=" + payload + ", params=" + params);
+
+        String orderId = payload != null ? (String) payload.get("orderId") : params.get("orderId");
+        String resultCode = payload != null ? String.valueOf(payload.get("resultCode")) : params.get("resultCode");
+
+        if ("0".equals(resultCode)) {
+            Integer cartId = extractCartId(orderId);
+            try {
+                billService.checkOut(cartId, "Chuyển khoản");
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Checkout fail");
+            }
+        }
+        return ResponseEntity.ok("IPN received");
+    }
+
+    private Integer extractCartId(String orderId) {
+        String idStr = orderId.replace("CART", "").split("_")[0];
+        return Integer.parseInt(idStr);
+    }
+
+    @GetMapping("/momo-return")
+    public String momoReturn(@RequestParam Map<String, String> params, Model model) {
+        String resultCode = params.get("resultCode");
+        String orderId = params.get("orderId");
+
+        if ("0".equals(resultCode)) {
+            Integer cartId = extractCartId(orderId);
+            try {
+                billService.checkOut(cartId, "Chuyển khoản");
+            } catch (Exception e) {
+                model.addAttribute("success", false);
+                model.addAttribute("error", "Checkout fail: " + e.getMessage());
+                return "admin/selling/momo-result";
+            }
+        }
+
+        model.addAttribute("success", "0".equals(resultCode));
+        model.addAttribute("orderId", orderId);
+        return "admin/selling/momo-result"; // view thymeleaf
+    }
+
+//    @GetMapping("/thanh-toan")
+//    public String redirectThanhToan() {
+//        return "redirect:/admin/sell-inline/hien-thi";
+//    }
 
     //Hiện list discount
     public List<Discount> listDiscountCanApply(BigDecimal minPrice) {
@@ -284,17 +379,12 @@ public class SellingInlineController {
     public ResponseEntity<?> addCustomertoCart(@RequestParam("idCart") Integer idCart,
                                                @RequestParam("customerId") Integer customerId) {
         try {
-            Customer customer = billService.addCustomerToCart(idCart, customerId);
-
-            String address = "";
-            if (customer.getAddresses() != null && !customer.getAddresses().isEmpty()) {
-                address = customer.getAddresses().get(0).getAddressDetail();
-            }
+            Bill bill = billService.addCustomerToCart(idCart, customerId);
 
             Map<String, Object> response = new HashMap<>();
-            response.put("name", customer.getName());
-            response.put("phone", customer.getPhoneNumber());
-            response.put("address", address);
+            response.put("name", bill.getName());
+            response.put("phone", bill.getPhoneNumber());
+            response.put("address", bill.getAddress_shipping());
 
             return ResponseEntity.ok(response);
         }catch (Exception e){
@@ -363,6 +453,50 @@ public class SellingInlineController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @GetMapping("/print/{id}")
+    public String printInvoice(@PathVariable("id") Integer billId, Model model) {
+        Account account = null;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()
+                && !"anonymousUser".equals(authentication.getPrincipal())) {
+            String email = authentication.getName();
+            account = accountService.findByEmail(email);
+        }
+
+        String name_employee = account.getCustomer().getName();
+
+        Bill bill = billService.findById(billId);
+
+        Customer customer = null;
+        if (bill.getCustomer() != null) {
+            customer = customerService.findById(bill.getCustomer().getId());
+        }
+
+        List<BillDetails> list_san_pham = billService.findBillDetailsByBillId(billId);
+
+        int tongSoLuong = (bill.getTotal_quantity() != null)
+                ? bill.getTotal_quantity()
+                : list_san_pham.stream()
+                .map(BillDetails::getQuantity)
+                .filter(java.util.Objects::nonNull)
+                .mapToInt(Integer::intValue)
+                .sum();
+
+        // Đảm bảo shippingFee không null
+        BigDecimal shippingFee = bill.getShippingFee() == null
+                ? BigDecimal.ZERO
+                : bill.getShippingFee();
+
+        model.addAttribute("bill", bill);
+        model.addAttribute("customer", customer);
+        model.addAttribute("list_san_pham", list_san_pham);
+        model.addAttribute("shippingFee", shippingFee);
+        model.addAttribute("tongSoLuong", tongSoLuong);
+        model.addAttribute("name_employee", name_employee);
+
+        return "admin/selling/print";
     }
 
 }

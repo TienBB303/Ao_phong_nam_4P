@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title th:text="'Hóa đơn #' + ${bill.code}">Hóa đơn</title>
+
+    <style>
+        :root { --fg:#111; --muted:#666; --brand:#0d6efd; }
+        * { box-sizing: border-box; }
+        html,body { margin: 0; padding: 0; color: var(--fg); font: 14px/1.5 system-ui, -apple-system, Segoe UI, Roboto, "Public Sans", Helvetica, Arial, sans-serif; }
+        .invoice { width: 210mm; max-width: 100%; margin: 0 auto; padding: 18mm 15mm; background: #fff; }
+        .head { display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed #ddd; padding-bottom:10px; }
+        .brand { font-weight:700; font-size:18px; color:var(--brand); }
+        .muted { color:var(--muted); font-size:12px; }
+        .title { margin:10px 0 0; font-size:16px; font-weight:700; }
+        .grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:12px; }
+        .card { border:1px solid #e9ecef; border-radius:10px; padding:10px 12px; }
+        table { width:100%; border-collapse:collapse; margin-top:12px; }
+        th,td { padding:8px 10px; text-align:left; border-bottom:1px dashed #eee; vertical-align:top; }
+        th { font-size:12px; color:#555; font-weight:600; }
+        .right { text-align:right; }
+        .total-box { margin-top:10px; }
+        .total-row { display:flex; justify-content:space-between; padding:4px 0; }
+        .grand { font-weight:800; font-size:16px; }
+        .footer { border-top:1px dashed #ddd; margin-top:16px; padding-top:10px; display:flex; justify-content:space-between; align-items:center; }
+        .actions { display:flex; gap:8px; }
+        .btn { appearance:none; border:1px solid #cfd3d7; padding:6px 10px; border-radius:8px; cursor:pointer; background:#f8f9fa; }
+        .btn.primary { background:var(--brand); border-color:var(--brand); color:#fff; }
+        @media print { .invoice { padding:10mm 10mm; } .btn,.actions { display:none!important; } body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
+    </style>
+</head>
+<body>
+<div class="invoice">
+    <div class="head">
+        <div>
+            <img th:src="@{/assets/images/logo_4P.png}" class="img-fluid logo-lg" alt="logo" style="width:100px; height:auto;">
+            <div class="brand">4P Store</div>
+            <div class="muted">Địa chỉ cửa hàng · Hotline: 0123 456 789</div>
+        </div>
+        <div class="right">
+            <div class="title">HÓA ĐƠN BÁN HÀNG</div>
+            <div class="muted">Mã: <span th:text="${bill.code}">HD000001</span></div>
+            <div class="muted">Ngày: <span th:text="${#temporals.format(bill.createdAt, 'dd/MM/yyyy HH:mm')}">07/09/2025 14:00</span></div>
+            <div class="muted">Nhân viên thực hiện: <strong th:text="${name_employee}">Demo</strong></div>
+
+        </div>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <div class="muted">Khách hàng</div>
+            <div>
+                <strong th:text="${bill.customer != null ? bill.customer.name : (bill.name != null ? bill.name : 'Khách lẻ')}">Khách lẻ</strong>
+            </div>
+            <div class="muted" th:text="${bill.customer != null ? bill.phoneNumber : ''}"> </div>
+            <div class="muted" th:if="${bill.address_shipping != null}" th:text="${bill.address_shipping}"></div>
+            <div class="muted" th:if="${bill.email != null}" th:text="${bill.email}"></div>
+        </div>
+        <div class="card">
+            <div class="muted">Thanh toán</div>
+            <div>Phương thức: <strong th:text="${bill.paymentMethod != null ? bill.paymentMethod.name : '---'}">Tiền mặt</strong></div>
+            <div>Trạng thái: <strong th:text="${bill.paymentStatus != null && bill.paymentStatus ? 'Đã thanh toán' : 'Chưa thanh toán'}">Đã thanh toán</strong></div>
+        </div>
+    </div>
+
+
+    <h3>Danh sách sản phẩm</h3>
+    <table>
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Sản phẩm</th>
+            <th class="right">SL</th>
+            <th class="right">Đơn giá</th>
+            <th class="right">Thành tiền</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="d, i : ${list_san_pham}">
+            <td th:text="${i.index + 1}">1</td>
+            <td>
+                <div>
+                    <strong th:text="${  d.productDetail != null && d.productDetail.product != null  ? d.productDetail.product.name  : 'Sản phẩm' }">
+                        Sản phẩm
+                    </strong>
+                </div>
+                <div class="muted" th:if="${d != null}">
+                    <span th:text="${(d.productDetail.size != null ? d.productDetail.size.code : '')
+                        + (d.productDetail.color != null ? ' - ' + d.productDetail.color.name : '')}">M - Đen
+                    </span>
+                </div>
+            </td>
+            <td class="right" th:text="${#numbers.formatDecimal(d.quantity, 0, 'POINT', 0, 'POINT')}">1</td>
+            <td class="right" th:text="${#numbers.formatDecimal(d.price != null ? d.price : 0, 0, 'POINT', 0, 'POINT')}">199000</td>
+            <!-- Lưu ý: field là total_price (gạch dưới) -->
+            <td class="right" th:text="${#numbers.formatDecimal(d.total_price != null ? d.total_price : 0, 0, 'POINT', 0, 'POINT')}">199000</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="total-box">
+        <div class="total-row">
+            <span>Tổng số lượng</span>
+            <strong th:text="${#numbers.formatDecimal(tongSoLuong != null ? tongSoLuong : 0, 0, 'POINT', 0, 'POINT')}">0</strong>
+        </div>
+        <div class="total-row">
+            <span>Tạm tính</span>
+            <strong th:text="${#numbers.formatDecimal(bill.totalAmount != null ? bill.totalAmount : 0, 0, 'POINT', 0, 'POINT')}">0</strong>
+        </div>
+        <div class="total-row">
+            <span>Giảm giá</span>
+            <strong th:text="${#numbers.formatDecimal(bill.discountAmount != null ? bill.discountAmount : 0, 0, 'POINT', 0, 'POINT')}">0</strong>
+        </div>
+        <div class="total-row">
+            <span>Phí ship</span>
+            <strong th:text="${#numbers.formatDecimal(shippingFee != null ? shippingFee : 0, 0, 'POINT', 0, 'POINT')}">0</strong>
+        </div>
+        <div class="total-row grand">
+            <span>TỔNG CỘNG</span>
+            <span class="grand" th:text="${#numbers.formatDecimal(bill.total_checkout != null ? bill.total_checkout : 0, 0, 'POINT', 0, 'POINT')}">0</span>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="muted">Cám ơn quý khách. Hẹn gặp lại!</div>
+        <div class="actions">
+<!--            <button class="btn" onclick="window.history.back()">Quay lại</button>-->
+            <button class="btn primary" onclick="window.print()">In hóa đơn</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Tự in khi mở trang
+    document.addEventListener('DOMContentLoaded', function(){
+        setTimeout(() => { window.print(); }, 120);
+    });
+
+    // // cố gắng đóng tab nếu là popup
+    // window.onafterprint = function(){
+    //     if (window.opener) { try { window.close(); } catch(e){} }
+    // };
+</script>
+</body>
+</html>

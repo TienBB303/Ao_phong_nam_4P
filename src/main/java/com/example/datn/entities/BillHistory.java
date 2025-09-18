@@ -27,9 +27,9 @@ public class BillHistory {
     @JoinColumn(name = "bill_id")
     private Bill bill;
 
-//    @ManyToOne
-//    @JoinColumn(name = "account_id")
-//    private Account account;
+    @ManyToOne
+    @JoinColumn(name = "account_id")
+    private Account account;
 
 
 }

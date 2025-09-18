@@ -48,9 +48,9 @@
                 <div class="mb-3">
                     <label class="form-label">Giới tính:</label>
                     <div>
-                        <input type="radio" th:field="*{gender}" value="true" id="male">
+                        <input type="radio" name="gender" th:field="*{gender}" th:value="true" id="male">
                         <label for="male">Nam</label>
-                        <input type="radio" th:field="*{gender}" value="false" id="female">
+                        <input type="radio" name="gender" th:field="*{gender}" th:value="false" id="female">
                         <label for="female">Nữ</label>
                     </div>
                 </div>
@@ -58,9 +58,9 @@
                     <label class="form-label">Ngày sinh:</label>
                     <input type="date"
                            th:field="*{birthday}"
-                           th:value="${#temporals.format(customerDto.birthday, 'yyyy-MM-dd')}"
                            id="birthday"
-                           class="form-control"/>
+                           class="form-control"
+                           required />
                     <div class="text-danger" th:if="${#fields.hasErrors('birthday')}" th:errors="*{birthday}"></div>
                 </div>
                 <div class="mb-3">
@@ -79,17 +79,17 @@
                 <h5 class="fw-semibold">ĐỊA CHỈ GIAO HÀNG</h5>
                 <div class="mb-3">
                     <label for="province" class="form-label">Tỉnh/Thành phố</label>
-                    <select th:field="*{address.provinceId}" id="province" class="form-select"></select>
+                    <select th:field="*{address.provinceId}" id="province" class="form-select" required></select>
                     <input type="hidden" th:field="*{address.provinceName}" id="provinceName"/>
                 </div>
                 <div class="mb-3">
                     <label for="district" class="form-label">Quận/Huyện</label>
-                    <select th:field="*{address.districtId}" id="district" class="form-select"></select>
+                    <select th:field="*{address.districtId}" id="district" class="form-select" required></select>
                     <input type="hidden" th:field="*{address.districtName}" id="districtName"/>
                 </div>
                 <div class="mb-3">
                     <label for="ward" class="form-label">Phường/Xã</label>
-                    <select th:field="*{address.wardId}" id="ward" class="form-select"></select>
+                    <select th:field="*{address.wardId}" id="ward" class="form-select" required></select>
                     <input type="hidden" th:field="*{address.wardName}" id="wardName"/>
                 </div>
                 <div class="mb-3">
@@ -270,11 +270,24 @@
         const nameInput = document.getElementById("name");
         const emailInput = document.getElementById("email");
         const phoneInput = document.getElementById("phoneNumber");
+        const addressDetailInput = document.querySelector('[name="address.addressDetail"]');
 
         if (form) {
             form.addEventListener("submit", function (e) {
                 // luôn đồng bộ tên Tỉnh/Huyện/Xã
                 updateFullAddress();
+                try {
+                    const fd = new FormData(form);
+                    const debug = [];
+                    for (const [k, v] of fd.entries()) {
+                        if (k === 'gender' || k === 'birthday') {
+                            debug.push(`${k}=${v}`);
+                        }
+                    }
+                    console.log('[DEBUG Submit]', debug.join(', '));
+                } catch (err) {
+                    // bỏ qua nếu trình duyệt không hỗ trợ
+                }
 
                 let isValid = true;
 
@@ -302,7 +315,23 @@
                     isValid = false;
                 }
                 phoneInput.reportValidity();
+                if (!provinceSelect.value) {
+                    provinceSelect.setCustomValidity("Vui lòng chọn Tỉnh/Thành phố.");
+                    isValid = false;
+                }
+                provinceSelect.reportValidity();
 
+                if (!districtSelect.value) {
+                    districtSelect.setCustomValidity("Vui lòng chọn Quận/Huyện.");
+                    isValid = false;
+                }
+                districtSelect.reportValidity();
+
+                if (!wardSelect.value) {
+                    wardSelect.setCustomValidity("Vui lòng chọn Phường/Xã.");
+                    isValid = false;
+                }
+                wardSelect.reportValidity();
                 if (!isValid) {
                     e.preventDefault();
                     return;

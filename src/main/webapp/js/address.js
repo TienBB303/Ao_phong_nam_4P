@@ -17,16 +17,6 @@ async function loadAddress() {
 }
 
 async function loadHuyen(idtinh) {
-    var totalTm = cleanCurrencyString(document.getElementById("tongtienhang").textContent);
-    if(idtinh == 201){
-        document.getElementById("phiship").innerHTML = "30.000đ";
-        document.getElementById("phaithanhtoan").innerHTML = formatmoney(Number(totalTm) + Number(30000));
-    }
-    else{
-        document.getElementById("phiship").innerHTML = "40.000đ";
-        document.getElementById("phaithanhtoan").innerHTML = formatmoney(Number(totalTm) + Number(40000));
-
-    }
     var urladd = 'http://localhost:8080/api/shipping/public/district?provinceId='+idtinh;
     const response = await fetch(urladd, {
         method: 'GET'
@@ -55,17 +45,4 @@ async function loadXa(idHuyen) {
         main += `<option name-add="${list[i].WardCode}" value="${list[i].WardName}">${list[i].WardName}</option>`
     }
     document.getElementById("xa").innerHTML = main
-}
-
-
-function formatmoney(money) {
-    const VND = new Intl.NumberFormat('vi-VN', {
-        style: 'currency',
-        currency: 'VND',
-    });
-    return VND.format(money);
-}
-
-function cleanCurrencyString(input){
-    return input.replace(/[^0-9]/g,'')
 }

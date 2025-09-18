@@ -1,49 +1,68 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{admin/admin-layout}">
-<head>
-    <title>Dashboard</title>
-</head>
-<div layout:fragment="content">
-    <div class="container py-4">
-        <h4 class="mb-4">4PStore xin chào</h4>
-        <div class="row mb-4">
-            <div class="col-md-3 mb-3">
-                <div class="card text-center p-3">
-                    <div class="h6">Tổng đơn đặt hàng</div>
-                    <div class="h4" th:text="${totalOrders}">0</div>
-                </div>
-            </div>
-            <div class="row mb-4">
-                <div class="col-md-3 mb-3">
-                    <div class="card text-center p-3">
-                        <div class="h6">Số đơn chờ xử lý</div>
-                        <div class="h4" th:text="${pendingOrders}">0</div>
-                    </div>
-                </div>
-                <div class="col-md-3 mb-3">
-                    <div class="card text-center p-3">
-                        <div class="h6">Số đơn chờ xác nhận (đã thanh toán)</div>
-                        <div class="h4" th:text="${paidPendingOrders}">0</div>
-                        <div class="small text-muted">
-                            Tổng chờ xác nhận: <span th:text="${waitingOrders}">0</span>
+
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{admin/fragments/head :: head}"></head>
+<body data-pc-preset="preset-1" data-pc-direction="ltr" data-pc-theme="light">
+<div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
+<header th:replace="~{admin/fragments/header :: header}"></header>
+
+<div class="pc-container">
+    <div class="pc-content">
+        <!-- breadcrumb -->
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <div class="page-header-title">
+                            <h5 class="m-b-10">Xin chào</h5>
                         </div>
                     </div>
                 </div>
-                    <div class="col-md-3 mb-3">
-                        <div class="card text-center p-3">
+            </div>
+        </div>
+        <!-- content: bạn dán phần “cards, charts, tables …” ở đây -->
+        <div class="row">
+            <!-- ... dán tiếp các block còn lại từ file gốc ... -->
+            <div class="container py-4">
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 row-cols-xl-5 g-3 mb-4">
+                    <div class="col">
+                        <div class="card h-100 text-center p-3">
+                            <div class="h6">Tổng đơn đặt hàng</div>
+                            <div class="h4" th:text="${totalOrders}">0</div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card h-100 text-center p-3">
+<!--                            <div class="card text-center p-3">-->
+                                <div class="h6">Số đơn chờ xử lý</div>
+                                <div class="h4" th:text="${pendingOrders}">0</div>
+                            </div>
+                        </div>
+                    <div class="col">
+                        <div class="card h-100 text-center p-3">
+                                <div class="h6">Số đơn chờ xác nhận (đã thanh toán)</div>
+                                <div class="h4" th:text="${paidPendingOrders}">0</div>
+                                <div class="small text-muted">
+                                    Tổng chờ xác nhận: <span th:text="${waitingOrders}">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    <div class="col">
+                        <div class="card h-100 text-center p-3">
                             <div class="h6">Tổng doanh thu</div>
                             <div class="h4" th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">0</div>
                         </div>
                     </div>
-                    <div class="col-md-3 mb-3">
-                        <div class="card text-center p-3">
+                    <div class="col">
+                        <div class="card h-100 text-center p-3">
                             <div class="h6">Số sản phẩm</div>
                             <div class="h4" th:text="${totalProducts}">0</div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-4">
-                            <div class="card">
+                </div>
+                <div class="row g-3">
+                    <div class="col-lg-6">
+                        <div class="card h-100">
                                 <div class="card-body">
                                     <div class="h6 mb-2">Doanh thu 7 ngày gần nhất</div>
                                     <canvas id="revenueChart"
@@ -52,9 +71,8 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-6 mb-4">
-                        <div class="card">
+                    <div class="col-lg-6">
+                        <div class="card h-100">
                             <div class="card-body">
                                 <div class="h6 mb-2">Đơn hàng theo trạng thái</div>
                                 <canvas id="orderPieChart"
@@ -69,8 +87,10 @@
         </div>
     </div>
 </div>
-<script layout:fragment="script">
-    document.addEventListener('DOMContentLoaded', function () {
+
+<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
         // Biểu đồ doanh thu 7 ngày gần nhất
         const revenueChart = document.getElementById('revenueChart');
         let dateLabels = revenueChart.getAttribute('data-labels');
@@ -120,7 +140,7 @@
                     y: {
                         beginAtZero: true,
                         ticks: {
-                            callback: function (value) {
+                            callback: function(value) {
                                 return new Intl.NumberFormat('vi-VN').format(value) + ' đ';
                             }
                         }
@@ -179,7 +199,7 @@
                     },
                     tooltip: {
                         callbacks: {
-                            label: function (context) {
+                            label: function(context) {
                                 return context.label + ': ' + context.parsed + ' đơn';
                             }
                         }
@@ -188,4 +208,7 @@
             }
         });
     });
-</script> 
+</script>
+</body>
+</html>
+

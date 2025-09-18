@@ -53,7 +53,7 @@
                 <div class="card shadow">
                     <div class="card-body p-5">
                         <h3 class="text-center mb-4">Đăng nhập</h3>
-                        
+
                         <!-- Hiển thị thông báo -->
                         <div th:if="${success}" class="alert alert-success" role="alert">
                             <span th:text="${success}"></span>
@@ -61,8 +61,13 @@
                         <div th:if="${error}" class="alert alert-danger" role="alert">
                             <span th:text="${error}"></span>
                         </div>
+<!--<<<<<<< HEAD-->
+
+<!--                        <form th:action="@{/user/login}" method="post">-->
+<!--=======-->
                         
                         <form th:action="@{/login}" method="post">
+
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
                                 <input type="email" class="form-control" id="email" name="email" required>
@@ -78,7 +83,7 @@
                             </div>
 
                             <button type="submit" class="btn btn-primary w-100 mb-3">Đăng nhập</button>
-                            
+
                             <div class="text-center">
                                 <p class="mb-0">Chưa có tài khoản? <a href="/user/signup" class="text-decoration-none">Đăng ký</a></p>
                             </div>

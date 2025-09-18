@@ -1,94 +1,180 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{admin/admin-layout}">
-
-<head>
-    <title></title>
-</head>
-<body>
-<div layout:fragment="content">
-
-
-                    <form method="get" action="">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="mb-0">Quản lý hóa đơn</h5>
-                            <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-primary" id="search-btn">🔍 Tìm kiếm</button>
-                                <a th:href="@{/admin/bill/view}" class="btn btn-outline-secondary">🧹 Hủy</a>
-                            </div>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{admin/fragments/head :: head}"></head>
+<style>
+    .btn i {
+        line-height: 2;      /* bỏ thừa chiều cao */
+        vertical-align: middle;
+        display: inline-flex;
+        align-items: center; /* căn icon giữa */
+        justify-content: center;
+        font-size: 1rem;     /* chỉnh nếu muốn icon đều nhau */
+    }
+</style>
+<body data-pc-preset="preset-1" data-pc-direction="ltr" data-pc-theme="light">
+<div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
+<header th:replace="~{admin/fragments/header :: header}"></header>
+<div class="pc-container">
+    <div class="pc-content">
+        <!-- breadcrumb -->
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <div class="page-header-title">
+                            <h5 class="m-b-10">Quản lý hóa đơn</h5>
                         </div>
-                        <div class="row mb-3">
-                            <div class="col">
-                                <input type="text" name="code" class="form-control" placeholder="Mã hóa đơn"
-                                       th:value="${code}">
-                            </div>
-                            <div class="col">
-                                <input type="date" name="startDate" class="form-control" th:value="${startDate}" />
-                            </div>
-                            <div class="col">
-                                <input type="date" name="endDate" class="form-control" th:value="${endDate}" />
-                            </div>
-                            <div class="col">
-                                <select name="status" class="form-control">
-                                    <option value="">Trạng thái</option>
-                                    <option value="1" th:selected="${status == 1}">Chờ xác nhận</option>
-                                    <option value="2" th:selected="${status == 2}">Đã xác nhận</option>
-                                    <option value="3" th:selected="${status == 3}">Đang giao</option>
-                                    <option value="4" th:selected="${status == 4}">Hoàn thành</option>
-                                    <option value="5" th:selected="${status == 5}">Đã huỷ</option>
-                                    <option value="6" th:selected="${status == 6}">Giao hàng thất bại</option>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- content: bạn dán phần “cards, charts, tables …” ở đây -->
+        <div class="row">
+            <form method="get" action="">
+<!--                <div class="d-flex justify-content-end align-items-center mb-3">-->
+<!--                    <div class="d-flex gap-2">-->
+<!--                        <button type="submit" class="btn btn-primary" id="search-btn">🔍 Tìm kiếm</button>-->
+<!--                        <a th:href="@{/admin/bill/view}" class="btn btn-outline-secondary">🧹 Hủy</a>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="row mb-3">-->
+<!--                    <div class="col">-->
+<!--                        <input type="text" name="code" class="form-control" placeholder="Mã hóa đơn"-->
+<!--                               th:value="${code}">-->
+<!--                    </div>-->
+<!--                    <div class="col">-->
+<!--                        <input type="date" name="startDate" class="form-control" th:value="${startDate}" />-->
+<!--                    </div>-->
+<!--                    <div class="col">-->
+<!--                        <input type="date" name="endDate" class="form-control" th:value="${endDate}" />-->
+<!--                    </div>-->
+<!--                    <div class="col">-->
+<!--                        <select name="status" class="form-control">-->
+<!--                            <option value="">Trạng thái</option>-->
+<!--                            <option value="1" th:selected="${status == 1}">Chờ xác nhận</option>-->
+<!--                            <option value="2" th:selected="${status == 2}">Đã xác nhận</option>-->
+<!--                            <option value="3" th:selected="${status == 3}">Đang giao</option>-->
+<!--                            <option value="4" th:selected="${status == 4}">Hoàn thành</option>-->
+<!--                            <option value="5" th:selected="${status == 5}">Đã huỷ</option>-->
+<!--                            <option value="6" th:selected="${status == 6}">Giao hàng thất bại</option>-->
 
-                                </select>
-                            </div>
-                            <div class="col">
-                                <select name="type" class="form-control">
-                                    <option value="">Loại đơn</option>
-                                    <option value="0" th:selected="${type == false}">Tại quầy</option>
-                                    <option value="1" th:selected="${type == true}">Online</option>
-                                </select>
-                            </div>
-                            <div class="col">
-                                <input type="text" name="name" class="form-control" placeholder="Họ và tên"
-                                       th:value="${name}">
-                            </div>
+<!--                        </select>-->
+<!--                    </div>-->
+<!--                    <div class="col">-->
+<!--                        <select name="type" class="form-control">-->
+<!--                            <option value="">Loại đơn</option>-->
+<!--                            <option value="0" th:selected="${type == false}">Tại quầy</option>-->
+<!--                            <option value="1" th:selected="${type == true}">Online</option>-->
+<!--                        </select>-->
+<!--                    </div>-->
+<!--                    <div class="col">-->
+<!--                        <input type="text" name="name" class="form-control" placeholder="Họ và tên"-->
+<!--                               th:value="${name}">-->
+<!--                    </div>-->
+<!--                </div>-->
+
+<!--                <div class="row mb-3 align-items-end">-->
+<!--                    <div class="col-3">-->
+<!--                        <input type="text" name="phoneNumber" class="form-control" placeholder="Số điện thoại"-->
+<!--                               th:value="${phoneNumber}">-->
+<!--                    </div>-->
+
+<!--                </div>-->
+
+                <div class="row g-3 align-items-end mb-3">
+                    <div class="col-md-4">
+                        <label for="ma_hoa_don" class="form-label">Mã hóa đơn</label>
+                        <div class="input-group shadow-sm">
+                            <input id="ma_hoa_don" type="text" name="code" class="form-control" placeholder="Mã hóa đơn" th:value="${code}">
                         </div>
-
-                        <div class="row mb-3 align-items-end">
-                            <div class="col-3">
-                                <input type="text" name="phoneNumber" class="form-control" placeholder="Số điện thoại"
-                                       th:value="${phoneNumber}">
-                            </div>
-
+                    </div>
+                    <div class="col-md-3">
+                        <label for="ngay_bat_dau" class="form-label">Từ ngày</label>
+                        <div class="input-group shadow-sm">
+                            <input id="ngay_bat_dau" type="date" name="startDate" class="form-control" th:value="${startDate}" />
                         </div>
-                    </form>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="ngay_ket_thuc" class="form-label">Đến ngày</label>
+                        <div class="input-group shadow-sm">
+                            <input id="ngay_ket_thuc" type="date" name="endDate" class="form-control" th:value="${endDate}" />
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="trang_thai" class="form-label">Trạng thái</label>
+                        <select id="trang_thai" name="status" class="form-control">
+                            <option value="">Trạng thái</option>
+                            <option value="1" th:selected="${status == 1}">Chờ xác nhận</option>
+                            <option value="2" th:selected="${status == 2}">Đã xác nhận</option>
+                            <option value="3" th:selected="${status == 3}">Đang giao</option>
+                            <option value="4" th:selected="${status == 4}">Hoàn thành</option>
+                            <option value="5" th:selected="${status == 5}">Đã huỷ</option>
+                            <option value="6" th:selected="${status == 6}">Giao hàng thất bại</option>
+                        </select>
+                    </div>
+                </div>
 
-                    <table class="table table-bordered text-center">
-                        <thead>
-                        <tr>
-                            <th>STT</th>
-                            <th>Mã hóa đơn</th>
-                            <th>Họ và tên</th>
-                            <th>SĐT</th>
-                            <th>Ngày đặt</th>
-                            <th>Tổng tiền</th>
-                            <th>Loại đơn</th>
-                            <th>Hình thức TT</th>
-                            <th>Trạng thái</th>
-                            <th>Thao tác</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="bill, iterStat : ${bills}">
-                            <td th:text="${iterStat.index + 1}">1</td>
-                            <td th:text="${bill.code}">HD001</td>
-                            <td th:text="${bill.name}">Nguyễn Văn A</td>
-                            <td th:text="${bill.phoneNumber}">0123456789</td>
-                            <td th:text="${#temporals.format(bill.createdAt, 'dd-MM-yyyy HH:mm')}">---</td>
-                            <td th:text="${bill.total_checkout != null ? #numbers.formatDecimal(bill.total_checkout, 0, 'POINT', 0, 'COMMA') + '₫' : '0₫'}">0₫</td>
-                            <td th:text="${bill.typeBill != null and bill.typeBill == true ? 'Online' : 'Tại quầy'}">Tại quầy</td>
-                            <td th:text="${bill.paymentMethod != null ? bill.paymentMethod.name : 'Tiền mặt'}"></td>
-                            <td>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label for="ho_va_ten" class="form-label">Họ và tên</label>
+                        <div class="input-group shadow-sm">
+                            <input id="ho_va_ten" type="text" name="name" class="form-control" placeholder="Họ và tên" th:value="${name}">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="so_dien_thoai" class="form-label">Số điện thoại</label>
+                        <div class="input-group shadow-sm">
+                            <input id="so_dien_thoai" type="text" name="phoneNumber" class="form-control" placeholder="Số điện thoại" th:value="${phoneNumber}">
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="type_bill" class="form-label">Loại đơn</label>
+                        <select id="type_bill" name="typeBill" class="form-control">
+                            <option value="">Loại đơn</option>
+                            <option value="false" th:selected="${typeBill  == false}">Tại quầy</option>
+                            <option value="true" th:selected="${typeBill  == true}">Online</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1 d-grid">
+                        <button type="submit" class="btn btn-primary mt-4" id="search_product_btn" title="Tìm kiếm">
+                            <i class="ti ti-search"></i>
+                        </button>
+                    </div>
+                    <div class="col-md-1 d-grid">
+                        <a th:href="@{/admin/bill/view}" class="btn btn-warning mt-4" id="clear_search" title="Xóa tìm kiếm">
+                            <i  class="ti ti-eraser"></i>
+                        </a>
+                    </div>
+                </div>
+            </form>
+
+            <table class="table table-bordered text-center">
+                <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Mã hóa đơn</th>
+                    <th>Họ và tên</th>
+                    <th>SĐT</th>
+                    <th>Ngày đặt</th>
+                    <th>Tổng tiền</th>
+                    <th>Loại đơn</th>
+                    <th>Hình thức TT</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="bill, iterStat : ${bills}">
+                    <td th:text="${iterStat.index + 1}">1</td>
+                    <td th:text="${bill.code}">HD001</td>
+                    <td th:text="${bill.name}">Nguyễn Văn A</td>
+                    <td th:text="${bill.phoneNumber}">0123456789</td>
+                    <td th:text="${#temporals.format(bill.createdAt, 'dd-MM-yyyy HH:mm')}">---</td>
+                    <td th:text="${bill.total_checkout != null ? #numbers.formatDecimal(bill.total_checkout, 0, 'POINT', 0, 'COMMA') + '₫' : '0₫'}">0₫</td>
+                    <td th:text="${bill.typeBill != null and bill.typeBill == true ? 'Online' : 'Tại quầy'}">Tại quầy</td>
+                    <td th:text="${bill.paymentMethod != null ? bill.paymentMethod.name : 'Tiền mặt'}"></td>
+                    <td>
                                  <span th:switch="${bill.status}">
                                    <span th:case="1">Chờ xác nhận</span>
                                    <span th:case="2">Đã xác nhận</span>
@@ -96,30 +182,74 @@
                                    <span th:case="4">Hoàn thành</span>
                                    <span th:case="5">Đã huỷ</span>
                                    <span th:case="6">Giao hàng thất bại</span>
+                                     <span th:case="*" >Không xác định</span>
                                  </span>
-                            </td>
-                            <td>
-                                <a th:href="@{'/admin/bill/getbill-detail/' + ${bill.id}}" class="btn btn-sm btn-primary">Xem</a>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+                    </td>
+<!--                    <td>-->
+<!--                        <a th:href="@{'/admin/bill/getbill-detail/' + ${bill.id}}" class="btn btn-sm btn-primary">Xem</a>-->
+<!--                    </td>-->
+                    <td style="text-align: center">
+                        <a class="btn btn-outline-info thayDoiTrangThai" th:href="@{'/admin/bill/getbill-detail/' + ${bill.id}}"  style="width: 70px" title="Xem">
+                            👁️
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
 
-                    <div class="d-flex justify-content-end">
-                        <ul class="pagination">
-                            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                                <a class="page-link" th:href="@{/admin/bill/view(page=${currentPage - 1})}">«</a>
-                            </li>
-                            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                                th:classappend="${i == currentPage} ? 'active'">
-                                <a class="page-link" th:href="@{/admin/bill/view(page=${i})}" th:text="${i + 1}">1</a>
-                            </li>
-                            <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
-                                <a class="page-link" th:href="@{/admin/bill/view(page=${currentPage + 1})}">»</a>
-                            </li>
-                        </ul>
-                    </div>
+            <div class="d-flex justify-content-end">
+                <ul class="pagination">
+                    <!-- Nút Previous -->
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/admin/bill/view(page=${currentPage - 1},
+                                           code=${code},
+                                           name=${name},
+                                           phoneNumber=${phoneNumber},
+                                           startDate=${startDate},
+                                           endDate=${endDate},
+                                           status=${status},
+                                           typeBill=${typeBill})}">
+                            Trước
+                        </a>
+                    </li>
 
+                    <!-- Số trang -->
+                    <li class="page-item"
+                        th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                        th:classappend="${i == currentPage} ? 'active'">
+                        <a class="page-link"
+                           th:href="@{/admin/bill/view(page=${i},
+                                           code=${code},
+                                           name=${name},
+                                           phoneNumber=${phoneNumber},
+                                           startDate=${startDate},
+                                           endDate=${endDate},
+                                           status=${status},
+                                           typeBill=${typeBill})}"
+                           th:text="${i + 1}">
+                        </a>
+                    </li>
+
+                    <!-- Nút Next -->
+                    <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/admin/bill/view(page=${currentPage + 1},
+                                           code=${code},
+                                           name=${name},
+                                           phoneNumber=${phoneNumber},
+                                           startDate=${startDate},
+                                           endDate=${endDate},
+                                           status=${status},
+                                           typeBill=${typeBill})}">
+                            Sau
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
 </div>
 
 <footer th:replace="~{admin/fragments/footer :: footer}"></footer>

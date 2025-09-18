@@ -1,42 +1,57 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{admin/admin-layout}">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{admin/fragments/head :: head}"></head>
+<body data-pc-preset="preset-1" data-pc-direction="ltr" data-pc-theme="light">
+<div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
+<header th:replace="~{admin/fragments/header :: header}"></header>
 
-<head>
-    <title></title>
-</head>
-<body>
-<div layout:fragment="content">
-
-<h6 class="mt-4">Lịch sử cập nhật trạng thái</h6>
-<table class="table table-bordered text-center align-middle">
-    <thead class="table-light">
-    <tr>
-        <th>Thời gian</th>
-        <th>Trạng thái</th>
-        <th>Ghi chú</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="history : ${billHistories}">
-        <td th:text="${#temporals.format(history.createdAt, 'dd-MM-yyyy HH:mm')}">01-08-2025 10:00</td>
-        <td>
-            <span th:switch="${history.status}">
-                <span th:case="1">Chờ xác nhận</span>
-                <span th:case="2">Đã xác nhận</span>
-                <span th:case="3">Đang giao</span>
-                <span th:case="4">Hoàn thành</span>
-                <span th:case="5">Đã huỷ</span>
-                <span th:case="6">Giao hàng thất bại</span>
-                <span th:case="*">Không rõ</span>
-            </span>
-        </td>
-        <td th:text="${history.note}"></td>
-    </tr>
-    </tbody>
-</table>
-    <a th:href="@{'/admin/bill/getbill-detail/' + ${bill.id}}" class="btn btn-secondary">⬅ Quay lại </a>
+<div class="pc-container">
+    <div class="pc-content">
+        <!-- breadcrumb -->
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <div class="page-header-title">
+                            <h5 class="m-b-10">Lịch sử cập nhật trạng thái</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- content: bạn dán phần “cards, charts, tables …” ở đây -->
+        <div class="row">
+            <table class="table table-bordered text-center align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>Thời gian</th>
+                    <th>Trạng thái</th>
+                    <th>Ghi chú</th>
+                    <th>Người thao tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="history : ${billHistories}">
+                    <td th:text="${#temporals.format(history.createdAt, 'dd-MM-yyyy HH:mm')}">01-08-2025 10:00</td>
+                    <td>
+                        <span th:switch="${history.status}">
+                            <span th:case="1">Chờ xác nhận</span>
+                            <span th:case="2">Đã xác nhận</span>
+                            <span th:case="3">Đang giao</span>
+                            <span th:case="4">Hoàn thành</span>
+                            <span th:case="5">Đã huỷ</span>
+                            <span th:case="6">Giao hàng thất bại</span>
+                            <span th:case="*">Không rõ</span>
+                        </span>
+                    </td>
+                    <td th:text="${history.note}"></td>
+                    <td th:text="${history.account != null ? history.account.username : 'Hệ thống'}"></td>
+                </tr>
+                </tbody>
+            </table>
+            <a th:href="@{'/admin/bill/getbill-detail/' + ${bill.id}}" class="btn btn-secondary">⬅ Quay lại </a>
+        </div>
+    </div>
 </div>
 
 <footer th:replace="~{admin/fragments/footer :: footer}"></footer>

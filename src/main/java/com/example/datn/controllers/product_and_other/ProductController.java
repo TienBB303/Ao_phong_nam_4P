@@ -26,6 +26,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin/product")
@@ -101,7 +102,7 @@ public class ProductController {
             totalQuantity.put(p.getId(),total);
         }
         model.addAttribute("categoryNameSearch", name.trim());
-        model.addAttribute("categoryStatusSearch", status != null ? status : "");
+        model.addAttribute("productStatusSearch", status != null ? status : "");
         model.addAttribute("productCategorySearch", categoryId);
         model.addAttribute("productBrandSearch", brandId);
         model.addAttribute("productMaterialSearch", materialId);
@@ -339,6 +340,34 @@ public class ProductController {
             }
         }
 
+        // ================== VALIDATE ẢNH: MỖI MÀU ≥ 1 ẢNH JPEG/PNG ==================
+        // Lấy tập màu được dùng trong variants
+        Set<Integer> usedColors = productForm.getVariants().stream()
+                .map(ProductDetailForm::getColorId)
+                .collect(Collectors.toSet());
+
+        // Duyệt từng colorId và kiểm tra có ít nhất 1 ảnh hợp lệ
+        for (Integer colorId : usedColors) {
+            String nameColorConvert = colorService.chuyenIDSangName(colorId);
+            String key = "colorImages[" + colorId + "]";
+            List<MultipartFile> files = (colorImages != null) ? colorImages.get(key) : null;
+
+            long validCount = (files == null) ? 0L
+                    : files.stream()
+                    .filter(f -> f != null && !f.isEmpty())
+                    .filter(f -> {
+                        String ct = (f.getContentType() == null) ? "" : f.getContentType().toLowerCase();
+                        return ct.equals("image/jpeg") || ct.equals("image/png");
+                    })
+                    .count();
+
+            if (validCount == 0) {
+                resp.put("ok", false);
+                resp.put("message", "Màu " + nameColorConvert + " phải có ít nhất 1 ảnh (JPEG/PNG).");
+                return ResponseEntity.badRequest().body(resp);
+            }
+        }
+
         // Tạo entity Product từ productForm
         Product product = new Product();
         product.setCode(productForm.getCode());
@@ -377,12 +406,37 @@ public class ProductController {
             // Lưu ProductDetail trước để có ID để lưu nhièu ảnh theo id đó
             productService.addProductDetail(detail);
 
+//            String key = "colorImages[" + form.getColorId() + "]";
+//            List<MultipartFile> files = colorImages.get(key);
+//            if(files != null){
+//                for(MultipartFile file : files){
+//                    if(!file.isEmpty()){
+//                        try {
+//                            imageService.saveImage(file,detail);
+//                        } catch (Exception e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                }
+//            }
             String key = "colorImages[" + form.getColorId() + "]";
-            List<MultipartFile> files = colorImages.get(key);
-            if(files != null){
-                for(MultipartFile file : files){
-                    if(!file.isEmpty()){
-                        imageService.saveImage(file,detail);
+            List<MultipartFile> files = (colorImages != null) ? colorImages.get(key) : null;
+            if (files != null) {
+                for (MultipartFile file : files) {
+                    if (file != null && !file.isEmpty()) {
+                        try {
+                            imageService.saveImage(file, detail); // service có validate MIME/magic bytes
+                        } catch (IllegalArgumentException ex) {
+                            Map<String, Object> err = new HashMap<>();
+                            err.put("ok", false);
+                            err.put("message", "Ảnh không hợp lệ cho màu ID " + form.getColorId() + ": " + ex.getMessage());
+                            return ResponseEntity.badRequest().body(err);
+                        } catch (Exception ex) {
+                            Map<String, Object> err = new HashMap<>();
+                            err.put("ok", false);
+                            err.put("message", "Upload ảnh thất bại cho màu ID " + form.getColorId() + ": " + ex.getMessage());
+                            return ResponseEntity.badRequest().body(err);
+                        }
                     }
                 }
             }

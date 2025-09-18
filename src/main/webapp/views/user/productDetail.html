@@ -1,11 +1,41 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" layout:decorate="~{user/layout-user.html}">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{user/layout-user.html}">
 
 <head>
     <meta charset="UTF-8">
     <title>Chi tiết sản phẩm</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.css" rel="stylesheet">
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+    <style>
+        #productImageCarousel .carousel-inner {
+            height: 450px; /* khung cố định */
+        }
+
+        #productImageCarousel img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;  /* giữ nguyên tỷ lệ, không crop */
+            margin: auto;         /* căn giữa */
+            display: block;
+        }
+
+    </style>
+
+
+        .btn-check:checked + .btn {
+            background-color: #0d6efd;
+            color: white;
+            border-color: #0d6efd;
+        }
+        .btn-check:disabled + .btn {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+
 </head>
 
 <body>
@@ -17,7 +47,8 @@
                 <div class="col-md-6" th:if="${!listProductDetail.isEmpty()}">
                     <!-- Container giới hạn kích thước -->
                     <div class="position-relative bg-light rounded shadow-sm p-3">
-                        <div id="productImageCarousel" class="carousel slide" data-mdb-ride="carousel" style="max-width: 100%; height: 450px; overflow: hidden;">
+                        <div id="productImageCarousel" class="carousel slide" data-mdb-ride="carousel"
+                             style="max-width: 100%; height: 450px; overflow: hidden;">
                             <div class="carousel-inner h-100">
                                 <div th:each="image, iterStat : ${uniqueImages}"
                                      th:class="'carousel-item h-100' + (${iterStat.index == 0} ? ' active' : '')">
@@ -32,10 +63,12 @@
                             </div>
 
                             <!-- Nút điều hướng -->
-                            <button class="carousel-control-prev" type="button" data-mdb-target="#productImageCarousel" data-mdb-slide="prev">
+                            <button class="carousel-control-prev" type="button" data-mdb-target="#productImageCarousel"
+                                    data-mdb-slide="prev">
                                 <span class="carousel-control-prev-icon"></span>
                             </button>
-                            <button class="carousel-control-next" type="button" data-mdb-target="#productImageCarousel" data-mdb-slide="next">
+                            <button class="carousel-control-next" type="button" data-mdb-target="#productImageCarousel"
+                                    data-mdb-slide="next">
                                 <span class="carousel-control-next-icon"></span>
                             </button>
                         </div>
@@ -51,25 +84,31 @@
                         </div>
 
                         <h2 class="fw-bold mb-3" th:text="${product.name}">Tên sản phẩm</h2>
+                        <!-- Chọn màu -->
                         <div class="mb-3">
-                            <label for="colorSelect" class="form-label">Chọn màu:</label>
-                            <select id="colorSelect" name="colorId" class="form-select form-select-sm w-50">
-                                <option disabled selected>-- Chọn màu --</option>
-                                <option th:each="color : ${colors}" th:value="${color.id}" th:text="${color.name}"></option>
-                            </select>
+                            <label class="form-label fw-bold">Chọn màu:</label>
+                            <div class="d-flex flex-wrap gap-2">
+                                <div th:each="color : ${colors}">
+                                    <input type="radio" class="btn-check" name="colorId" th:id="'color-' + ${color.id}" th:value="${color.id}">
+                                    <label class="btn btn-outline-dark btn-sm" th:for="'color-' + ${color.id}" th:text="${color.name}"></label>
+                                </div>
+                            </div>
                         </div>
 
+                        <!-- Chọn size -->
                         <div class="mb-3">
-                            <label for="sizeSelect" class="form-label">Chọn size:</label>
-                            <select id="sizeSelect" name="sizeId" class="form-select form-select-sm w-50">
-                                <option disabled selected>-- Chọn size --</option>
-                                <option th:each="size : ${sizes}" th:value="${size.id}" th:text="${size.name}"></option>
-                            </select>
+                            <label class="form-label fw-bold">Chọn size:</label>
+                            <div class="d-flex flex-wrap gap-2">
+                                <div th:each="size : ${sizes}">
+                                    <input type="radio" class="btn-check" name="sizeId" th:id="'size-' + ${size.id}" th:value="${size.id}">
+                                    <label class="btn btn-outline-primary btn-sm" th:for="'size-' + ${size.id}" th:text="${size.name}"></label>
+                                </div>
+                            </div>
                         </div>
-
                         <div class="mb-3">
                             <label for="quantity" class="form-label">Số lượng:</label>
-                            <input type="number" id="quantity" name="quantity" value="1" min="1" class="form-control w-25">
+                            <input type="number" id="quantity" name="quantity" value="1" min="1"
+                                   class="form-control w-25">
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Giá: </label>
@@ -81,128 +120,247 @@
                             <span id="quantityDisplay" class="fw-bold text-success">--</span>
                         </div>
 
-                        <form th:action="@{/cart/add}" method="post">
-                            <input type="hidden" name="productId" th:value="${product.id}"/>
-                            <input type="hidden" id="colorIdInput" name="colorId"/>
-                            <input type="hidden" id="sizeIdInput" name="sizeId"/>
+                        <form id="addToCartForm">
                             <input type="hidden" id="productDetailId" name="productDetailId"/>
-                            <input type="hidden" id="cartId" name="cartId" th:value="${session.cartId}"/>
-                            <input type="hidden" id="quantityHidden" name="quantity"/>
-
-                            <button type="submit" class="btn btn-primary me-2" name="action" value="addToCart">
-                                Thêm vào giỏ
-                            </button>
-                            <button type="submit" class="btn btn-danger" name="action" value="buyNow">
-                                Mua ngay
-                            </button>
+                            <input type="hidden" id="quantityHidden" name="quantity" value="1"/>
+                            <button type="submit" class="btn btn-primary me-2">Thêm vào giỏ</button>
+                            <button type="button" class="btn btn-danger" name="action" value="buyNow"> Mua ngay</button>
                         </form>
+<!--                        <form th:action="@{/cart/add}" method="post">-->
+<!--                            <input type="hidden" name="productId" th:value="${product.id}"/>-->
+<!--                            <input type="hidden" id="colorIdInput" name="colorId"/>-->
+<!--                            <input type="hidden" id="sizeIdInput" name="sizeId"/>-->
+<!--                            <input type="hidden" id="productDetailId" name="productDetailId"/>-->
+<!--                            <input type="hidden" id="cartId" name="cartId" th:value="${session.cartId}"/>-->
+<!--                            <input type="hidden" id="quantityHidden" name="quantity"/>-->
 
+<!--                            <button type="submit" class="btn btn-primary me-2" name="action" value="addToCart">-->
+<!--                                Thêm vào giỏ-->
+<!--                            </button>-->
+<!--                            <button type="submit" class="btn btn-danger" name="action" value="buyNow">-->
+<!--                                Mua ngay-->
+<!--                            </button>-->
+<!--                        </form>-->
                     </div>
                 </div>
             </div>
-            <!-- Divider -->
-            <hr class="my-5"/>
-
-            <!--            &lt;!&ndash; Sản phẩm liên quan &ndash;&gt;-->
-            <!--            <h4 class="mb-4 text-center">Sản phẩm liên quan</h4>-->
-            <!--            <div class="row">-->
-            <!--                <div class="col-md-4 mb-4">-->
-            <!--                    <img src="" class="img-fluid rounded shadow-sm" alt="">-->
-            <!--                    <h5 class="card-title" th:text="${product.name}">Tên sản phẩm</h5>-->
-            <!--                    <a th:href="@{'/product-detail/' + ${product.code}}" class="btn btn-outline-primary btn-sm">Chi tiết</a>-->
-            <!--                </div>-->
-            <!--            </div>-->
         </div>
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
         <script>
-            const colorSelect = document.getElementById("colorSelect");
-            const sizeSelect = document.getElementById("sizeSelect");
-            const priceDisplay = document.getElementById("priceDisplay");
-            const quantityDisplay = document.getElementById("quantityDisplay");
+            $(document).ready(function () {
+                const productId = $("#productInfo").data("product-id");
 
-            const productId = document.getElementById("productInfo").getAttribute("data-product-id");
+                function fetchDetailInfo() {
+                    const colorId = $("input[name='colorId']:checked").val();
+                    const sizeId = $("input[name='sizeId']:checked").val();
 
-            function fetchPriceAndQuantity() {
-                const colorId = colorSelect.value;
-                const sizeId = sizeSelect.value;
+                    if (colorId && sizeId) {
+                        $.ajax({
+                            url: "/api/product-detail/info-product-detail",
+                            type: "GET",
+                            data: {
+                                productID: productId,
+                                colorID: colorId,
+                                sizeID: sizeId
+                            },
+                            success: function (data) {
+                                // Format giá tiền VND
+                                const priceFormatted = new Intl.NumberFormat('vi-VN', {
+                                    style: 'currency',
+                                    currency: 'VND'
+                                }).format(data.price);
 
-                if (colorId && sizeId) {
-                    fetch(`/api/product-detail/price?productId=${productId}&colorId=${colorId}&sizeId=${sizeId}`)
-                        .then(response => {
-                            if (!response.ok) throw new Error("Không tìm thấy biến thể");
-                            return response.json();
-                        })
-                        .then(data => {
-                            const priceFormatted = new Intl.NumberFormat('vi-VN', {
-                                style: 'currency',
-                                currency: 'VND'
-                            }).format(data.price);
-                            priceDisplay.textContent = priceFormatted;
-                            quantityDisplay.textContent = data.quantity;
-                        })
-                        .catch(error => {
-                            priceDisplay.textContent = "--";
-                            quantityDisplay.textContent = "--";
-                            console.error("Lỗi khi lấy biến thể:", error);
+                                // Đổ dữ liệu ra view
+                                $("#priceDisplay").text(priceFormatted);
+                                $("#quantityDisplay").text(data.quantity);
+
+                                // Gán hidden input (khi submit form thêm giỏ)
+                                $("#colorIdInput").val(colorId);
+                                $("#sizeIdInput").val(sizeId);
+                                $("#productDetailId").val(data.id);
+                            },
+                            error: function (xhr) {
+                                $("#priceDisplay").text("--");
+                                $("#quantityDisplay").text("--");
+
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Lỗi',
+                                    text: xhr.responseText || "Không tìm thấy sản phẩm",
+                                });
+                            }
                         });
-                } else {
-                    console.log("Chưa chọn đủ màu và size");
+                    }
                 }
-            }
 
-            colorSelect.addEventListener("change", fetchPriceAndQuantity);
-            sizeSelect.addEventListener("change", fetchPriceAndQuantity);
-
-            let clickedButton = null;
-            document.querySelectorAll("button[name='action']").forEach(btn => {
-                btn.addEventListener("click", function () {
-                    clickedButton = btn;
-                });
+                // Bắt sự kiện click chọn màu hoặc size
+                $("input[name='colorId']").on("change", fetchDetailInfo);
+                $("input[name='sizeId']").on("change", fetchDetailInfo);
             });
 
-            const form = document.querySelector("form");
-            const quantityInput = document.getElementById("quantity");
 
-            form.addEventListener("submit", function (e) {
+
+        </script>
+<!--        Thêm vào giỏ-->
+        <script>
+            $("#quantity").on("input", function() {
+                $("#quantityHidden").val($(this).val());
+            });
+
+            $("#addToCartForm").on("submit", function(e) {
                 e.preventDefault();
-
-                const colorId = colorSelect.value;
-                const sizeId = sizeSelect.value;
-                const quantity = quantityInput.value;
+                const productDetailId = $("#productDetailId").val();
+                const quantity = $("#quantityHidden").val();
+                const colorId = $("input[name='colorId']:checked").val();
+                const sizeId = $("input[name='sizeId']:checked").val();
 
                 if (!colorId || !sizeId) {
-                    alert("Vui lòng chọn đầy đủ màu và size!");
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'warning',
+                        title: "Bạn cần chọn màu sắc và kích cỡ",
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
                     return;
                 }
 
-                document.getElementById("colorIdInput").value = colorId;
-                document.getElementById("sizeIdInput").value = sizeId;
-                document.getElementById("quantityHidden").value = quantity;
-
-                const actionInput = document.createElement("input");
-                actionInput.type = "hidden";
-                actionInput.name = "action";
-                actionInput.value = clickedButton ? clickedButton.value : "addToCart";
-                form.appendChild(actionInput);
-
-                fetch(`/api/product-detail/id?productId=${productId}&colorId=${colorId}&sizeId=${sizeId}`)
-                    .then(res => {
-                        if (!res.ok) throw new Error("Không tìm thấy biến thể phù hợp");
-                        return res.json();
-                    })
-                    .then(data => {
-                        if (!data.id) {
-                            alert("Không tìm thấy biến thể phù hợp!");
-                            return;
-                        }
-                        document.getElementById("productDetailId").value = data.id;
-                        form.submit();
-                    })
-                    .catch(err => {
-                        alert("Lỗi khi lấy thông tin sản phẩm.");
-                        console.error(err);
+                if (!quantity || quantity <= 0) {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'warning',
+                        title: "Cần nhập số lượng",
+                        showConfirmButton: false,
+                        timer: 2000
                     });
+                    return;
+                }
+
+                $.ajax({
+                    url: "/api/product-detail/add-to-cart",
+                    type: "POST",
+                    data: { productDetailId, quantity },
+                    success: function (msg) {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: msg,
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                    },
+                    error: function (xhr) {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'error',
+                            title: xhr.responseText || "Có lỗi xảy ra!",
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                    }
+                });
             });
+
         </script>
+
+
+        <!--        <script>-->
+<!--            const colorSelect = document.getElementById("colorSelect");-->
+<!--            const sizeSelect = document.getElementById("sizeSelect");-->
+<!--            const priceDisplay = document.getElementById("priceDisplay");-->
+<!--            const quantityDisplay = document.getElementById("quantityDisplay");-->
+
+<!--            const productId = document.getElementById("productInfo").getAttribute("data-product-id");-->
+
+<!--            function fetchPriceAndQuantity() {-->
+<!--                const colorId = colorSelect.value;-->
+<!--                const sizeId = sizeSelect.value;-->
+
+<!--                if (colorId && sizeId) {-->
+<!--                    fetch(`/api/product-detail/price?productId=${productId}&colorId=${colorId}&sizeId=${sizeId}`)-->
+<!--                        .then(response => {-->
+<!--                            if (!response.ok) throw new Error("Không tìm thấy biến thể");-->
+<!--                            return response.json();-->
+<!--                        })-->
+<!--                        .then(data => {-->
+<!--                            const priceFormatted = new Intl.NumberFormat('vi-VN', {-->
+<!--                                style: 'currency',-->
+<!--                                currency: 'VND'-->
+<!--                            }).format(data.price);-->
+<!--                            priceDisplay.textContent = priceFormatted;-->
+<!--                            quantityDisplay.textContent = data.quantity;-->
+<!--                        })-->
+<!--                        .catch(error => {-->
+<!--                            priceDisplay.textContent = "&#45;&#45;";-->
+<!--                            quantityDisplay.textContent = "&#45;&#45;";-->
+<!--                            console.error("Lỗi khi lấy biến thể:", error);-->
+<!--                        });-->
+<!--                } else {-->
+<!--                    console.log("Chưa chọn đủ màu và size");-->
+<!--                }-->
+<!--            }-->
+
+<!--            colorSelect.addEventListener("change", fetchPriceAndQuantity);-->
+<!--            sizeSelect.addEventListener("change", fetchPriceAndQuantity);-->
+
+<!--            let clickedButton = null;-->
+<!--            document.querySelectorAll("button[name='action']").forEach(btn => {-->
+<!--                btn.addEventListener("click", function () {-->
+<!--                    clickedButton = btn;-->
+<!--                });-->
+<!--            });-->
+
+<!--            const form = document.querySelector("form");-->
+<!--            const quantityInput = document.getElementById("quantity");-->
+
+<!--            form.addEventListener("submit", function (e) {-->
+<!--                e.preventDefault();-->
+
+<!--                const colorId = colorSelect.value;-->
+<!--                const sizeId = sizeSelect.value;-->
+<!--                const quantity = quantityInput.value;-->
+
+<!--                if (!colorId || !sizeId) {-->
+<!--                    alert("Vui lòng chọn đầy đủ màu và size!");-->
+<!--                    return;-->
+<!--                }-->
+
+<!--                document.getElementById("colorIdInput").value = colorId;-->
+<!--                document.getElementById("sizeIdInput").value = sizeId;-->
+<!--                document.getElementById("quantityHidden").value = quantity;-->
+
+<!--                const actionInput = document.createElement("input");-->
+<!--                actionInput.type = "hidden";-->
+<!--                actionInput.name = "action";-->
+<!--                actionInput.value = clickedButton ? clickedButton.value : "addToCart";-->
+<!--                form.appendChild(actionInput);-->
+
+<!--                fetch(`/api/product-detail/id?productId=${productId}&colorId=${colorId}&sizeId=${sizeId}`)-->
+<!--                    .then(res => {-->
+<!--                        if (!res.ok) throw new Error("Không tìm thấy biến thể phù hợp");-->
+<!--                        return res.json();-->
+<!--                    })-->
+<!--                    .then(data => {-->
+<!--                        if (!data.id) {-->
+<!--                            alert("Không tìm thấy biến thể phù hợp!");-->
+<!--                            return;-->
+<!--                        }-->
+<!--                        document.getElementById("productDetailId").value = data.id;-->
+<!--                        form.submit();-->
+<!--                    })-->
+<!--                    .catch(err => {-->
+<!--                        alert("Lỗi khi lấy thông tin sản phẩm.");-->
+<!--                        console.error(err);-->
+<!--                    });-->
+<!--            });-->
+<!--        </script>-->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.js"></script>
     </main>
 </div>

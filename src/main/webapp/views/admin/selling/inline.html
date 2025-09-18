@@ -1,319 +1,309 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="admin/fragments/head :: head">
-    <title>Quan ly khuyen mai | 4PStore</title>
-</head>
-<style>
-    #barcode-scanner video,
-    #barcode-scanner canvas {
-        width: 100% !important;
-        height: 100% !important;
-        object-fit: cover;
-        border-radius: 0.5rem;
-        overflow: hidden;
-    }
-</style>
+<head th:replace="~{admin/fragments/head :: head}"></head>
+<link rel="stylesheet" th:href="@{/assets/css/tienbb/inline.css}">
 <body>
-<header th:replace="admin/fragments/header :: header"></header>
-<div th:replace="admin/fragments/sidebar :: sidebar"></div>
-<section>
-    <div class="pc-container">
-        <div class="pc-content">
-            <div class="card-header bg-white shadow-sm rounded-top">
-                <div class="row align-items-center">
-                    <div class="col-md-11">
-                        <div id="tabCarts" class="px-2 py-2 bg-light rounded shadow-sm overflow-auto">
-                            <ul class="nav nav-pills flex-nowrap gap-2 mb-0">
-                                <li class="nav-item d-flex align-items-center gap-1" th:each="cart, stat : ${listCart}"  th:if="${cart.status == 9}">
-                                    <!-- Tab giỏ hàng -->
-                                    <a class="nav-link px-2 py-1 rounded-3 shadow-sm text-nowrap"
-                                       th:classappend="${cart.id == idCart ? 'active' : 'text-dark bg-white'}"
-                                       th:href="@{/admin/sell-inline/cart-detail(idCart=${cart.id})}">
-                                        Hóa đơn <span th:text="${stat.index + 1}"></span>
-                                        <span class="badge text-bg-warning ms-1" th:text="${numberItemInCart}">0</span>
-                                    </a>
-                                    <!-- Nút xóa -->
-                                    <a href="javascript:void(0);"
-                                       class="text-danger fw-bold ms-1 hover-shadow delete-cart"
-                                       th:data-id="${cart.id}"
-                                       style="font-size: 1rem;">
-                                        <i class="bi bi-x-circle-fill" title="Đóng"></i>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-md-1 text-end">
-                        <form id="taoCartMoi" method="post">
-                            <button class="btn btn-success rounded-3 shadow-sm px-3" title="Thêm giỏ hàng mới">
-                                <i class="bi bi-plus-lg"></i>
-                            </button>
-                        </form>
+<header th:replace="~{admin/fragments/header :: header}"></header>
+<div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
+
+<div class="pc-container">
+    <div class="pc-content">
+        <div class="card-header bg-white shadow-sm rounded-top">
+            <div class="row align-items-center">
+                <div class="col-md-11">
+                    <div id="tabCarts" class="px-2 py-2 bg-light rounded shadow-sm overflow-auto">
+                        <ul class="nav nav-pills flex-nowrap gap-2 mb-0">
+                            <li class="nav-item d-flex align-items-center gap-1" th:each="cart, stat : ${listCart}"  th:if="${cart.status == 9}">
+                                <!-- Tab giỏ hàng -->
+                                <a class="nav-link px-2 py-1 rounded-3 shadow-sm text-nowrap"
+                                   th:classappend="${cart.id == idCart ? 'active' : 'text-dark bg-white'}"
+                                   th:href="@{/admin/sell-inline/cart-detail(idCart=${cart.id})}">
+                                    Hóa đơn <span th:text="${stat.index + 1}"></span>
+                                    <span class="badge text-bg-warning ms-1" th:text="${numberItemInCart}">0</span>
+                                </a>
+                                <!-- Nút xóa -->
+                                <a href="javascript:void(0);"
+                                   class="text-danger fw-bold ms-1 hover-shadow delete-cart"
+                                   th:data-id="${cart.id}"
+                                   style="font-size: 1rem;">
+                                    <i class="bi bi-x-circle-fill" title="Đóng"></i>
+                                </a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
-            </div>
-            <div th:if="${idCart == null}" class="d-flex flex-column justify-content-center align-items-center" style="height: 400px;">
-                <img src="https://shop.nebulacare.in/Content/Images/nodata.jpg" style="max-height: 400px;">
-            </div>
-            <div class="card-body">
-                <div th:if="${idCart != null}" class="row gx-3 mb-3">
-                    <!-- Tìm & thêm sản phẩm -->
-                    <div class="col-md-6">
-                        <div class="card shadow-sm rounded-3 h-100">
-                            <div class="card-header fw-bold bg-light">
-                                Tìm & thêm sản phẩm
-                            </div>
-                            <div class="card-body py-2">
-                                <div class="row gx-1 gy-2 align-items-end">
-                                    <div class="col-md-11 position-relative">
-                                        <input type="text" id="productSearchName" class="form-control" placeholder="Tìm sản phẩm..." autocomplete="off">
-                                        <div id="suggestionBox"
-                                             class="border bg-white rounded mt-1 position-absolute z-10 shadow-sm"
-                                             style="width: 100%; display: none; max-height: 300px; overflow-y: auto; z-index: 1055;">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-1">
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-white" id="productSearchBarcode" role="button" tabindex="0" style="cursor:pointer">
-                                                <i class="bi bi-upc-scan"></i>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Khách hàng -->
-                    <div class="col-md-6">
-                        <div class="card shadow-sm rounded-3 h-100">
-                            <div class="card-header fw-bold bg-light">
-                                Khách hàng
-                            </div>
-                            <div class="card-body py-2">
-                                <div class="row gx-1 gy-2 align-items-end">
-                                    <div class="col-md-11 position-relative">
-<!--                                        <input type="hidden" id="customerId" name="customerId">-->
-                                        <input type="text" id="customer_search" th:value="${customerName}" class="form-control" placeholder="Khách lẻ" autocomplete="off">
-                                        <div id="suggestionBox_Customer"
-                                             class="border bg-white rounded mt-1 position-absolute z-10 shadow-sm"
-                                             style="width: 100%; display: none; max-height: 300px; overflow-y: auto; z-index: 1055;">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-1">
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-white" id="addCustomer" data-bs-toggle="modal" data-bs-target="#addCustomerModal">
-                                                <i class="bi bi-person"></i>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- danh sách sản phẩm-->
-                <div th:if="${idCart != null}" class="card shadow-sm rounded-3" style="height: 275px;">
-                    <div class="card-header fw-bold bg-light">
-                        Sản phẩm trong giỏ (<span th:text="${itemInCart}">0</span>)
-                    </div>
-                    <div class="card-body">
-                        <div id="product-in-cart" style="max-height: 200px; overflow-y: auto; overflow-x: hidden;">
-                            <div th:if="${listCartDetail != null and #lists.size(listCartDetail) > 0}">
-                                <!-- Header row -->
-                                <div class="row fw-semibold text-muted px-3 mb-2">
-                                    <div class="col-md-1 text-center">STT</div>
-                                    <div class="col-md-4">Sản phẩm</div>
-                                    <div class="col-md-2 text-center">Giá tiền</div>
-                                    <div class="col-md-2 text-center">Số lượng</div>
-                                    <div class="col-md-2 text-center">Thành tiền</div>
-                                    <div class="col-md-1 text-end">Xóa</div>
-                                </div>
-                                <div th:each="item, stat : ${listCartDetail}" class="cart-detail-item row gx-3 gy-2 align-items-end mb-3 p-3 border rounded-3 shadow-sm bg-white">
-                                    <!-- STT -->
-                                    <div class="col-md-1">
-                                        <input class="form-control text-center" th:value="${stat.index + 1}" disabled />
-                                    </div>
-                                    <!-- Tên sản phẩm -->
-                                    <div class="col-md-4">
-                                        <input class="form-control"
-                                               th:value="${item.productDetail.product.name + ' ( ' + item.productDetail.size.code + '-' + item.productDetail.color.name + ' )'}"
-                                               disabled />
-                                    </div>
-                                    <!-- Giá tiền -->
-                                    <div class="col-md-2">
-                                        <input class="form-control text-end giaVND" th:value="${item.productDetail.price}" disabled />
-                                    </div>
-                                    <!-- Số lượng -->
-                                    <!-- Số lượng -->
-                                    <div class="col-md-2">
-                                        <div class="input-group">
-                                            <button class="btn btn-outline-secondary btn-sm btn-qty-minus"
-                                                    type="button"
-                                                    th:data-id="${item.id}">-</button>
-                                            <input type="number"
-                                                   class="form-control text-center update-quantity"
-                                                   th:value="${item.quantity}"
-                                                   th:data-id="${item.id}"
-                                                   th:attr="data-old=${item.quantity}" />
-                                            <button class="btn btn-outline-secondary btn-sm btn-qty-plus"
-                                                    type="button"
-                                                    th:data-id="${item.id}">+</button>
-                                        </div>
-                                    </div>
-
-                                    <!-- Thành tiền -->
-                                    <div class="col-md-2">
-                                        <input class="form-control text-end giaVND" th:value="${item.total_price}" disabled />
-                                    </div>
-                                    <!-- Xóa -->
-                                    <div class="col-md-1 d-flex align-items-end justify-content-end">
-                                        <button type="button" class="btn btn-outline-danger btn-sm delete-item"
-                                                th:data-id="${item.id}"
-                                                title="Xóa sản phẩm">
-                                            <i class="bi bi-trash-fill"></i>
-                                        </button>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                            <!-- Nếu không có sản phẩm -->
-                            <div th:if="${listCartDetail == null or #lists.isEmpty(listCartDetail)}"
-                                 class="text-center text-muted">
-                                Chưa có sản phẩm nào trong giỏ hàng.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div th:if="${idCart != null}" class="row gx-3 mb-3">
-                    <!-- Chọn hình thức thanh toán + giao hàng -->
-                    <div class="col-md-6">
-                        <div class="card shadow-sm rounded-3">
-                            <div class="card-header fw-bold bg-light d-flex justify-content-between align-items-center">
-                                <span>Giao hàng</span>
-                                <div class="form-check form-switch m-0">
-<!--                                    <input class="form-check-input" type="checkbox" id="toggleDeliveryInfoSwitch">-->
-                                    <input class="form-check-input" type="checkbox" id="toggleDeliveryInfoSwitch" th:checked="${isDelivery} ? 'checked' : null">
-                                </div>
-
-                            </div>
-
-                            <div class="card-body py-2">
-                                <div class="collapse" id="deliveryInfo" th:classappend="${isDelivery} ? ' show' : ''">
-                                    <div class="card card-body border rounded-3 mt-2 shadow-sm">
-                                        <div class="mb-2">
-                                            <label class="form-label">Tên người nhận</label>
-                                            <input type="text" class="form-control" id="nameD" name="nameD" th:value="${nameShip}" placeholder="Nhập tên người nhận">
-                                        </div>
-                                        <div class="mb-2">
-                                            <label class="form-label">Số điện thoại</label>
-                                            <input type="text" class="form-control" id="phoneD" name="phoneD" th:value="${phoneShip}" placeholder="Nhập số điện thoại">
-                                        </div>
-                                        <div class="mb-2">
-                                            <label class="form-label">Địa chỉ giao hàng</label>
-                                            <textarea class="form-control" id="addressD" name="addressD" rows="2" th:text="${addressShip}" placeholder="Nhập địa chỉ"></textarea>
-                                        </div>
-                                        <div class="mb-2">
-                                            <label class="form-label">Tiền ship - thu hộ</label>
-<!--                                            <input type="number" class="form-control" id="feeD" name="feeD" th:value="${feeShip}" placeholder="Tiền thu hộ">-->
-                                            <input type="text" class="form-control" id="feeD" name="feeD" th:value="${feeShip}" placeholder="Tiền thu hộ">
-
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Thông tin -->
-                    <div class="col-md-6">
-                        <!--  Giảm giá -->
-                        <div class="card shadow-sm rounded-3">
-                            <div class="card-header fw-bold bg-light">
-                                Chọn giảm giá
-                            </div>
-                            <div class="card-body py-2">
-                                <div class="row gx-1 gy-2 align-items-end">
-                                    <!--                                    <div class="col-md-12 position-relative">-->
-                                    <div class="position-relative d-flex gap-2">
-                                        <select class="form-select" id="discount_select" name="discountId" th:attr="data-id=${idCart}">
-                                            <option value="">-- Chọn mã giảm giá --</option>
-                                            <option th:each="discount : ${discountCanApply}"
-                                                    th:value="${discount.id}"
-                                                    th:data-amount="${discount.discountValue}"
-                                                    th:selected="${cart.discount != null and cart.discount.id == discount.id}"
-                                                    th:text="${discount.code + ' - giảm ' +
-                                                         (discount.discountType == 'percent'
-                                                            ? #numbers.formatDecimal(discount.discountValue, 0, 'POINT', 0, 'NONE') + '%'
-                                                            : #numbers.formatDecimal(discount.discountValue, 0, 'POINT', 0, 'NONE') + ' ₫')
-                                                         + ' nếu mua ≥ ' + #numbers.formatDecimal(discount.minPurchase, 0, 'POINT', 0, 'NONE') + ' ₫' + ' (giảm tối đa ' + #numbers.formatDecimal(discount.maxDiscount, 0, 'POINT', 0, 'NONE') + ' ₫' + ' )'}" >
-
-                                            </option>
-                                        </select>
-                                        <button class="btn btn-outline-danger" id="remove_discount" th:attr="data-id=${idCart}" title="Bỏ mã giảm">
-                                            <i class="bi bi-trash-fill"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!--  phương thức thanh toán -->
-                        <div class="card shadow-sm rounded-3">
-                            <div class="card-header fw-bold bg-light">
-                                Chọn hình thức thanh toán
-                            </div>
-                            <div class="card-body py-2">
-                                <div class="row gx-1 gy-2 align-items-end">
-                                    <div class="position-relative d-flex gap-2">
-                                        <input type="hidden" name="idCart" th:value="${idCart}" />
-                                        <select class="form-select" id="type_payment_select" name="typePayment">
-                                            <option value="Tiền mặt">Tiền mặt</option>
-                                            <option value="Chuyển khoản">Chuyển khoản</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!--  thông tin tiền -->
-                        <div class="card shadow-sm rounded-3">
-                            <div class="card-header fw-bold bg-light">
-                                thông tin thanh toán - tổng sản phẩm(<span th:text="${allItemInCart}">0</span>)
-                            </div>
-                            <div class="card-body py-2">
-                                <div class="row gx-1 gy-2 align-items-end">
-                                    <div class="col-md-6 position-relative">
-                                        <label for="total_price_all_product">Tổng tiền sản phẩm</label>
-                                        <input type="text" id="total_price_all_product" class="form-control giaVND" th:value="${totalPriceInCart}" readonly>
-                                    </div>
-                                    <div class="col-md-6 position-relative">
-                                        <label for="total_price_discount">Tiền được giảm</label>
-                                        <input type="text" id="total_price_discount" class="form-control giaVND" th:value="${totalPriceDiscount}" readonly>
-                                    </div>
-                                </div>
-                                <div class="row gx-1 gy-2 align-items-end">
-                                    <div class="col-md-12 position-relative">
-                                        <label for="total_price_checkout">Thành tiền</label>
-                                        <input type="text" id="total_price_checkout" class="form-control giaVND" th:value="${totalPriceCheckOut}" readonly>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!--thanh toán -->
-                <div th:if="${idCart != null}" class="row gx-3 mb-3">
-                    <div class="align-center">
-                        <button class="btn btn-primary w-100 shadow-sm" id="thanhToanBtn" th:attr="data-id=${idCart}">
-                            <i class="bi bi-cash-stack"></i> Thanh toán
+                <div class="col-md-1 text-end">
+                    <form id="taoCartMoi" method="post">
+                        <button class="btn btn-success rounded-3 shadow-sm px-3" title="Thêm giỏ hàng mới">
+                            <i class="bi bi-plus-lg"></i>
                         </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div th:if="${idCart == null}" class="d-flex flex-column justify-content-center align-items-center" style="height: 400px;">
+            <img src="https://img.freepik.com/premium-vector/man-with-question-mark-looking-computer-screen-with-no-data-error-message_808505-4655.jpg?semt=ais_incoming&w=740&q=80" style="max-height: 400px;">
+        </div>
+        <div class="card-body">
+            <div th:if="${idCart != null}" class="row gx-3 mb-3">
+                <!-- Tìm & thêm sản phẩm -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm rounded-3 h-100">
+                        <div class="card-header fw-bold bg-light">
+                            Tìm & thêm sản phẩm
+                        </div>
+                        <div class="card-body py-2">
+                            <div class="row gx-1 gy-2 align-items-end">
+                                <div class="col-md-11 position-relative">
+                                    <input type="text" id="productSearchName" class="form-control" placeholder="Tìm sản phẩm..." autocomplete="off">
+                                    <div id="suggestionBox"
+                                         class="border bg-white rounded mt-1 position-absolute z-10 shadow-sm"
+                                         style="width: 100%; display: none; max-height: 300px; overflow-y: auto; z-index: 1055;">
+                                    </div>
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white" id="productSearchBarcode" role="button" tabindex="0" style="cursor:pointer">
+                                            <i class="bi bi-upc-scan"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                </div>
+
+                <!-- Khách hàng -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm rounded-3 h-100">
+                        <div class="card-header fw-bold bg-light">
+                            Khách hàng
+                        </div>
+                        <div class="card-body py-2">
+                            <div class="row gx-1 gy-2 align-items-end">
+                                <div class="col-md-12 position-relative">
+                                    <!--                                        <input type="hidden" id="customerId" name="customerId">-->
+                                    <input type="text" id="customer_search" th:value="${customerName}" class="form-control" placeholder="Khách lẻ" autocomplete="off">
+                                    <div id="suggestionBox_Customer"
+                                         class="border bg-white rounded mt-1 position-absolute z-10 shadow-sm"
+                                         style="width: 100%; display: none; max-height: 300px; overflow-y: auto; z-index: 1055;">
+                                    </div>
+                                </div>
+<!--                                13/09/2025  TienBB bỏ chức năng thêm nhanh khách hàng ở bán tại quầy-->
+<!--                                <div class="col-md-1">-->
+<!--                                    <div class="input-group">-->
+<!--                                        <span class="input-group-text bg-white" id="addCustomer" data-bs-toggle="modal" data-bs-target="#addCustomerModal">-->
+<!--                                            <i class="bi bi-person"></i>-->
+<!--                                        </span>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- danh sách sản phẩm-->
+            <div th:if="${idCart != null}" class="card shadow-sm rounded-3" style="height: 400px;">
+                <div class="card-header fw-bold bg-light">
+                    Sản phẩm trong giỏ : <span th:text="${itemInCart}">0</span>
+                </div>
+                <div class="card-body">
+                    <div id="product-in-cart" style="max-height: 325px; overflow-y: auto; overflow-x: hidden;">
+                        <div th:if="${listCartDetail != null and #lists.size(listCartDetail) > 0}">
+                            <!-- Header row -->
+                            <div class="row fw-semibold text-muted px-3 mb-2">
+                                <div class="col-md-1 text-center">STT</div>
+                                <div class="col-md-4">Sản phẩm</div>
+                                <div class="col-md-2 text-center">Giá tiền</div>
+                                <div class="col-md-2 text-center">Số lượng</div>
+                                <div class="col-md-2 text-center">Thành tiền</div>
+                                <div class="col-md-1 text-end">Xóa</div>
+                            </div>
+                            <div th:each="item, stat : ${listCartDetail}" class="cart-detail-item row gx-3 gy-2 align-items-end mb-3 p-3 border rounded-3 shadow-sm bg-white">
+                                <!-- STT -->
+                                <div class="col-md-1">
+                                    <input class="form-control text-center" th:value="${stat.index + 1}" disabled />
+                                </div>
+                                <!-- Tên sản phẩm -->
+                                <div class="col-md-4">
+                                    <input class="form-control"
+                                           th:value="${item.productDetail.product.name + ' ( ' + item.productDetail.size.code + '-' + item.productDetail.color.name + ' )'}"
+                                           disabled />
+                                </div>
+                                <!-- Giá tiền -->
+                                <div class="col-md-2">
+                                    <input class="form-control text-end giaVND" th:value="${item.productDetail.price}" disabled />
+                                </div>
+                                <!-- Số lượng -->
+                                <div class="col-md-2">
+                                    <div class="input-group">
+                                        <button class="btn btn-outline-secondary btn-sm btn-qty-minus"
+                                                type="button"
+                                                th:data-id="${item.id}">-</button>
+                                        <input type="number"
+                                               class="form-control text-center update-quantity"
+                                               th:value="${item.quantity}"
+                                               th:data-id="${item.id}"
+                                               th:attr="data-old=${item.quantity}" />
+                                        <button class="btn btn-outline-secondary btn-sm btn-qty-plus"
+                                                type="button"
+                                                th:data-id="${item.id}">+</button>
+                                    </div>
+                                </div>
+
+                                <!-- Thành tiền -->
+                                <div class="col-md-2">
+                                    <input class="form-control text-end giaVND" th:value="${item.total_price}" disabled />
+                                </div>
+                                <!-- Xóa -->
+                                <div class="col-md-1 d-flex align-items-end justify-content-end">
+                                    <button type="button" class="btn btn-outline-danger btn-sm delete-item"
+                                            th:data-id="${item.id}"
+                                            title="Xóa sản phẩm">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- Nếu không có sản phẩm -->
+                        <div th:if="${listCartDetail == null or #lists.isEmpty(listCartDetail)}"
+                             class="text-center text-muted">
+                            Chưa có sản phẩm nào trong giỏ hàng.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${idCart != null}" class="row gx-3 mb-3">
+                <!-- Chọn hình thức thanh toán + giao hàng -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm rounded-3">
+                        <div class="card-header fw-bold bg-light d-flex justify-content-between align-items-center">
+                            <span>Giao hàng</span>
+                            <div class="form-check form-switch m-0">
+                                <!--                                    <input class="form-check-input" type="checkbox" id="toggleDeliveryInfoSwitch">-->
+                                <input class="form-check-input" type="checkbox" id="toggleDeliveryInfoSwitch" th:checked="${isDelivery} ? 'checked' : null">
+                            </div>
+
+                        </div>
+
+                        <div class="card-body py-2">
+                            <div class="collapse" id="deliveryInfo" th:classappend="${isDelivery} ? ' show' : ''">
+                                <div class="card card-body border rounded-3 mt-2 shadow-sm">
+                                    <div class="mb-2">
+                                        <label class="form-label">Tên người nhận</label>
+                                        <input type="text" class="form-control" id="nameD" name="nameD" th:value="${nameShip}" placeholder="Nhập tên người nhận">
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">Số điện thoại</label>
+                                        <input type="text" class="form-control" id="phoneD" name="phoneD" th:value="${phoneShip}" placeholder="Nhập số điện thoại">
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">Địa chỉ giao hàng</label>
+                                        <textarea class="form-control" id="addressD" name="addressD" rows="2" th:text="${addressShip}" placeholder="Nhập địa chỉ"></textarea>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">Tiền ship - thu hộ</label>
+                                        <!--                                            <input type="number" class="form-control" id="feeD" name="feeD" th:value="${feeShip}" placeholder="Tiền thu hộ">-->
+                                        <input type="text" class="form-control" id="feeD" name="feeD" th:value="${feeShip}" placeholder="Tiền thu hộ">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Thông tin -->
+                <div class="col-md-6">
+                    <!--  Giảm giá -->
+                    <div class="card shadow-sm rounded-3">
+                        <div class="card-header fw-bold bg-light">
+                            Chọn giảm giá
+                        </div>
+                        <div class="card-body py-2">
+                            <div class="row gx-1 gy-2 align-items-end">
+                                <!--                                    <div class="col-md-12 position-relative">-->
+                                <div class="position-relative d-flex gap-2">
+                                    <select class="form-select" id="discount_select" name="discountId" th:attr="data-id=${idCart}">
+                                        <option value="">-- Chọn mã giảm giá --</option>
+                                        <option th:each="discount : ${discountCanApply}"
+                                                th:value="${discount.id}"
+                                                th:data-amount="${discount.discountValue}"
+                                                th:selected="${cart.discount != null and cart.discount.id == discount.id}"
+                                                th:text="${discount.code + ' - giảm ' +
+                                                     (discount.discountType == 'percent'
+                                                        ? #numbers.formatDecimal(discount.discountValue, 0, 'POINT', 0, 'NONE') + '%'
+                                                        : #numbers.formatDecimal(discount.discountValue, 0, 'POINT', 0, 'NONE') + ' ₫')
+                                                     + ' nếu mua ≥ ' + #numbers.formatDecimal(discount.minPurchase, 0, 'POINT', 0, 'NONE') + ' ₫' + ' (giảm tối đa ' + #numbers.formatDecimal(discount.maxDiscount, 0, 'POINT', 0, 'NONE') + ' ₫' + ' )'}" >
+
+                                        </option>
+                                    </select>
+                                    <button class="btn btn-outline-danger" id="remove_discount" th:attr="data-id=${idCart}" title="Bỏ mã giảm">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--  phương thức thanh toán -->
+                    <div class="card shadow-sm rounded-3">
+                        <div class="card-header fw-bold bg-light">
+                            Chọn hình thức thanh toán
+                        </div>
+                        <div class="card-body py-2">
+                            <div class="row gx-1 gy-2 align-items-end">
+                                <div class="position-relative d-flex gap-2">
+                                    <input type="hidden" name="idCart" th:value="${idCart}" />
+                                    <select class="form-select" id="type_payment_select" name="typePayment">
+                                        <option value="Tiền mặt">Tiền mặt</option>
+                                        <option value="Chuyển khoản">Chuyển khoản (Momo QR)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--  thông tin tiền -->
+                    <div class="card shadow-sm rounded-3">
+                        <div class="card-header fw-bold bg-light">
+                            thông tin thanh toán - tổng số lượng sản phẩm áo : <span th:text="${allItemInCart}">0</span>
+                        </div>
+                        <div class="card-body py-2">
+                            <div class="row gx-1 gy-2 align-items-end" style="padding-top: 15px">
+                                <div class="col-md-6 position-relative">
+                                    <label for="total_price_all_product">Tổng tiền sản phẩm</label>
+                                    <input type="text" id="total_price_all_product" class="form-control giaVND" th:value="${totalPriceInCart}" readonly>
+                                </div>
+                                <div class="col-md-6 position-relative">
+                                    <label for="total_price_discount">Tiền được giảm</label>
+                                    <input type="text" id="total_price_discount" class="form-control giaVND" th:value="${totalPriceDiscount}" readonly>
+                                </div>
+                            </div>
+                            <div class="row gx-1 gy-2 align-items-end" style="padding-top: 10px; padding-bottom: 10px">
+                                <div class="col-md-12 position-relative">
+                                    <label for="total_price_checkout">Thành tiền</label>
+                                    <input type="text" id="total_price_checkout" class="form-control giaVND" th:value="${totalPriceCheckOut}" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--thanh toán -->
+            <div th:if="${idCart != null}" class="row gx-3 mb-3">
+                <div class="align-center">
+                    <button class="btn btn-primary w-100 shadow-sm" id="thanhToanBtn" th:attr="data-id=${idCart}">
+                        <i class="bi bi-cash-stack"></i> Thanh toán
+                    </button>
                 </div>
             </div>
         </div>
     </div>
-</section>
+</div>
+<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
+<!--Modal Add-->
 <div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -340,6 +330,7 @@
         </div>
     </div>
 </div>
+<!--Modal Camera-->
 <div id="cameraModal" class="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-75 d-none"
      role="dialog" style="z-index: 1056;">
     <div class="d-flex justify-content-center align-items-center h-100">
@@ -356,10 +347,9 @@
     </div>
 </div>
 
-<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
 <script th:inline="javascript">
     window.idCartFromPage = /*[[${idCart}]]*/ null; //gắn idCart cho frompage để dùng js ngoài
-    console.log('idCartFromPage =', idCartFromPage);   // THÊM DÒNG NÀY
+    console.log('idCartFromPage =', idCartFromPage);
 </script>
 <!--thư viên cho camera-->
 <script src="https://unpkg.com/quagga@0.12.1/dist/quagga.min.js"></script>
@@ -389,5 +379,6 @@
         });
     });
 </script>
+
 </body>
 </html>

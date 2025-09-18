@@ -9,12 +9,73 @@
     <title layout:title-pattern="$CONTENT_TITLE - Trang người dùng">Trang người dùng</title>
 
     <!--CSS -->
-    <link rel="stylesheet" th:href="@{/assets/css/mdb.min.css}">
+<!--    <link rel="stylesheet" th:href="@{/assets/css/mdb.min.css}">-->
     <link rel="stylesheet" th:href="@{/assets/css/style.css}">
     <link rel="stylesheet" th:href="@{/assets/css/style-preset.css}">
     <link rel="stylesheet" th:href="@{/assets/css/uikit.css}">
-    <link rel="stylesheet" th:href="@{/assets/css/plugins/landing.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/landing.css}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap" id="main-font-link">
+
+    <!-- Icon fonts (nội bộ) -->
+    <link rel="stylesheet" th:href="@{/assets/fonts/tabler-icons.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/fonts/feather.css}">
+    <link rel="stylesheet" th:href="@{/assets/fonts/fontawesome.css}">
+    <link rel="stylesheet" th:href="@{/assets/fonts/material.css}">
+
+    <!-- Thư viện thêm (CDN) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
+    <link href="https://unpkg.com/filepond@^4/dist/filepond.min.css" rel="stylesheet" />
+    <link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css" rel="stylesheet" />
+    <!-- Chart.js + plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <style>
+        .footer {
+            background-color: #0d1b2a; /* nền đen xanh đậm */
+            color: #ccc;
+            font-size: 14px;
+        }
+
+        .footer h5, .footer h6 {
+            color: #fff;
+        }
+
+        .footer-link {
+            color: #aaa;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 6px;
+            transition: color 0.3s;
+        }
+        .footer-link:hover {
+            color: #fff;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 10px;
+        }
+        .social-icon {
+            width: 36px;
+            height: 36px;
+            background-color: #6c75e6; /* tím nhạt như hình */
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+        .social-icon:hover {
+            background-color: #4a54c5;
+        }
+    </style>
 </head>
 <body>
 <!-- Navbar -->
@@ -47,6 +108,9 @@
                 <li class="nav-item">
                     <a class="nav-link" th:href="@{/tracking}">Tra cứu đơn hàng</a>
                 </li>
+<!--                <li class="nav-item">-->
+<!--                    <a class="nav-link" th:href="@{/admin}">admin</a>-->
+<!--                </li>-->
             </ul>
         </div>
         <div class="d-flex align-items-center gap-3">
@@ -64,23 +128,14 @@
                             class="fas fa-user-circle fa-lg"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                        <li><a class="dropdown-item" th:href="@{/user/profile}"><i class="fas fa-user me-2"></i>Tài
-                            khoản</a></li>
-                        <li><a class="dropdown-item" th:href="@{/user/change-password-request}">
-                            <i class="fas fa-key me-2"></i>Đổi mật khẩu
-                        </a></li>
-                        <li><a class="dropdown-item" th:href="@{/user/orders}"><i class="fas fa-shopping-bag me-2"></i>Đơn
-                            hàng</a></li>
+                        <li><a class="dropdown-item" th:href="@{/user/profile}"><i class="fas fa-user me-2"></i>Tài khoản</a></li>
+                        <li><a class="dropdown-item" th:href="@{/user/change-password-request}"><i class="fas fa-key me-2"></i>Đổi mật khẩu</a></li>
+                        <li><a class="dropdown-item" th:href="@{/user/orders}"><i class="fas fa-shopping-bag me-2"></i>Đơn hàng</a></li>
                         <li th:if="${session.userRole == 'ROLE_ADMIN' || session.userRole == 'ROLE_EMPLOYEE'}">
-                            <a class="dropdown-item" th:href="@{/admin/dashboard}">
-                                <i class="fas fa-tools me-2"></i>Trang quản lý
-                            </a>
+                            <a class="dropdown-item" th:href="@{/admin/dashboard}"><i class="fas fa-tools me-2"></i>Trang quản lý</a>
                         </li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li><a class="dropdown-item" th:href="@{/user/logout}"><i class="fas fa-sign-out-alt me-2"></i>Đăng
-                            xuất</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" th:href="@{/user/logout}"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
                     </ul>
                 </div>
             </div>
@@ -107,33 +162,64 @@
 <main layout:fragment="content" style="padding-top: 80px;"></main>
 
 <!-- FOOTER -->
-<footer class="text-center text-white mt-4" style="background-color: #607D8B">
-    <hr class="text-dark">
+<footer class="footer bg-dark text-light pt-5 pb-4 mt-5">
     <div class="container">
-        <section class="mb-3">
-            <a class="btn-link btn-floating btn-lg text-white" href="#"><i class="fab fa-facebook-f"></i></a>
-            <a class="btn-link btn-floating btn-lg text-white" href="#"><i class="fab fa-twitter"></i></a>
-            <a class="btn-link btn-floating btn-lg text-white" href="#"><i class="fab fa-google"></i></a>
-            <a class="btn-link btn-floating btn-lg text-white" href="#"><i class="fab fa-instagram"></i></a>
-            <a class="btn-link btn-floating btn-lg text-white" href="#"><i class="fab fa-youtube"></i></a>
-            <a class="btn-link btn-floating btn-lg text-white" href="#"><i class="fab fa-github"></i></a>
-        </section>
-    </div>
-    <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2); text-color: #E0E0E0">
-        © 2025 Copyright:
-        <a class="text-white" href="">4PStore</a>
+        <div class="row">
+            <!-- Logo / Brand -->
+            <div class="col-md-3 mb-4">
+                <h5 class="fw-bold">4PStore</h5>
+                <p class="text-muted mb-0">© 2025 4PStore</p>
+            </div>
+
+            <!-- Customers -->
+            <div class="col-md-3 mb-4">
+                <h6 class="fw-bold">Customers</h6>
+                <ul class="list-unstyled">
+                    <li><a href="#" class="footer-link">Buyer</a></li>
+                    <li><a href="#" class="footer-link">Supplier</a></li>
+                </ul>
+            </div>
+
+            <!-- Company -->
+            <div class="col-md-3 mb-4">
+                <h6 class="fw-bold">Company</h6>
+                <ul class="list-unstyled">
+                    <li><a href="#" class="footer-link">About us</a></li>
+                    <li><a href="#" class="footer-link">Careers</a></li>
+                    <li><a href="#" class="footer-link">Contact us</a></li>
+                </ul>
+            </div>
+
+            <!-- Info + Social -->
+            <div class="col-md-3 mb-4">
+                <h6 class="fw-bold">Further Information</h6>
+                <ul class="list-unstyled">
+                    <li><a href="#" class="footer-link">Terms & Conditions</a></li>
+                    <li><a href="#" class="footer-link">Privacy Policy</a></li>
+                </ul>
+                <div class="social-icons mt-3">
+                    <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-medium"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-telegram-plane"></i></a>
+                </div>
+            </div>
+        </div>
     </div>
 </footer>
 
+
 <!-- JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script th:src="@{/assets/js/mdb.min.js}"></script>
-<script th:src="@{/assets/js/mdb.es.min.js}"></script>
-<script th:src="@{/assets/js/mdb.umd.min.js}"></script>
-<script th:src="@{/assets/js/plugins/component.js}"></script>
-<script th:src="@{/assets/js/plugins/pcoded.js}"></script>
-<script th:src="@{/assets/js/plugins/layout-tab.js}"></script>
-<script th:src="@{/assets/js/plugins/layout-horizontal.js}"></script>
-<script th:src="@{/assets/js/plugins/layout-compact.js}"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!--<script th:src="@{/assets/js/mdb.min.js}"></script>-->
+<!--<script th:src="@{/assets/js/mdb.es.min.js}"></script>-->
+<!--<script th:src="@{/assets/js/mdb.umd.min.js}"></script>-->
+<script th:src="@{/assets/js/component.js}"></script>
+<script th:src="@{/assets/js/pcoded.js}"></script>
+<script th:src="@{/assets/js/layout-tab.js}"></script>
+<script th:src="@{/assets/js/layout-horizontal.js}"></script>
+<script th:src="@{/assets/js/layout-compact.js}"></script>
 </body>
 </html>

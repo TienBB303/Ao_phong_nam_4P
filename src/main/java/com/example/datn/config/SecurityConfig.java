@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import com.example.datn.config.UserLoginSuccessHandler;
+//import org.thymeleaf.extras.springsecurity6.dialect.SpringSecurityDialect;
 import org.thymeleaf.extras.springsecurity6.dialect.SpringSecurityDialect;
 
 @Configuration
@@ -50,6 +51,8 @@ public class SecurityConfig {
                                 "/static/**", "/webjars/**", "/assets/**"
                         ).permitAll()
                         .requestMatchers("/login", "/register", "/user/signup").permitAll()
+                        // Chỉ Admin được phép xem trang & gọi API doanh thu
+                        .requestMatchers("/admin/revenue", "/admin/revenue/", "/admin/revenue/api/**").hasAuthority("ROLE_ADMIN")
                         // ADMIN và EMPLOYEE đều truy cập được dashboard, bán hàng, hóa đơn
                         .requestMatchers("/admin/dashboard", "/admin/sell-inline/**", "/admin/sell-inline", "/admin/bill/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_EMPLOYEE")
                         .requestMatchers("/admin/**", "/all-admin/**").hasAuthority("ROLE_ADMIN")
@@ -88,7 +91,7 @@ public class SecurityConfig {
     public UserDetailsService userDetailsService() {
         return loginService;
     }
-    // ✅ Thêm bean này để sec:authorize hoạt động
+    // ✅ Kích hoạt SpringSecurityDialect để #authentication và sec:authorize hoạt động
     @Bean
     public SpringSecurityDialect springSecurityDialect() {
         return new SpringSecurityDialect();
