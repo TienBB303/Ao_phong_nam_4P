@@ -74,22 +74,9 @@
                             <td th:text="${e.customer.name}"></td>
                             <td th:text="${e.email}"></td>
                             <td th:text="${e.customer.phoneNumber}"></td>
-                            <td th:text="${e.customer.birthDate}"></td>
+                            <td th:text="${#temporals.format(e.customer.birthDate, 'dd/MM/yyyy')}"></td>
                             <td th:text="${e.customer.gender == true ? 'Nam' : 'Nữ'}"></td>
-                            <td>
-                                <!--        <span th:if="${e.customer.addresses != null and !e.customer.addresses.isEmpty()}"-->
-                                <!--              th:text="${e.customer.addresses[0].addressDetail-->
-                                <!--                + (e.customer.addresses[0].wardName != null ? ', ' + e.customer.addresses[0].wardName : '')-->
-                                <!--                + (e.customer.addresses[0].districtName != null ? ', ' + e.customer.addresses[0].districtName : '')-->
-                                <!--                + (e.customer.addresses[0].provinceName != null ? ', ' + e.customer.addresses[0].provinceName : '')}">-->
-                                <!--        </span>-->
-                                <span th:if="${e.customer.addresses == null or e.customer.addresses.isEmpty()}" th:text="''"></span>
-                            </td>
-
-                            <!--                            <td th:text="${e.phoneNumber}"></td>-->
-                            <!--                            <td th:text="${e.birthOfDate}"></td>-->
-                            <!--                            <td th:text="${e.gender}"></td>-->
-                            <!--                            <td th:text="${e.addressDetail}"></td>-->
+                            <td th:each="address : ${e.customer.addresses}" th:text="${address.addressDetail + ', ' + address.wardName + ', ' + address.districtName + ', ' + address.provinceName}"></td>
                             <td>
                                 <span th:class="${e.status} ? 'badge bg-success' : 'badge bg-danger'"
                                       th:text="${e.status} ? 'Đang hoạt động' : 'Đã khóa'"></span>

@@ -1,4 +1,5 @@
 package com.example.datn.services.serviceImpl;
+
 import com.example.datn.dto.employee.AccountDto;
 import com.example.datn.entities.Account;
 import com.example.datn.entities.Customer;
@@ -48,7 +49,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Page<Account> listAccountAndPage(Pageable pageable) {
-        return accountRepository.findAll(pageable);
+        return accountRepository.findByCodeStartingWith("NV", pageable);
     }
 
     @Override
@@ -97,6 +98,7 @@ public class AccountServiceImpl implements AccountService {
             System.err.println("Email gui that bai: " + e.getMessage());
         }
     }
+
     @Override
     public Account findByEmail(String email) {
         return accountRepository.findByEmail(email)
@@ -154,7 +156,6 @@ public class AccountServiceImpl implements AccountService {
     }
 
 
-
     public Account loadUserByUsername(String email) throws UsernameNotFoundException {
         return accountRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy tài khoản: " + email));
@@ -164,6 +165,12 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Cart getCartByAccountID(Integer accountId) {
         return accountRepository.findByAccountID(accountId);
+    }
+
+    @Override
+    public Account findById(Integer id) {
+        return accountRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy nhân viên với ID: " + id));
     }
 
 }
