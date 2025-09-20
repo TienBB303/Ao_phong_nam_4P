@@ -21,7 +21,8 @@ public interface CustomerRepository extends JpaRepository<Customer,Integer> {
 
     boolean existsByPhoneNumber(String phoneNumber);
 
-    @Query("SELECT c FROM Customer c WHERE c.isActive = true AND (c.name LIKE %:keyword% OR c.code LIKE %:keyword%)")
+//    @Query("SELECT c FROM Customer c WHERE c.isActive = true AND (c.name LIKE %:keyword% OR c.code LIKE %:keyword%)")
+    @Query("SELECT c FROM Customer c WHERE (c.name LIKE %:keyword% OR c.code LIKE %:keyword%)")
     Page<Customer> searchCustomerKeyword(@Param("keyword") String keyword, Pageable pageable);
 
     Page<Customer> findByIsActiveTrue(Pageable pageable);

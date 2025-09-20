@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<<<<<<< HEAD
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head th:replace="~{admin/fragments/head :: head}"></head>
 <body data-pc-preset="preset-1" data-pc-direction="ltr" data-pc-theme="light">
@@ -25,6 +24,9 @@
         color: #a61b1b !important;               /* đỏ đậm, dễ đọc */
         border: 1px solid #f5c6cb !important;
     }
+    /* Xám hóa hàng khách hàng không hoạt động */
+    tr.row-inactive { color: #6c757d !important; background-color: #f8f9fa !important; }
+    tr.row-inactive a, tr.row-inactive .btn { opacity: 0.7; }
 </style>
 <div class="pc-container">
     <div class="pc-content">
@@ -93,7 +95,8 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="c, iterStat : ${customerPage.content}" th:if="${c != null}">
+                    <tr th:each="c, iterStat : ${customerPage.content}" th:if="${c != null}"
+                        th:classappend="${c.isActive != null and !c.isActive} ? 'row-inactive' : ''">
                         <td th:text="${iterStat.index + 1}"></td>
                         <td th:text="${c.code != null ? c.code : ''}"></td>
                         <td th:text="${c.name != null ? c.name : ''}"></td>
@@ -128,12 +131,19 @@
                         <!--                        </a>-->
                         <!--                    </td>-->
                         <td style="text-align: center">
-                            <a class="btn btn-outline-warning" style="width: 70px" title="Sửa" th:href="${c.id != null ? '/admin/customer/edit/' + c.id : '#'}" >
-                                <i class="ti ti-pencil"></i>
-                            </a>
-                            <a class="btn btn-outline-danger" style="width: 70px" title="Xóa" th:href="${c.id != null ? '/admin/customer/delete/' + c.id : '#'}">
-                                <i class="ti ti-trash"></i>
-                            </a>
+                            <div th:if="${c.isActive != null and c.isActive}">
+                                <a class="btn btn-outline-warning" style="width: 70px" title="Sửa" th:href="${c.id != null ? '/admin/customer/edit/' + c.id : '#'}">
+                                    <i class="ti ti-pencil"></i>
+                                </a>
+                                <a class="btn btn-outline-danger" style="width: 70px" title="Xóa" th:href="${c.id != null ? '/admin/customer/delete/' + c.id : '#'}" onclick="return confirm('Bạn có chắc muốn xóa (ẩn) khách hàng này?')">
+                                    <i class="ti ti-trash"></i>
+                                </a>
+                            </div>
+                            <div th:if="${c.isActive != null and !c.isActive}">
+                                <a class="btn btn-outline-success" style="width: 90px" title="Khôi phục" th:href="${c.id != null ? '/admin/customer/restore/' + c.id : '#'}">
+                                    <i class="ti ti-rotate-clockwise"></i> Khôi phục
+                                </a>
+                            </div>
                         </td>
                     </tr>
                     </tbody>

@@ -19,7 +19,7 @@ public interface CustomerService {
     boolean isEmailExists(String email);
     //check sdt trùng
     boolean isPhoneNumberExists(String phoneNumber);
-    // Lấy danh sách khách hàng đang hoạt động (isActive = true)
+    // Lấy danh sách khách hàng đang hoạt động (isActive = true) + k hoạt động
     Page<Customer> getAllCustomersEntity(Pageable pageable);
     // Tìm kiếm khách hàng theo tên hoặc mã
     Page<Customer> searchCustomerEntity(String keyword, Pageable pageable);
@@ -43,6 +43,9 @@ public interface CustomerService {
 
     // ✅ Xóa mềm khách hàng (set isActive = false)
     void softDeleteCustomer(Integer id);
+
+    // ✅ Khôi phục khách hàng (set isActive = true)
+    void restoreCustomer(Integer id);
 
     // Thêm địa chỉ cho khách hàng
     ShippingAddress createAddressForCustomer(Integer customerId, AddressDto addressDto);

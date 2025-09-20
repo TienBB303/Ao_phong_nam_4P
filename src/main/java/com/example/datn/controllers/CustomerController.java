@@ -137,11 +137,19 @@ public class CustomerController {
         } catch (Exception e) {
             System.out.println("[DEBUG] Exception in updateCustomer: " + e.getMessage());
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("error", "Lỗi khi cập nhật khách hàng: " + e.getMessage());
+//            redirectAttributes.addFlashAttribute("error", "Lỗi khi cập nhật khách hàng: " + e.getMessage());
+            String msg = e.getMessage() != null ? e.getMessage() : "Đã xảy ra lỗi";
+            if (msg.contains("Email đã tồn tại")) {
+                result.rejectValue("email", "error.customerDto", "Email đã tồn tại.");
+            } else {
+                result.reject("error", msg);
+            }
+            return "admin/customer/customerEdit";
         }
 
         return "redirect:/admin/customer/view";
     }
+
     @GetMapping("/delete/{id}")
     public String deleteCustomer(@PathVariable Integer id, RedirectAttributes redirect) {
         try {
@@ -152,7 +160,16 @@ public class CustomerController {
         }
         return "redirect:/admin/customer/view";
     }
-
+    @GetMapping("/restore/{id}")
+    public String restoreCustomer(@PathVariable Integer id, RedirectAttributes redirect) {
+        try {
+            customerService.restoreCustomer(id);
+            redirect.addFlashAttribute("success", "Khôi phục khách hàng thành công");
+        } catch (Exception e) {
+            redirect.addFlashAttribute("error", "Không tìm thấy khách hàng.");
+        }
+        return "redirect:/admin/customer/view";
+    }
     // Chi tiết khách hàng,Gọi theo id
     @GetMapping("/detail/{id}")
     public String detail(@PathVariable int id, Model model, RedirectAttributes redirect) {

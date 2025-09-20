@@ -54,24 +54,40 @@ public class CustomerServiceImpl implements CustomerService {
     private String generateRandomPassword() {
         return UUID.randomUUID().toString().substring(0, 8);
     }
+//    // Khôi phục khách hàng
+//    @Override
+//    public void restoreCustomer(Integer id) {
+//        Customer customer = customerRepository.findById(id)
+//                .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng có id = " + id));
+//        customer.setIsActive(true);
+//        customerRepository.save(customer);
+//    }
 
     // Lấy danh sách tất cả khách hàng đang hoạt động
     @Override
     public Page<Customer> getAllCustomersEntity(Pageable pageable) {
-        return customerRepository.findByIsActiveTrue(pageable);
+//        return customerRepository.findByIsActiveTrue(pageable);
+        return customerRepository.findAll(pageable);
     }
-
+    // Khôi phục khách hàng
+    @Override
+    public void restoreCustomer(Integer id) {
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng có id = " + id));
+        customer.setIsActive(true);
+        customerRepository.save(customer);
+    }
     // Tìm kiếm khách hàng theo keyword (name/code) và đang hoạt động
     @Override
     public Page<Customer> searchCustomerEntity(String keyword, Pageable pageable) {
         return customerRepository.searchCustomerKeyword(keyword, pageable);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public Customer findByIdWithAddressesAndAccount(Integer id) {
-        return customerRepository.findByIdWithAddressesAndAccount(id).orElse(null);
-    }
+//    @Override
+//    @Transactional(readOnly = true)
+//    public Customer findByIdWithAddressesAndAccount(Integer id) {
+//        return customerRepository.findByIdWithAddressesAndAccount(id).orElse(null);
+//    }
     // Tạo khách hàng mới từ entity
     @Override
     public Customer createCustomerEntity(Customer customer) {
@@ -183,9 +199,10 @@ public class CustomerServiceImpl implements CustomerService {
             existing.setBirthDate(null); // hoặc giữ nguyên tùy rule của bạn
         }
         if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
+            String newEmail = dto.getEmail().trim();
             Account account = existing.getAccount();
             if (account != null) {
-                String newEmail = dto.getEmail().trim();
+//                String newEmail = dto.getEmail().trim();
                 String currentEmail = account.getEmail();
                 if (currentEmail == null || !newEmail.equalsIgnoreCase(currentEmail)) {
                     // Kiểm tra trùng email với account khác
@@ -196,8 +213,27 @@ public class CustomerServiceImpl implements CustomerService {
                     account.setEmail(newEmail);
                     accountRepository.save(account);
                 }
+            } else {
+                // Chưa có tài khoản -> tạo mới để lưu email
+                Optional<Account> other = accountRepository.findByEmail(newEmail);
+                if (other.isPresent()) {
+                    throw new RuntimeException("Email đã tồn tại.");
+                }
+                Account newAccount = new Account();
+                newAccount.setCustomer(existing);
+                newAccount.setEmail(newEmail);
+                String rawPassword = generateRandomPassword();
+                newAccount.setPassword(passwordEncoder.encode(rawPassword));
+                Role role = roleRepository.findByName("ROLE_CUSTOMER")
+                        .orElseThrow(() -> new RuntimeException("Role ROLE_CUSTOMER không tồn tại!"));
+                newAccount.setRole(role);
+                newAccount.setFirstLogin(1);
+                newAccount.setStatus(false);
+                newAccount.setCreatedAt(java.time.LocalDateTime.now());
+                accountRepository.save(newAccount);
+                // (Tuỳ chọn) Gửi mail thông báo tạo tài khoản: bỏ qua để tránh spam khi cập nhật
             }
-        }
+            }
 
         // --- Bổ sung cập nhật địa chỉ ---
         AddressDto addressDto = dto.getAddress();
@@ -339,9 +375,9 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public long countAllCustomers() {
         // Nếu chỉ muốn đếm khách hàng đang hoạt động:
-        return customerRepository.countByIsActiveTrue();
+//        return customerRepository.countByIsActiveTrue();
         // Nếu muốn đếm tất cả khách hàng (kể cả đã bị xóa mềm):
-        // return customerRepository.count();
+         return customerRepository.count();
     }
 
     //TienBB
@@ -508,7 +544,12 @@ public class CustomerServiceImpl implements CustomerService {
     public Account findAccountById(Integer accountId) {
         return accountRepository.findById(accountId).orElse(null);
     }
-
+    // ✅ Thêm method fetch-join cả addresses và account
+    @Override
+    @Transactional(readOnly = true)
+    public Customer findByIdWithAddressesAndAccount(Integer id) {
+        return customerRepository.findByIdWithAddressesAndAccount(id).orElse(null);
+    }
     @Override
     public Account findAccountByCustomerID(Integer id) {
         return customerRepository.findAccountByCustomerID(id);
