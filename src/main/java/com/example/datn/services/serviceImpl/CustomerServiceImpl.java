@@ -83,7 +83,7 @@ public class CustomerServiceImpl implements CustomerService {
         return customerRepository.searchCustomerKeyword(keyword, pageable);
     }
 
-//    @Override
+    //    @Override
 //    @Transactional(readOnly = true)
 //    public Customer findByIdWithAddressesAndAccount(Integer id) {
 //        return customerRepository.findByIdWithAddressesAndAccount(id).orElse(null);
@@ -233,7 +233,7 @@ public class CustomerServiceImpl implements CustomerService {
                 accountRepository.save(newAccount);
                 // (Tuỳ chọn) Gửi mail thông báo tạo tài khoản: bỏ qua để tránh spam khi cập nhật
             }
-            }
+        }
 
         // --- Bổ sung cập nhật địa chỉ ---
         AddressDto addressDto = dto.getAddress();
@@ -377,7 +377,7 @@ public class CustomerServiceImpl implements CustomerService {
         // Nếu chỉ muốn đếm khách hàng đang hoạt động:
 //        return customerRepository.countByIsActiveTrue();
         // Nếu muốn đếm tất cả khách hàng (kể cả đã bị xóa mềm):
-         return customerRepository.count();
+        return customerRepository.count();
     }
 
     //TienBB
