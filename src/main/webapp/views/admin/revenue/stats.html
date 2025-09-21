@@ -31,6 +31,11 @@
                 </div>
             </div>
         </div>
+<!--        <div class="alert alert-light border mb-3 py-2">-->
+<!--            <small class="text-muted">-->
+<!--                Lưu ý: Các chỉ số trên trang này chỉ tính các đơn đã hoàn thành và đã thanh toán (status = 4, payment_status = 1).-->
+<!--            </small>-->
+<!--        </div>-->
         <!-- content: bạn dán phần “cards, charts, tables …” ở đây -->
         <div class="row">
             <div class="row mb-4">
@@ -39,7 +44,7 @@
                         <div class="card-body">
                             <div class="row">
                                 <div class="col">
-                                    <h5 class="card-title text-uppercase text-muted mb-0">Tổng Đơn Đặt Hàng</h5>
+                                    <h5 class="card-title text-uppercase text-muted mb-0">Tổng Đơn Hoàn Thành (đã thanh toán)</h5>
                                     <span class="h2 font-weight-bold mb-0" th:text="${revenueSummary.totalOrders}">0</span>
                                 </div>
                                 <div class="col-auto">
@@ -49,7 +54,8 @@
                                 </div>
                             </div>
                             <p class="mt-3 mb-0 text-sm">
-                                <span class="text-success mr-2" th:text="${revenueSummary.totalOrders + ' đơn hàng'}">0 đơn hàng</span>
+                                <span class="text-success mr-2"
+                                      th:text="${revenueSummary.totalOrders + ' đơn đã thanh toán'}">0 đơn đã thanh toán</span>
                                 <span class="text-nowrap">toàn hệ thống</span>
                             </p>
                         </div>
@@ -71,7 +77,8 @@
                                 </div>
                             </div>
                             <p class="mt-3 mb-0 text-sm">
-                                <span class="text-success mr-2" th:text="${revenueSummary.totalOrdersToday + ' đơn hàng'}">0 đơn hàng</span>
+                                <span class="text-success mr-2"
+                                      th:text="${revenueSummary.totalOrdersToday + ' đơn đã thanh toán'}">0 đơn đã thanh toán</span>
                                 <span class="text-nowrap">hôm nay</span>
                             </p>
                         </div>
@@ -117,7 +124,7 @@
                             </div>
                             <p class="mt-3 mb-0 text-sm">
                             <span class="text-success mr-2"
-                                  th:text="${revenueSummary.totalOrdersThisYear + ' đơn hàng'}">0 đơn hàng</span>
+                                  th:text="${revenueSummary.totalOrdersThisYear + ' đơn đã thanh toán'}">0 đơn đã thanh toán</span>
                                 <span class="text-nowrap">năm nay</span>
                             </p>
                         </div>

@@ -4,6 +4,7 @@ import com.example.datn.entities.Account;
 import com.example.datn.repositories.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
 
@@ -51,9 +52,29 @@ public class LoginService implements UserDetailsService {
         System.out.println("🔑 DB RoleName: " + account.getRole().getName());
         System.out.println("🔑 Password in DB: " + account.getPassword());
 
+        // Chặn đăng nhập online nếu tài khoản gắn với khách hàng bị khóa (isActive=false)
+//        if (account.getCustomer() != null) {
+//            Boolean active = account.getCustomer().getIsActive();
+//            if (active != null && !active) {
+////                throw new UsernameNotFoundException("Tài khoản khách hàng đã bị khóa. Vui lòng liên hệ CSKH.");
+//                throw new DisabledException("Tài khoản khách hàng đã bị khóa. Vui lòng liên hệ CSKH.");
+//
+//            }
+//        }
+        boolean enabled = true;
+        if (account.getCustomer() != null) {
+            Boolean active = account.getCustomer().getIsActive();
+            if (active != null && !active) {
+                enabled = false;
+            }
+        }
         return new User(
                 account.getEmail(),
                 account.getPassword(),
+                enabled,
+                true,
+                true,
+                true,
                 List.of(new SimpleGrantedAuthority(roleName)) // dùng role name trực tiếp
         );
     }

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head th:replace="~{admin/fragments/head :: head}"></head>
 <body data-pc-preset="preset-1" data-pc-direction="ltr" data-pc-theme="light">
@@ -23,34 +23,46 @@
         <div class="row">
             <!-- ... dán tiếp các block còn lại từ file gốc ... -->
             <div class="container py-4">
-                <div class="row mb-4">
-                    <div class="col-md-3 mb-3">
-                        <div class="card text-center p-3">
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 row-cols-xl-5 g-3 mb-4">
+                    <div class="col">
+                        <div class="card h-100 text-center p-3">
                             <div class="h6">Tổng đơn đặt hàng</div>
                             <div class="h4" th:text="${totalOrders}">0</div>
                         </div>
                     </div>
-                    <div class="col-md-3 mb-3">
-                        <div class="card text-center p-3">
-                            <div class="h6">Số đơn chờ xử lý</div>
-                            <div class="h4" th:text="${pendingOrders}">0</div>
+                    <div class="col">
+                        <div class="card h-100 text-center p-3">
+<!--                            <div class="card text-center p-3">-->
+                                <div class="h6">Số đơn chờ xử lý</div>
+                                <div class="h4" th:text="${pendingOrders}">0</div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <div class="card text-center p-3">
+                    <div class="col">
+                        <div class="card h-100 text-center p-3">
+                                <div class="h6">Số đơn chờ xác nhận (đã thanh toán)</div>
+                                <div class="h4" th:text="${paidPendingOrders}">0</div>
+                                <div class="small text-muted">
+                                    Tổng chờ xác nhận: <span th:text="${waitingOrders}">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    <div class="col">
+                        <div class="card h-100 text-center p-3">
                             <div class="h6">Tổng doanh thu</div>
                             <div class="h4" th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">0</div>
                         </div>
                     </div>
-                    <div class="col-md-3 mb-3">
-                        <div class="card text-center p-3">
+                    <div class="col">
+                        <div class="card h-100 text-center p-3">
                             <div class="h6">Số sản phẩm</div>
                             <div class="h4" th:text="${totalProducts}">0</div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-4">
-                            <div class="card">
+                </div>
+                <div class="row g-3">
+                    <div class="col-lg-6">
+                        <div class="card h-100">
                                 <div class="card-body">
                                     <div class="h6 mb-2">Doanh thu 7 ngày gần nhất</div>
                                     <canvas id="revenueChart"
@@ -59,9 +71,8 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-6 mb-4">
-                        <div class="card">
+                    <div class="col-lg-6">
+                        <div class="card h-100">
                             <div class="card-body">
                                 <div class="h6 mb-2">Đơn hàng theo trạng thái</div>
                                 <canvas id="orderPieChart"
@@ -173,7 +184,7 @@
                         'rgba(108,117,125,0.7)', // Đang giao - xám
                         'rgba(40,167,69,0.7)',   // Hoàn thành - xanh lá
                         'rgba(220,53,69,0.7)',   // Đã hủy - đỏ
-                        'rgba(0,200,150,0.7)'    // Tại quầy - xanh mint
+                        'rgba(128,0,128,0.7)',   // Giao hàng thất bại (màu bổ sung)
                     ],
                     borderWidth: 2,
                     borderColor: '#fff'

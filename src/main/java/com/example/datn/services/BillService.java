@@ -425,7 +425,9 @@ public class BillService {
         if (customer == null) {
             throw new Exception("Không tìm thấy khách hàng");
         }
-
+//        if (customer.getIsActive() != null && !customer.getIsActive()) {
+//            throw new Exception("Tài khoản này đã bị vô hiệu hóa");
+//        }
         cart.setCustomer(customer);
         cart.setName(customer.getName());
         cart.setPhoneNumber(customer.getPhoneNumber());

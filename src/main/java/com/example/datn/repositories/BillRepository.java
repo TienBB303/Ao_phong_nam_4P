@@ -95,50 +95,57 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
 
     //     Tổng tất cả đơn (mọi trạng thái, cả online + offline)
     //     => Dùng để hiển thị "Tổng đơn hàng"
-    @Query(value = "SELECT COUNT(*) FROM bill WHERE status > 0 AND type_bill IN (0, 1)", nativeQuery = true)
+    @Query(value = "SELECT COUNT(*) FROM bill WHERE status IN (1, 2, 3, 4, 5, 6) AND type_bill IN (0, 1)", nativeQuery = true)
     Long getTotalOrders();
     // Tổng đơn hàng (cả online + offline, chỉ tính hoàn thành)
     @Query(value = "SELECT COUNT(*) FROM bill WHERE status = 4 AND payment_status = 1 AND type_bill IN (0, 1)", nativeQuery = true)
     Long getTotalCompletedOrders();
-    // Số đơn chờ xử lý (cả online + offline, Bao gồm: Chờ xác nhận (1), Đã xác nhận (2), Đang giao (3))
+    // Chờ xử lý (tất cả): KHÔNG bao gồm chờ xác nhận, chỉ 2-Đã xác nhận, 3-Đang giao
+    @Query(value = "SELECT COUNT(*) FROM bill WHERE status IN (2, 3) AND type_bill IN (0, 1)", nativeQuery = true)
+    Long getProcessingTotal();
+    // Chờ xử lý (đã thanh toán): theo dõi pipeline đã pre-paid
+    @Query(value = "SELECT COUNT(*) FROM bill WHERE status IN (2, 3) AND payment_status = 1 AND type_bill IN (0, 1)", nativeQuery = true)
+    Long getProcessingPaid();
+    // Số đơn chờ xử lý (cả online + offline,yêu cầu ĐÃ THANH TOÁN (payment_status = 1), Bao gồm: Chờ xác nhận (1), Đã xác nhận (2), Đang giao (3))
     @Query(value = "SELECT COUNT(*) FROM bill WHERE status IN (1, 2, 3) AND payment_status = 1 AND type_bill IN (0, 1)", nativeQuery = true)
     Long getPendingOrders();
 
-    // Tổng doanh thu (cả online + offline, không tính phí ship)
+    // Tổng doanh thu (cả online + offline, không tính phí ship, đã TRỪ khuyến mãi)
     // - Đơn hoàn thành (status = 4): + doanh thu
 // - Đơn giao thất bại (status = 5): - doanh thu (hoàn tiền)
 // - Đơn online đã thanh toán qua app và được xác nhận: + doanh thu
     @Query(value = """
     SELECT COALESCE(SUM(
         CASE 
-            WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
-            WHEN b.status = 5 THEN -(b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+            WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.discount_amount,0))
             ELSE 0
         END
     ), 0)
     FROM bill b
     WHERE b.type_bill IN (0, 1)
-""", nativeQuery = true)
+      AND b.payment_status = 1
+    """, nativeQuery = true)
     BigDecimal getTotalRevenue();
 
     // Method lấy doanh thu và số đơn theo khoảng thời gian (cả online + offline)
     @Query(value = """
     SELECT COALESCE(SUM(
                CASE 
-                   WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
-                   WHEN b.status = 5 THEN -(b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+                   WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.discount_amount,0))
                    ELSE 0
                END
            ), 0),
-           COUNT(*)
+           COALESCE(SUM(CASE WHEN b.status = 4 THEN 1 ELSE 0 END), 0)
     FROM bill b
     WHERE b.type_bill IN (0, 1)
+      AND b.payment_status = 1
       AND b.created_at BETWEEN :startDate AND :endDate
     """, nativeQuery = true)
     Object[] getRevenueAndOrdersByRange(@Param("startDate") LocalDateTime startDate,
                                         @Param("endDate") LocalDateTime endDate);
 
-    // Số đơn hàng hôm nay (cả online + offline)
+
+    // Số đơn hàng hôm nay , Đếm số đơn HOÀN THÀNH và ĐÃ THANH TOÁN (cả online + offline)
     @Query(value = """
     SELECT COUNT(*) FROM bill
     WHERE status = 4 AND payment_status = 1 AND type_bill IN (0, 1)
@@ -152,17 +159,17 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
     SELECT CAST(b.created_at AS DATE) AS date,
            COALESCE(SUM(
                CASE 
-                   WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
-                   WHEN b.status = 5 THEN -(b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+                   WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.discount_amount,0))
                    ELSE 0
                END
            ), 0) AS totalRevenue
     FROM bill b
     WHERE b.type_bill IN (0, 1)
+      AND b.payment_status = 1
       AND b.created_at BETWEEN :startDate AND :endDate
     GROUP BY CAST(b.created_at AS DATE)
     ORDER BY CAST(b.created_at AS DATE)
-""", nativeQuery = true)
+    """, nativeQuery = true)
     List<Object[]> getRevenueLast7Days(@Param("startDate") LocalDateTime startDate,
                                        @Param("endDate") LocalDateTime endDate);
 
@@ -194,18 +201,19 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
 
     // ================== REVENUE (stats.html) ==================
 
+    // Doanh thu hôm nay: chỉ tính status=4
     @Query(value = """
     SELECT COALESCE(SUM(
         CASE 
-            WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
-            WHEN b.status = 5 THEN -(b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+            WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.discount_amount,0))
             ELSE 0
         END
     ), 0)
     FROM bill b
     WHERE b.type_bill IN (0, 1)
+      AND b.payment_status = 1
       AND b.created_at BETWEEN :startOfDay AND :endOfDay
-""", nativeQuery = true)
+    """, nativeQuery = true)
     BigDecimal getTodayRevenue(@Param("startOfDay") LocalDateTime startOfDay,
                                @Param("endOfDay") LocalDateTime endOfDay);
 
@@ -213,15 +221,15 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
     @Query(value = """
     SELECT COALESCE(SUM(
         CASE 
-            WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
-            WHEN b.status = 5 THEN -(b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+            WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.discount_amount,0))
             ELSE 0
         END
     ), 0)
     FROM bill b
     WHERE b.type_bill IN (0, 1)
+      AND b.payment_status = 1
       AND b.created_at BETWEEN :startOfMonth AND :endOfMonth
-""", nativeQuery = true)
+    """, nativeQuery = true)
     BigDecimal getCurrentMonthRevenue(@Param("startOfMonth") LocalDateTime startOfMonth,
                                       @Param("endOfMonth") LocalDateTime endOfMonth);
 
@@ -229,34 +237,34 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
     @Query(value = """
     SELECT COALESCE(SUM(
         CASE 
-            WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
-            WHEN b.status = 5 THEN -(b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+            WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.discount_amount,0))
             ELSE 0
         END
     ), 0)
     FROM bill b
     WHERE b.type_bill IN (0, 1)
+      AND b.payment_status = 1
       AND YEAR(b.created_at) = YEAR(GETDATE())
-""", nativeQuery = true)
+    """, nativeQuery = true)
     BigDecimal getCurrentYearRevenue();
 
     // Doanh thu theo khoảng ngày (cả online + offline)
     @Query(value = """
-    SELECT CAST(b.created_at AS DATE),
+    SELECT CAST(b.created_at AS DATE) AS day_value,
            COALESCE(SUM(
                CASE 
-                   WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
-                   WHEN b.status = 5 THEN -(b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+                   WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.discount_amount,0))
                    ELSE 0
                END
-           ), 0),
-           COUNT(*)
+           ), 0) AS total_revenue,
+           COALESCE(SUM(CASE WHEN b.status = 4 THEN 1 ELSE 0 END), 0) AS total_orders
     FROM bill b
     WHERE b.type_bill IN (0, 1)
+      AND b.payment_status = 1
       AND b.created_at BETWEEN :startDate AND :endDate
     GROUP BY CAST(b.created_at AS DATE)
     ORDER BY CAST(b.created_at AS DATE)
-""", nativeQuery = true)
+    """, nativeQuery = true)
     List<Object[]> getRevenueByDate(@Param("startDate") LocalDateTime startDate,
                                     @Param("endDate") LocalDateTime endDate);
 
@@ -266,18 +274,18 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
     SELECT YEAR(b.created_at), MONTH(b.created_at),
            COALESCE(SUM(
                CASE 
-                   WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
-                   WHEN b.status = 5 THEN -(b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+                   WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.discount_amount,0))
                    ELSE 0
                END
            ), 0),
-           COUNT(*)
+           COALESCE(SUM(CASE WHEN b.status = 4 THEN 1 ELSE 0 END), 0)
     FROM bill b
     WHERE b.type_bill IN (0, 1)
+      AND b.payment_status = 1
       AND YEAR(b.created_at) = :year
     GROUP BY YEAR(b.created_at), MONTH(b.created_at)
     ORDER BY YEAR(b.created_at), MONTH(b.created_at)
-""", nativeQuery = true)
+    """, nativeQuery = true)
     List<Object[]> getRevenueByMonth(@Param("year") int year);
 
     // Doanh thu theo năm (cả online + offline)
@@ -285,17 +293,17 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
     SELECT YEAR(b.created_at),
            COALESCE(SUM(
                CASE 
-                   WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
-                   WHEN b.status = 5 THEN -(b.total_amount - COALESCE(b.shipping_fee,0) - COALESCE(b.discount_amount,0))
+                   WHEN b.status = 4 THEN (b.total_amount - COALESCE(b.discount_amount,0))
                    ELSE 0
                END
            ), 0),
-           COUNT(*)
+           COALESCE(SUM(CASE WHEN b.status = 4 THEN 1 ELSE 0 END), 0)
     FROM bill b
     WHERE b.type_bill IN (0, 1)
+      AND b.payment_status = 1
     GROUP BY YEAR(b.created_at)
     ORDER BY YEAR(b.created_at)
-""", nativeQuery = true)
+    """, nativeQuery = true)
     List<Object[]> getRevenueByYear();
 
 //    // Top sản phẩm bán chạy

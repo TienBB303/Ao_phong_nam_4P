@@ -109,28 +109,47 @@ public class CustomerController {
     public String updateCustomer(@Valid @ModelAttribute("customerDto") CustomerDto dto,
                                  BindingResult result,
                                  RedirectAttributes redirectAttributes) {
+        System.out.println("[DEBUG] UpdateCustomer incoming DTO: "
+                + "id=" + dto.getId()
+                + ", gender=" + dto.getGender()
+                + ", birthday=" + dto.getBirthday()
+                + ", name=" + dto.getName()
+                + ", email=" + dto.getEmail()
+                + ", phone=" + dto.getPhoneNumber()
+                + ", isActive=" + dto.getIsActive());
         if (result.hasErrors()) {
+            System.out.println("[DEBUG] BindingResult has errors:");
+            result.getAllErrors().forEach(err -> System.out.println("  - " + err));
             // Nếu có lỗi validation, quay lại form chỉnh sửa
             return "admin/customer/customerEdit";
         }
-
         try {
             // KHÔNG CẦN convertToEntity ở đây vì service sẽ tự tìm và cập nhật entity
             Customer updated = customerService.updateCustomer(dto);
             if (updated == null) {
+                System.out.println("[DEBUG] Update failed: customerService.updateCustomer(dto) returned null");
                 result.reject("error", "Không tìm thấy khách hàng để cập nhật!");
                 return "admin/customer/customerEdit";
             } else {
+                System.out.println("[DEBUG] Update success for customer id=" + updated.getId());
                 redirectAttributes.addFlashAttribute("message", "Cập nhật khách hàng thành công!");
             }
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Lỗi khi cập nhật khách hàng: " + e.getMessage());
-            // In lỗi ra console để debug, rất quan trọng!
+            System.out.println("[DEBUG] Exception in updateCustomer: " + e.getMessage());
             e.printStackTrace();
+//            redirectAttributes.addFlashAttribute("error", "Lỗi khi cập nhật khách hàng: " + e.getMessage());
+            String msg = e.getMessage() != null ? e.getMessage() : "Đã xảy ra lỗi";
+            if (msg.contains("Email đã tồn tại")) {
+                result.rejectValue("email", "error.customerDto", "Email đã tồn tại.");
+            } else {
+                result.reject("error", msg);
+            }
+            return "admin/customer/customerEdit";
         }
 
         return "redirect:/admin/customer/view";
     }
+
     @GetMapping("/delete/{id}")
     public String deleteCustomer(@PathVariable Integer id, RedirectAttributes redirect) {
         try {
@@ -141,7 +160,16 @@ public class CustomerController {
         }
         return "redirect:/admin/customer/view";
     }
-
+    @GetMapping("/restore/{id}")
+    public String restoreCustomer(@PathVariable Integer id, RedirectAttributes redirect) {
+        try {
+            customerService.restoreCustomer(id);
+            redirect.addFlashAttribute("success", "Khôi phục khách hàng thành công");
+        } catch (Exception e) {
+            redirect.addFlashAttribute("error", "Không tìm thấy khách hàng.");
+        }
+        return "redirect:/admin/customer/view";
+    }
     // Chi tiết khách hàng,Gọi theo id
     @GetMapping("/detail/{id}")
     public String detail(@PathVariable int id, Model model, RedirectAttributes redirect) {
@@ -180,11 +208,11 @@ public class CustomerController {
             // addressDto.setReceiverName(address.getReceiverName() != null ? address.getReceiverName() : ""); // [Removed]
             // addressDto.setReceiverPhoneNumber(address.getReceiverPhoneNumber() != null ? address.getReceiverPhoneNumber() : ""); // [Removed]
             // addressDto.setIsDefault(address.getIsDefault() != null ? address.getIsDefault() : false); // [Removed]
-    
+
             // // [Removed] Debug log liên quan isDefault
             // System.out.println("Address isDefault: " + address.getIsDefault());
             // System.out.println("AddressDto isDefault: " + addressDto.getIsDefault());
-    
+
             dto.setAddress(addressDto);
         }
         return dto;

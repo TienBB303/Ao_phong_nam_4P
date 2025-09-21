@@ -99,43 +99,81 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     @Query("SELECT COUNT(DISTINCT p.brand.id) FROM Product p WHERE p.brand.status = true")
     Long countActiveBrands();
     // Sản phẩm bán chạy nhất theo số lượng (Sử dụng cho bảng chính)
-    @Query("SELECT p.id, p.code, p.name, c.name, br.name, " +
-            "COALESCE(SUM(bd.quantity), 0) AS totalSold, " +
-            "COALESCE(SUM(bd.total_price), 0) AS grossRevenue " + // GrossRevenue
-            "FROM BillDetails bd " +
-            "JOIN bd.productDetail pd " +
-            "JOIN pd.product p " +
-            "JOIN p.category c " +
-            "JOIN p.brand br " +
-            "JOIN bd.bill b " +
-            "WHERE b.paymentStatus = true " +
-            "AND b.status = 4 " + // chỉ tính đơn hoàn thành
-            "AND p.status = true " +
-            "AND (:startDate IS NULL OR b.createdAt >= :startDate) " +
-            "AND (:endDate IS NULL OR b.createdAt <= :endDate) " +
-            "GROUP BY p.id, p.code, p.name, c.name, br.name " +
-            "ORDER BY totalSold DESC")
+    @Query(value = """
+    SELECT p.id, p.code, p.name, c.name AS category_name, br.name AS brand_name,
+           COALESCE(SUM(bd.quantity), 0) AS totalSold,
+           COALESCE(SUM(
+               CASE 
+                   WHEN b.status = 4 AND b.payment_status = 1 THEN
+                       (
+                           (CAST(COALESCE(bd.total_price, 0) AS DECIMAL(38, 10))
+                            / NULLIF(CAST(COALESCE(bsum.total_price_sum, 0) AS DECIMAL(38, 10)), 0))
+                           *
+                           (CAST(COALESCE(b.total_amount, 0) AS DECIMAL(38, 2))
+                            - CAST(COALESCE(b.discount_amount, 0) AS DECIMAL(38, 2)))
+                       )
+                   ELSE 0
+               END
+           ), 0) AS netRevenue
+    FROM bill_detail bd
+    JOIN bill b ON b.id = bd.bill_id
+    JOIN product_detail pd ON pd.id = bd.product_detail_id
+    JOIN product p ON p.id = pd.product_id
+    JOIN category c ON c.id = p.category_id
+    JOIN brand br ON br.id = p.brand_id
+    LEFT JOIN (
+        SELECT bd2.bill_id, SUM(COALESCE(bd2.total_price, 0)) AS total_price_sum
+        FROM bill_detail bd2
+        GROUP BY bd2.bill_id
+    ) bsum ON bsum.bill_id = b.id
+    WHERE b.payment_status = 1
+      AND b.status = 4
+      AND p.status = 1
+      AND (:startDate IS NULL OR b.created_at >= :startDate)
+      AND (:endDate IS NULL OR b.created_at <= :endDate)
+    GROUP BY p.id, p.code, p.name, c.name, br.name
+    ORDER BY totalSold DESC
+    """, nativeQuery = true)
     List<Object[]> getTopSellingProductsByQuantity(@Param("startDate") LocalDateTime startDate,
                                                    @Param("endDate") LocalDateTime endDate);
 
 
-    // Sản phẩm bán chạy theo doanh thu (GrossRevenue)- tính theo giá gốc ( dùng cho màn Danh sách sản phẩm bán nhiều nhất)
-    //  (gross revenue = chưa trừ phí ship + discount)
-    @Query("SELECT p.id, p.code, p.name, c.name, br.name, " +
-            "COALESCE(SUM(bd.quantity), 0), " +
-            "COALESCE(SUM(bd.total_price), 0) " +
-            "FROM BillDetails bd " +
-            "JOIN bd.productDetail pd " +
-            "JOIN pd.product p " +
-            "JOIN p.category c " +
-            "JOIN p.brand br " +
-            "JOIN bd.bill b " +
-            "WHERE b.paymentStatus = true " +
-            "AND p.status = true " +
-            "AND (:startDate IS NULL OR b.createdAt >= :startDate) " +
-            "AND (:endDate IS NULL OR b.createdAt <= :endDate) " +
-            "GROUP BY p.id, p.code, p.name, c.name, br.name " +
-            "ORDER BY SUM(bd.total_price) DESC")
+    // Sản phẩm bán chạy theo doanh thu (net revenue = total-checkout)
+    @Query(value = """
+    SELECT p.id, p.code, p.name, c.name AS category_name, br.name AS brand_name,
+           COALESCE(SUM(bd.quantity), 0) AS totalSold,
+           COALESCE(SUM(
+               CASE 
+                   WHEN b.status = 4 AND b.payment_status = 1 THEN
+                       (
+                           (CAST(COALESCE(bd.total_price, 0) AS DECIMAL(38, 10))
+                            / NULLIF(CAST(COALESCE(bsum.total_price_sum, 0) AS DECIMAL(38, 10)), 0))
+                           *
+                           (CAST(COALESCE(b.total_amount, 0) AS DECIMAL(38, 2))
+                            - CAST(COALESCE(b.discount_amount, 0) AS DECIMAL(38, 2)))
+                       )
+                   ELSE 0
+               END
+           ), 0) AS netRevenue
+    FROM bill_detail bd
+    JOIN bill b ON b.id = bd.bill_id
+    JOIN product_detail pd ON pd.id = bd.product_detail_id
+    JOIN product p ON p.id = pd.product_id
+    JOIN category c ON c.id = p.category_id
+    JOIN brand br ON br.id = p.brand_id
+    LEFT JOIN (
+        SELECT bd2.bill_id, SUM(COALESCE(bd2.total_price, 0)) AS total_price_sum
+        FROM bill_detail bd2
+        GROUP BY bd2.bill_id
+    ) bsum ON bsum.bill_id = b.id
+    WHERE b.payment_status = 1
+      AND b.status = 4
+      AND p.status = 1
+      AND (:startDate IS NULL OR b.created_at >= :startDate)
+      AND (:endDate IS NULL OR b.created_at <= :endDate)
+    GROUP BY p.id, p.code, p.name, c.name, br.name
+    ORDER BY netRevenue DESC
+    """, nativeQuery = true)
     List<Object[]> getTopSellingProductsByRevenue(@Param("startDate") LocalDateTime startDate,
                                                   @Param("endDate") LocalDateTime endDate);
 
@@ -144,39 +182,81 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     // ProductRepository.java - Cần cập nhật getCategoryStats để lọc theo thời gian
     @Query(value = """
     SELECT c.name, 
-           COUNT(p.id) AS productCount,
+           COUNT(DISTINCT p.id) AS productCount,
            COALESCE(SUM(bd.quantity), 0) AS totalSold,
-           COALESCE(SUM(bd.total_price), 0) AS grossRevenue,  -- GrossRevenue
+           COALESCE(SUM(
+               CASE 
+                   WHEN b.status = 4 AND b.payment_status = 1 THEN
+                       (
+                           (CAST(COALESCE(bd.total_price, 0) AS DECIMAL(38, 10))
+                            / NULLIF(CAST(COALESCE(bsum.total_price_sum, 0) AS DECIMAL(38, 10)), 0))
+                           *
+                           (CAST(COALESCE(b.total_amount, 0) AS DECIMAL(38, 2))
+                            - CAST(COALESCE(b.discount_amount, 0) AS DECIMAL(38, 2)))
+                       )
+                   ELSE 0
+               END
+           ), 0) AS netRevenue,
            COALESCE(SUM(pd.quantity), 0) AS totalStock
     FROM category c
-    LEFT JOIN product p ON p.category_id = c.id AND p.status = 1
-    LEFT JOIN product_detail pd ON pd.product_id = p.id
-    LEFT JOIN bill_detail bd ON bd.product_detail_id = pd.id
-    LEFT JOIN bill b ON bd.bill_id = b.id AND b.payment_status = 1 AND b.status = 4
+    LEFT JOIN product p 
+           ON p.category_id = c.id AND p.status = 1
+    LEFT JOIN product_detail pd 
+           ON pd.product_id = p.id
+    LEFT JOIN bill_detail bd 
+           ON bd.product_detail_id = pd.id
+    LEFT JOIN bill b 
+           ON bd.bill_id = b.id
+          AND b.payment_status = 1
+          AND b.status = 4
+          AND (:startDate IS NULL OR b.created_at >= :startDate)
+          AND (:endDate IS NULL OR b.created_at <= :endDate)
+    LEFT JOIN (
+        SELECT bd2.bill_id, SUM(COALESCE(bd2.total_price, 0)) AS total_price_sum
+        FROM bill_detail bd2
+        GROUP BY bd2.bill_id
+    ) bsum ON bsum.bill_id = b.id       
     WHERE c.status = 1
-      AND (:startDate IS NULL OR b.created_at >= :startDate)
-      AND (:endDate IS NULL OR b.created_at <= :endDate)
     GROUP BY c.id, c.name
-    ORDER BY grossRevenue DESC
-""", nativeQuery = true)
+    ORDER BY netRevenue DESC
+    """, nativeQuery = true)
     List<Object[]> getCategoryStats(@Param("startDate") LocalDateTime startDate,
                                     @Param("endDate") LocalDateTime endDate);
     // Thống kê theo thương hiệu (tính theo giá gốc ( dùng cho màn Danh sách sản phẩm bán nhiều nhất)
     @Query(value = """
-    SELECT br.name, 
-           COUNT(p.id) AS productCount,
-           COALESCE(SUM(bd.quantity), 0) AS totalSold,
-           COALESCE(SUM(bd.total_price), 0) AS grossRevenue,  -- GrossRevenue
-           COALESCE(SUM(pd.quantity), 0) AS totalStock
-    FROM brand br
-    LEFT JOIN product p ON p.brand_id = br.id AND p.status = 1
-    LEFT JOIN product_detail pd ON pd.product_id = p.id
-    LEFT JOIN bill_detail bd ON bd.product_detail_id = pd.id
-    LEFT JOIN bill b ON bd.bill_id = b.id AND b.payment_status = 1 AND b.status = 4
-    WHERE br.status = 1
-    GROUP BY br.id, br.name
-    ORDER BY grossRevenue DESC
-""", nativeQuery = true)
+        SELECT
+            br.name,
+            COUNT(p.id) AS productCount,
+            COALESCE(SUM(bd.quantity), 0) AS totalSold,
+            COALESCE(SUM(
+                CASE
+                    WHEN b.payment_status = 1 AND b.status = 4 THEN
+                        (
+                            (CAST(COALESCE(bd.total_price, 0) AS DECIMAL(38, 10))
+                             / NULLIF(CAST(SUM(COALESCE(bd.total_price, 0)) OVER (PARTITION BY b.id) AS DECIMAL(38, 10)), 0))
+                            *
+                            (CAST(COALESCE(b.total_amount, 0) AS DECIMAL(38, 2))
+                             - CAST(COALESCE(b.discount_amount, 0) AS DECIMAL(38, 2)))
+                        )
+                    ELSE 0
+                END
+            ), 0) AS netRevenue,
+            COALESCE(SUM(pd.quantity), 0) AS totalStock
+        FROM brand br
+        LEFT JOIN product p
+               ON p.brand_id = br.id AND p.status = 1
+        LEFT JOIN product_detail pd
+               ON pd.product_id = p.id
+        LEFT JOIN bill_detail bd
+               ON bd.product_detail_id = pd.id
+        LEFT JOIN bill b
+               ON bd.bill_id = b.id
+              AND b.payment_status = 1
+              AND b.status = 4
+        WHERE br.status = 1
+        GROUP BY br.id, br.name
+        ORDER BY netRevenue DESC
+        """, nativeQuery = true)
     List<Object[]> getBrandStats();
 
 

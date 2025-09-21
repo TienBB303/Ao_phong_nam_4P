@@ -12,6 +12,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import com.example.datn.config.CustomAuthenticationFailureHandler;
 import com.example.datn.config.UserLoginSuccessHandler;
 //import org.thymeleaf.extras.springsecurity6.dialect.SpringSecurityDialect;
 import org.thymeleaf.extras.springsecurity6.dialect.SpringSecurityDialect;
@@ -23,7 +24,8 @@ public class SecurityConfig {
     private LoginService loginService;
     @Autowired
     private UserLoginSuccessHandler userLoginSuccessHandler;
-
+    @Autowired
+    private CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -65,7 +67,8 @@ public class SecurityConfig {
                         .usernameParameter("email")
                         .passwordParameter("password")
                         .successHandler(userLoginSuccessHandler)
-                        .failureUrl("/login?error=true")
+//                        .failureUrl("/login?error=true")
+                                .failureHandler(customAuthenticationFailureHandler)
                         .permitAll()
                 )
                 .logout(logout -> logout

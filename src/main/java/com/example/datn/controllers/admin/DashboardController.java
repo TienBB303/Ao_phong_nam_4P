@@ -29,7 +29,8 @@ public class DashboardController {
         // 2. Đơn chờ xác nhận
         Long totalWaiting = billRepository.getTotalWaitingConfirmOrders();  // tất cả
         Long paidWaiting = billRepository.getPaidWaitingConfirmOrders();    // đã thanh toán
-
+        // ✅ Chờ xử lý: chỉ 2 (Đã xác nhận), 3 (Đang giao) - KHÔNG lọc đã thanh toán
+        Long pendingOrders = billRepository.getProcessingTotal();
         // ✅ 3. TỔNG DOANH THU (sử dụng method có sẵn - không tính phí ship)
         BigDecimal totalRevenue = billRepository.getTotalRevenue();
 
@@ -48,26 +49,40 @@ public class DashboardController {
         }
 
         // ✅ 6. DOANH THU 7 NGÀY GẦN NHẤT (sử dụng method có sẵn)
-        LocalDateTime endDate = LocalDateTime.now();
-        LocalDateTime startDate = endDate.minusDays(7);
+        java.time.LocalDate today = java.time.LocalDate.now();
+        java.time.LocalDate start = today.minusDays(6);
+        java.time.LocalDateTime startDate = start.atStartOfDay();
+        java.time.LocalDateTime endDate = today.atTime(java.time.LocalTime.MAX);
         List<Object[]> revenueData = billRepository.getRevenueLast7Days(startDate, endDate);
-
+        Map<java.time.LocalDate, java.math.BigDecimal> revenueByDate = new java.util.HashMap<>();
+        for (Object[] row : revenueData) {
+            java.time.LocalDate d = (row[0] instanceof java.sql.Date)
+                    ? ((java.sql.Date) row[0]).toLocalDate()
+                    : java.time.LocalDate.parse(row[0].toString());
+            java.math.BigDecimal revenue = (row[1] != null)
+                    ? new java.math.BigDecimal(row[1].toString())
+                    : java.math.BigDecimal.ZERO;
+            revenueByDate.put(d, revenue);
+        }
+        if (!revenueByDate.containsKey(today)) {
+            java.math.BigDecimal todayRevenue = billRepository.getTodayRevenue(
+                    today.atStartOfDay(), today.atTime(java.time.LocalTime.MAX)
+            );
+            revenueByDate.put(today, todayRevenue != null ? todayRevenue : java.math.BigDecimal.ZERO);
+        }
         List<String> dateLabels = new ArrayList<>();
         List<BigDecimal> revenueValues = new ArrayList<>();
 
-        for (Object[] row : revenueData) {
-            // row[0] = date, row[1] = revenue
-            String date = row[0].toString();
-            BigDecimal revenue = (row[1] != null) ? new BigDecimal(row[1].toString()) : BigDecimal.ZERO;
-
-            dateLabels.add(formatDateForChart(date));
-            revenueValues.add(revenue);
+        for (java.time.LocalDate d = start; !d.isAfter(today); d = d.plusDays(1)) {
+            dateLabels.add(formatDateForChart(d.toString()));
+            revenueValues.add(revenueByDate.getOrDefault(d, java.math.BigDecimal.ZERO));
         }
 
         // ✅ THÊM CÁC ATTRIBUTE VÀO MODEL
+        model.addAttribute("pendingOrders", pendingOrders != null ? pendingOrders : 0L); // 2,3
+        model.addAttribute("waitingOrders", totalWaiting != null ? totalWaiting : 0L);   // tổng chờ xác nhận
+        model.addAttribute("paidPendingOrders", paidWaiting != null ? paidWaiting : 0L); // chờ xác nhận - đã thanh toán
         model.addAttribute("totalOrders", totalOrders != null ? totalOrders : 0L);
-        model.addAttribute("pendingOrders", totalWaiting != null ? totalWaiting : 0L); // tất cả
-        model.addAttribute("paidPendingOrders", paidWaiting != null ? paidWaiting : 0L); // đã thanh toán
         model.addAttribute("totalRevenue", totalRevenue != null ? totalRevenue : BigDecimal.ZERO);
         model.addAttribute("totalProducts", totalProducts != null ? totalProducts : 0L);
         model.addAttribute("orderStatusMap", orderStatusMap);
