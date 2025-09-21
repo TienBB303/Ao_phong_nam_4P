@@ -202,11 +202,11 @@ public class UserController {
                 return "redirect:/user/login";
             }
 
-            // Kiểm tra mật khẩu xác nhận
-            if (!newPassword.equals(confirmPassword)) {
-                redirectAttributes.addFlashAttribute("error", "Mật khẩu xác nhận không khớp!");
-                return "redirect:/user/change-password-request";
-            }
+//            // Kiểm tra mật khẩu xác nhận
+//            if (!newPassword.equals(confirmPassword)) {
+//                redirectAttributes.addFlashAttribute("error", "Mật khẩu xác nhận không khớp!");
+//                return "redirect:/user/change-password-request";
+//            }
 
             // Kiểm tra độ dài mật khẩu mới
             if (newPassword.length() < 6) {
@@ -220,6 +220,17 @@ public class UserController {
                 return "redirect:/user/change-password-request";
             }
 
+            // Kiểm tra mật khẩu xác nhận không được trùng mật khẩu cũ
+            if (confirmPassword.equals(oldPassword)) {
+                redirectAttributes.addFlashAttribute("error", "Mật khẩu xác nhận không được trùng với mật khẩu hiện tại!");
+                return "redirect:/user/change-password-request";
+            }
+
+            // Kiểm tra mật khẩu xác nhận khớp với mật khẩu mới
+            if (!newPassword.equals(confirmPassword)) {
+                redirectAttributes.addFlashAttribute("error", "Mật khẩu xác nhận không khớp!");
+                return "redirect:/user/change-password-request";
+            }
             // Kiểm tra mật khẩu cũ
             if (!customerService.verifyPassword(oldPassword, account.getPassword())) {
                 redirectAttributes.addFlashAttribute("error", "Mật khẩu hiện tại không đúng!");
