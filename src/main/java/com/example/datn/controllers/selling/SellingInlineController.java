@@ -387,12 +387,12 @@ public class SellingInlineController {
             response.put("address", bill.getAddress_shipping());
 
             return ResponseEntity.ok(response);
-//        }catch (Exception e){
-//            throw new RuntimeException(e);
-//        }
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+        }catch (Exception e){
+            throw new RuntimeException(e);
         }
+//        } catch (Exception e) {
+//            return ResponseEntity.badRequest().body(e.getMessage());
+//        }
     }
 
     @PostMapping("/remove-customer-from-cart")
