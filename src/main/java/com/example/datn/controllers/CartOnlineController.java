@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
+import java.security.Principal;
 import java.util.Date;
 import java.util.List;
 
@@ -52,7 +53,7 @@ public class CartOnlineController {
     private ProductDetailRepository productDetailRepository;
 
     @GetMapping
-    public String showCart(Model model, HttpSession session) {
+    public String showCart(Model model, HttpSession session, Principal principal) {
         Integer cartId = (Integer) session.getAttribute("cartId");
         BillInsert billInsert = new BillInsert();
         boolean isGuest = true;
@@ -82,13 +83,17 @@ public class CartOnlineController {
                 billInsert.setPhone(account.getCustomer().getPhoneNumber());
                 billInsert.setEmail(account.getEmail());
 
-//                if (account.getCustomer().getAddresses() != null && !account.getCustomer().getAddresses().isEmpty()) {
-//                    ShippingAddress address = account.getCustomer().getAddresses().get(0);
-//                    billInsert.setProvince(address.getProvinceName());
-//                    billInsert.setDistrict(address.getDistrictName());
-//                    billInsert.setWard(address.getWardName());
-//                    billInsert.setStreet(address.getAddressDetail());
-//                }
+                // ✅ Nếu có địa chỉ, set mặc định vào billInsert
+                if (account.getCustomer().getAddresses() != null && !account.getCustomer().getAddresses().isEmpty()) {
+                    ShippingAddress address = account.getCustomer().getAddresses().get(0);
+                    billInsert.setProvince(address.getProvinceName());
+                    billInsert.setDistrict(address.getDistrictName());
+                    billInsert.setWard(address.getWardName());
+                    billInsert.setStreet(address.getAddressDetail());
+                }
+
+                // ✅ Truyền danh sách addresses ra view
+                model.addAttribute("addresses", account.getCustomer().getAddresses());
             }
         }
 
@@ -99,7 +104,6 @@ public class CartOnlineController {
             List<Discount> discounts = discountRepository.findValidDiscounts();
             model.addAttribute("availableDiscounts", discounts);
         }
-
 
         if (cartId != null) {
             Cart cart = cartService.findCartById(cartId);
@@ -116,10 +120,9 @@ public class CartOnlineController {
             return "user/cart-empty";
         }
 
-        model.addAttribute("isGuest", isGuest);
-
         return "user/cart";
     }
+
 
     @GetMapping("/delete-cart")
     public String deleteCart(@RequestParam Integer productDetailId, HttpSession session) {
@@ -283,5 +286,4 @@ public class CartOnlineController {
 
         return "user/checkout";
     }
-
 }
