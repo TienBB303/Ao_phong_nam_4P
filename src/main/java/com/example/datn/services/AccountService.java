@@ -23,4 +23,6 @@ public interface AccountService {
     Account findByEmail(String email);
 
     Cart getCartByAccountID(Integer id);
+
+    Account findById(Integer id);
 }

@@ -42,9 +42,10 @@ public interface CustomerRepository extends JpaRepository<Customer,Integer> {
     @Query("SELECT COUNT(c) FROM Customer c JOIN c.account a JOIN a.role r WHERE r.name = :roleName")
     long countCustomersByRoleName(@Param("roleName") String roleName);
 
-    @Query("select c from Customer c where " +
-            "lower(c.name) like lower(concat('%', :keyword, '%') ) " +
-            "or lower(c.phoneNumber) like lower(concat('%', :keyword, '%') ) ")
+    @Query("select c from Customer c " +
+            "where (lower(c.name) like lower(concat('%', :keyword, '%')) " +
+            "   or lower(c.phoneNumber) like lower(concat('%', :keyword, '%'))) " +
+            "and c.isActive = true")
     List<Customer> searchCustomerByKeywordInline(@Param("keyword") String keyword);
 
 

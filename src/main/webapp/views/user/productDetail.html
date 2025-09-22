@@ -22,9 +22,6 @@
             display: block;
         }
 
-    </style>
-
-
         .btn-check:checked + .btn {
             background-color: #0d6efd;
             color: white;
@@ -124,7 +121,7 @@
                             <input type="hidden" id="productDetailId" name="productDetailId"/>
                             <input type="hidden" id="quantityHidden" name="quantity" value="1"/>
                             <button type="submit" class="btn btn-primary me-2">Thêm vào giỏ</button>
-                            <button type="button" class="btn btn-danger" name="action" value="buyNow"> Mua ngay</button>
+                            <button type="button" class="btn btn-danger" id="buyNowBtn"> Mua ngay</button>
                         </form>
 <!--                        <form th:action="@{/cart/add}" method="post">-->
 <!--                            <input type="hidden" name="productId" th:value="${product.id}"/>-->
@@ -268,6 +265,55 @@
                 });
             });
 
+            $("#buyNowBtn").on("click", function () {
+                const productDetailId = $("#productDetailId").val();
+                const quantity = $("#quantityHidden").val();
+                const colorId = $("input[name='colorId']:checked").val();
+                const sizeId = $("input[name='sizeId']:checked").val();
+
+                if (!colorId || !sizeId) {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'warning',
+                        title: "Bạn cần chọn màu sắc và kích cỡ",
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                    return;
+                }
+
+                if (!quantity || quantity <= 0) {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'warning',
+                        title: "Cần nhập số lượng",
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                    return;
+                }
+
+                $.ajax({
+                    url: "/api/product-detail/add-to-cart",
+                    type: "POST",
+                    data: {productDetailId, quantity},
+                    success: function () {
+                        window.location.href = "/cart";
+                    },
+                    error: function (xhr) {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'error',
+                            title: xhr.responseText || "Có lỗi xảy ra!",
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                    }
+                });
+            });
         </script>
 
 

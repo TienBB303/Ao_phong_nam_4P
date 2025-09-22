@@ -636,20 +636,6 @@ $('#suggestionBox_Customer').on('click', '.suggestion-item', function () {
         error: function () {
             alert("Không thể thêm khách hàng vào giỏ hàng.");
         }
-        // error: function (xhr) {
-        //     const msg = xhr && xhr.responseText ? xhr.responseText : 'Không thể thêm khách hàng vào giỏ hàng.';
-        //     Swal.fire({
-        //         icon: 'warning',
-        //         title: msg,
-        //         toast: true,
-        //         position: 'top-end',
-        //         timer: 1500,
-        //         showConfirmButton: false
-        //     });
-        //     // Xóa chọn để người dùng chọn lại khách khác
-        //     $('#customer_search').val('');
-        //     $('#customerId').val('');
-        //}
     });
 });
 //Thêm khách hàng
