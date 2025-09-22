@@ -74,7 +74,7 @@ public class BillController {
         try {
 //            int status = Integer.parseInt(trangThaiDonHang);
 
-            if (trangThaiDonHang < 1 || trangThaiDonHang > 6) {
+            if (trangThaiDonHang < 1 || trangThaiDonHang < 2) {
                 redirectAttributes.addFlashAttribute("error", "Trạng thái đơn hàng không hợp lệ.");
                 return "redirect:/admin/bill/getbill-detail/" + billId;
             }

@@ -366,6 +366,11 @@ public class ProductController {
                 resp.put("message", "Màu " + nameColorConvert + " phải có ít nhất 1 ảnh (JPEG/PNG).");
                 return ResponseEntity.badRequest().body(resp);
             }
+            if (validCount > 3) {
+                resp.put("ok", false);
+                resp.put("message", "Màu " + nameColorConvert + " chỉ được phép tối đa 3 ảnh (JPEG/PNG).");
+                return ResponseEntity.badRequest().body(resp);
+            }
         }
 
         // Tạo entity Product từ productForm

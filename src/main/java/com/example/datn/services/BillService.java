@@ -508,7 +508,7 @@ public class BillService {
 
         cart.setPaymentStatus(true);
         if (cart.getDelivery_type() == true) {
-            cart.setStatus(1);                              // giao hàng
+            cart.setStatus(2);                              // giao hàng, đã xác nhận
         } else {
             cart.setStatus(4);                              // không giao hàng
         }
@@ -529,8 +529,8 @@ public class BillService {
                 throw new Exception("Giao hàng không được để trống tên khách hàng");
             } else if (cart.getPhoneNumber() == null || cart.getPhoneNumber().isEmpty() || cart.getPhoneNumber().trim().equals("")) {
                 throw new Exception("Giao hàng không được để trống số điện thoại");
-            } else if (!cart.getPhoneNumber().matches("^\\d{9,10}$")) {
-                throw new Exception("Số điện thoại phải từ 9 đến 10 chữ số");
+            } else if (!cart.getPhoneNumber().matches("^\\d{10,12}$")) {
+                throw new Exception("Số điện thoại phải từ 10 đến 12 chữ số");
             } else if (cart.getAddress_shipping() == null || cart.getAddress_shipping().isEmpty() || cart.getAddress_shipping().trim().equals("")) {
                 throw new Exception("Giao hàng không được để trống địa chỉ khách hàng");
             } else if (cart.getShippingFee().compareTo(BigDecimal.ZERO) < 0) {

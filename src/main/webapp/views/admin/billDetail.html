@@ -84,7 +84,7 @@
                 <div class="action-buttons d-flex justify-content-end gap-2 mt-3"
                      th:if="${bill.status != 4 and bill.status != 5}" style="padding-bottom: 20px">
                     <!-- Nút hủy đơn -->
-                    <button th:if="${bill.status == 1 or bill.status == 2 or bill.status == 6}"
+                    <button th:if="${bill.status == 1 or bill.status == 2}"
                             class="btn btn-outline-danger"
                             data-bs-toggle="modal"
                             data-bs-target="#noteModal"
