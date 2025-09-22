@@ -97,7 +97,7 @@
                     <tbody>
                     <tr th:each="c, iterStat : ${customerPage.content}" th:if="${c != null}"
                         th:classappend="${c.isActive != null and !c.isActive} ? 'row-inactive' : ''">
-                        <td th:text="${iterStat.index + 1}"></td>
+                        <td th:text="${customerPage.number * customerPage.size + iterStat.index + 1}">1</td>
                         <td th:text="${c.code != null ? c.code : ''}"></td>
                         <td th:text="${c.name != null ? c.name : ''}"></td>
                         <td th:text="${c.phoneNumber != null ? c.phoneNumber : ''}"></td>

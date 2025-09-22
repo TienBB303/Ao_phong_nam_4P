@@ -23,7 +23,7 @@
         <div class="row">
             <!-- ... dán tiếp các block còn lại từ file gốc ... -->
             <div class="container py-4">
-                <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 row-cols-xl-5 g-3 mb-4">
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3 mb-4">
                     <div class="col">
                         <div class="card h-100 text-center p-3">
                             <div class="h6">Tổng đơn đặt hàng</div>
@@ -37,15 +37,15 @@
                                 <div class="h4" th:text="${pendingOrders}">0</div>
                             </div>
                         </div>
-                    <div class="col">
+                    <div class="col" th:if="${false}">
                         <div class="card h-100 text-center p-3">
-                                <div class="h6">Số đơn chờ xác nhận (đã thanh toán)</div>
-                                <div class="h4" th:text="${paidPendingOrders}">0</div>
-                                <div class="small text-muted">
-                                    Tổng chờ xác nhận: <span th:text="${waitingOrders}">0</span>
-                                </div>
+                            <div class="h6">Số đơn chờ xác nhận (đã thanh toán)</div>
+                            <div class="h4" th:text="${paidPendingOrders}">0</div>
+                            <div class="small text-muted">
+                                Tổng chờ xác nhận: <span th:text="${waitingOrders}">0</span>
                             </div>
                         </div>
+                    </div>
 
                     <div class="col">
                         <div class="card h-100 text-center p-3">
