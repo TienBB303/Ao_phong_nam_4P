@@ -51,22 +51,19 @@ public class LoginService implements UserDetailsService {
         System.out.println("🔑 DB RoleId: " + account.getRole().getId());
         System.out.println("🔑 DB RoleName: " + account.getRole().getName());
         System.out.println("🔑 Password in DB: " + account.getPassword());
-
-        // Chặn đăng nhập online nếu tài khoản gắn với khách hàng bị khóa (isActive=false)
+        boolean enabled = true;
 //        if (account.getCustomer() != null) {
 //            Boolean active = account.getCustomer().getIsActive();
 //            if (active != null && !active) {
-////                throw new UsernameNotFoundException("Tài khoản khách hàng đã bị khóa. Vui lòng liên hệ CSKH.");
-//                throw new DisabledException("Tài khoản khách hàng đã bị khóa. Vui lòng liên hệ CSKH.");
-//
-//            }
-//        }
-        boolean enabled = true;
-        if (account.getCustomer() != null) {
-            Boolean active = account.getCustomer().getIsActive();
-            if (active != null && !active) {
-                enabled = false;
-            }
+//                enabled = false;
+        // Chỉ chặn đăng nhập khi là KHÁCH HÀNG và bị khóa (isActive=false)
+        if ("ROLE_CUSTOMER".equals(roleName)) {
+            if (account.getCustomer() != null) {
+                Boolean active = account.getCustomer().getIsActive();
+                if (active != null && !active) {
+                    enabled = false;
+                }
+           }
         }
         return new User(
                 account.getEmail(),

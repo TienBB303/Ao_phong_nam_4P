@@ -15,7 +15,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.example.datn.dto.AddressDto;
 import com.example.datn.entities.ShippingAddress;
 
-
+import java.time.LocalDate;
+import java.time.Period;
 @Controller
 @RequestMapping("/admin/customer")
 public class CustomerController {
@@ -27,7 +28,7 @@ public class CustomerController {
                                 @RequestParam(defaultValue = "0") int page,
                                 @RequestParam(required = false) String keyword) {
         int pageSize = 5;
-        Pageable pageable = PageRequest.of(page, pageSize);
+        Pageable pageable = PageRequest.of(page, pageSize, org.springframework.data.domain.Sort.by("id").descending());
         Page<Customer> customerPage;
 
         if (keyword != null && !keyword.trim().isEmpty()) {
@@ -64,6 +65,14 @@ public class CustomerController {
         if (result.hasErrors()) {
             return "admin/customer/customerCreate1";
         }
+        // Kiểm tra tuổi tối thiểu 15
+        if (dto.getBirthday() != null) {
+            int years = Period.between(dto.getBirthday(), LocalDate.now()).getYears();
+            if (years < 15) {
+                result.rejectValue("birthday", "error.customerDto", "Khách hàng phải từ 15 tuổi trở lên");
+                return "admin/customer/customerCreate1";
+            }
+        }
 
         if (customerService.isEmailExists(dto.getEmail())) {
             result.rejectValue("email", "error.customerDto", "Email đã tồn tại trong hệ thống.");
@@ -81,13 +90,10 @@ public class CustomerController {
             return "admin/customer/customerCreate1";
         }
 
-        // Tính trang cuối cùng
-        int pageSize = 5; // giống như trong viewCustomers
-        long totalCustomers = customerService.countAllCustomers(); // cần thêm hàm này
-        int lastPage = (int) ((totalCustomers - 1) / pageSize);
-
+        // Sau khi lưu, hiển thị khách hàng mới ở TRANG ĐẦU (vì đang sort id DESC)
         redirectAttributes.addFlashAttribute("message", "Lưu khách hàng thành công!");
-        return "redirect:/admin/customer/view?page=" + lastPage;
+//        redirectAttributes.addFlashAttribute("message", "Lưu khách hàng thành công!");
+        return "redirect:/admin/customer/view?page=0";
     }
     // Hiển thị form chỉnh sửa khách hàng
     @GetMapping("/edit/{id}")
@@ -122,6 +128,14 @@ public class CustomerController {
             result.getAllErrors().forEach(err -> System.out.println("  - " + err));
             // Nếu có lỗi validation, quay lại form chỉnh sửa
             return "admin/customer/customerEdit";
+        }
+        // Kiểm tra tuổi tối thiểu 15 khi cập nhật
+        if (dto.getBirthday() != null) {
+            int years = Period.between(dto.getBirthday(), LocalDate.now()).getYears();
+            if (years < 15) {
+                result.rejectValue("birthday", "error.customerDto", "Khách hàng phải từ 15 tuổi trở lên");
+                return "admin/customer/customerEdit";
+            }
         }
         try {
             // KHÔNG CẦN convertToEntity ở đây vì service sẽ tự tìm và cập nhật entity

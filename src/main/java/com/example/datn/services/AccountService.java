@@ -8,6 +8,9 @@ import org.springframework.data.domain.Pageable;
 public interface AccountService {
 
     Page<Account> listAccountAndPage(Pageable pageable);
+    Page<Account> listAccountsByRole(String roleName, Pageable pageable);
+
+    Page<Account> listAccountsExcludingRole(String roleName, Pageable pageable);
 
     void add(AccountDto accountDto);
 
