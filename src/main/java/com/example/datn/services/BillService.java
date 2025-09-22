@@ -604,6 +604,9 @@ public class BillService {
         }
 
         bill.setStatus(status);
+        if (bill.getStatus() == 4){
+            bill.setPaymentStatus(true);
+        }
         bill.setUpdatedAt(LocalDateTime.now());
 
         return billRepository.save(bill);

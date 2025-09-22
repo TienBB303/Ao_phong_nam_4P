@@ -196,5 +196,15 @@ public class ProductService {
         productDetail.setStatus(!productDetail.getStatus());
         return productDetailRepository.save(productDetail);
     }
+
+    //TienBB
+    public List<Size> findSizesByProductIdAndColor(Integer productId, Integer colorId) {
+        return productDetailRepository.findSizesByProductIdAndColor(productId,colorId);
+    }
+
+    //TienBB
+    public List<Color> findColorsByProductIdAndSize(Integer productId, Integer sizeId) {
+        return productDetailRepository.findColorsByProductIdAndSize(productId,sizeId);
+    }
 }
 

@@ -1,6 +1,8 @@
 package com.example.datn.repositories.product_and_other;
 
+import com.example.datn.entities.product_and_other.Color;
 import com.example.datn.entities.product_and_other.ProductDetail;
+import com.example.datn.entities.product_and_other.Size;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -43,5 +45,10 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, In
 
     ProductDetail findByProductIdAndColorIdAndSizeId(Integer productId, Integer colorId, Integer sizeId);
 
-
+    //TienBB
+    @Query("SELECT pd.size from ProductDetail pd WHERE pd.product.id = :productId AND pd.color.id = :colorId")
+    List<Size> findSizesByProductIdAndColor(Integer productId, Integer colorId);
+    //TienBB
+    @Query("SELECT pd.color from ProductDetail pd WHERE pd.product.id = :productId AND pd.size.id = :sizeId")
+    List<Color> findColorsByProductIdAndSize(Integer productId, Integer sizeId);
 }
