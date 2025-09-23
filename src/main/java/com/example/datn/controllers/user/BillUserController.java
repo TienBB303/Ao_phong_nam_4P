@@ -169,6 +169,9 @@ public class BillUserController {
             billDetailRepository.save(billDetails);
 
             ProductDetail productDetail = cd.getProductDetail();
+            if (billInsert.getPaymentMethodId() == 2) {
+                productDetail.setQuantity(productDetail.getQuantity() - cd.getQuantity());
+            }
             productDetailRepository.save(productDetail);
         }
 
