@@ -9,6 +9,7 @@ import com.example.datn.repositories.DiscountRepository;
 import com.example.datn.repositories.cart.CartDetailRepositoty;
 import com.example.datn.repositories.cart.CartRepository;
 import com.example.datn.repositories.product_and_other.ProductDetailRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -357,8 +358,12 @@ public class CartService {
 // =======
     // ban hang online ne ca nhom :D
 
-    public void addProductOnlineToCart(Integer cartId, Integer productDetailId, Integer quantity, Account account) throws Exception {
-        // Lấy thông tin giỏ hàng
+    @Transactional
+    public void addProductOnlineToCart(Integer cartId,
+                                       Integer productDetailId,
+                                       Integer quantity,
+                                       Account account) throws Exception {
+
         Cart cart = cartRepository.findByIdCart(cartId);
         if (cart == null) {
             throw new Exception("Giỏ hàng không tồn tại");
@@ -369,19 +374,34 @@ public class CartService {
             throw new Exception("Sản phẩm không tồn tại");
         }
 
+        if (quantity <= 0) {
+            throw new Exception("Số lượng không hợp lệ");
+        }
         if (productDetail.getQuantity() < quantity) {
             throw new Exception("Sản phẩm " + productDetail.getProduct().getName() +
                     " (" + productDetail.getColor().getName() + " - " + productDetail.getSize().getCode() + ")" +
                     " không đủ hàng (tồn kho: " + productDetail.getQuantity() + ")");
         }
 
+        // 🔹 Nếu user đã login và cart chưa có account → gắn ngay
+        if (account != null && cart.getAccount() == null) {
+            cart.setAccount(account);
+        }
+
         CartDetail existingItem = cartDetailRepositoty.findByCartAndProductDetailId(cartId, productDetailId);
 
         if (existingItem != null) {
             int newQuantity = existingItem.getQuantity() + quantity;
+
+            if (newQuantity > productDetail.getQuantity()) {
+                throw new Exception("Không thể thêm vượt quá số lượng tồn kho (" + productDetail.getQuantity() + ")");
+            }
+
             existingItem.setQuantity(newQuantity);
+            existingItem.setPrice(productDetail.getPrice());
             existingItem.setTotal_price(productDetail.getPrice().multiply(BigDecimal.valueOf(newQuantity)));
             cartDetailRepositoty.save(existingItem);
+
         } else {
             CartDetail newItem = new CartDetail();
             newItem.setCart(cart);
@@ -392,10 +412,12 @@ public class CartService {
             cartDetailRepositoty.save(newItem);
         }
 
+        // 🔹 Tính lại tổng giỏ hàng
         List<CartDetail> cartDetails = cartRepository.findAllCartDetailByCartId(cartId);
         BigDecimal totalPrice = cartDetails.stream()
                 .map(CartDetail::getTotal_price)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+
         int totalQuantity = cartDetails.stream()
                 .mapToInt(CartDetail::getQuantity)
                 .sum();
@@ -403,16 +425,13 @@ public class CartService {
         cart.setTotal_price_cart(totalPrice);
         cart.setTotal_quantity(totalQuantity);
 
-        if (cart.getAccount() == null && account != null) {
-            cart.setAccount(account);
-        }
-
         recalculateCartTotalWithDiscount(cart);
 
         cart.setUpdated_at(new Date());
-
         cartRepository.save(cart);
     }
+
+
 
 
     public Integer findDiscountIdByCode(String code) {
