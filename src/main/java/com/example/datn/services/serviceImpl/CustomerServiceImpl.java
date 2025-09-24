@@ -227,7 +227,6 @@ public class CustomerServiceImpl implements CustomerService {
                 newAccount.setStatus(false);
                 newAccount.setCreatedAt(java.time.LocalDateTime.now());
                 accountRepository.save(newAccount);
-                // (Tuỳ chọn) Gửi mail thông báo tạo tài khoản: bỏ qua để tránh spam khi cập nhật
             }
         }
 
@@ -495,42 +494,44 @@ public class CustomerServiceImpl implements CustomerService {
 //            }
         AddressDto addressDto = dto.getAddress();
         if (addressDto != null) {
-            // Lấy địa chỉ đầu tiên (không dùng default nữa để tránh phụ thuộc UI)
+            // Ưu tiên cập nhật địa chỉ mặc định, nếu không có thì lấy địa chỉ đầu tiên
             ShippingAddress address = null;
             if (existing.getAddresses() != null && !existing.getAddresses().isEmpty()) {
-                address = existing.getAddresses().get(0);
+                address = existing.getAddresses().stream()
+                        .filter(a -> Boolean.TRUE.equals(a.getIsDefault()))
+                        .findFirst()
+                        .orElse(existing.getAddresses().get(0));
             }
             if (address == null) {
                 address = new ShippingAddress();
                 address.setCustomer(existing);
             }
-            address.setAddressDetail(addressDto.getAddressDetail());
-            address.setProvinceId(addressDto.getProvinceId());
-            address.setProvinceName(addressDto.getProvinceName());
-            address.setDistrictId(addressDto.getDistrictId());
-            address.setDistrictName(addressDto.getDistrictName());
-            address.setWardId(addressDto.getWardId());
-            address.setWardName(addressDto.getWardName());
-//            address.setReceiverName(addressDto.getReceiverName());
-//            address.setReceiverPhoneNumber(addressDto.getReceiverPhoneNumber());
-//            Boolean isDefault = addressDto.getIsDefault();
-//            if (isDefault == null) isDefault = true;
-//            address.setIsDefault(isDefault);
-//            if (isDefault) {
-//                shippingAddressRepository.updateAllDefaultFalseByCustomerId(existing.getId());
-//            }
+            // Cập nhật từng phần, chỉ ghi đè khi DTO có giá trị
+            if (addressDto.getAddressDetail() != null && !addressDto.getAddressDetail().isBlank()) {
+                address.setAddressDetail(addressDto.getAddressDetail());
+            }
+            if (addressDto.getProvinceId() != null) {
+                address.setProvinceId(addressDto.getProvinceId());
+                address.setProvinceName(addressDto.getProvinceName());
+            }
+            if (addressDto.getDistrictId() != null) {
+                address.setDistrictId(addressDto.getDistrictId());
+                address.setDistrictName(addressDto.getDistrictName());
+            }
+            if (addressDto.getWardId() != null && !addressDto.getWardId().isBlank()) {
+                address.setWardId(addressDto.getWardId());
+                address.setWardName(addressDto.getWardName());
+            }
             if (addressDto.getReceiverName() != null && !addressDto.getReceiverName().isBlank()) {
                 address.setReceiverName(addressDto.getReceiverName());
             }
             if (addressDto.getReceiverPhoneNumber() != null && !addressDto.getReceiverPhoneNumber().isBlank()) {
                 address.setReceiverPhoneNumber(addressDto.getReceiverPhoneNumber());
             }
-            if (addressDto.getIsDefault() != null) {
-                Boolean isDefault = addressDto.getIsDefault();
-                address.setIsDefault(isDefault);
-                if (Boolean.TRUE.equals(isDefault)) {
-                    shippingAddressRepository.updateAllDefaultFalseByCustomerId(existing.getId());
-                }
+            // Chỉ cập nhật trạng thái mặc định khi DTO gửi true để tránh mất cờ mặc định khi chỉnh sửa thông tin
+            if (Boolean.TRUE.equals(addressDto.getIsDefault())) {
+                shippingAddressRepository.updateAllDefaultFalseByCustomerId(existing.getId());
+                address.setIsDefault(true);
             }
             shippingAddressRepository.save(address);
         }
