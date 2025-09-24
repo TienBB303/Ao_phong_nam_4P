@@ -35,6 +35,6 @@ public class AddressDto {
 
     private String wardName;
 
-    // isDefault = true nếu nhân viên tick chọn địa chỉ là mặc định.
+    // isDefault = true nếu nhân viên tick chọn địa chỉ là mặc định. quan que gi z
     private Boolean isDefault = false;
 }

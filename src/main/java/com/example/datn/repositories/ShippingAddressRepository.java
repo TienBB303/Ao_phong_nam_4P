@@ -20,4 +20,8 @@ public interface ShippingAddressRepository extends JpaRepository<ShippingAddress
 
     // ✅ Lấy địa chỉ mặc định của 1 khách hàng (nếu cần)
     ShippingAddress findByCustomerIdAndIsDefaultTrue(Integer customerId);
+
+    @Modifying
+    @Query("UPDATE ShippingAddress a SET a.isDefault = false WHERE a.customer.id = :customerId")
+    void clearDefault(Integer customerId);
 }
