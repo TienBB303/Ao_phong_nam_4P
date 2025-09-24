@@ -13,6 +13,7 @@ import com.example.datn.repositories.cart.CartDetailRepositoty;
 import com.example.datn.repositories.cart.CartRepository;
 import com.example.datn.repositories.product_and_other.ProductDetailRepository;
 import com.example.datn.services.CartService;
+import com.example.datn.services.DiscountService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -49,6 +50,9 @@ public class CartOnlineController {
 
     @Autowired
     private DiscountRepository discountRepository;
+
+    @Autowired
+    DiscountService discountService;
 
     @Autowired
     private ProductDetailRepository productDetailRepository;
@@ -116,8 +120,11 @@ public class CartOnlineController {
         model.addAttribute("isGuest", isGuest);
         model.addAttribute("billInsert", billInsert);
 
+        //TienBB sua hienj discount voi tien hop le
+        Cart cartCheckDiscount = cartService.findCartById(cartId);
         if (!isGuest) {
-            List<Discount> discounts = discountRepository.findValidDiscounts();
+//            List<Discount> discounts = discountRepository.findValidDiscounts();
+            List<Discount> discounts = discountService.getAllDiscountByMinPurchase(cartCheckDiscount.getTotal_price_cart());
             model.addAttribute("availableDiscounts", discounts);
         }
 
@@ -302,5 +309,9 @@ public class CartOnlineController {
         }
 
         return "user/checkout";
+    }
+
+    public List<Discount> listDiscountCanApply(BigDecimal minPrice) {
+        return discountService.getAllDiscountByMinPurchase(minPrice);
     }
 }
