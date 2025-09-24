@@ -31,6 +31,11 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
+
+        .btn.disabled, .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
     </style>
 
 </head>
@@ -98,7 +103,7 @@
                             <div class="d-flex flex-wrap gap-2">
                                 <div th:each="size : ${sizes}">
                                     <input type="radio" class="btn-check" name="sizeId" th:id="'size-' + ${size.id}" th:value="${size.id}">
-                                    <label class="btn btn-outline-primary btn-sm" th:for="'size-' + ${size.id}" th:text="${size.name}"></label>
+                                    <label class="btn btn-outline-primary btn-sm" th:for="'size-' + ${size.id}" th:text="${size.code}"></label>
                                 </div>
                             </div>
                         </div>
@@ -123,21 +128,6 @@
                             <button type="submit" class="btn btn-primary me-2">Thêm vào giỏ</button>
                             <button type="button" class="btn btn-danger" id="buyNowBtn"> Mua ngay</button>
                         </form>
-<!--                        <form th:action="@{/cart/add}" method="post">-->
-<!--                            <input type="hidden" name="productId" th:value="${product.id}"/>-->
-<!--                            <input type="hidden" id="colorIdInput" name="colorId"/>-->
-<!--                            <input type="hidden" id="sizeIdInput" name="sizeId"/>-->
-<!--                            <input type="hidden" id="productDetailId" name="productDetailId"/>-->
-<!--                            <input type="hidden" id="cartId" name="cartId" th:value="${session.cartId}"/>-->
-<!--                            <input type="hidden" id="quantityHidden" name="quantity"/>-->
-
-<!--                            <button type="submit" class="btn btn-primary me-2" name="action" value="addToCart">-->
-<!--                                Thêm vào giỏ-->
-<!--                            </button>-->
-<!--                            <button type="submit" class="btn btn-danger" name="action" value="buyNow">-->
-<!--                                Mua ngay-->
-<!--                            </button>-->
-<!--                        </form>-->
                     </div>
                 </div>
             </div>
@@ -150,58 +140,128 @@
             $(document).ready(function () {
                 const productId = $("#productInfo").data("product-id");
 
+                // Hàm fetch thông tin chi tiết (giá, tồn kho) khi đã chọn đủ màu + size
                 function fetchDetailInfo() {
                     const colorId = $("input[name='colorId']:checked").val();
                     const sizeId = $("input[name='sizeId']:checked").val();
 
                     if (colorId && sizeId) {
                         $.ajax({
-                            url: "/api/product-detail/info-product-detail",
+                            url: "/api/product-detail/info-product-detail", // Ở ApiProductController
                             type: "GET",
-                            data: {
-                                productID: productId,
-                                colorID: colorId,
-                                sizeID: sizeId
-                            },
+                            data: { productID: productId, colorID: colorId, sizeID: sizeId },
                             success: function (data) {
-                                // Format giá tiền VND
                                 const priceFormatted = new Intl.NumberFormat('vi-VN', {
                                     style: 'currency',
                                     currency: 'VND'
                                 }).format(data.price);
 
-                                // Đổ dữ liệu ra view
                                 $("#priceDisplay").text(priceFormatted);
                                 $("#quantityDisplay").text(data.quantity);
-
-                                // Gán hidden input (khi submit form thêm giỏ)
-                                $("#colorIdInput").val(colorId);
-                                $("#sizeIdInput").val(sizeId);
                                 $("#productDetailId").val(data.id);
                             },
-                            error: function (xhr) {
+                            error: function () {
                                 $("#priceDisplay").text("--");
                                 $("#quantityDisplay").text("--");
-
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Lỗi',
-                                    text: xhr.responseText || "Không tìm thấy sản phẩm",
-                                });
+                                $("#productDetailId").val("");
                             }
                         });
+                    } else {
+                        // Reset hiển thị nếu chưa chọn đủ
+                        $("#priceDisplay").text("--");
+                        $("#quantityDisplay").text("--");
+                        $("#productDetailId").val("");
                     }
                 }
 
-                // Bắt sự kiện click chọn màu hoặc size
-                $("input[name='colorId']").on("change", fetchDetailInfo);
-                $("input[name='sizeId']").on("change", fetchDetailInfo);
+                // Khi chọn màu → filter size
+                $("input[name='colorId']").on("change", function () {
+                    const colorId = $(this).val();
+
+                    // Reset toàn bộ size về enable
+                    $("input[name='sizeId']").prop("disabled", false)
+                        .siblings("label").removeClass("disabled");
+
+                    $.ajax({
+                        url: "/api/product-detail/available-sizes", // Ở ApiProductController
+                        type: "GET",
+                        data: { productID: productId, colorID: colorId },
+                        success: function (sizes) {
+                            // Disable tất cả trước
+                            $("input[name='sizeId']").prop("disabled", true)
+                                .siblings("label").addClass("disabled");
+
+                            // Bật lại size hợp lệ
+                            sizes.forEach(s => {
+                                $("#size-" + s.id).prop("disabled", false)
+                                    .siblings("label").removeClass("disabled");
+                            });
+                        }
+                    });
+
+                    fetchDetailInfo();
+                });
+
+                // Khi chọn size → filter màu
+                $("input[name='sizeId']").on("change", function () {
+                    const sizeId = $(this).val();
+
+                    // Reset toàn bộ màu về enable
+                    $("input[name='colorId']").prop("disabled", false)
+                        .siblings("label").removeClass("disabled");
+
+                    $.ajax({
+                        url: "/api/product-detail/available-colors", // Ở ApiProductController
+                        type: "GET",
+                        data: { productID: productId, sizeID: sizeId },
+                        success: function (colors) {
+                            // Disable tất cả trước
+                            $("input[name='colorId']").prop("disabled", true)
+                                .siblings("label").addClass("disabled");
+
+                            // Bật lại màu hợp lệ
+                            colors.forEach(c => {
+                                $("#color-" + c.id).prop("disabled", false)
+                                    .siblings("label").removeClass("disabled");
+                            });
+                        }
+                    });
+
+                    fetchDetailInfo();
+                });
+
+                // Cho phép bỏ chọn radio (click lần 2)
+                $("input[name='colorId'], input[name='sizeId']").on("click", function () {
+                    const $this = $(this);
+
+                    if ($this.data("waschecked") === true) {
+                        // Nếu đã chọn rồi → bỏ chọn
+                        $this.prop("checked", false);
+                        $this.data("waschecked", false);
+
+                        if ($this.attr("name") === "colorId") {
+                            // Reset toàn bộ size khi bỏ chọn màu
+                            $("input[name='sizeId']").prop("disabled", false)
+                                .siblings("label").removeClass("disabled");
+                        }
+
+                        if ($this.attr("name") === "sizeId") {
+                            // Reset toàn bộ màu khi bỏ chọn size
+                            $("input[name='colorId']").prop("disabled", false)
+                                .siblings("label").removeClass("disabled");
+                        }
+
+                        fetchDetailInfo(); // reset lại thông tin hiển thị
+                    } else {
+                        // Clear trạng thái waschecked cho radio cùng nhóm
+                        $("input[name='" + $this.attr("name") + "']").data("waschecked", false);
+                        $this.data("waschecked", true);
+                    }
+                });
             });
-
-
-
         </script>
-<!--        Thêm vào giỏ-->
+
+        <!--        Thêm vào giỏ-->
         <script>
             $("#quantity").on("input", function() {
                 $("#quantityHidden").val($(this).val());
@@ -315,98 +375,6 @@
                 });
             });
         </script>
-
-
-        <!--        <script>-->
-<!--            const colorSelect = document.getElementById("colorSelect");-->
-<!--            const sizeSelect = document.getElementById("sizeSelect");-->
-<!--            const priceDisplay = document.getElementById("priceDisplay");-->
-<!--            const quantityDisplay = document.getElementById("quantityDisplay");-->
-
-<!--            const productId = document.getElementById("productInfo").getAttribute("data-product-id");-->
-
-<!--            function fetchPriceAndQuantity() {-->
-<!--                const colorId = colorSelect.value;-->
-<!--                const sizeId = sizeSelect.value;-->
-
-<!--                if (colorId && sizeId) {-->
-<!--                    fetch(`/api/product-detail/price?productId=${productId}&colorId=${colorId}&sizeId=${sizeId}`)-->
-<!--                        .then(response => {-->
-<!--                            if (!response.ok) throw new Error("Không tìm thấy biến thể");-->
-<!--                            return response.json();-->
-<!--                        })-->
-<!--                        .then(data => {-->
-<!--                            const priceFormatted = new Intl.NumberFormat('vi-VN', {-->
-<!--                                style: 'currency',-->
-<!--                                currency: 'VND'-->
-<!--                            }).format(data.price);-->
-<!--                            priceDisplay.textContent = priceFormatted;-->
-<!--                            quantityDisplay.textContent = data.quantity;-->
-<!--                        })-->
-<!--                        .catch(error => {-->
-<!--                            priceDisplay.textContent = "&#45;&#45;";-->
-<!--                            quantityDisplay.textContent = "&#45;&#45;";-->
-<!--                            console.error("Lỗi khi lấy biến thể:", error);-->
-<!--                        });-->
-<!--                } else {-->
-<!--                    console.log("Chưa chọn đủ màu và size");-->
-<!--                }-->
-<!--            }-->
-
-<!--            colorSelect.addEventListener("change", fetchPriceAndQuantity);-->
-<!--            sizeSelect.addEventListener("change", fetchPriceAndQuantity);-->
-
-<!--            let clickedButton = null;-->
-<!--            document.querySelectorAll("button[name='action']").forEach(btn => {-->
-<!--                btn.addEventListener("click", function () {-->
-<!--                    clickedButton = btn;-->
-<!--                });-->
-<!--            });-->
-
-<!--            const form = document.querySelector("form");-->
-<!--            const quantityInput = document.getElementById("quantity");-->
-
-<!--            form.addEventListener("submit", function (e) {-->
-<!--                e.preventDefault();-->
-
-<!--                const colorId = colorSelect.value;-->
-<!--                const sizeId = sizeSelect.value;-->
-<!--                const quantity = quantityInput.value;-->
-
-<!--                if (!colorId || !sizeId) {-->
-<!--                    alert("Vui lòng chọn đầy đủ màu và size!");-->
-<!--                    return;-->
-<!--                }-->
-
-<!--                document.getElementById("colorIdInput").value = colorId;-->
-<!--                document.getElementById("sizeIdInput").value = sizeId;-->
-<!--                document.getElementById("quantityHidden").value = quantity;-->
-
-<!--                const actionInput = document.createElement("input");-->
-<!--                actionInput.type = "hidden";-->
-<!--                actionInput.name = "action";-->
-<!--                actionInput.value = clickedButton ? clickedButton.value : "addToCart";-->
-<!--                form.appendChild(actionInput);-->
-
-<!--                fetch(`/api/product-detail/id?productId=${productId}&colorId=${colorId}&sizeId=${sizeId}`)-->
-<!--                    .then(res => {-->
-<!--                        if (!res.ok) throw new Error("Không tìm thấy biến thể phù hợp");-->
-<!--                        return res.json();-->
-<!--                    })-->
-<!--                    .then(data => {-->
-<!--                        if (!data.id) {-->
-<!--                            alert("Không tìm thấy biến thể phù hợp!");-->
-<!--                            return;-->
-<!--                        }-->
-<!--                        document.getElementById("productDetailId").value = data.id;-->
-<!--                        form.submit();-->
-<!--                    })-->
-<!--                    .catch(err => {-->
-<!--                        alert("Lỗi khi lấy thông tin sản phẩm.");-->
-<!--                        console.error(err);-->
-<!--                    });-->
-<!--            });-->
-<!--        </script>-->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.js"></script>
     </main>
 </div>

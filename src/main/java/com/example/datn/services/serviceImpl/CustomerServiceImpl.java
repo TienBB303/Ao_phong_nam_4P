@@ -76,6 +76,14 @@ public class CustomerServiceImpl implements CustomerService {
 //        return customerRepository.searchCustomerKeyword(keyword, pageable);
         return customerRepository.searchCustomersByRoleName("ROLE_CUSTOMER", keyword, pageable);
     }
+
+
+    //    @Override
+//    @Transactional(readOnly = true)
+//    public Customer findByIdWithAddressesAndAccount(Integer id) {
+//        return customerRepository.findByIdWithAddressesAndAccount(id).orElse(null);
+//    }
+
     // Tạo khách hàng mới từ entity
     @Override
     public Customer createCustomerEntity(Customer customer) {
@@ -361,8 +369,12 @@ public class CustomerServiceImpl implements CustomerService {
     public long countAllCustomers() {
         // Nếu chỉ muốn đếm khách hàng đang hoạt động:
 //        return customerRepository.countByIsActiveTrue();
-        // Đếm theo đúng role để đồng bộ với danh sách hiển thị
-        return customerRepository.countCustomersByRoleName("ROLE_CUSTOMER");
+        // Nếu muốn đếm tất cả khách hàng (kể cả đã bị xóa mềm):
+        return customerRepository.count();
+//
+//        // Đếm theo đúng role để đồng bộ với danh sách hiển thị
+//        return customerRepository.countCustomersByRoleName("ROLE_CUSTOMER");
+
     }
 
     //TienBB

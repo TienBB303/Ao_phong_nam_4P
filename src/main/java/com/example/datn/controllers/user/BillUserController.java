@@ -110,6 +110,7 @@ public class BillUserController {
         bill.setName(billInsert.getFullName());
         bill.setPhoneNumber(billInsert.getPhone());
         bill.setEmail(billInsert.getEmail());
+        bill.setDelivery_type(true);
         bill.setCreatedAt(LocalDateTime.now());
         bill.setUpdatedAt(null);
         bill.setAddress_shipping(
@@ -122,8 +123,10 @@ public class BillUserController {
 
         if (billInsert.getPaymentMethodId() == 2) {
             bill.setStatus(2);
+            bill.setPaymentStatus(true);
         } else {
             bill.setStatus(1);
+            bill.setPaymentStatus(false);
         }
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -144,9 +147,15 @@ public class BillUserController {
 
         if (billInsert.getDiscountId() != null) {
             Discount discount = discountRepository.findById(billInsert.getDiscountId()).orElse(null);
-            bill.setDiscount(discount);
-        }
+            if (discount != null) {
+                bill.setDiscount(discount);
 
+                if (discount.getUsageLimit() != null && discount.getUsageLimit() > 0) {
+                    discount.setUsageLimit(discount.getUsageLimit() - 1);
+                    discountRepository.save(discount);
+                }
+            }
+        }
         billRepository.save(bill);
 
         for (CartDetail cd : cart.getCartDetails()) {
@@ -158,9 +167,10 @@ public class BillUserController {
                     .multiply(new BigDecimal(cd.getQuantity())));
             billDetails.setQuantity(cd.getQuantity());
             billDetailRepository.save(billDetails);
-
             ProductDetail productDetail = cd.getProductDetail();
-            productDetail.setQuantity(productDetail.getQuantity() - cd.getQuantity());
+            if (billInsert.getPaymentMethodId() == 2) {
+                productDetail.setQuantity(productDetail.getQuantity() - cd.getQuantity());
+            }
             productDetailRepository.save(productDetail);
         }
 

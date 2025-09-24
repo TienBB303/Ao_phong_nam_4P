@@ -13,6 +13,9 @@ public interface ColorRepository extends JpaRepository<Color, Integer> {
     @Query("SELECT c FROM Color c")
     List<Color> getAll();
 
+    @Query("SELECT c FROM Color c WHERE c.status = true")
+    List<Color> getAllColorOn();
+
     @Query("SELECT c FROM Color c ORDER BY c.id DESC")
     Page<Color> getAll(Pageable pageable);
 
