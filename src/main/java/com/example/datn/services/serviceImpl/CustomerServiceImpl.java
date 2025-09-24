@@ -54,20 +54,13 @@ public class CustomerServiceImpl implements CustomerService {
     private String generateRandomPassword() {
         return UUID.randomUUID().toString().substring(0, 8);
     }
-//    // Khôi phục khách hàng
-//    @Override
-//    public void restoreCustomer(Integer id) {
-//        Customer customer = customerRepository.findById(id)
-//                .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng có id = " + id));
-//        customer.setIsActive(true);
-//        customerRepository.save(customer);
-//    }
 
     // Lấy danh sách tất cả khách hàng đang hoạt động
     @Override
     public Page<Customer> getAllCustomersEntity(Pageable pageable) {
-//        return customerRepository.findByIsActiveTrue(pageable);
-        return customerRepository.findAll(pageable);
+////        return customerRepository.findByIsActiveTrue(pageable);
+//        return customerRepository.findAll(pageable);
+        return customerRepository.findCustomersByRoleName("ROLE_CUSTOMER", pageable);
     }
     // Khôi phục khách hàng
     @Override
@@ -80,14 +73,17 @@ public class CustomerServiceImpl implements CustomerService {
     // Tìm kiếm khách hàng theo keyword (name/code) và đang hoạt động
     @Override
     public Page<Customer> searchCustomerEntity(String keyword, Pageable pageable) {
-        return customerRepository.searchCustomerKeyword(keyword, pageable);
+//        return customerRepository.searchCustomerKeyword(keyword, pageable);
+        return customerRepository.searchCustomersByRoleName("ROLE_CUSTOMER", keyword, pageable);
     }
+
 
     //    @Override
 //    @Transactional(readOnly = true)
 //    public Customer findByIdWithAddressesAndAccount(Integer id) {
 //        return customerRepository.findByIdWithAddressesAndAccount(id).orElse(null);
 //    }
+
     // Tạo khách hàng mới từ entity
     @Override
     public Customer createCustomerEntity(Customer customer) {
@@ -277,8 +273,6 @@ public class CustomerServiceImpl implements CustomerService {
 //                shippingAddressRepository.updateAllDefaultFalseByCustomerId(existing.getId());
 //            }
 
-            // Debug log
-//            System.out.println("Updating address isDefault: " + isDefault);
             if (addressDto.getIsDefault() != null) {
                 Boolean isDefault = addressDto.getIsDefault();
                 address.setIsDefault(isDefault);
@@ -378,6 +372,10 @@ public class CustomerServiceImpl implements CustomerService {
 //        return customerRepository.countByIsActiveTrue();
         // Nếu muốn đếm tất cả khách hàng (kể cả đã bị xóa mềm):
         return customerRepository.count();
+//
+//        // Đếm theo đúng role để đồng bộ với danh sách hiển thị
+//        return customerRepository.countCustomersByRoleName("ROLE_CUSTOMER");
+
     }
 
     //TienBB
@@ -460,7 +458,13 @@ public class CustomerServiceImpl implements CustomerService {
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại"));
 
-        account.setStatus(status);
+//        account.setStatus(status);
+        if (account.getRole() != null && "ROLE_ADMIN".equals(account.getRole().getName())) {
+            // Admin luôn hoạt động, không cho phép tắt
+            account.setStatus(true);
+        } else {
+            account.setStatus(status);
+        }
         account.setUpdatedAt(java.time.LocalDateTime.now());
         accountRepository.save(account);
     }

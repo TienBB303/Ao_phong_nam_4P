@@ -57,7 +57,7 @@ public class BillUserController {
     private MomoOnlineService momoOnlineService;
 
     @Autowired
-    private CustomerRepository customerRepository;
+    private AccountRepository accountRepository;
 
     @GetMapping("/thank-you")
     public String viewSuccess() {
@@ -110,6 +110,7 @@ public class BillUserController {
         bill.setName(billInsert.getFullName());
         bill.setPhoneNumber(billInsert.getPhone());
         bill.setEmail(billInsert.getEmail());
+        bill.setDelivery_type(true);
         bill.setCreatedAt(LocalDateTime.now());
         bill.setUpdatedAt(null);
         bill.setAddress_shipping(
@@ -122,19 +123,23 @@ public class BillUserController {
 
         if (billInsert.getPaymentMethodId() == 2) {
             bill.setStatus(2);
+            bill.setPaymentStatus(true);
         } else {
             bill.setStatus(1);
+            bill.setPaymentStatus(false);
         }
 
-        // ✅ kiểm tra login hay khách vãng lai
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)) {
-            Account account = (Account) auth.getPrincipal();
-            Customer customer = customerRepository.findByAccount(account);
-            bill.setCustomer(customer);   // logged-in user
+            String email = auth.getName();
+            Account account = accountRepository.findByEmail(email).orElse(null);
+            if (account != null && account.getCustomer() != null) {
+                bill.setCustomer(account.getCustomer());
+            }
         } else {
-            bill.setCustomer(null);       // guest
+            bill.setCustomer(null);
         }
+
 
         PaymentMethod paymentMethod = paymentMethodRepository.findById(billInsert.getPaymentMethodId())
                 .orElseThrow(() -> new RuntimeException("Phương thức thanh toán không hợp lệ"));
@@ -142,9 +147,15 @@ public class BillUserController {
 
         if (billInsert.getDiscountId() != null) {
             Discount discount = discountRepository.findById(billInsert.getDiscountId()).orElse(null);
-            bill.setDiscount(discount);
-        }
+            if (discount != null) {
+                bill.setDiscount(discount);
 
+                if (discount.getUsageLimit() != null && discount.getUsageLimit() > 0) {
+                    discount.setUsageLimit(discount.getUsageLimit() - 1);
+                    discountRepository.save(discount);
+                }
+            }
+        }
         billRepository.save(bill);
 
         for (CartDetail cd : cart.getCartDetails()) {
@@ -156,9 +167,10 @@ public class BillUserController {
                     .multiply(new BigDecimal(cd.getQuantity())));
             billDetails.setQuantity(cd.getQuantity());
             billDetailRepository.save(billDetails);
-
             ProductDetail productDetail = cd.getProductDetail();
-            productDetail.setQuantity(productDetail.getQuantity() - cd.getQuantity());
+            if (billInsert.getPaymentMethodId() == 2) {
+                productDetail.setQuantity(productDetail.getQuantity() - cd.getQuantity());
+            }
             productDetailRepository.save(productDetail);
         }
 
@@ -286,9 +298,9 @@ public class BillUserController {
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
 
             if ("0".equals(resultCode)) {
-                bill.setStatus(2); // thanh toán thành công
+                bill.setStatus(2);
             } else {
-                bill.setStatus(3); // thất bại
+                bill.setStatus(3);
             }
             bill.setUpdatedAt(LocalDateTime.now());
             billRepository.save(bill);

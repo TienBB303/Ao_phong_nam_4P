@@ -49,7 +49,26 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Page<Account> listAccountAndPage(Pageable pageable) {
-        return accountRepository.findByCodeStartingWith("NV", pageable);
+
+//        Page<Account> all = accountRepository.findAll(pageable);
+//        // Lọc bỏ admin khỏi danh sách
+//        List<Account> filtered = all.getContent().stream()
+//                .filter(a -> a.getRole() != null && !"ROLE_ADMIN".equals(a.getRole().getName()))
+//                .toList();
+//        return new org.springframework.data.domain.PageImpl<>(filtered, pageable, all.getTotalElements());
+       // Danh sách nhân viên: chỉ lấy ROLE_EMPLOYEE
+        return accountRepository.findByRole_Name("ROLE_EMPLOYEE", pageable);
+    }
+    @Override
+    public Page<Account> listAccountsByRole(String roleName, Pageable pageable) {
+        return accountRepository.findByRole_Name(roleName, pageable);
+    }
+    @Override
+    public Page<Account> listAccountsExcludingRole(String roleName, Pageable pageable) {
+        return accountRepository.findByRole_NameNot(roleName, pageable);
+
+//         return accountRepository.findByCodeStartingWith("NV", pageable);
+
     }
 
     @Override

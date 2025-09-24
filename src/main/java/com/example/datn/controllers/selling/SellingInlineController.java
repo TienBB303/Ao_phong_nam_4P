@@ -22,6 +22,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import org.springframework.data.domain.PageRequest;
 
@@ -347,8 +349,36 @@ public class SellingInlineController {
 //    }
 
     //Hiện list discount
-    public List<Discount> listDiscountCanApply(BigDecimal minPrice) {
-        return discountService.getAllDiscountByMinPurchase(minPrice);
+//    public List<Discount> listDiscountCanApply(BigDecimal minPrice) {
+//        return discountService.getAllDiscountByMinPurchase(minPrice);
+//    }
+
+    public List<Discount> listDiscountCanApply(BigDecimal totalPrice){
+        List<Discount> list = discountService.getAllDiscountByMinPurchase(totalPrice);
+
+        list.sort((d1, d2) -> {
+            BigDecimal val1 = calDiscountValue(d1, totalPrice);
+            BigDecimal val2 = calDiscountValue(d2, totalPrice);
+            return val2.compareTo(val1);
+        });
+        return list;
+    }
+
+    private BigDecimal calDiscountValue(Discount d, BigDecimal totalPrice) {
+        BigDecimal discountAmount = BigDecimal.ZERO;
+
+        if(d.getDiscountType().equals("percent")){
+            if (d.getDiscountValue() != null && d.getDiscountValue().compareTo(BigDecimal.ZERO) > 0) {
+                discountAmount = totalPrice.multiply(d.getDiscountValue())
+                        .divide(BigDecimal.valueOf(100));
+            }
+        }else if (d.getDiscountType().equals("amount")){
+            if (d.getDiscountValue() != null && d.getDiscountValue().compareTo(BigDecimal.ZERO) > 0) {
+                discountAmount = discountAmount.max(d.getDiscountValue());
+            }
+        }
+
+        return discountAmount;
     }
 
     @PostMapping("/apply-discount")

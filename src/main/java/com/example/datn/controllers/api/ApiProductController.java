@@ -3,7 +3,9 @@ package com.example.datn.controllers.api;
 import com.example.datn.entities.Account;
 import com.example.datn.entities.Customer;
 import com.example.datn.entities.Selling.Cart;
+import com.example.datn.entities.product_and_other.Color;
 import com.example.datn.entities.product_and_other.ProductDetail;
+import com.example.datn.entities.product_and_other.Size;
 import com.example.datn.services.AccountService;
 import com.example.datn.services.CartService;
 import com.example.datn.services.product_and_other.ProductService;
@@ -19,6 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -64,6 +67,22 @@ public class ApiProductController {
         data.put("quantity", productDetail.getQuantity());
 
         return ResponseEntity.ok(data);
+    }
+
+    @GetMapping("/available-sizes")
+    public ResponseEntity<List<Size>> getAvailableSizes(
+            @RequestParam Integer productID,
+            @RequestParam Integer colorID) {
+        List<Size> sizes = productService.findSizesByProductIdAndColor(productID, colorID);
+        return ResponseEntity.ok(sizes);
+    }
+
+    @GetMapping("/available-colors")
+    public ResponseEntity<List<Color>> getAvailableColors(
+            @RequestParam Integer productID,
+            @RequestParam Integer sizeID) {
+        List<Color> colors = productService.findColorsByProductIdAndSize(productID, sizeID);
+        return ResponseEntity.ok(colors);
     }
 
     @PostMapping("/add-to-cart")

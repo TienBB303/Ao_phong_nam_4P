@@ -26,6 +26,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
+import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -52,7 +54,7 @@ public class CartOnlineController {
     private ProductDetailRepository productDetailRepository;
 
     @GetMapping
-    public String showCart(Model model, HttpSession session) {
+    public String showCart(Model model, HttpSession session, Principal principal) {
         Integer cartId = (Integer) session.getAttribute("cartId");
         BillInsert billInsert = new BillInsert();
         boolean isGuest = true;
@@ -69,26 +71,45 @@ public class CartOnlineController {
             if (account != null && account.getCustomer() != null) {
                 isGuest = false;
 
+                // 🔹 Nếu chưa có cartId → tìm giỏ hàng theo account hoặc tạo mới
                 if (cartId == null) {
                     List<Cart> carts = cartRepository.findCartsByAccountIdOrderByUpdatedAtDesc(account.getId());
                     if (!carts.isEmpty()) {
                         Cart latestCart = carts.get(0);
                         cartId = latestCart.getId();
-                        session.setAttribute("cartId", cartId);
+                    } else {
+                        Cart newCart = new Cart();
+                        newCart.setAccount(account);
+                        newCart.setCreated_at(new Date());
+                        newCart.setUpdated_at(new Date());
+                        cartRepository.save(newCart);
+                        cartId = newCart.getId();
+                    }
+                    session.setAttribute("cartId", cartId);
+                } else {
+                    // 🔹 Nếu có cartId nhưng chưa gắn account → gắn account
+                    Cart sessionCart = cartRepository.findByIdCart(cartId);
+                    if (sessionCart != null && sessionCart.getAccount() == null) {
+                        sessionCart.setAccount(account);
+                        sessionCart.setUpdated_at(new Date());
+                        cartRepository.save(sessionCart);
                     }
                 }
 
+                // 🔹 Điền sẵn thông tin khách hàng
                 billInsert.setFullName(account.getCustomer().getName());
                 billInsert.setPhone(account.getCustomer().getPhoneNumber());
                 billInsert.setEmail(account.getEmail());
 
-//                if (account.getCustomer().getAddresses() != null && !account.getCustomer().getAddresses().isEmpty()) {
-//                    ShippingAddress address = account.getCustomer().getAddresses().get(0);
-//                    billInsert.setProvince(address.getProvinceName());
-//                    billInsert.setDistrict(address.getDistrictName());
-//                    billInsert.setWard(address.getWardName());
-//                    billInsert.setStreet(address.getAddressDetail());
-//                }
+                if (account.getCustomer().getAddresses() != null && !account.getCustomer().getAddresses().isEmpty()) {
+                    ShippingAddress address = account.getCustomer().getAddresses().get(0);
+                    billInsert.setProvince(address.getProvinceName());
+                    billInsert.setDistrict(address.getDistrictName());
+                    billInsert.setWard(address.getWardName());
+                    billInsert.setStreet(address.getAddressDetail());
+                }
+
+                model.addAttribute("addresses", account.getCustomer().getAddresses());
             }
         }
 
@@ -100,7 +121,7 @@ public class CartOnlineController {
             model.addAttribute("availableDiscounts", discounts);
         }
 
-
+        // 🔹 Lấy giỏ hàng để hiển thị
         if (cartId != null) {
             Cart cart = cartService.findCartById(cartId);
 
@@ -116,10 +137,9 @@ public class CartOnlineController {
             return "user/cart-empty";
         }
 
-        model.addAttribute("isGuest", isGuest);
-
         return "user/cart";
     }
+
 
     @GetMapping("/delete-cart")
     public String deleteCart(@RequestParam Integer productDetailId, HttpSession session) {
@@ -283,5 +303,4 @@ public class CartOnlineController {
 
         return "user/checkout";
     }
-
 }

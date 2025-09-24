@@ -23,7 +23,13 @@ public class CustomerDto {
     private Boolean gender; // true = nam, false = nữ
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @NotNull(message = "Ngày sinh không được để trống")
+    @Past(message = "Ngày sinh không được là ngày trong quá khứ")
     private LocalDate birthday;
+    // Custom validation method for age check
+    public boolean isValidAge() {
+        if (birthday == null) return false;
+        return java.time.Period.between(birthday, java.time.LocalDate.now()).getYears() >= 15;
+    }
     @NotBlank(message = "SĐT không được để trống")
     @Pattern(regexp = "^0\\d{9,11}$", message = "Số điện thoại phải bắt đầu bằng 0 và có 10-12 số.")
     private String phoneNumber;

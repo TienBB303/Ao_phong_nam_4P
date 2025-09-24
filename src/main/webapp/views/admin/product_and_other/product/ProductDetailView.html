@@ -90,7 +90,10 @@
                     </thead>
                     <tbody>
                     <tr th:each="detail : ${listProductDetail}">
-                        <td th:text="${detail.product.name + '(' + detail.color.name + ' - ' + detail.size.code + ' )'}">
+<!--                        <td th:text="${detail.product.name + '(' + detail.color.name + ' - ' + detail.size.code + ' )'}">-->
+<!--                            Tên-->
+<!--                        </td>-->
+                        <td th:text="${detail.product.name + ' - ' + detail.size.code}">
                             Tên
                         </td>
                         <td>

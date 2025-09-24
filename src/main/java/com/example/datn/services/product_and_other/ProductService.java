@@ -189,12 +189,43 @@ public class ProductService {
 
     public ProductDetail changeStatus(Integer id){
         if (id == null){
-            System.out.println("Do not have product with id = " + id);
+            System.out.println("Không có product detail với id = " + id);
             return null;
         }
         ProductDetail productDetail = productDetailRepository.findProductDetailById(id);
         productDetail.setStatus(!productDetail.getStatus());
-        return productDetailRepository.save(productDetail);
+        productDetailRepository.save(productDetail);
+
+        Product parent = productDetail.getProduct();
+        if (parent != null) {
+            // Lấy toàn bộ danh sách con của cha
+            List<ProductDetail> childList = productDetailRepository.findALLProductDetailByProductID(parent.getId());
+
+            // Check xem tất cả con có bị tắt không
+            boolean allDisabled = childList.stream().allMatch(pd -> !pd.getStatus());
+
+            if (allDisabled) {
+                parent.setStatus(false); // tắt cha nếu tất cả con đều tắt
+                productRepository.save(parent);
+            } else {
+                // Nếu còn ít nhất 1 con bật thì cha bật
+                parent.setStatus(true);
+                productRepository.save(parent);
+            }
+        }
+
+        return productDetail;
     }
+
+    //TienBB
+    public List<Size> findSizesByProductIdAndColor(Integer productId, Integer colorId) {
+        return productDetailRepository.findSizesByProductIdAndColor(productId,colorId);
+    }
+
+    //TienBB
+    public List<Color> findColorsByProductIdAndSize(Integer productId, Integer sizeId) {
+        return productDetailRepository.findColorsByProductIdAndSize(productId,sizeId);
+    }
+
 }
 
