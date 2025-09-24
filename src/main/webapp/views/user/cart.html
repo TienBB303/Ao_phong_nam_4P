@@ -78,22 +78,22 @@
                 </div>
 
                 <!-- 📦 Địa chỉ giao hàng -->
-                <div class="row">
-                    <th:block th:if="${!isGuest}">
-                        <!-- Nếu là khách hàng đã đăng nhập -->
-                        <div class="col-sm-12 mb-3">
-                            <label>Chọn địa chỉ giao hàng</label>
-                            <select class="form-select"
-                                    onchange="fillAddress(this)" id="addressSelect">
-                                <option value="">-- Chọn địa chỉ --</option>
-                                <option th:each="addr : ${customer.addresses}"
-                                        th:value="${addr.province + '|' + addr.district + '|' + addr.ward + '|' + addr.street}"
-                                        th:text="${addr.street + ', ' + addr.ward + ', ' + addr.district + ', ' + addr.province}">
-                                </option>
-                            </select>
-                        </div>
-                    </th:block>
 
+                <div class="mb-3" th:if="${!isGuest}">
+                    <label>Địa chỉ giao hàng:</label>
+                    <select class="form-select" onchange="fillAddress(this)" id="addressSelect">
+                        <option value="" hidden="hidden">-- Chọn địa chỉ --</option>
+                        <option th:each="addr : ${addresses}"
+                                th:value="${addr.addressDetail + '|' + addr.wardName + '|' + addr.districtName + '|' + addr.provinceName}"
+                                th:text="${addr.addressDetail + ', ' + addr.wardName + ', ' + addr.districtName + ', ' + addr.provinceName}">
+                        </option>
+                    </select>
+                    <input type="hidden" th:field="*{street}" id="hiddenStreet"/>
+                    <input type="hidden" th:field="*{ward}" id="hiddenWard"/>
+                    <input type="hidden" th:field="*{district}" id="hiddenDistrict"/>
+                    <input type="hidden" th:field="*{province}" id="hiddenProvince"/>
+                </div>
+                <div class="row" th:if="${isGuest}">
                     <!-- Tỉnh -->
                     <div class="col-sm-4">
                         <label>Tỉnh/Thành</label>
@@ -163,9 +163,9 @@
             <div th:each="item : ${cart.cartDetails}" class="d-flex mb-3">
                 <div>
                     <p class="mb-1"
-                       th:text="${item.productDetail.product.name} + ' - ' + ${item.productDetail.color.name} + ' - ' + ${item.productDetail.size.name}"></p>
+                       th:text="${item.productDetail.product.name + ' - ' + item.productDetail.color.name + ' - ' + item.productDetail.size.name}"></p>
                     <span class="fw-bold text-danger"
-                          th:text="${#numbers.formatInteger(item.productDetail.price, 0, 'POINT')} + 'đ'"></span>
+                          th:text="${#numbers.formatInteger(item.productDetail.price, 0, 'POINT') + 'đ'}"></span>
                     <a href="javascript:void(0);"
                        th:attr="data-href=@{/cart/delete-cart(productDetailId=${item.productDetail.id})}"
                        onclick="confirmDelete(this)">
@@ -216,15 +216,15 @@
                 <li class="list-group-item d-flex justify-content-between">
                     Phí ship:
                     <span id="phiship"
-                          th:text="${provinceName != null and provinceName.toLowerCase().contains('Hà Nội') ? '30.000đ' : '40.000đ'}">
+                          th:text="${provinceName != null and provinceName.toLowerCase().contains('hà nội') ? '30.000đ' : '40.000đ'}">
                         0đ
                     </span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between fw-bold fs-5 text-danger">
                     Cần thanh toán:
                     <span id="phaithanhtoan"
-                          th:text="${#numbers.formatInteger(cart.total_price_checkout + (provinceName != null and provinceName.toLowerCase().contains('hà nội') ? 30000 : 40000), 0, 'POINT')} + 'đ'">
-                        0đ
+                          th:text="${#numbers.formatInteger(cart.total_price_checkout + (provinceName != null and provinceName.toLowerCase().contains('hà nội') ? 30000 : 40000), 0, 'POINT') + 'đ'}">
+    0đ
                     </span>
                 </li>
             </ul>
@@ -262,7 +262,6 @@
         });
     }
 
-    // Hàm kiểm tra form trước khi submit
     function checkForm() {
         var phone = document.getElementById("phoneck").value;
         var regex = /^0\d{9}$/;
@@ -277,8 +276,6 @@
         return true;
     }
 
-    // Hàm áp dụng mã giảm giá cho khách chưa đăng nhập
-    // Hàm áp dụng mã giảm giá
     let discountValue = 0;
 
     function parseCurrency(str) {
@@ -296,6 +293,7 @@
         const phiShip = parseCurrency(document.getElementById("phiship").textContent);
 
         const tamTinh = tongTien - discountValue;
+
         const thanhToan = tamTinh + phiShip;
 
         document.getElementById("giamgia").textContent = '- ' + formatCurrency(discountValue);
@@ -303,6 +301,7 @@
         document.getElementById("phaithanhtoan").textContent = formatCurrency(thanhToan);
     }
 
+    // Hàm áp dụng mã giảm giá
     function applyDiscount() {
         const code = document.getElementById("discount-code").value.trim();
         if (!code) return alert("Vui lòng nhập mã giảm giá");
@@ -329,7 +328,31 @@
             });
     }
 
+    function fillAddress(selectElement) {
+        const selectedAddress = selectElement.value.split('|');
+        const provinceName = selectedAddress[3];
+
+        document.getElementById('hiddenStreet').value = selectedAddress[0];
+        document.getElementById('hiddenWard').value = selectedAddress[1];
+        document.getElementById('hiddenDistrict').value = selectedAddress[2];
+        document.getElementById('hiddenProvince').value = provinceName;
+
+        updateShippingFee(provinceName);
+    }
+
+    function updateShippingFee(provinceName) {
+        const phishipElement = document.getElementById('phiship');
+        let phiShip = 40000;
+
+        if (provinceName.toLowerCase().includes('hà nội')) {
+            phiShip = 30000;
+        }
+        phishipElement.textContent = formatCurrency(phiShip);
+        updateSummary();
+    }
+
     document.addEventListener("DOMContentLoaded", updateSummary);
 </script>
+
 </body>
 </html>

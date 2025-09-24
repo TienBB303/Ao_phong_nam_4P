@@ -29,4 +29,6 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     Page<Account> findByRole_Name(String roleName, Pageable pageable);
     @Query("select c from Cart c where c.account.id = :accountId")
     Cart findByAccountID(Integer accountId);
+
+    Page<Account> findByCodeStartingWith(String prefix, Pageable pageable);
 }
