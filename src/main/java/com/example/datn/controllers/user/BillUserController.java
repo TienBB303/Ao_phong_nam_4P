@@ -24,6 +24,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -63,7 +65,7 @@ public class BillUserController {
     public String viewSuccess() {
         return "user/thankyou";
     }
-
+/// ======================== CREATE BILL ==========================
     @PostMapping("/bill/create")
     public String createBill(HttpSession session,
                              @ModelAttribute BillInsert billInsert,
@@ -75,31 +77,144 @@ public class BillUserController {
         }
 
         Cart cart = cartService.findCartById(cartId);
-        int totalQuantity = 0;
 
+        // kiểm tra tồn kho
         for (CartDetail cd : cart.getCartDetails()) {
             if (cd.getQuantity() > cd.getProductDetail().getQuantity()) {
                 redirectAttributes.addFlashAttribute("error",
-                        "Số lượng sản phẩm " + cd.getProductDetail().getProduct().getName()
-                                + " chỉ còn " + cd.getProductDetail().getQuantity());
+                        "Sản phẩm " + cd.getProductDetail().getProduct().getName() + " Size "+ cd.getProductDetail().getSize().getCode() + "Màu sắc" +cd.getProductDetail().getColor().getName()
+                                + " chỉ còn " + cd.getProductDetail().getQuantity() + " sản phẩm.");
                 return "redirect:/cart";
             }
-            totalQuantity += cd.getQuantity();
         }
 
         BigDecimal total = cartService.calTotalCart(cart);
         BigDecimal discountAmount = billInsert.getDiscountValue() != null
                 ? billInsert.getDiscountValue() : BigDecimal.ZERO;
-        if (discountAmount.compareTo(total) > 0) {
-            discountAmount = total;
-        }
+        if (discountAmount.compareTo(total) > 0) discountAmount = total;
 
         BigDecimal totalCheckout = total.subtract(discountAmount);
         BigDecimal shippingFee = "Hà Nội".equalsIgnoreCase(billInsert.getProvince())
-                ? new BigDecimal(30000)
-                : new BigDecimal(40000);
-
+                ? new BigDecimal(30000) : new BigDecimal(40000);
         totalCheckout = totalCheckout.add(shippingFee);
+
+        PaymentMethod paymentMethod = paymentMethodRepository.findById(billInsert.getPaymentMethodId())
+                .orElseThrow(() -> new RuntimeException("Phương thức thanh toán không hợp lệ"));
+
+        // ================== Tiền mặt ==================
+        if ("Tiền mặt".equalsIgnoreCase(paymentMethod.getName())) {
+            Bill bill = buildBillFromCart(billInsert, cart, paymentMethod, total, discountAmount, totalCheckout, shippingFee);
+            bill.setStatus(1);              // chờ xác nhận
+            bill.setPaymentStatus(false);   // chưa thanh toán online
+            billRepository.save(bill);
+
+            if (billInsert.getDiscountId() != null) {
+                discountRepository.findById(billInsert.getDiscountId()).ifPresent(discount -> {
+                    if (discount.getUsageLimit() > 0) {
+                        discount.setUsageLimit(discount.getUsageLimit() - 1);
+                        discountRepository.save(discount);
+                    }
+                });
+            }
+            saveBillDetails(bill, cart);
+
+
+            sendMail(bill);
+            clearCart(session, cart);
+
+            return "redirect:/thank-you";
+        }
+
+        // ================== Chuyển khoản (MoMo) ==================
+        if ("Chuyển khoản".equalsIgnoreCase(paymentMethod.getName())) {
+            session.setAttribute("pendingBill", billInsert);
+            return "redirect:" + momoOnlineService.momoCreateOdr(cartId, totalCheckout);
+        }
+
+        return "redirect:/cart";
+    }
+
+    // ======================== RETURN URL (MoMo) ==========================
+    @GetMapping("/momo-return")
+    public String momoReturn(@RequestParam("resultCode") String resultCode,
+                             HttpSession session,
+                             RedirectAttributes redirectAttributes) {
+
+        Integer cartId = (Integer) session.getAttribute("cartId");
+        Cart cart = cartId != null ? cartService.findCartById(cartId) : null;
+
+        System.out.println("MoMo return resultCode=" + resultCode);
+
+        if ("0".equals(resultCode) && cart != null) {
+            // ✅ Check lại tồn kho trước khi tạo bill
+            for (CartDetail cd : cart.getCartDetails()) {
+                if (cd.getQuantity() > cd.getProductDetail().getQuantity()) {
+                    redirectAttributes.addFlashAttribute("warning",
+                            "Sản phẩm " + cd.getProductDetail().getProduct().getName()
+                                    + " không còn đủ số lượng. Liên hệ với cửa hàng để được hoàn tiền.");
+                    return "redirect:/cart";
+                }
+            }
+            // ✅ Thanh toán thành công -> tạo bill
+            BillInsert billInsert = (BillInsert) session.getAttribute("pendingBill");
+            PaymentMethod momoMethod = paymentMethodRepository.findPaymentMethodByName("Chuyển khoản");
+
+            BigDecimal total = cartService.calTotalCart(cart);
+            BigDecimal discountAmount = billInsert.getDiscountValue() != null
+                    ? billInsert.getDiscountValue() : BigDecimal.ZERO;
+            if (discountAmount.compareTo(total) > 0) discountAmount = total;
+
+            BigDecimal totalCheckout = total.subtract(discountAmount);
+            BigDecimal shippingFee = "Hà Nội".equalsIgnoreCase(billInsert.getProvince())
+                    ? new BigDecimal(30000) : new BigDecimal(40000);
+            totalCheckout = totalCheckout.add(shippingFee);
+
+            Bill bill = buildBillFromCart(billInsert, cart, momoMethod, total, discountAmount, totalCheckout, shippingFee);
+            bill.setStatus(2);            // đã xác nhận
+            bill.setPaymentStatus(true);  // đã thanh toán online
+            billRepository.save(bill);
+
+            saveBillDetails(bill, cart);
+
+            // ✅ Trừ tồn kho
+            for (BillDetails bd : bill.getBillDetails()) {
+                ProductDetail productDetail = bd.getProductDetail();
+                productDetail.setQuantity(productDetail.getQuantity() - bd.getQuantity());
+                productDetailRepository.save(productDetail);
+            }
+
+            billRepository.save(bill);
+
+            if (billInsert.getDiscountId() != null) {
+                discountRepository.findById(billInsert.getDiscountId()).ifPresent(discount -> {
+                    if (discount.getUsageLimit() > 0) {
+                        discount.setUsageLimit(discount.getUsageLimit() - 1);
+                        discountRepository.save(discount);
+                    }
+                });
+            }
+
+            sendMail(bill);
+            clearCart(session, cart);
+
+            redirectAttributes.addFlashAttribute("success", "Thanh toán thành công!");
+            return "redirect:/thank-you";
+        }
+
+        // ❌ Thất bại -> quay lại giỏ hàng
+        redirectAttributes.addFlashAttribute("error", "Thanh toán thất bại hoặc đã hủy!");
+        return "redirect:/cart";
+    }
+
+
+    // ======================== SUPPORT METHODS ==========================
+    private Bill buildBillFromCart(BillInsert billInsert,
+                                   Cart cart,
+                                   PaymentMethod paymentMethod,
+                                   BigDecimal total,
+                                   BigDecimal discountAmount,
+                                   BigDecimal totalCheckout,
+                                   BigDecimal shippingFee) {
 
         Bill bill = new Bill();
         bill.setCode("HD" + System.currentTimeMillis());
@@ -112,23 +227,21 @@ public class BillUserController {
         bill.setEmail(billInsert.getEmail());
         bill.setDelivery_type(true);
         bill.setCreatedAt(LocalDateTime.now());
-        bill.setUpdatedAt(null);
         bill.setAddress_shipping(
-                billInsert.getStreet() + ", " +
-                        billInsert.getWard() + ", " +
-                        billInsert.getDistrict() + ", " +
-                        billInsert.getProvince());
+                billInsert.getStreet() + ", " + billInsert.getWard() + ", " +
+                        billInsert.getDistrict() + ", " + billInsert.getProvince());
         bill.setNote(billInsert.getNote());
         bill.setTypeBill(true);
+        bill.setStatus(1);
+        bill.setPaymentStatus(false);
 
-        if (billInsert.getPaymentMethodId() == 2) {
-            bill.setStatus(2);
-            bill.setPaymentStatus(true);
-        } else {
-            bill.setStatus(1);
-            bill.setPaymentStatus(false);
+        if (billInsert.getDiscountId() != null) {
+            Discount dc = discountRepository.findById(billInsert.getDiscountId()).orElse(null);
+            bill.setDiscount(dc);
         }
 
+
+        // gán customer nếu login
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)) {
             String email = auth.getName();
@@ -136,28 +249,14 @@ public class BillUserController {
             if (account != null && account.getCustomer() != null) {
                 bill.setCustomer(account.getCustomer());
             }
-        } else {
-            bill.setCustomer(null);
         }
 
-
-        PaymentMethod paymentMethod = paymentMethodRepository.findById(billInsert.getPaymentMethodId())
-                .orElseThrow(() -> new RuntimeException("Phương thức thanh toán không hợp lệ"));
         bill.setPaymentMethod(paymentMethod);
+        return bill;
+    }
 
-        if (billInsert.getDiscountId() != null) {
-            Discount discount = discountRepository.findById(billInsert.getDiscountId()).orElse(null);
-            if (discount != null) {
-                bill.setDiscount(discount);
-
-                if (discount.getUsageLimit() != null && discount.getUsageLimit() > 0) {
-                    discount.setUsageLimit(discount.getUsageLimit() - 1);
-                    discountRepository.save(discount);
-                }
-            }
-        }
-        billRepository.save(bill);
-
+    private void saveBillDetails(Bill bill, Cart cart) {
+        List<BillDetails> detailsList = new ArrayList<>();
         for (CartDetail cd : cart.getCartDetails()) {
             BillDetails billDetails = new BillDetails();
             billDetails.setBill(bill);
@@ -167,18 +266,13 @@ public class BillUserController {
                     .multiply(new BigDecimal(cd.getQuantity())));
             billDetails.setQuantity(cd.getQuantity());
             billDetailRepository.save(billDetails);
-            ProductDetail productDetail = cd.getProductDetail();
-            if (billInsert.getPaymentMethodId() == 2) {
-                productDetail.setQuantity(productDetail.getQuantity() - cd.getQuantity());
-            }
-            productDetailRepository.save(productDetail);
-        }
 
-        if ("Chuyển khoản".equalsIgnoreCase(paymentMethod.getName())) {
-            String payUrl = momoOnlineService.createQrOrder(bill.getId(), bill.getTotal_checkout());
-            return "redirect:" + payUrl;
+            detailsList.add(billDetails);
         }
+        bill.setBillDetails(detailsList); // ✅ gắn list vào bill
+    }
 
+    private void sendMail(Bill bill) {
         String content = mailServices.buildOrderConfirmationEmailTemplate(
                 bill.getCode(),
                 bill.getCreatedAt().toString(),
@@ -186,128 +280,14 @@ public class BillUserController {
                 bill.getAddress_shipping(),
                 bill.getNote(),
                 bill.getName(),
-                "thaitvph40872@fpt.edu.vn"
+                "linhtnph31789@fpt.edu.vn"
         );
-        mailServices.sendEmail(billInsert.getEmail(), "Đặt hàng thành công", content, false, true);
+        mailServices.sendEmail(bill.getEmail(), "Đặt hàng thành công", content, false, true);
+    }
 
+    private void clearCart(HttpSession session, Cart cart) {
         cartDetailRepositoty.deleteAll(cart.getCartDetails());
         session.removeAttribute("cartId");
-
-        return "redirect:/thank-you";
-    }
-
-    //    fill information user login
-//    @GetMapping("/checkout")
-//    public String checkout(HttpSession session, Model model) {
-//        BillInsert billInsert = new BillInsert();
-//
-//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//        if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)) {
-//            Account account = (Account) auth.getPrincipal();
-//            Customer customer = customerRepository.findByAccount(account);
-//
-//            if (customer != null) {
-//                billInsert.setFullName(customer.getName());
-//                billInsert.setPhone(customer.getPhoneNumber());
-//                billInsert.setEmail(account.getEmail());
-//
-//                // Lấy địa chỉ mặc định
-//                if (customer.getAddresses() != null && !customer.getAddresses().isEmpty()) {
-//                    ShippingAddress defaultAddress = customer.getAddresses()
-//                            .stream()
-//                            .filter(ShippingAddress::getIsDefault) // nếu có cờ mặc định
-//                            .findFirst()
-//                            .orElse(customer.getAddresses().get(0));
-//
-//                    billInsert.setProvince(defaultAddress.getProvinceName());
-//                    billInsert.setDistrict(defaultAddress.getDistrictName());
-//                    billInsert.setWard(defaultAddress.getWardName());
-//                }
-//            }
-//
-//            model.addAttribute("isGuest", false);
-//        } else {
-//            model.addAttribute("isGuest", true);
-//        }
-//
-//        // giỏ hàng
-//        Integer cartId = (Integer) session.getAttribute("cartId");
-//        if (cartId != null) {
-//            Cart cart = cartService.findCartById(cartId);
-//            model.addAttribute("cart", cart);
-//            model.addAttribute("totalCart", cartService.calTotalCart(cart));
-//        }
-//
-//        model.addAttribute("billInsert", billInsert);
-//
-//        return "user/cart";
-//    }
-
-
-    @GetMapping("/momo-return")
-    public String momoReturn(@RequestParam Map<String, String> params,
-                             RedirectAttributes redirectAttributes,
-                             HttpSession session) {
-        String resultCode = params.get("resultCode");
-        String orderId = params.get("orderId");
-
-        try {
-            String[] parts = orderId.split("_");
-            String billIdStr = parts[0].replace("CART", "");
-            Integer billId = Integer.valueOf(billIdStr);
-
-            Bill bill = billRepository.findById(billId)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
-
-            if ("0".equals(resultCode)) {
-                bill.setStatus(2);
-                bill.setUpdatedAt(LocalDateTime.now());
-                billRepository.save(bill);
-
-                session.removeAttribute("cartId");
-
-                redirectAttributes.addFlashAttribute("success", "Thanh toán thành công!");
-            } else {
-                bill.setStatus(3);
-                bill.setUpdatedAt(LocalDateTime.now());
-                billRepository.save(bill);
-
-                redirectAttributes.addFlashAttribute("error", "Thanh toán thất bại!");
-            }
-
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Lỗi xử lý MoMo: " + e.getMessage());
-        }
-
-        return "redirect:/thank-you";
-    }
-
-    // ✅ NotifyUrl (server-to-server, MoMo gọi về xác nhận thanh toán)
-    @PostMapping("/momo-ipn")
-    @ResponseBody
-    public ResponseEntity<?> momoIpn(@RequestBody Map<String, Object> payload) {
-        try {
-            String resultCode = String.valueOf(payload.get("resultCode"));
-            String orderId = String.valueOf(payload.get("orderId"));
-
-            String[] parts = orderId.split("_");
-            String billIdStr = parts[0].replace("CART", "");
-            Integer billId = Integer.valueOf(billIdStr);
-
-            Bill bill = billRepository.findById(billId)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
-
-            if ("0".equals(resultCode)) {
-                bill.setStatus(2);
-            } else {
-                bill.setStatus(3);
-            }
-            bill.setUpdatedAt(LocalDateTime.now());
-            billRepository.save(bill);
-
-            return ResponseEntity.ok(Map.of("message", "IPN received"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
+        session.removeAttribute("pendingBill");
     }
 }

@@ -67,7 +67,10 @@
                        class="form-control" readonly/>
             </div>
 
-            <a th:href="@{/admin/users}" class="btn btn-dark">⬅ Quay lại</a>
+            <div class="d-flex justify-content-between">
+                <a th:href="@{/admin/users}" class="btn btn-dark">⬅ Quay lại</a>
+                <a class="btn btn-primary" th:href="@{'/admin/users/edit'(id=${accountDto.id})}">✏️ Sửa</a>
+            </div>
         </form>
 
     </div>

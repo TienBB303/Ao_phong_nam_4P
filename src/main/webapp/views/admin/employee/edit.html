@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{admin/fragments/head :: head}"></head>
+<body data-pc-preset="preset-1" data-pc-direction="ltr" data-pc-theme="light">
+<div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
+<header th:replace="~{admin/fragments/header :: header}"></header>
+
+<div class="pc-container">
+    <div class="pc-content">
+        <!-- breadcrumb -->
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <div class="page-header-title">
+                            <h5 class="m-b-10">Sửa tài khoản nhân viên</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- content -->
+        <div class="row">
+            <form id="editUserForm" action="/admin/users/edit" method="post" th:object="${accountDto}" onsubmit="return check()">
+                <!-- lưu id để update -->
+                <input type="hidden" th:field="*{id}"/>
+
+                <div class="mb-3">
+                    <label class="form-label">Mã NV:</label>
+                    <input type="text" th:field="*{code}" class="form-control" readonly/>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Họ tên:</label>
+                    <input type="text" id="fullName" th:value="*{fullName}" name="fullName" class="form-control"/>
+                    <span id="error-fullName" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Email:</label>
+                    <input type="email" id="email" th:value="*{email}" name="email" class="form-control"/>
+                    <span id="error-email" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Số điện thoại:</label>
+                    <input type="text" id="sdt" th:value="*{phoneNumber}" name="phoneNumber" class="form-control"/>
+                    <span id="error-sdt" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Ngày sinh:</label>
+                    <input type="date" id="birthOfDate" th:value="*{birthDate}" name="birthDate" class="form-control"/>
+                    <span id="error-birthOfDate" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Giới tính:</label>
+                    <div>
+                        <input type="radio" name="gender" id="male" value="true" th:checked="${accountDto.gender == true}">
+                        <label for="male">Nam</label>
+                        <input type="radio" name="gender" id="female" value="false" th:checked="${accountDto.gender == false}">
+                        <label for="female">Nữ</label>
+                    </div>
+                    <span id="error-gender" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Trạng thái:</label>
+                    <select th:field="*{status}" class="form-select">
+                        <option value="true">Hoạt động</option>
+                        <option value="false">Đã khoá</option>
+                    </select>
+                </div>
+
+                <hr/>
+                <h5 class="fw-semibold">ĐỊA CHỈ (mặc định)</h5>
+
+                <div class="mb-3">
+                    <label for="province" class="form-label">Tỉnh/Thành phố</label>
+                    <select id="province" name="address.provinceId" class="form-select"></select>
+                    <input type="hidden" id="provinceName" name="address.provinceName" th:value="*{address.provinceName}"/>
+                    <span id="error-province" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label for="district" class="form-label">Quận/Huyện</label>
+                    <select id="district" name="address.districtId" class="form-select"></select>
+                    <input type="hidden" id="districtName" name="address.districtName" th:value="*{address.districtName}"/>
+                    <span id="error-district" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label for="ward" class="form-label">Phường/Xã</label>
+                    <select id="ward" name="address.wardId" class="form-select"></select>
+                    <input type="hidden" id="wardName" name="address.wardName" th:value="*{address.wardName}"/>
+                    <span id="error-ward" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Địa chỉ chi tiết:</label>
+                    <input type="text" id="addressDetail" name="address.addressDetail"
+                           th:value="*{address.addressDetail}" class="form-control"/>
+                    <span id="error-addressDetail" class="text-danger"></span>
+                </div>
+
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="isDefault" name="address.isDefault"
+                           th:checked="${accountDto.address != null ? accountDto.address.isDefault : false}">
+                    <label class="form-check-label" for="isDefault">Đặt địa chỉ này làm mặc định</label>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a th:href="@{/admin/users}" class="btn btn-outline-secondary">⬅ Quay lại</a>
+                    <button type="submit" class="btn btn-primary">💾 Cập nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{admin/fragments/footer :: footer}"></footer>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script th:inline="javascript">
+    const provinceSelect = document.getElementById('province');
+    const districtSelect = document.getElementById('district');
+    const wardSelect = document.getElementById('ward');
+
+    // Lấy giá trị hiện tại từ model
+    const currentProvinceId = /*[[${accountDto.address != null ? accountDto.address.provinceId : '01'}]]*/ '01';
+    const currentDistrictId = /*[[${accountDto.address != null ? accountDto.address.districtId : null}]]*/ null;
+    const currentWardId = /*[[${accountDto.address != null ? accountDto.address.wardId : null}]]*/ null;
+
+    function loadOnlyHaNoi() {
+        // Chỉ load Hà Nội như trang thêm
+        provinceSelect.innerHTML = `<option value="01">Thành phố Hà Nội</option>`;
+        provinceSelect.value = currentProvinceId || '01';
+        setProvinceName();
+        fetchDistricts(); // Lấy quận/huyện Hà Nội
+    }
+
+    function fetchDistricts() {
+        const provinceId = provinceSelect.value; // luôn là 01
+        fetch(`https://provinces.open-api.vn/api/p/${provinceId}?depth=2`)
+            .then(res => res.json())
+            .then(data => {
+                const districts = data.districts || [];
+                districtSelect.innerHTML = districts.map(d => `<option value="${d.code}">${d.name}</option>`).join('');
+                // chọn lại quận hiện tại nếu có
+                if (currentDistrictId) {
+                    districtSelect.value = String(currentDistrictId);
+                }
+                setDistrictName();
+                fetchWards();
+            });
+    }
+
+    function fetchWards() {
+        const districtId = districtSelect.value;
+        if (!districtId) {
+            wardSelect.innerHTML = '';
+            return;
+        }
+        fetch(`https://provinces.open-api.vn/api/d/${districtId}?depth=2`)
+            .then(res => res.json())
+            .then(data => {
+                const wards = data.wards || [];
+                wardSelect.innerHTML = wards.map(w => `<option value="${w.code}">${w.name}</option>`).join('');
+                // chọn lại phường hiện tại nếu có
+                if (currentWardId) {
+                    wardSelect.value = String(currentWardId);
+                }
+                setWardName();
+            });
+    }
+
+    function setProvinceName() {
+        document.getElementById('provinceName').value = provinceSelect.options[provinceSelect.selectedIndex]?.text || '';
+    }
+
+    function setDistrictName() {
+        document.getElementById('districtName').value = districtSelect.options[districtSelect.selectedIndex]?.text || '';
+    }
+
+    function setWardName() {
+        document.getElementById('wardName').value = wardSelect.options[wardSelect.selectedIndex]?.text || '';
+    }
+
+    provinceSelect.addEventListener('change', () => {
+        setProvinceName();
+        fetchDistricts();
+    });
+
+    districtSelect.addEventListener('change', () => {
+        setDistrictName();
+        fetchWards();
+    });
+
+    wardSelect.addEventListener('change', setWardName);
+
+    document.addEventListener('DOMContentLoaded', loadOnlyHaNoi);
+
+    function check() {
+        let isValid = true;
+        let errorMessages = [];
+
+        const fullName = document.getElementById("fullName");
+        const email = document.getElementById("email");
+        const birthOfDate = document.getElementById("birthOfDate");
+        const sdt = document.getElementById("sdt");
+        const addressDetail = document.getElementById("addressDetail");
+        const genderRadios = document.getElementsByName("gender");
+
+        const province = document.getElementById("province");
+        const district = document.getElementById("district");
+        const ward = document.getElementById("ward");
+
+        if (fullName.value.trim() === "") {
+            errorMessages.push("Vui lòng nhập họ và tên!");
+            isValid = false;
+        }
+        if (email.value.trim() === "") {
+            errorMessages.push("Vui lòng nhập email!");
+            isValid = false;
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
+            errorMessages.push("Email không hợp lệ!");
+            isValid = false;
+        }
+        if (sdt.value.trim() === "") {
+            errorMessages.push("Vui lòng nhập số điện thoại!");
+            isValid = false;
+        } else if (!/^\d{10,15}$/.test(sdt.value.trim())) {
+            errorMessages.push("Số điện thoại không hợp lệ!");
+            isValid = false;
+        }
+        if (birthOfDate.value === "") {
+            errorMessages.push("Vui lòng chọn ngày sinh!");
+            isValid = false;
+        } else {
+            const dob = new Date(birthOfDate.value);
+            const minDob = new Date();
+            minDob.setFullYear(minDob.getFullYear() - 15);
+            if (dob > minDob) {
+                errorMessages.push("Nhân viên phải từ 15 tuổi trở lên!");
+                isValid = false;
+            }
+        }
+
+        let genderSelected = false;
+        for (const radio of genderRadios) {
+            if (radio.checked) {
+                genderSelected = true;
+                break;
+            }
+        }
+        if (!genderSelected) {
+            errorMessages.push("Vui lòng chọn giới tính!");
+            isValid = false;
+        }
+
+        if (!province.value) {
+            errorMessages.push("Vui lòng chọn tỉnh/thành phố!");
+            isValid = false;
+        }
+        if (!district.value) {
+            errorMessages.push("Vui lòng chọn quận/huyện!");
+            isValid = false;
+        }
+        if (!ward.value) {
+            errorMessages.push("Vui lòng chọn phường/xã!");
+            isValid = false;
+        }
+        if (addressDetail.value.trim() === "") {
+            errorMessages.push("Vui lòng nhập địa chỉ chi tiết!");
+            isValid = false;
+        }
+
+        if (!isValid) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi xác thực',
+                html: errorMessages.join('<br/>')
+            });
+        }
+        return isValid;
+    }
+</script>
+
+</body>
+</html>

@@ -38,6 +38,18 @@
             loadAddress();
         }
 
+        function showToast(icon, message) {
+            Swal.fire({
+                toast: true,
+                position: "top-end",   // vị trí: góc trên bên phải
+                icon: icon,            // "success", "error", "warning", "info"
+                title: message,
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
+            });
+        }
+
         function checkForm() {
             let fullName = document.querySelector("[name='fullName']").value.trim();
             let phone = document.querySelector("[name='phone']").value.trim();
@@ -49,49 +61,29 @@
             let paymentMethod = document.querySelector("input[name='paymentMethodId']:checked");
 
             if (fullName === "") {
-                Swal.fire({
-                    icon: "error",
-                    title: "Cảnh báo",
-                    text: "Vui lòng nhập họ và tên"
-                });
+                showToast("error", "Vui lòng nhập họ và tên");
                 return false;
             }
 
             let phoneRegex = /^(0[0-9]{9})$/;
             if (phone === "" || !phoneRegex.test(phone)) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Số điện thoại không hợp lệ",
-                    text: "Vui lòng nhập số điện thoại 10 số, bắt đầu bằng 0"
-                });
+                showToast("error", "Số điện thoại không hợp lệ. Vui lòng nhập 10 số bắt đầu bằng 0");
                 return false;
             }
 
             let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (email === "" || !emailRegex.test(email)) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Email không hợp lệ",
-                    text: "Vui lòng nhập đúng định dạng email"
-                });
+                showToast("error", "Email không hợp lệ. Vui lòng nhập đúng định dạng");
                 return false;
             }
 
             if (province === "" || district === "" || ward === "" || street === "") {
-                Swal.fire({
-                    icon: "error",
-                    title: "Thiếu địa chỉ",
-                    text: "Vui lòng nhập đầy đủ địa chỉ giao hàng"
-                });
+                showToast("error", "Vui lòng nhập đầy đủ địa chỉ giao hàng");
                 return false;
             }
 
             if (!paymentMethod) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Chưa chọn phương thức",
-                    text: "Vui lòng chọn phương thức thanh toán"
-                });
+                showToast("error", "Vui lòng chọn phương thức thanh toán");
                 return false;
             }
 
@@ -212,22 +204,45 @@
         </div>
         <div class="col-md-5 order-summary ps-md-5 mt-5 mt-md-0">
             <div th:each="item : ${cart.cartDetails}" class="d-flex mb-3">
-                <div>
-                    <p class="mb-1"
-                       th:text="${item.productDetail.product.name + ' - ' + item.productDetail.color.name + ' - ' + item.productDetail.size.name}"></p>
-                    <span class="fw-bold text-danger"
-                          th:text="${#numbers.formatInteger(item.productDetail.price, 0, 'POINT') + 'đ'}"></span>
-                    <a href="javascript:void(0);"
-                       th:attr="data-href=@{/cart/delete-cart(productDetailId=${item.productDetail.id})}"
-                       onclick="confirmDelete(this)">
-                        <i class="fa fa-trash text-danger"></i>
-                    </a>
-                    <div class="mt-2">
-                        <a th:href="@{/cart/up-down(productDetailId=${item.productDetail.id},quantity=${-1})}"
-                           class="btn btn-sm btn-outline-secondary">-</a>
-                        <span class="mx-2" th:text="${item.quantity}">1</span>
-                        <a th:href="@{/cart/up-down(productDetailId=${item.productDetail.id},quantity=${1})}"
-                           class="btn btn-sm btn-outline-secondary">+</a>
+                <div class="d-flex align-items-center border-bottom py-3">
+                    <!-- Ảnh sản phẩm -->
+                    <div style="width: 70px;">
+                        <img th:src="@{${item.productDetail.product.mainImagePath}}"
+                             alt="Ảnh sản phẩm"
+                             class="img-fluid rounded"
+                             style="width: 60px; height: 60px; object-fit: cover;">
+                    </div>
+
+                    <!-- Thông tin sản phẩm -->
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-1" th:text="${item.productDetail.product.name}"></h6>
+                        <small class="text-muted">
+                            Màu: <span th:text="${item.productDetail.color.name}"></span> |
+                            Size: <span th:text="${item.productDetail.size.name}"></span>
+                        </small>
+
+                        <div class="d-flex align-items-center justify-content-between mt-2">
+                            <!-- Giá -->
+                            <span class="fw-bold text-danger"
+                                  th:text="${#numbers.formatInteger(item.productDetail.price, 0, 'POINT') + 'đ'}"></span>
+
+                            <!-- Nút xóa -->
+                            <a href="javascript:void(0);"
+                               th:attr="data-href=@{/cart/delete-cart(productDetailId=${item.productDetail.id})}"
+                               onclick="confirmDelete(this)"
+                               class="text-danger ms-3">
+                                <i class="fa fa-trash"></i>
+                            </a>
+                        </div>
+
+                        <!-- Nút tăng giảm số lượng -->
+                        <div class="mt-2">
+                            <a th:href="@{/cart/up-down(productDetailId=${item.productDetail.id},quantity=${-1})}"
+                               class="btn btn-sm btn-outline-secondary">-</a>
+                            <span class="mx-2" th:text="${item.quantity}">1</span>
+                            <a th:href="@{/cart/up-down(productDetailId=${item.productDetail.id},quantity=${1})}"
+                               class="btn btn-sm btn-outline-secondary">+</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -245,12 +260,19 @@
                         <option value="">-- Không áp dụng mã --</option>
                         <option th:each="discount : ${availableDiscounts}"
                                 th:value="${discount.id}"
-                                th:text="${discount.code + ' - Giảm ' + #numbers.formatInteger(discount.discountValue, 0, 'POINT') + 'đ'}"
-                                th:attr="data-code=${discount.code}, data-amount=${discount.discountValue}">
+                                th:text="${discount.code + ' - giảm ' + (discount.discountType == 'percent' ? discount.discountValue + '%' : #numbers.formatInteger(discount.discountValue, 0, 'POINT') + 'đ') + ' - Đơn tối thiểu: ' + #numbers.formatInteger(discount.minPurchase, 0, 'POINT') + 'đ' + ' - Giảm tối đa: ' + #numbers.formatInteger(discount.maxDiscount, 0, 'POINT') + 'đ'}"
+                                th:attr="data-code=${discount.code}, 
+                                        data-amount=${discount.discountValue}, 
+                                        data-type=${discount.discountType},
+                                        data-max=${discount.maxDiscount},
+                                        data-min-purchase=${discount.minPurchase}">
                         </option>
                     </select>
                 </div>
                 <div id="discount-message" class="mt-2 text-success" style="display: none;"></div>
+                <div th:if="${availableDiscounts.isEmpty()}" class="mt-2 text-muted">
+                    <small>Không có mã giảm giá phù hợp với đơn hàng của bạn.</small>
+                </div>
             </div>
 
             <ul class="list-group list-group-flush mb-3">
@@ -259,7 +281,7 @@
                                           th:text="${#numbers.formatInteger(totalCart, 0, 'POINT')} + 'đ'">0đ</span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between">
-                    Giảm giá: <span id="giamgia">- 0đ</span>
+                    Giảm giá: <span id="giamgia"> 0đ</span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between">
                     Tạm tính: <span id="tamtinh">0đ</span>
@@ -282,6 +304,20 @@
         </div>
     </div>
 </div>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    let errorMsg = /*[[${error}]]*/ null;
+    if (errorMsg !== null) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Lỗi',
+            text: errorMsg,
+            confirmButtonText: 'Đóng'
+        });
+    }
+    /*]]>*/
+</script>
+
 <script th:inline="javascript">
     /*<![CDATA[*/
     let errorMessage = [[${errorMessage}]];
@@ -339,7 +375,7 @@
     function applyDiscount() {
         const code = document.getElementById("discount-code").value.trim();
         if (!code) {
-            Swal.fire("Vui lòng nhập mã giảm giá");
+            showToast("error", "Vui lòng nhập mã giảm giá");
             return;
         }
 
@@ -349,29 +385,51 @@
                 return res.json();
             })
             .then(data => {
-                discountValue = data.discountAmount || 0;
+                const tongTien = parseCurrency(document.getElementById("tongtienhang").textContent);
+
+                const discountType = data.discountType || "amount";
+                const discountAmount = data.discountValue || 0;
+                const maxDiscount = data.maxDiscount || 0;
+                const minPurchase = data.minPurchase || 0;
+
+                // Kiểm tra giá trị tối thiểu
+                if (tongTien < minPurchase) {
+                    showToast("error", `Đơn hàng chưa đạt tối thiểu ${formatCurrency(minPurchase)} để áp dụng mã này`);
+                    discountValue = 0;
+                    updateSummary();
+                    return;
+                }
+
+                if (discountType === "percent") {
+                    discountValue = Math.round(tongTien * discountAmount / 100);
+                    if (maxDiscount > 0 && discountValue > maxDiscount) {
+                        discountValue = maxDiscount;
+                    }
+                } else {
+                    discountValue = discountAmount;
+                }
+
+                if (discountValue > tongTien) {
+                    discountValue = tongTien;
+                }
+
+                // Gán vào hidden input
                 document.getElementById("discountCodeInput").value = code;
                 document.getElementById("discountValueInput").value = discountValue;
+                document.getElementById("discountIdInput").value = data.id || "";
 
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Áp dụng mã thành công',
-                    text: data.message
-                });
+                showToast("success", `Áp dụng mã ${code} thành công (-${formatCurrency(discountValue)})`);
 
                 updateSummary();
             })
             .catch(async err => {
                 const errMsg = await err.json();
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Lỗi',
-                    text: errMsg.message || "Lỗi khi áp mã"
-                });
+                showToast("error", errMsg.message || "Lỗi khi áp mã");
 
                 discountValue = 0;
                 document.getElementById("discountCodeInput").value = "";
                 document.getElementById("discountValueInput").value = "0";
+                document.getElementById("discountIdInput").value = "";
                 updateSummary();
             });
     }
@@ -381,9 +439,63 @@
         const selectedOption = select.options[select.selectedIndex];
         const discountMessage = document.getElementById("discount-message");
 
-        discountValue = parseInt(selectedOption.getAttribute("data-amount")) || 0;
+        if (!select.value) {
+            // Không chọn mã giảm giá
+            discountValue = 0;
+            document.getElementById("discountIdInput").value = "";
+            document.getElementById("discountCodeInput").value = "";
+            document.getElementById("discountValueInput").value = "0";
+            discountMessage.style.display = "none";
+            updateSummary();
+            return;
+        }
+
         const code = selectedOption.getAttribute("data-code") || "";
         const discountId = select.value || "";
+        const discountType = selectedOption.getAttribute("data-type") || "amount";
+        const discountAmount = parseFloat(selectedOption.getAttribute("data-amount")) || 0;
+        const maxDiscount = parseFloat(selectedOption.getAttribute("data-max")) || 0;
+        const minPurchase = parseFloat(selectedOption.getAttribute("data-min-purchase")) || 0;
+
+        // Tính toán giá trị giảm giá
+        const tongTien = parseCurrency(document.getElementById("tongtienhang").textContent);
+
+        // Kiểm tra điều kiện áp dụng
+        if (tongTien < minPurchase) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Không thể áp dụng mã giảm giá',
+                text: `Giỏ hàng của bạn chưa đạt giá trị tối thiểu ${formatCurrency(minPurchase)} để áp dụng mã này.`
+            });
+
+            // Reset lại select box
+            select.value = "";
+            discountValue = 0;
+            document.getElementById("discountIdInput").value = "";
+            document.getElementById("discountCodeInput").value = "";
+            document.getElementById("discountValueInput").value = "0";
+            discountMessage.style.display = "none";
+            updateSummary();
+            return;
+        }
+
+        if (discountType === "percent") {
+            // Giảm theo phần trăm
+            discountValue = Math.round(tongTien * discountAmount / 100);
+
+            // Kiểm tra giới hạn tối đa nếu có
+            if (maxDiscount > 0 && discountValue > maxDiscount) {
+                discountValue = maxDiscount;
+            }
+        } else {
+            // Giảm theo số tiền cố định
+            discountValue = discountAmount;
+        }
+
+        // Đảm bảo không giảm quá tổng tiền
+        if (discountValue > tongTien) {
+            discountValue = tongTien;
+        }
 
         // Gán vào hidden input
         document.getElementById("discountIdInput").value = discountId;
@@ -400,7 +512,6 @@
         }
     }
 
-
     function fillAddress(selectElement) {
         const selectedAddress = selectElement.value.split('|');
         const provinceName = selectedAddress[3];
@@ -413,15 +524,37 @@
         updateShippingFee(provinceName);
     }
 
-    // --- Tính phí ship ---
+    // // --- Tính phí ship ---
+    // function updateShippingFee(provinceName) {
+    //     const phishipElement = document.getElementById('phiship');
+    //     let phiShip = 40000;
+    //
+    //     // Chuẩn hoá để so khớp chính xác
+    //     const normalized = provinceName
+    //         .normalize("NFD")                // tách dấu
+    //         .replace(/[\u0300-\u036f]/g, "") // xoá dấu
+    //         .toLowerCase()
+    //         .trim();
+    //
+    //     if (normalized.includes("ha noi")) {
+    //         phiShip = 30000;
+    //     }
+    //
+    //     phishipElement.textContent = formatCurrency(phiShip);
+    //     updateSummary();
+    // }
+
+    // document.addEventListener("DOMContentLoaded", updateSummary);
+    // /*]]>*/
+
     function updateShippingFee(provinceName) {
         const phishipElement = document.getElementById('phiship');
         let phiShip = 40000;
 
         // Chuẩn hoá để so khớp chính xác
         const normalized = provinceName
-            .normalize("NFD")                // tách dấu
-            .replace(/[\u0300-\u036f]/g, "") // xoá dấu
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
             .toLowerCase()
             .trim();
 
@@ -433,8 +566,24 @@
         updateSummary();
     }
 
-    document.addEventListener("DOMContentLoaded", updateSummary);
-    /*]]>*/
+    // ✅ chạy khi load trang
+    document.addEventListener("DOMContentLoaded", function () {
+        let provinceInput = document.getElementById("hiddenProvince"); // login
+        let provinceSelect = document.getElementById("tinh");         // guest
+
+        let provinceName = "";
+        if (provinceInput && provinceInput.value) {
+            provinceName = provinceInput.value;
+        } else if (provinceSelect && provinceSelect.options[provinceSelect.selectedIndex]) {
+            provinceName = provinceSelect.options[provinceSelect.selectedIndex].text;
+        }
+
+        if (provinceName) {
+            updateShippingFee(provinceName);
+        } else {
+            updateSummary();
+        }
+    });
 </script>
 </body>
 </html>

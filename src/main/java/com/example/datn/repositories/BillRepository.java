@@ -25,16 +25,26 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
 
     Page<Bill> findAll(Pageable pageable);
 
+//    @Query("SELECT b FROM Bill b " +
+//            "WHERE (:code IS NULL OR b.code LIKE CONCAT('%', :code, '%')) " +
+//            "AND (:name IS NULL OR b.name LIKE CONCAT('%', :name, '%')) " +
+//            "AND (:phone IS NULL OR b.phoneNumber LIKE CONCAT('%', :phone, '%')) " +
+//            "AND (:start IS NULL OR b.createdAt >= :start) " +
+//            "AND (:end IS NULL OR b.createdAt <= :end) " +
+//            "AND (:status IS NULL OR b.status = :status) " +
+//            "AND (:typeBill IS NULL OR b.typeBill = :typeBill) " +
+//            "AND (b.status <> 9 AND b.status <> 10) " +
+//            "ORDER BY b.id DESC")
     @Query("SELECT b FROM Bill b " +
-            "WHERE (:code IS NULL OR b.code LIKE CONCAT('%', :code, '%')) " +
-            "AND (:name IS NULL OR b.name LIKE CONCAT('%', :name, '%')) " +
-            "AND (:phone IS NULL OR b.phoneNumber LIKE CONCAT('%', :phone, '%')) " +
-            "AND (:start IS NULL OR b.createdAt >= :start) " +
-            "AND (:end IS NULL OR b.createdAt <= :end) " +
-            "AND (:status IS NULL OR b.status = :status) " +
-            "AND (:typeBill IS NULL OR b.typeBill = :typeBill) " +
-            "AND (b.status <> 9 AND b.status <> 10) " +
-            "ORDER BY b.id DESC")
+        "WHERE (:code IS NULL OR LOWER(b.code) LIKE LOWER(CONCAT('%', :code, '%'))) " +
+        "AND (:name IS NULL OR LOWER(b.name) LIKE LOWER(CONCAT('%', :name, '%'))) " +
+        "AND (:phone IS NULL OR b.phoneNumber LIKE CONCAT('%', :phone, '%')) " +
+        "AND (:start IS NULL OR b.createdAt >= :start) " +
+        "AND (:end IS NULL OR b.createdAt <= :end) " +
+        "AND (:status IS NULL OR b.status = :status) " +
+        "AND (:typeBill IS NULL OR b.typeBill = :typeBill) " +
+        "AND b.status NOT IN (9,10) " +
+        "ORDER BY b.id DESC")
     Page<Bill> filterBills(
             @Param("code") String code,
             @Param("name") String name,
