@@ -109,4 +109,55 @@ public class MomoOnlineService {
         }
         return hash.toString();
     }
+
+    // Dành cho ONLINE (MoMo) – không dùng Bill
+    public String momoCreateOdr(Integer cartId, BigDecimal amount) throws Exception {
+        String requestId = String.valueOf(System.currentTimeMillis());
+        String orderId = "CART" + cartId + "_" + requestId;
+        String orderInfo = "Thanh toán đơn hàng 4P Store"; // không cần bill.getCode()
+        String extraData = "";
+
+        String amountStr = amount.setScale(0, RoundingMode.HALF_UP).toPlainString();
+
+        String rawHash = "accessKey=" + accessKey +
+                "&amount=" + amountStr +
+                "&extraData=" + extraData +
+                "&ipnUrl=" + notifyUrl +
+                "&orderId=" + orderId +
+                "&orderInfo=" + orderInfo +
+                "&partnerCode=" + partnerCode +
+                "&redirectUrl=" + returnUrl +
+                "&requestId=" + requestId +
+                "&requestType=captureWallet";
+
+        String signature = hmacSHA256(rawHash, secretKey);
+
+        JSONObject json = new JSONObject();
+        json.put("partnerCode", partnerCode);
+        json.put("accessKey", accessKey);
+        json.put("requestId", requestId);
+        json.put("amount", amountStr);
+        json.put("orderId", orderId);
+        json.put("orderInfo", orderInfo);
+        json.put("redirectUrl", returnUrl);
+        json.put("ipnUrl", notifyUrl);
+        json.put("extraData", extraData);
+        json.put("requestType", "captureWallet");
+        json.put("signature", signature);
+
+        System.out.println("MOMO REQUEST: " + json.toString(2));
+
+        HttpResponse<String> response = Unirest.post(endpoint)
+                .header("Content-Type", "application/json")
+                .body(json.toString())
+                .asString();
+
+        System.out.println("MOMO RESPONSE: " + response.getBody());
+
+        JSONObject res = new JSONObject(response.getBody());
+        if (!res.has("payUrl")) {
+            throw new RuntimeException("Momo error: " + res.toString());
+        }
+        return res.getString("payUrl");
+    }
 }

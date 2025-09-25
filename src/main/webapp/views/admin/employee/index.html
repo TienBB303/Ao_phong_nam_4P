@@ -82,9 +82,8 @@
                                       th:text="${e.status} ? 'Đang hoạt động' : 'Đã khóa'"></span>
                             </td>
                             <td style="text-align: center">
-                                <a class="btn btn-outline-info" th:href="@{'/admin/users/detail'(id=${e.id})}" style="width: 70px" title="Xem">
-                                    👁️
-                                </a>
+                                <a class="btn btn-outline-info" th:href="@{'/admin/users/detail'(id=${e.id})}" style="width: 70px" title="Xem">👁️</a>
+                                <a class="btn btn-outline-primary ms-2" th:href="@{'/admin/users/edit'(id=${e.id})}" style="width: 70px" title="Sửa">✏️</a>
                             </td>
                         </tr>
                         </tbody>

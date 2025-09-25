@@ -275,7 +275,7 @@
                              aria-labelledby="editProfileModalLabel" aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
-                                    <form th:action="@{/user/profile/edit}" method="post" th:object="${customer}">
+                                    <form id="editProfileForm" th:action="@{/user/profile/edit}" method="post" th:object="${customer}">
                                         <div class="modal-header">
                                             <h5 class="modal-title" id="editProfileModalLabel">Chỉnh sửa thông tin cá
                                                 nhân</h5>
@@ -525,14 +525,16 @@
             if (addAddressForm) {
                 const phoneInput = document.getElementById('receiverPhone');
                 const phoneFeedback = document.querySelector('#receiverPhone + .invalid-feedback');
-                const VN_PHONE_REGEX = /^[0-9]{10,12}$/;
+                const VN_PHONE_REGEX = /^0\d{9}$/;
                 function updatePhoneFeedback() {
                     if (!phoneInput) return;
                     const v = phoneInput.value.trim();
                     let msg = '';
                     if (!v) msg = 'Không được để trống';
                     else if (!VN_PHONE_REGEX.test(v)) msg = 'Số điện thoại không hợp lệ';
-                    if (addAddressForm.classList.contains('was-validated') && phoneFeedback) {
+                    // Cập nhật ngay lập tức thay vì chờ submit
+                    phoneInput.setCustomValidity(msg);
+                    if (phoneFeedback) {
                         phoneFeedback.textContent = msg;
                     }
                 }
@@ -695,7 +697,9 @@
                     let msg = '';
                     if (!v) msg = 'Không được để trống';
                     else if (!VN_PHONE_REGEX.test(v)) msg = 'Số điện thoại không hợp lệ';
-                    if (phoneFeedbackEdit && document.getElementById('editAddressForm')?.classList.contains('was-validated')) {
+                    // Cập nhật ngay lập tức cả tooltip và nội dung invalid-feedback
+                    this.setCustomValidity(msg);
+                    if (phoneFeedbackEdit) {
                         phoneFeedbackEdit.textContent = msg;
                     }
                 });
@@ -926,6 +930,56 @@
                     });
             }
         };
+
+        // Validate form Chỉnh sửa thông tin cá nhân
+        document.addEventListener('DOMContentLoaded', function(){
+            const form = document.getElementById('editProfileForm');
+            if(!form) return;
+            const nameInput = document.getElementById('name');
+            const phoneInput = document.getElementById('phoneNumber');
+            const birthdayInput = document.getElementById('birthday');
+            const VN_PHONE_REGEX = /^[0-9]{10,12}$/;
+
+            function validatePhone(){
+                const v = (phoneInput?.value||'').trim();
+                let msg = '';
+                if(!v) msg = 'Không được để trống';
+                else if(!VN_PHONE_REGEX.test(v)) msg = 'Số điện thoại không hợp lệ';
+                phoneInput.setCustomValidity(msg);
+                // show native tooltip immediately on input
+                return !msg;
+            }
+
+            function validateName(){
+                const v = (nameInput?.value||'').trim();
+                let msg = '';
+                if(!v) msg = 'Vui lòng điền vào trường này.'; // giữ nguyên như bootstrap tooltip
+                nameInput.setCustomValidity(msg);
+                return !msg;
+            }
+
+            function validateBirthday(){
+                if(!birthdayInput) return true;
+                const v = birthdayInput.value;
+                if(!v) { birthdayInput.setCustomValidity(''); return true; }
+                const d = new Date(v);
+                if(d > new Date()) { birthdayInput.setCustomValidity('Ngày sinh không hợp lệ'); return false; }
+                birthdayInput.setCustomValidity('');
+                return true;
+            }
+
+            phoneInput?.addEventListener('input', validatePhone);
+            nameInput?.addEventListener('input', validateName);
+            birthdayInput?.addEventListener('change', validateBirthday);
+
+            form.addEventListener('submit', function(e){
+                const ok = validateName() & validatePhone() & validateBirthday();
+                if(!ok){
+                    e.preventDefault();
+                    form.classList.add('was-validated');
+                }
+            });
+        });
     </script>
 </main>
 </body>

@@ -34,6 +34,7 @@ public class DiscountRestController {
 
         Discount discount = optionalDiscount.get();
 
+        // Kiểm tra thời gian áp dụng
         if (discount.getStartDatetime() == null || discount.getEndDatetime() == null ||
                 discount.getStartDatetime().isAfter(LocalDateTime.now()) ||
                 discount.getEndDatetime().isBefore(LocalDateTime.now())) {
@@ -42,11 +43,15 @@ public class DiscountRestController {
                     .body(Collections.singletonMap("message", "Mã giảm giá đã hết hạn hoặc chưa đến thời gian áp dụng."));
         }
 
-
         Map<String, Object> result = new HashMap<>();
-        result.put("discountAmount", discount.getDiscountValue());
+        result.put("id", discount.getId());
+        result.put("discountValue", discount.getDiscountValue());  // số % hoặc số tiền
+        result.put("discountType", discount.getDiscountType());    // "percent" | "amount"
+        result.put("maxDiscount", discount.getMaxDiscount());      // số tiền tối đa (nếu có)
+        result.put("minPurchase", discount.getMinPurchase());      // giá trị đơn tối thiểu
         result.put("message", "Áp dụng mã giảm giá thành công");
 
         return ResponseEntity.ok(result);
     }
+
 }

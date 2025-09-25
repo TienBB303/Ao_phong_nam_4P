@@ -265,6 +265,7 @@ public class BillService {
         cart.setTotalAmount(totalPrice);
         cart.setTotal_quantity(totalQuantity);
 
+        checkDiscountCanApply(cart.getId());
         recalculateCart(cart);
 
         cart.setUpdatedAt(LocalDateTime.now());
@@ -291,11 +292,41 @@ public class BillService {
         cart.setTotalAmount(totalPrice);
         cart.setTotal_quantity(totalQuantity);
 
+        checkDiscountCanApply(cart.getId());
         recalculateCart(cart);
 
         cart.setUpdatedAt(LocalDateTime.now());
         billRepository.save(cart);
     }
+
+    public void checkDiscountCanApply(Integer idBill) throws Exception {
+        Bill bill = billRepository.findByIdBill(idBill);
+
+        if (bill == null) {
+            throw new Exception("Không tìm thấy hóa đơn");
+        }
+
+        Discount discount = bill.getDiscount();
+
+        if (discount != null) {
+            // Nếu tổng tiền nhỏ hơn điều kiện tối thiểu để áp dụng mã giảm
+            if (bill.getTotalAmount().compareTo(discount.getMinPurchase()) < 0) {
+                // remove discount
+                bill.setDiscount(null);
+                bill.setDiscountAmount(BigDecimal.ZERO);
+                //hoàn lại số lượng phiếu
+                discount.setUsageLimit(discount.getUsageLimit() + 1);
+                discountService.saveDiscount_Cart(discount);
+
+                recalculateCart(bill);
+
+                bill.setUpdatedAt(LocalDateTime.now());
+                billRepository.save(bill);
+            }
+        }
+    }
+
+
 
     //xóa giỏ
     public void deleteCart(Integer cartId) throws Exception {

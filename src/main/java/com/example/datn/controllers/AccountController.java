@@ -75,5 +75,63 @@ public class AccountController {
         }
     }
 
+    @GetMapping("/edit")
+    public String showEditForm(@RequestParam("id") Integer id, Model model, RedirectAttributes redirectAttributes) {
+        try {
+            Account account = accountService.findById(id);
+            if (account == null) {
+                redirectAttributes.addFlashAttribute("error", "Không tìm thấy nhân viên!");
+                return "redirect:/admin/users";
+            }
+            // Map entity -> dto dùng lại form add.html
+            AccountDto dto = new AccountDto();
+            dto.setId(account.getId());
+            dto.setCode(account.getCode());
+            dto.setEmail(account.getEmail());
+            dto.setStatus(account.getStatus());
+            if (account.getCustomer() != null) {
+                dto.setFullName(account.getCustomer().getName());
+                dto.setPhoneNumber(account.getCustomer().getPhoneNumber());
+                dto.setBirthDate(account.getCustomer().getBirthDate());
+                dto.setGender(account.getCustomer().getGender());
+                // lấy địa chỉ mặc định nếu có
+                if (account.getCustomer().getAddresses() != null && !account.getCustomer().getAddresses().isEmpty()) {
+                    var address = account.getCustomer().getAddresses().stream()
+                            .filter(a -> Boolean.TRUE.equals(a.getIsDefault()))
+                            .findFirst()
+                            .orElse(account.getCustomer().getAddresses().get(0));
+                    AddressDto adto = new AddressDto();
+                    adto.setAddressDetail(address.getAddressDetail());
+                    adto.setProvinceId(address.getProvinceId());
+                    adto.setProvinceName(address.getProvinceName());
+                    adto.setDistrictId(address.getDistrictId());
+                    adto.setDistrictName(address.getDistrictName());
+                    adto.setWardId(address.getWardId());
+                    adto.setWardName(address.getWardName());
+                    adto.setIsDefault(Boolean.TRUE.equals(address.getIsDefault()));
+                    dto.setAddress(adto);
+                } else {
+                    dto.setAddress(new AddressDto());
+                }
+            }
+            model.addAttribute("accountDto", dto);
+            return "admin/employee/edit";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Lỗi khi mở form sửa: " + e.getMessage());
+            return "redirect:/admin/users";
+        }
+    }
+
+    @PostMapping("/edit")
+    public String handleEdit(@ModelAttribute("accountDto") AccountDto accountDto,
+                             RedirectAttributes redirectAttributes) {
+        try {
+            accountService.update(accountDto);
+            redirectAttributes.addFlashAttribute("success", "Cập nhật nhân viên thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Lỗi khi cập nhật: " + e.getMessage());
+        }
+        return "redirect:/admin/users";
+    }
 
 }

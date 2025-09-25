@@ -56,7 +56,7 @@ public class AccountServiceImpl implements AccountService {
 //                .filter(a -> a.getRole() != null && !"ROLE_ADMIN".equals(a.getRole().getName()))
 //                .toList();
 //        return new org.springframework.data.domain.PageImpl<>(filtered, pageable, all.getTotalElements());
-       // Danh sách nhân viên: chỉ lấy ROLE_EMPLOYEE
+        // Danh sách nhân viên: chỉ lấy ROLE_EMPLOYEE
         return accountRepository.findByRole_Name("ROLE_EMPLOYEE", pageable);
     }
     @Override
@@ -127,7 +127,94 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void update(AccountDto accountDto) {
+        if (accountDto == null || accountDto.getId() == null) {
+            throw new RuntimeException("ID nhân viên không hợp lệ");
+        }
+        Account account = accountRepository.findById(accountDto.getId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy nhân viên với ID: " + accountDto.getId()));
 
+        // Cập nhật thông tin tài khoản
+        if (accountDto.getEmail() != null && !accountDto.getEmail().isBlank()) {
+            String newEmail = accountDto.getEmail().trim();
+            if (!newEmail.equalsIgnoreCase(account.getEmail()) && accountRepository.existsByEmail(newEmail)) {
+                throw new RuntimeException("Email đã tồn tại");
+            }
+            account.setEmail(newEmail);
+        }
+        if (accountDto.getStatus() != null) {
+            account.setStatus(accountDto.getStatus());
+        }
+        account.setUpdatedAt(java.time.LocalDateTime.now());
+
+        // Cập nhật thông tin khách hàng liên kết
+        Customer customer = account.getCustomer();
+        if (customer == null) {
+            customer = new Customer();
+            customer.setIsActive(true);
+            customer = customerRepository.save(customer);
+            account.setCustomer(customer);
+        }
+        if (accountDto.getFullName() != null && !accountDto.getFullName().isBlank()) {
+            customer.setName(accountDto.getFullName());
+        }
+        if (accountDto.getPhoneNumber() != null && !accountDto.getPhoneNumber().isBlank()) {
+            customer.setPhoneNumber(accountDto.getPhoneNumber());
+        }
+        if (accountDto.getBirthDate() != null) {
+            customer.setBirthDate(accountDto.getBirthDate());
+        }
+        if (accountDto.getGender() != null) {
+            customer.setGender(accountDto.getGender());
+        }
+        customerRepository.save(customer);
+
+        // Cập nhật địa chỉ mặc định của khách nếu có DTO
+        com.example.datn.dto.AddressDto addressDto = accountDto.getAddress();
+        if (addressDto != null) {
+            ShippingAddress address = null;
+            if (customer.getAddresses() != null && !customer.getAddresses().isEmpty()) {
+                address = customer.getAddresses().stream()
+                        .filter(a -> java.util.Objects.equals(Boolean.TRUE, a.getIsDefault()))
+                        .findFirst()
+                        .orElse(customer.getAddresses().get(0));
+            }
+            if (address == null) {
+                address = new ShippingAddress();
+                address.setCustomer(customer);
+            }
+            if (addressDto.getAddressDetail() != null && !addressDto.getAddressDetail().isBlank()) {
+                address.setAddressDetail(addressDto.getAddressDetail());
+            }
+            if (addressDto.getProvinceId() != null) {
+                address.setProvinceId(addressDto.getProvinceId());
+                address.setProvinceName(addressDto.getProvinceName());
+            }
+            if (addressDto.getDistrictId() != null) {
+                address.setDistrictId(addressDto.getDistrictId());
+                address.setDistrictName(addressDto.getDistrictName());
+            }
+            if (addressDto.getWardId() != null && !addressDto.getWardId().isBlank()) {
+                address.setWardId(addressDto.getWardId());
+                address.setWardName(addressDto.getWardName());
+            }
+            if (addressDto.getReceiverName() != null && !addressDto.getReceiverName().isBlank()) {
+                address.setReceiverName(addressDto.getReceiverName());
+            }
+            if (addressDto.getReceiverPhoneNumber() != null && !addressDto.getReceiverPhoneNumber().isBlank()) {
+                address.setReceiverPhoneNumber(addressDto.getReceiverPhoneNumber());
+            }
+            if (addressDto.getIsDefault() != null) {
+                boolean isDefault = addressDto.getIsDefault();
+                address.setIsDefault(isDefault);
+                if (isDefault) {
+                    shippingAddressRepository.updateAllDefaultFalseByCustomerId(customer.getId());
+                    address.setIsDefault(true);
+                }
+            }
+            shippingAddressRepository.save(address);
+        }
+
+        accountRepository.save(account);
     }
 
     @Override

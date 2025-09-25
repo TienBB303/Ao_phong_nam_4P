@@ -14,6 +14,7 @@ import com.example.datn.repositories.cart.CartRepository;
 import com.example.datn.repositories.product_and_other.ProductDetailRepository;
 import com.example.datn.services.CartService;
 import com.example.datn.services.DiscountService;
+import com.itextpdf.text.pdf.qrcode.Mode;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -123,8 +124,8 @@ public class CartOnlineController {
         //TienBB sua hienj discount voi tien hop le
         Cart cartCheckDiscount = cartService.findCartById(cartId);
         if (!isGuest) {
-//            List<Discount> discounts = discountRepository.findValidDiscounts();
-            List<Discount> discounts = discountService.getAllDiscountByMinPurchase(cartCheckDiscount.getTotal_price_cart());
+            List<Discount> discounts = discountRepository.findValidDiscounts();
+//            List<Discount> discounts = discountService.getAllDiscountByMinPurchase(cartCheckDiscount.getTotal_price_cart());
             model.addAttribute("availableDiscounts", discounts);
         }
 
@@ -149,7 +150,7 @@ public class CartOnlineController {
 
 
     @GetMapping("/delete-cart")
-    public String deleteCart(@RequestParam Integer productDetailId, HttpSession session) {
+    public String deleteCart(@RequestParam Integer productDetailId, HttpSession session, Model model) {
         Integer cartId = (Integer) session.getAttribute("cartId");
         if (cartId != null) {
             Cart cart = cartService.findCartById(cartId);
@@ -192,6 +193,9 @@ public class CartOnlineController {
 
                         cd.setQuantity(newQuantity);
                         cartDetailRepositoty.save(cd);
+
+//                        List<Discount> discounts = listDiscountCanApply(cartService.calTotalCart(cart));
+//                        redirectAttributes.addFlashAttribute("availableDiscounts", discounts);
                     }
                 }
             }
@@ -234,6 +238,10 @@ public class CartOnlineController {
 
         try {
             cartService.addProductOnlineToCart(cartId, productDetailId, quantity, account);
+
+//            Cart cart = cartService.findCartById(cartId);
+//            List<Discount> discounts = listDiscountCanApply(cartService.calTotalCart(cart));
+//            redirectAttributes.addFlashAttribute("availableDiscounts", discounts);
 
             if ("buyNow".equals(action)) {
                 return "redirect:/cart";
