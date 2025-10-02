@@ -19,6 +19,9 @@ public class ColorService {
     public List<Color> getAll(){
         return colorRepository.getAll();
     }
+    public List<Color> getAllColorOn(){
+        return colorRepository.getAllColorOn();
+    }
 
     public Page<Color> getAll(Pageable pageable){
         return colorRepository.getAll(pageable);

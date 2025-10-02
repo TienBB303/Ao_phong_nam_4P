@@ -18,7 +18,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     @Query("SELECT p FROM Product p")
     List<Product> getAll();
 
-    @Query("SELECT p FROM Product p ORDER BY p.id DESC")
+    @Query("SELECT p FROM Product p WHERE p.status = true ORDER BY p.id DESC")
     Page<Product> getAll(Pageable pageable);
 
     @Query("SELECT p FROM Product p WHERE p.id = :id")
@@ -38,10 +38,14 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 
     @Query("SELECT pd FROM ProductDetail pd WHERE pd.product.id = :id")
     List<ProductDetail> findAllProductDetail(Integer id);
-    @Query("SELECT DISTINCT pd.color FROM ProductDetail pd WHERE pd.product.id = :productId")
+
+//    @Query("SELECT pd FROM ProductDetail pd WHERE pd.product.id = :id")
+//    List<ProductDetail> findAllProductDetailOnByProductId(Integer id);
+
+    @Query("SELECT DISTINCT pd.color FROM ProductDetail pd WHERE pd.product.id = :productId AND pd.status = true")
     List<Color> findColorsByProductId(@Param("productId") Integer productId);
 
-    @Query("SELECT DISTINCT pd.size FROM ProductDetail pd WHERE pd.product.id = :productId")
+    @Query("SELECT DISTINCT pd.size FROM ProductDetail pd WHERE pd.product.id = :productId AND pd.status = true")
     List<Size> findSizesByProductId(@Param("productId") Integer productId);
 
     Product findByCode(String code);

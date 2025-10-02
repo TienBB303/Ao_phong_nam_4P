@@ -26,24 +26,11 @@ public class ProductDetailController {
     @PostMapping("/update")
     public String updateProductDetail(
             @RequestParam("ProductDetailId") Integer id,
-            @RequestParam("productPriceUpdate") String priceStr,
             @RequestParam("productQuantityUpdate") String quantityStr,
             RedirectAttributes redirectAttributes) {
 
         ProductDetail productDetail = productService.findProductDetailById(id);
-        BigDecimal price;
         Integer quantity;
-
-//        try {
-//            price = new BigDecimal(priceStr);
-//            if (price.compareTo(BigDecimal.ZERO) <= 0) {
-//                throw new NumberFormatException("Giá nhỏ hơn hoặc bằng 0");
-//            }
-//        } catch (Exception e) {
-//            redirectAttributes.addFlashAttribute("alert", "Giá không hợp lệ");
-//            redirectAttributes.addFlashAttribute("type", "error");
-//            return "redirect:/admin/product/view-detail/" + productDetail.getProduct().getId();
-//        }
 
         try {
             quantity = Integer.parseInt(quantityStr);
@@ -56,7 +43,6 @@ public class ProductDetailController {
             return "redirect:/admin/product/view-detail/" + productDetail.getProduct().getId();
         }
 
-//        productDetail.setPrice(price);
         productDetail.setQuantity(quantity);
         productService.updateProductDetail(productDetail);
 

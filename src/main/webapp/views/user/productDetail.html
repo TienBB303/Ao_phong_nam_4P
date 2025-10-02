@@ -103,7 +103,7 @@
                             <div class="d-flex flex-wrap gap-2">
                                 <div th:each="size : ${sizes}">
                                     <input type="radio" class="btn-check" name="sizeId" th:id="'size-' + ${size.id}" th:value="${size.id}">
-                                    <label class="btn btn-outline-primary btn-sm" th:for="'size-' + ${size.id}" th:text="${size.name}"></label>
+                                    <label class="btn btn-outline-primary btn-sm" th:for="'size-' + ${size.id}" th:text="${size.code}"></label>
                                 </div>
                             </div>
                         </div>
@@ -140,6 +140,7 @@
             $(document).ready(function () {
                 const productId = $("#productInfo").data("product-id");
 
+                // Hàm fetch thông tin chi tiết (giá, tồn kho) khi đã chọn đủ màu + size
                 function fetchDetailInfo() {
                     const colorId = $("input[name='colorId']:checked").val();
                     const sizeId = $("input[name='sizeId']:checked").val();
@@ -162,25 +163,35 @@
                             error: function () {
                                 $("#priceDisplay").text("--");
                                 $("#quantityDisplay").text("--");
+                                $("#productDetailId").val("");
                             }
                         });
+                    } else {
+                        // Reset hiển thị nếu chưa chọn đủ
+                        $("#priceDisplay").text("--");
+                        $("#quantityDisplay").text("--");
+                        $("#productDetailId").val("");
                     }
                 }
 
-                // Khi chọn màu → disable size không hợp lệ
+                // Khi chọn màu → filter size
                 $("input[name='colorId']").on("change", function () {
                     const colorId = $(this).val();
 
+                    // Reset toàn bộ size về enable
+                    $("input[name='sizeId']").prop("disabled", false)
+                        .siblings("label").removeClass("disabled");
+
                     $.ajax({
-                        url: "/api/product-detail/available-sizes",  // Ở ApiProductController
+                        url: "/api/product-detail/available-sizes", // Ở ApiProductController
                         type: "GET",
                         data: { productID: productId, colorID: colorId },
                         success: function (sizes) {
-                            // disable tất cả size
+                            // Disable tất cả trước
                             $("input[name='sizeId']").prop("disabled", true)
                                 .siblings("label").addClass("disabled");
 
-                            // enable size hợp lệ
+                            // Bật lại size hợp lệ
                             sizes.forEach(s => {
                                 $("#size-" + s.id).prop("disabled", false)
                                     .siblings("label").removeClass("disabled");
@@ -191,20 +202,24 @@
                     fetchDetailInfo();
                 });
 
-                // Khi chọn size → disable màu không hợp lệ
+                // Khi chọn size → filter màu
                 $("input[name='sizeId']").on("change", function () {
                     const sizeId = $(this).val();
+
+                    // Reset toàn bộ màu về enable
+                    $("input[name='colorId']").prop("disabled", false)
+                        .siblings("label").removeClass("disabled");
 
                     $.ajax({
                         url: "/api/product-detail/available-colors", // Ở ApiProductController
                         type: "GET",
                         data: { productID: productId, sizeID: sizeId },
                         success: function (colors) {
-                            // disable tất cả màu
+                            // Disable tất cả trước
                             $("input[name='colorId']").prop("disabled", true)
                                 .siblings("label").addClass("disabled");
 
-                            // enable màu hợp lệ
+                            // Bật lại màu hợp lệ
                             colors.forEach(c => {
                                 $("#color-" + c.id).prop("disabled", false)
                                     .siblings("label").removeClass("disabled");
@@ -214,23 +229,39 @@
 
                     fetchDetailInfo();
                 });
-            });
 
-            $("input[name='colorId'], input[name='sizeId']").on("click", function () {
-                const $this = $(this);
+                // Cho phép bỏ chọn radio (click lần 2)
+                $("input[name='colorId'], input[name='sizeId']").on("click", function () {
+                    const $this = $(this);
 
-                // Nếu trước đó đã checked
-                if ($this.data("waschecked") === true) {
-                    $this.prop("checked", false);    // bỏ checked
-                    $this.data("waschecked", false); // reset flag
-                } else {
-                    // clear trạng thái các radio cùng nhóm
-                    $("input[name='" + $this.attr("name") + "']").data("waschecked", false);
-                    $this.data("waschecked", true); // đánh dấu radio này đã checked
-                }
+                    if ($this.data("waschecked") === true) {
+                        // Nếu đã chọn rồi → bỏ chọn
+                        $this.prop("checked", false);
+                        $this.data("waschecked", false);
+
+                        if ($this.attr("name") === "colorId") {
+                            // Reset toàn bộ size khi bỏ chọn màu
+                            $("input[name='sizeId']").prop("disabled", false)
+                                .siblings("label").removeClass("disabled");
+                        }
+
+                        if ($this.attr("name") === "sizeId") {
+                            // Reset toàn bộ màu khi bỏ chọn size
+                            $("input[name='colorId']").prop("disabled", false)
+                                .siblings("label").removeClass("disabled");
+                        }
+
+                        fetchDetailInfo(); // reset lại thông tin hiển thị
+                    } else {
+                        // Clear trạng thái waschecked cho radio cùng nhóm
+                        $("input[name='" + $this.attr("name") + "']").data("waschecked", false);
+                        $this.data("waschecked", true);
+                    }
+                });
             });
         </script>
-<!--        Thêm vào giỏ-->
+
+        <!--        Thêm vào giỏ-->
         <script>
             $("#quantity").on("input", function() {
                 $("#quantityHidden").val($(this).val());

@@ -174,8 +174,8 @@ public class ProductController {
                 .writeValueAsString(productForm.getVariants() == null ? java.util.List.of() : productForm.getVariants());
 
         model.addAttribute("productForm", productForm);
-        model.addAttribute("listColor", colorService.getAll());
-        model.addAttribute("listSize", sizeService.getAll());
+        model.addAttribute("listColor", colorService.getAllColorOn());
+        model.addAttribute("listSize", sizeService.getAllSizeOn());
 
         model.addAttribute("variantsJson", variantsJson);
         return "admin/product_and_other/product/ProductViewAddNext";
@@ -292,9 +292,6 @@ public class ProductController {
         ProductForm productForm = (ProductForm) session.getAttribute("add1" + sessionKey);
 
         if (productForm == null) {
-//            redirectAttributes.addFlashAttribute("alert", "Dữ liệu sản phẩm không hợp lệ.");
-//            redirectAttributes.addFlashAttribute("type", "error");
-//            return "redirect:/admin/product/view-add2";
             resp.put("ok", false);
             resp.put("message", "Dữ liệu sản phẩm không hợp lệ hoặc phiên làm việc đã hết hạn.");
             return ResponseEntity.badRequest().body(resp);
@@ -306,11 +303,6 @@ public class ProductController {
         }
 
         if (productForm.getVariants() == null || productForm.getVariants().isEmpty()) {
-//            redirectAttributes.addFlashAttribute("alert", "Vui lòng tạo ít nhất 1 biến thể.");
-//            redirectAttributes.addFlashAttribute("type", "error");
-//            redirectAttributes.addFlashAttribute("productForm", productForm);
-//            return "redirect:/admin/product/view-add2";
-
             resp.put("ok", false);
             resp.put("message", "Vui lòng tạo ít nhất 1 biến thể.");
             return ResponseEntity.badRequest().body(resp);
@@ -319,21 +311,12 @@ public class ProductController {
         for (int i = 0; i < productForm.getVariants().size(); i++) {
             ProductDetailForm v = productForm.getVariants().get(i);
             if (v.getQuantity() == null || v.getQuantity() < 1) {
-//                redirectAttributes.addFlashAttribute("alert", "Số lượng phải > 0");
-//                redirectAttributes.addFlashAttribute("type", "error");
-//                redirectAttributes.addFlashAttribute("productForm", productForm);
-//                return "redirect:/admin/product/view-add2";
 
                 resp.put("ok", false);
                 resp.put("message", "Số lượng mỗi biến thể phải ≥ 1");
                 return ResponseEntity.badRequest().body(resp);
             }
             if (v.getPrice() == null || v.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
-//                redirectAttributes.addFlashAttribute("alert", "Giá phải > 0 ");
-//                redirectAttributes.addFlashAttribute("type", "error");
-//                redirectAttributes.addFlashAttribute("productForm", productForm);
-//                return "redirect:/admin/product/view-add2";
-
                 resp.put("ok", false);
                 resp.put("message", "Giá mỗi biến thể phải > 0");
                 return ResponseEntity.badRequest().body(resp);
@@ -411,19 +394,6 @@ public class ProductController {
             // Lưu ProductDetail trước để có ID để lưu nhièu ảnh theo id đó
             productService.addProductDetail(detail);
 
-//            String key = "colorImages[" + form.getColorId() + "]";
-//            List<MultipartFile> files = colorImages.get(key);
-//            if(files != null){
-//                for(MultipartFile file : files){
-//                    if(!file.isEmpty()){
-//                        try {
-//                            imageService.saveImage(file,detail);
-//                        } catch (Exception e) {
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                }
-//            }
             String key = "colorImages[" + form.getColorId() + "]";
             List<MultipartFile> files = (colorImages != null) ? colorImages.get(key) : null;
             if (files != null) {
@@ -451,10 +421,6 @@ public class ProductController {
         // clear session
         session.removeAttribute("add1" + sessionKey);
         session.removeAttribute("sessionKey");
-
-//        redirectAttributes.addFlashAttribute("alert", "Lưu sản phẩm thành công!");
-//        redirectAttributes.addFlashAttribute("type", "success");
-//        return "redirect:/admin/product/hien-thi";
 
         resp.put("ok", true);
         resp.put("message", "Lưu sản phẩm thành công!");

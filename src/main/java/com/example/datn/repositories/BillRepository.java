@@ -333,5 +333,6 @@ public interface BillRepository extends JpaRepository<Bill,Integer> {
     @Query("select cd from Bill cd where cd.status = 9")
     List<Bill> getAllCartInline();
 
-
+    //TienBB : xóa hóa đơn sau 1 ngày
+    List<Bill> findByStatusAndCreatedAtBefore(Integer status, LocalDateTime cutoff);
 }

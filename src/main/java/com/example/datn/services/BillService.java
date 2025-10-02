@@ -16,6 +16,7 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -498,6 +499,15 @@ public class BillService {
         if (cart == null || cart.getStatus() != 9) {
             throw new Exception("Giỏ hàng không tồn tại hoặc đã được thanh toán");
         }
+        if (cart.getDiscount() != null){
+            if (cart.getDiscount().getStatus() == 2){
+                throw new Exception("Mã giảm giá không hợp lệ, hãy gỡ ra khỏi hóa đơn trước khi thanh toán");
+            }
+
+            if (cart.getDiscount().getStatus() == 3){
+                throw new Exception("Mã giảm giá đã hết hạn, hãy gỡ ra khỏi hóa đơn trước khi thanh toán");
+            }
+        }
 
         checkDiscountBelongToCart(cart); // kiểm tra discout còn hoạt động không
 
@@ -761,6 +771,37 @@ public class BillService {
             return value.toString();
         }
     }
+
+
+    //Set time delete hóa đơn sau khi sang ngày mới
+    @Transactional
+    public void deleteOldUnpaidBills(LocalDateTime cutoff) {
+        List<Bill> oldBills = billRepository.findByStatusAndCreatedAtBefore(9, cutoff);
+        System.out.println("Found " + oldBills.size() + " old bills to delete (before " + cutoff + ")");
+        for (Bill cart : oldBills) {
+            // Hoàn số lượng SP
+            List<BillDetails> listCartDetails = billRepository.findAllCartDetailByCartId(cart.getId());
+            for (BillDetails billDetails : listCartDetails) {
+                ProductDetail productDetail = billDetails.getProductDetail();
+                productDetail.setQuantity(productDetail.getQuantity() + billDetails.getQuantity());
+                productDetailRepository.save(productDetail);
+            }
+
+            // Hoàn mã giảm giá (nếu có)
+            Discount discountInCart = cart.getDiscount();
+            if (discountInCart != null) {
+                discountInCart.setUsageLimit(discountInCart.getUsageLimit() + 1);
+                discountService.saveDiscount_Cart(discountInCart);
+            }
+
+            // Xóa BillDetails
+            billDetailRepository.deleteAll(listCartDetails);
+
+            // Xóa Bill
+            billRepository.delete(cart);
+        }
+    }
+
 
 }
 

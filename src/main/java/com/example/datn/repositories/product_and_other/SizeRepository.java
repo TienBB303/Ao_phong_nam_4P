@@ -13,6 +13,9 @@ public interface SizeRepository extends JpaRepository<Size, Integer> {
     @Query("SELECT s FROM Size s")
     List<Size> getAll();
 
+    @Query("SELECT s FROM Size s WHere s.status = true")
+    List<Size> getAllSizeOn();
+
     @Query("SELECT s FROM Size s ORDER BY s.id DESC")
     Page<Size> getAll(Pageable pageable);
 
